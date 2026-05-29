@@ -1,0 +1,5 @@
+# HANCR Driver — Android signing keys (نفس النمط)
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=hancr-driver
+storeFile=/path/to/hancr-driver-release.jks

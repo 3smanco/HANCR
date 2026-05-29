@@ -1,0 +1,60 @@
+# =============================================
+# HANCR — Multi-stage Dockerfile للـ NestJS APIs
+# يُستخدم لـ rider-api / driver-api / admin-api
+# Build arg: APP=rider-api|driver-api|admin-api
+# =============================================
+
+# ─── Stage 1: Builder ───────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+ARG APP=rider-api
+
+WORKDIR /workspace
+
+# نسخ package files أولاً للـ Docker layer caching
+COPY package.json package-lock.json* tsconfig.base.json nx.json ./
+COPY apps/${APP}/package.json* apps/${APP}/
+
+# Install dependencies
+RUN npm ci --legacy-peer-deps
+
+# نسخ كل المصدر
+COPY tsconfig*.json ./
+COPY libs ./libs
+COPY apps/${APP} ./apps/${APP}
+
+# Build
+RUN npx nx build ${APP} --prod || npx nx build ${APP}
+
+# ─── Stage 2: Runtime ───────────────────────────────────────────
+FROM node:20-alpine AS runtime
+
+ARG APP=rider-api
+ENV NODE_ENV=production
+ENV APP_NAME=${APP}
+
+# لـ healthcheck
+RUN apk add --no-cache curl tini
+
+# user غير root للأمان
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S hancr -u 1001 -G nodejs
+
+WORKDIR /app
+
+# نسخ build artifacts + node_modules
+COPY --from=builder --chown=hancr:nodejs /workspace/dist/apps/${APP} ./
+COPY --from=builder --chown=hancr:nodejs /workspace/node_modules ./node_modules
+COPY --from=builder --chown=hancr:nodejs /workspace/package.json ./
+
+USER hancr
+
+# health check يتحقق من /health/live (غير محمي بـ versioning)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:3000/health/live || exit 1
+
+EXPOSE 3000
+
+# Tini يتعامل مع signals بشكل صحيح (SIGTERM للـ graceful shutdown)
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["node", "main.js"]

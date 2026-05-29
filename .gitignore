@@ -1,0 +1,41 @@
+
+!.env.example
+!.env.prod.example
+# Build outputs
+# IDE
+# Logs
+# Node
+# OS
+# Secrets
+# ─── Android signing keys (CRITICAL — لا تَرفعها أبداً) ───
+# ─── Production env ───
+# ─── iOS signing ───
+**/*.jks
+**/*.keystore
+**/.dart_tool/
+**/.gradle/
+**/android/app/*.jks
+**/android/app/*.keystore
+**/android/key.properties
+**/build/
+**/coverage/
+**/dist/
+**/ios/*.mobileprovision
+**/ios/*.p12
+**/ios/Runner/GoogleService-Info.plist
+**/key.properties
+*.log
+.DS_Store
+.env
+.env.*
+.env.prod
+.env.production
+.env.staging
+.idea/
+.vscode/
+Thumbs.db
+node_modules/
+npm-debug.log*
+secrets/
+deliverables/*.apk
+deliverables/

@@ -1,0 +1,216 @@
+import {
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { InjectRedis } from '@songkeys/nestjs-redis';
+import Redis from 'ioredis';
+import { RiderEntity } from '@hancr/database';
+import { SmsService } from '@hancr/notifications';
+import { SendOtpInput } from './dto/send-otp.input';
+import { VerifyOtpInput } from './dto/verify-otp.input';
+import { SendOtpResponse } from './dto/send-otp-response.type';
+import { AuthPayload } from './dto/auth-payload.type';
+import { JwtPayload } from './jwt.strategy';
+
+const OTP_TTL_SECONDS = 300; // 5 دقائق
+const MAX_OTP_ATTEMPTS = 5;
+
+@Injectable()
+export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
+  constructor(
+    @InjectRepository(RiderEntity)
+    private readonly riderRepo: Repository<RiderEntity>,
+
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly smsService: SmsService,
+
+    @InjectRedis()
+    private readonly redis: Redis,
+  ) {}
+
+  // =============================================
+  // sendOtp — إرسال رمز OTP للتحقق من الهاتف
+  // =============================================
+  // أرقام تجريبية بـ OTP ثابت — للـ demo + Play Store reviewers
+  // OTP الثابت: 1234
+  private static readonly TEST_PHONES = new Set<string>([
+    '+966500000001', // Rider demo
+    '+966500000002', // Rider demo 2
+  ]);
+
+  async sendOtp(input: SendOtpInput): Promise<SendOtpResponse> {
+    const { phone } = input;
+    const key = `hancr:otp:login:${phone}`;
+    const isTestPhone = AuthService.TEST_PHONES.has(phone);
+
+    // الأرقام التجريبية: OTP ثابت = 1234
+    const code = isTestPhone
+      ? '1234'
+      : Math.floor(1000 + Math.random() * 9000).toString();
+    const isDev = this.configService.get<string>('NODE_ENV') === 'development';
+
+    // تخزين OTP في Redis مع TTL = 5 دقائق
+    await this.redis.setex(
+      key,
+      OTP_TTL_SECONDS,
+      JSON.stringify({ code, attempts: 0 }),
+    );
+    this.logger.log(`OTP for ${phone}: ${code}`);
+
+    // إرسال SMS عبر Twilio لو مُكوَّن
+    const sms = await this.smsService.sendOtp(phone, code, 'ar');
+
+    // في dev mode أو لو Twilio لم يُرسل أو رقم تجريبي — نُعيد الكود
+    const exposeDevOtp = isDev || !sms.success || isTestPhone;
+
+    let message: string;
+    if (sms.success) {
+      message = `OTP sent to ${phone}`;
+    } else if (!this.smsService.enabled) {
+      message = 'OTP sent (dev mode — Twilio not configured)';
+    } else {
+      message = `SMS failed (${sms.error}) — using dev OTP`;
+    }
+
+    return {
+      success: true, // OTP is always usable in dev (returned in response)
+      message,
+      devOtp: exposeDevOtp ? code : undefined,
+    };
+  }
+
+  // =============================================
+  // verifyOtp — التحقق من OTP وإنشاء/إيجاد الراكب
+  // =============================================
+  async verifyOtp(input: VerifyOtpInput): Promise<AuthPayload> {
+    const { phone, code } = input;
+    const key = `hancr:otp:login:${phone}`;
+
+    // استرداد OTP من Redis
+    const raw = await this.redis.get(key);
+    if (!raw) {
+      throw new UnauthorizedException(
+        'OTP expired or not found. Request a new one.',
+      );
+    }
+
+    const stored = JSON.parse(raw) as { code: string; attempts: number };
+
+    // تحقق من عدد المحاولات
+    if (stored.attempts >= MAX_OTP_ATTEMPTS) {
+      await this.redis.del(key);
+      throw new UnauthorizedException(
+        'Too many failed attempts. Request a new OTP.',
+      );
+    }
+
+    // مقارنة الرمز
+    if (stored.code !== code) {
+      stored.attempts += 1;
+      await this.redis.setex(
+        key,
+        OTP_TTL_SECONDS,
+        JSON.stringify(stored),
+      );
+      throw new UnauthorizedException(
+        `Invalid OTP. ${MAX_OTP_ATTEMPTS - stored.attempts} attempts remaining.`,
+      );
+    }
+
+    // حذف OTP بعد نجاح التحقق
+    await this.redis.del(key);
+
+    // استخراج رمز الدولة من الرقم
+    const countryCode = this.extractCountryCode(phone);
+
+    // إيجاد أو إنشاء الراكب
+    let rider = await this.riderRepo.findOne({ where: { phoneNumber: phone } });
+    const isNewUser = !rider;
+
+    if (!rider) {
+      rider = this.riderRepo.create({
+        phoneNumber: phone,
+        countryCode,
+        active: true,
+        banned: false,
+        balance: 0,
+        currency: this.getDefaultCurrency(countryCode),
+        rating: 5.0,
+        totalRides: 0,
+      });
+      rider = await this.riderRepo.save(rider);
+      this.logger.log(`New rider registered: ${phone} (ID: ${rider.id})`);
+    } else {
+      // تحديث آخر دخول
+      await this.riderRepo.update(rider.id, { lastLoginAt: new Date() });
+      rider.lastLoginAt = new Date();
+    }
+
+    const accessToken = this.signToken(rider);
+
+    return {
+      accessToken,
+      rider: {
+        id: rider.id,
+        phoneNumber: rider.phoneNumber,
+        countryCode: rider.countryCode,
+        firstName: rider.firstName,
+        lastName: rider.lastName,
+        avatarUrl: rider.avatarUrl,
+        email: rider.email,
+        banned: rider.banned,
+        active: rider.active,
+        balance: Number(rider.balance),
+        currency: rider.currency,
+        rating: Number(rider.rating),
+        totalRides: rider.totalRides,
+        lastLoginAt: rider.lastLoginAt,
+        createdAt: rider.createdAt,
+      },
+      isNewUser,
+    };
+  }
+
+  // =============================================
+  // Helpers
+  // =============================================
+
+  private signToken(rider: RiderEntity): string {
+    const payload: JwtPayload = {
+      sub: rider.id,
+      phone: rider.phoneNumber,
+      type: 'rider',
+    };
+    return this.jwtService.sign(payload);
+  }
+
+  private extractCountryCode(phone: string): string {
+    if (phone.startsWith('+974')) return '+974'; // Qatar
+    if (phone.startsWith('+971')) return '+971'; // UAE
+    if (phone.startsWith('+966')) return '+966'; // Saudi Arabia
+    if (phone.startsWith('+965')) return '+965'; // Kuwait
+    if (phone.startsWith('+973')) return '+973'; // Bahrain
+    if (phone.startsWith('+968')) return '+968'; // Oman
+    return phone.substring(0, 4);
+  }
+
+  private getDefaultCurrency(countryCode: string): string {
+    const map: Record<string, string> = {
+      '+974': 'QAR',
+      '+971': 'AED',
+      '+966': 'SAR',
+      '+965': 'KWD',
+      '+973': 'BHD',
+      '+968': 'OMR',
+    };
+    return map[countryCode] ?? 'QAR';
+  }
+}

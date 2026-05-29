@@ -1,0 +1,21 @@
+import { Module, Global } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { FirebaseAdminService } from './firebase-admin.service';
+import { PushNotificationService } from './push-notification.service';
+import { SmsService } from './sms.service';
+
+/**
+ * NotificationsModule — يوفِّر:
+ *  - `FirebaseAdminService` — تهيئة Firebase Admin SDK
+ *  - `PushNotificationService` — إرسال push عبر FCM
+ *  - `SmsService` — إرسال SMS عبر Twilio
+ *
+ * `@Global()` لأنه يُستخدم في كل الـ APIs بدون استيراد مكرر.
+ */
+@Global()
+@Module({
+  imports: [ConfigModule],
+  providers: [FirebaseAdminService, PushNotificationService, SmsService],
+  exports: [FirebaseAdminService, PushNotificationService, SmsService],
+})
+export class NotificationsModule {}

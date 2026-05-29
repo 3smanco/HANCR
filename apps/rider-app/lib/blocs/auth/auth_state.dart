@@ -1,0 +1,44 @@
+import 'package:equatable/equatable.dart';
+
+abstract class AuthState extends Equatable {
+  const AuthState();
+  @override
+  List<Object?> get props => [];
+}
+
+class AuthInitial extends AuthState {
+  const AuthInitial();
+}
+
+class AuthLoading extends AuthState {
+  const AuthLoading();
+}
+
+/// OTP was sent successfully
+class AuthOtpSent extends AuthState {
+  final String phone;
+  final String? devOtp; // non-null in development
+  const AuthOtpSent({required this.phone, this.devOtp});
+  @override
+  List<Object?> get props => [phone, devOtp];
+}
+
+/// Fully authenticated — token stored
+class AuthAuthenticated extends AuthState {
+  final int riderId;
+  final bool isNewUser;
+  const AuthAuthenticated({required this.riderId, required this.isNewUser});
+  @override
+  List<Object?> get props => [riderId, isNewUser];
+}
+
+class AuthUnauthenticated extends AuthState {
+  const AuthUnauthenticated();
+}
+
+class AuthError extends AuthState {
+  final String message;
+  const AuthError(this.message);
+  @override
+  List<Object?> get props => [message];
+}

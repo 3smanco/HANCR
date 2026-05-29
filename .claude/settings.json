@@ -1,0 +1,27 @@
+﻿{
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(docker:*)",
+      "Bash(git:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(sleep:*)",
+      "Bash(kill:*)",
+      "Bash(lsof:*)",
+      "Bash(pkill:*)",
+      "Bash(tail:*)",
+      "Bash(head:*)",
+      "Bash(echo:*)"
+    ],
+    "deny": []
+  }
+}

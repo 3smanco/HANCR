@@ -1,0 +1,51 @@
+# Dependencies
+node_modules
+**/node_modules
+**/dist
+**/build
+**/.next
+
+# Logs
+*.log
+npm-debug.log*
+.npm
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests/Coverage
+coverage
+**/*.spec.ts
+**/*.test.ts
+apps/*/test
+e2e
+
+# Documentation
+docs
+*.md
+
+# Git
+.git
+.gitignore
+.github
+
+# Flutter (لا نحتاجها في Docker للـ APIs)
+apps/rider-app
+apps/driver-app
+
+# Misc
+.editorconfig
+.prettierrc
+.eslintrc*

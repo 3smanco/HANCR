@@ -1,0 +1,285 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import {
+  WalletTransactionEntity,
+  WalletTransactionType,
+  WalletTransactionDirection,
+  WalletTransactionStatus,
+  WalletOwnerType,
+  PaymentGateway,
+  RiderEntity,
+  DriverEntity,
+} from '@hancr/database';
+import {
+  CreateTransactionInput,
+  WalletOperationResult,
+  InsufficientBalanceError,
+} from './dto/transaction.dto';
+
+/**
+ * WalletService — منطق المحفظة المركزي (atomic transactions)
+ *
+ * المسؤوليات:
+ *  - إنشاء معاملة وتحديث الـ balance في entity (Rider أو Driver) atomically عبر transaction
+ *  - منع double-spending عبر row locking (SELECT ... FOR UPDATE)
+ *  - حفظ ledger history في `hancr_wallet_transaction`
+ *  - حسابات مساعدة (getBalance, listTransactions)
+ *
+ * مهم: كل عملية credit/debit تستخدم DB transaction للحفاظ على consistency.
+ */
+@Injectable()
+export class WalletService {
+  private readonly logger = new Logger(WalletService.name);
+
+  constructor(
+    @InjectRepository(WalletTransactionEntity)
+    private readonly txRepo: Repository<WalletTransactionEntity>,
+
+    @InjectRepository(RiderEntity)
+    private readonly riderRepo: Repository<RiderEntity>,
+
+    @InjectRepository(DriverEntity)
+    private readonly driverRepo: Repository<DriverEntity>,
+
+    private readonly dataSource: DataSource,
+  ) {}
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Public API
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Credit (إضافة) للمحفظة.
+   * Atomic: locks the wallet row + creates transaction + updates balance.
+   */
+  async credit(input: CreateTransactionInput): Promise<WalletOperationResult> {
+    if (input.amount <= 0) {
+      throw new Error(`credit amount must be positive (got ${input.amount})`);
+    }
+    return this._executeTransaction({
+      ...input,
+      direction: WalletTransactionDirection.Credit,
+    });
+  }
+
+  /**
+   * Debit (خصم) من المحفظة.
+   * يرمي InsufficientBalanceError لو الرصيد غير كافٍ.
+   */
+  async debit(input: CreateTransactionInput): Promise<WalletOperationResult> {
+    if (input.amount <= 0) {
+      throw new Error(`debit amount must be positive (got ${input.amount})`);
+    }
+    return this._executeTransaction({
+      ...input,
+      direction: WalletTransactionDirection.Debit,
+    });
+  }
+
+  /**
+   * احصل على الرصيد الحالي للمالك
+   */
+  async getBalance(
+    ownerType: WalletOwnerType,
+    ownerId: number,
+  ): Promise<{ balance: number; currency: string }> {
+    if (ownerType === WalletOwnerType.Rider) {
+      const rider = await this.riderRepo.findOne({
+        where: { id: ownerId },
+        select: ['balance', 'currency'],
+      });
+      if (!rider) throw new Error(`Rider #${ownerId} not found`);
+      return { balance: Number(rider.balance), currency: rider.currency };
+    }
+    const driver = await this.driverRepo.findOne({
+      where: { id: ownerId },
+      select: ['balance', 'currency'],
+    });
+    if (!driver) throw new Error(`Driver #${ownerId} not found`);
+    return { balance: Number(driver.balance), currency: driver.currency };
+  }
+
+  /**
+   * قائمة معاملات المحفظة بترتيب زمني (الأحدث أولاً)
+   */
+  async listTransactions(
+    ownerType: WalletOwnerType,
+    ownerId: number,
+    limit = 50,
+    offset = 0,
+  ): Promise<WalletTransactionEntity[]> {
+    return this.txRepo.find({
+      where: { ownerType, ownerId },
+      order: { createdAt: 'DESC' },
+      take: limit,
+      skip: offset,
+    });
+  }
+
+  /**
+   * جلب معاملة بمعرّفها (يُستخدم بواسطة webhook handlers)
+   */
+  async getTransactionById(
+    transactionId: number,
+  ): Promise<WalletTransactionEntity | null> {
+    return this.txRepo.findOne({ where: { id: transactionId } });
+  }
+
+  /**
+   * تحديث حالة معاملة Pending (يُستخدم بواسطة webhook handlers)
+   */
+  async updateTransactionStatus(
+    transactionId: number,
+    status: WalletTransactionStatus,
+    metadata?: Record<string, unknown>,
+  ): Promise<WalletTransactionEntity> {
+    const tx = await this.txRepo.findOne({ where: { id: transactionId } });
+    if (!tx) throw new Error(`Transaction #${transactionId} not found`);
+
+    tx.status = status;
+    if (metadata) tx.metadata = { ...tx.metadata, ...metadata };
+    if (status === WalletTransactionStatus.Completed) {
+      tx.completedAt = new Date();
+    }
+    return this.txRepo.save(tx);
+  }
+
+  /**
+   * Reconciliation: إجمالي الـ credits − debits للمالك.
+   * يفيد للتحقق من تطابق الـ ledger مع الـ cached balance في rider/driver.
+   */
+  async getLedgerTotal(
+    ownerType: WalletOwnerType,
+    ownerId: number,
+  ): Promise<number> {
+    const result = await this.txRepo
+      .createQueryBuilder('tx')
+      .select(
+        `COALESCE(SUM(
+          CASE WHEN tx.direction = 'Credit' THEN tx.amount ELSE -tx.amount END
+        ), 0)`,
+        'total',
+      )
+      .where('tx.owner_type = :ownerType', { ownerType })
+      .andWhere('tx.owner_id = :ownerId', { ownerId })
+      .andWhere('tx.status = :status', {
+        status: WalletTransactionStatus.Completed,
+      })
+      .getRawOne<{ total: string }>();
+
+    return Number(result?.total ?? 0);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Internal — atomic transaction execution
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * يُنفِّذ معاملة atomic:
+   *  1. يبدأ DB transaction
+   *  2. يقفل صف المالك (Rider/Driver) بـ SELECT ... FOR UPDATE
+   *  3. يتحقق من الرصيد (في Debit)
+   *  4. يحدِّث الرصيد
+   *  5. ينشئ سجل المعاملة بـ balanceAfter
+   *  6. commit
+   */
+  private async _executeTransaction(
+    input: CreateTransactionInput & { direction: WalletTransactionDirection },
+  ): Promise<WalletOperationResult> {
+    const status = input.status ?? WalletTransactionStatus.Completed;
+    const gateway = input.gateway ?? PaymentGateway.Internal;
+    const isDebit = input.direction === WalletTransactionDirection.Debit;
+    const delta = isDebit ? -input.amount : input.amount;
+
+    return this.dataSource.transaction(async (em) => {
+      // ─── Step 1: Lock the owner row ───
+      const tableName =
+        input.ownerType === WalletOwnerType.Rider
+          ? 'hancr_rider'
+          : 'hancr_driver';
+
+      const ownerRow = await em.query<
+        Array<{ id: number; balance: string; currency: string }>
+      >(
+        `SELECT id, balance, currency FROM ${tableName} WHERE id = $1 FOR UPDATE`,
+        [input.ownerId],
+      );
+
+      if (ownerRow.length === 0) {
+        throw new Error(
+          `${input.ownerType} #${input.ownerId} not found in ${tableName}`,
+        );
+      }
+
+      const currentBalance = Number(ownerRow[0].balance);
+      const ownerCurrency = ownerRow[0].currency;
+
+      // ─── Step 2: Currency check ───
+      if (input.currency !== ownerCurrency) {
+        throw new Error(
+          `Currency mismatch: transaction is ${input.currency}, ` +
+            `${input.ownerType} wallet is ${ownerCurrency}`,
+        );
+      }
+
+      // ─── Step 3: Insufficient balance check (Debit only, Completed status only) ───
+      if (
+        isDebit &&
+        status === WalletTransactionStatus.Completed &&
+        currentBalance < input.amount
+      ) {
+        throw new InsufficientBalanceError(
+          currentBalance,
+          input.amount,
+          ownerCurrency,
+        );
+      }
+
+      // ─── Step 4: Compute new balance ───
+      // Note: Pending transactions don't change balance yet — only Completed.
+      // This handles the case where a Recharge is Pending (awaiting gateway confirmation).
+      const willAffectBalance = status === WalletTransactionStatus.Completed;
+      const newBalance = willAffectBalance ? currentBalance + delta : currentBalance;
+
+      // ─── Step 5: Update wallet (only if Completed) ───
+      if (willAffectBalance) {
+        await em.query(
+          `UPDATE ${tableName} SET balance = $1, updated_at = NOW() WHERE id = $2`,
+          [newBalance, input.ownerId],
+        );
+      }
+
+      // ─── Step 6: Insert transaction record ───
+      const tx = em.create(WalletTransactionEntity, {
+        ownerType: input.ownerType,
+        ownerId: input.ownerId,
+        type: input.type,
+        direction: input.direction,
+        amount: input.amount,
+        balanceAfter: newBalance,
+        currency: input.currency,
+        status,
+        gateway,
+        gatewayRef: input.gatewayRef,
+        orderId: input.orderId,
+        description: input.description,
+        metadata: input.metadata,
+        completedAt: status === WalletTransactionStatus.Completed ? new Date() : undefined,
+      });
+      const saved = await em.save(tx);
+
+      this.logger.log(
+        `[${input.ownerType}#${input.ownerId}] ${input.direction} ` +
+          `${input.amount} ${input.currency} (${input.type}) → balance: ${newBalance}` +
+          (status !== WalletTransactionStatus.Completed ? ` [${status}]` : ''),
+      );
+
+      return {
+        transactionId: saved.id,
+        newBalance,
+        currency: ownerCurrency,
+      };
+    });
+  }
+}

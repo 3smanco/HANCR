@@ -1,0 +1,234 @@
+{
+  "version": "6.0",
+  "nxVersion": "20.8.4",
+  "pathMappings": {
+    "@hancr/database": [
+      "libs/database/src/index.ts"
+    ],
+    "@hancr/database/*": [
+      "libs/database/src/lib/*"
+    ],
+    "@hancr/redis": [
+      "libs/redis/src/index.ts"
+    ],
+    "@hancr/redis/*": [
+      "libs/redis/src/lib/*"
+    ],
+    "@hancr/order": [
+      "libs/order/src/index.ts"
+    ],
+    "@hancr/order/*": [
+      "libs/order/src/lib/*"
+    ],
+    "@hancr/geo": [
+      "libs/geo/src/index.ts"
+    ],
+    "@hancr/geo/*": [
+      "libs/geo/src/lib/*"
+    ],
+    "@hancr/notifications": [
+      "libs/notifications/src/index.ts"
+    ],
+    "@hancr/notifications/*": [
+      "libs/notifications/src/lib/*"
+    ],
+    "@hancr/sdui": [
+      "libs/sdui/src/index.ts"
+    ],
+    "@hancr/sdui/*": [
+      "libs/sdui/src/lib/*"
+    ]
+  },
+  "nxJsonPlugins": [],
+  "fileMap": {
+    "projectFileMap": {
+      "hancr": [
+        {
+          "file": ".env.example",
+          "hash": "5863123739823733880"
+        },
+        {
+          "file": "docker/docker-compose.yml",
+          "hash": "10070917730157207896"
+        },
+        {
+          "file": "docker/postgres/init.sql",
+          "hash": "10502045273933095833"
+        },
+        {
+          "file": "jest.preset.js",
+          "hash": "8630497064081400020"
+        },
+        {
+          "file": "libs/database/src/index.ts",
+          "hash": "17659022338199007656"
+        },
+        {
+          "file": "libs/database/src/lib/data-source.ts",
+          "hash": "6454610888288405923"
+        },
+        {
+          "file": "libs/database/src/lib/entities/app-config.entity.ts",
+          "hash": "11579431081119671797"
+        },
+        {
+          "file": "libs/database/src/lib/entities/bid-offer.entity.ts",
+          "hash": "14378528531632128190"
+        },
+        {
+          "file": "libs/database/src/lib/entities/bid.entity.ts",
+          "hash": "14243908559406142068"
+        },
+        {
+          "file": "libs/database/src/lib/entities/config-audit-log.entity.ts",
+          "hash": "7393835922895923319"
+        },
+        {
+          "file": "libs/database/src/lib/entities/driver-stars.entity.ts",
+          "hash": "11527803225592823371"
+        },
+        {
+          "file": "libs/database/src/lib/entities/driver.entity.ts",
+          "hash": "16643369081964342679"
+        },
+        {
+          "file": "libs/database/src/lib/entities/loyalty.entity.ts",
+          "hash": "3879970059070148924"
+        },
+        {
+          "file": "libs/database/src/lib/entities/order-message.entity.ts",
+          "hash": "6023417891589814853"
+        },
+        {
+          "file": "libs/database/src/lib/entities/order.entity.ts",
+          "hash": "17483781813149326469"
+        },
+        {
+          "file": "libs/database/src/lib/entities/pool-member.entity.ts",
+          "hash": "6743795514828483200"
+        },
+        {
+          "file": "libs/database/src/lib/entities/pool.entity.ts",
+          "hash": "12079651142974724721"
+        },
+        {
+          "file": "libs/database/src/lib/entities/region.entity.ts",
+          "hash": "14771445611870266626"
+        },
+        {
+          "file": "libs/database/src/lib/entities/request-activity.entity.ts",
+          "hash": "9901146546896574751"
+        },
+        {
+          "file": "libs/database/src/lib/entities/rider.entity.ts",
+          "hash": "5892541767923527058"
+        },
+        {
+          "file": "libs/database/src/lib/entities/service.entity.ts",
+          "hash": "12673783009956061972"
+        },
+        {
+          "file": "libs/database/src/lib/enums/bid-status.enum.ts",
+          "hash": "16266237682128744825"
+        },
+        {
+          "file": "libs/database/src/lib/enums/driver-status.enum.ts",
+          "hash": "15265604630944219568"
+        },
+        {
+          "file": "libs/database/src/lib/enums/loyalty-tier.enum.ts",
+          "hash": "10636257878824438361"
+        },
+        {
+          "file": "libs/database/src/lib/enums/order-status.enum.ts",
+          "hash": "14951990875271941152"
+        },
+        {
+          "file": "libs/database/src/lib/enums/order-type.enum.ts",
+          "hash": "18271925105986879684"
+        },
+        {
+          "file": "libs/database/src/lib/enums/payment-mode.enum.ts",
+          "hash": "1791600696349378304"
+        },
+        {
+          "file": "libs/database/src/lib/enums/pool-type.enum.ts",
+          "hash": "8632712892363551557"
+        },
+        {
+          "file": "libs/database/src/lib/enums/request-activity-type.enum.ts",
+          "hash": "7647223103289201957"
+        },
+        {
+          "file": "libs/database/src/lib/enums/service-type.enum.ts",
+          "hash": "10044498154590196250"
+        },
+        {
+          "file": "libs/database/src/lib/interfaces/point.interface.ts",
+          "hash": "16682251584893440260"
+        },
+        {
+          "file": "libs/database/src/lib/transformers/geo-points.transformer.ts",
+          "hash": "18036624194592183485"
+        },
+        {
+          "file": "libs/database/tsconfig.json",
+          "hash": "1378958077582595643"
+        },
+        {
+          "file": "libs/database/tsconfig.lib.json",
+          "hash": "3632393694954060084"
+        },
+        {
+          "file": "libs/database/tsconfig.spec.json",
+          "hash": "11550347367511341917"
+        },
+        {
+          "file": "libs/redis/src/index.ts",
+          "hash": "16159152135928553283"
+        },
+        {
+          "file": "libs/redis/src/lib/bid-redis.service.ts",
+          "hash": "13720271812803387536"
+        },
+        {
+          "file": "libs/redis/src/lib/driver-redis.service.ts",
+          "hash": "14903856366219489465"
+        },
+        {
+          "file": "libs/redis/src/lib/order-redis.service.ts",
+          "hash": "3806455253564479840"
+        },
+        {
+          "file": "libs/redis/src/lib/redis-keys.constant.ts",
+          "hash": "5085855127120173839"
+        },
+        {
+          "file": "libs/redis/src/lib/redis.module.ts",
+          "hash": "16238801625269242382"
+        },
+        {
+          "file": "libs/redis/tsconfig.json",
+          "hash": "13655327788767029834"
+        },
+        {
+          "file": "nx.json",
+          "hash": "9682704785591759459"
+        },
+        {
+          "file": "package.json",
+          "hash": "3634900685177592779"
+        },
+        {
+          "file": "scripts/verify.ps1",
+          "hash": "10038174000239758991"
+        },
+        {
+          "file": "tsconfig.base.json",
+          "hash": "3018407303461066989"
+        }
+      ]
+    },
+    "nonProjectFiles": []
+  }
+}

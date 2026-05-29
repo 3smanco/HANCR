@@ -1,0 +1,112 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { DriverRedisService, NearbyDriver } from '@hancr/redis';
+import { DriverEntity } from '@hancr/database';
+
+export interface MatchResult {
+  driver: DriverEntity;
+  distanceMeters: number;
+  etaMinutes: number;
+}
+
+/**
+ * MatchingService — محرك المطابقة بين الراكب والسائقين القريبين
+ * يعتمد على Redis GEO لإيجاد أقرب السائقين في ثوانٍ
+ */
+@Injectable()
+export class MatchingService {
+  private readonly logger = new Logger(MatchingService.name);
+
+  constructor(
+    private readonly driverRedis: DriverRedisService,
+
+    @InjectRepository(DriverEntity)
+    private readonly driverRepo: Repository<DriverEntity>,
+  ) {}
+
+  /**
+   * إيجاد أقرب السائقين المتاحين
+   * @param lat خط العرض لنقطة الانطلاق
+   * @param lng خط الطول لنقطة الانطلاق
+   * @param serviceId معرّف الخدمة المطلوبة
+   * @param radiusKm نصف قطر البحث بالكيلومتر
+   */
+  async findNearbyDrivers(
+    lat: number,
+    lng: number,
+    serviceId: number,
+    radiusKm = 5,
+  ): Promise<MatchResult[]> {
+    // تحويل إلى أمتار كما تتوقعه DriverRedisService
+    const radiusMeters = radiusKm * 1000;
+
+    const nearby: NearbyDriver[] = await this.driverRedis.findNearbyDrivers(
+      lat,
+      lng,
+      radiusMeters,
+      serviceId,
+    );
+
+    if (nearby.length === 0) {
+      this.logger.log(
+        `No drivers found near (${lat}, ${lng}) within ${radiusKm}km for service ${serviceId}`,
+      );
+      return [];
+    }
+
+    // جلب بيانات السائقين من قاعدة البيانات
+    const driverIds = nearby.map((n) => n.driverId);
+    const drivers = await this.driverRepo.findByIds(driverIds);
+    const driverMap = new Map(drivers.map((d) => [d.id, d]));
+
+    const results: MatchResult[] = [];
+
+    for (const nearbyDriver of nearby) {
+      const driver = driverMap.get(nearbyDriver.driverId);
+      if (!driver || !driver.active || driver.banned) continue;
+
+      // حساب الوقت المتوقع للوصول (ETA) — تقدير: 1.5 دقيقة لكل كيلومتر
+      const distanceKm = nearbyDriver.distanceMeters / 1000;
+      const etaMinutes = Math.ceil(distanceKm * 1.5);
+
+      results.push({
+        driver,
+        distanceMeters: nearbyDriver.distanceMeters,
+        etaMinutes,
+      });
+    }
+
+    this.logger.log(
+      `Found ${results.length} valid drivers near (${lat}, ${lng})`,
+    );
+
+    return results;
+  }
+
+  /**
+   * حساب السعر التقريبي للرحلة
+   * @param distanceMeters المسافة بالأمتار
+   * @param durationSeconds المدة بالثواني
+   * @param baseFare الأجرة الأساسية
+   * @param pricePerKm السعر لكل كيلومتر (perHundredMeters * 10)
+   * @param pricePerMinute السعر لكل دقيقة
+   */
+  estimateFare(
+    distanceMeters: number,
+    durationSeconds: number,
+    baseFare: number,
+    pricePerKm: number,
+    pricePerMinute: number,
+  ): number {
+    const distanceKm = distanceMeters / 1000;
+    const durationMinutes = durationSeconds / 60;
+
+    const fare =
+      baseFare +
+      distanceKm * pricePerKm +
+      durationMinutes * pricePerMinute;
+
+    return Math.round(fare * 100) / 100;
+  }
+}

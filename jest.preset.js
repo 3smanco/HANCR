@@ -1,0 +1,7 @@
+const nxPreset = require('@nx/jest/preset').default;
+
+module.exports = {
+  ...nxPreset,
+  testEnvironment: 'node',
+  snapshotFormat: { escapeString: true, printBasicPrototype: true },
+};

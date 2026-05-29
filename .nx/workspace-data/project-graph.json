@@ -1,0 +1,33 @@
+{
+  "nodes": {
+    "hancr": {
+      "name": "hancr",
+      "type": "lib",
+      "data": {
+        "root": ".",
+        "name": "hancr",
+        "includedScripts": [],
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {},
+          "description": "HANCR — Next-Gen Smart Mobility Platform for MENA | Zancr, LLC",
+          "js": {
+            "packageName": "hancr",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {},
+        "implicitDependencies": []
+      }
+    }
+  },
+  "externalNodes": {},
+  "dependencies": {
+    "hancr": []
+  },
+  "version": "6.0",
+  "errors": [],
+  "computedAt": 1779860197387
+}

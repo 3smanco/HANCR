@@ -1,0 +1,200 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthPayload {
+  accessToken: String!
+  driver: DriverType!
+  isNewDriver: Boolean!
+}
+
+type BidOfferResult {
+  message: String!
+  offerId: Int!
+  offeredPrice: Float!
+  success: Boolean!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type DriverLocationType {
+  driverId: Int!
+  heading: Int!
+  lat: Float!
+  lng: Float!
+  updatedAt: DateTime!
+}
+
+type DriverOrderType {
+  addresses: [String!]!
+  audioOff: Boolean!
+  costAfterCoupon: Float!
+  costBest: Float!
+  createdOn: DateTime!
+  currency: String!
+  distanceBest: Int!
+  durationBest: Int!
+  etaPickup: DateTime
+  finishTimestamp: DateTime
+  id: Int!
+  isBidOrder: Boolean!
+  numberMasked: Boolean!
+  otpCode: String
+  paymentMode: String!
+  points: [GeoPoint!]
+  quietRide: Boolean!
+  receiverName: String
+  requestedTemperature: Int
+  riderId: Int!
+  riderName: String
+  riderPhone: String
+  riderRating: Float!
+  startTimestamp: DateTime
+  status: String!
+  type: String!
+}
+
+type DriverType {
+  active: Boolean!
+  avatarUrl: String
+  balance: Float!
+  banned: Boolean!
+  carBrand: String
+  carColor: String
+  carModel: String
+  carPhotoUrl: String
+  carYear: Int
+  countryCode: String!
+  createdAt: DateTime!
+  currency: String!
+  fcmToken: String
+  firstName: String!
+  id: Int!
+  lastName: String!
+  phoneNumber: String!
+  plateNumber: String
+  rating: Float!
+  ratingCount: Int!
+  regionId: Int
+  status: String!
+}
+
+type GeoPoint {
+  lat: Float!
+  lng: Float!
+}
+
+type Mutation {
+  """قبول طلب رحلة"""
+  acceptOrder(orderId: Int!): DriverOrderType!
+
+  """تأكيد وصول نقطة الانطلاق"""
+  arrivedAtPickup(orderId: Int!): DriverOrderType!
+
+  """حذف FCM token للسائق"""
+  clearDriverFcmToken: Boolean!
+
+  """إلغاء الطلب"""
+  driverCancelOrder(orderId: Int!): DriverOrderType!
+
+  """ارسال OTP للسائق"""
+  driverSendOtp(phone: String!): SendOtpResponse!
+
+  """تحقق من OTP + JWT للسائق"""
+  driverVerifyOtp(code: String!, phone: String!): AuthPayload!
+
+  """انتهاء الرحلة"""
+  finishRide(orderId: Int!): DriverOrderType!
+
+  """تحويل حالة السائق إلى Offline"""
+  goOffline: Boolean!
+
+  """تحويل حالة السائق إلى Online"""
+  goOnline: Boolean!
+
+  """بدء الرحلة"""
+  startRide(orderId: Int!): DriverOrderType!
+
+  """تقديم عرض سعر في Bid Mode"""
+  submitBidOffer(bidId: Int!, offeredPrice: Float!): BidOfferResult!
+
+  """تحديث FCM token للسائق"""
+  updateDriverFcmToken(token: String!): Boolean!
+
+  """تحديث بيانات السائق"""
+  updateDriverProfile(input: UpdateDriverInput!): DriverType!
+
+  """تحديث موقع السائق (كل 4 ثوانٍ)"""
+  updateLocation(input: UpdateLocationInput!): DriverLocationType!
+}
+
+type Query {
+  """الطلب النشط الحالي"""
+  driverActiveOrder: DriverOrderType
+
+  """بيانات السائق الحالي"""
+  driverMe: DriverType!
+
+  """الموقع الحالي للسائق"""
+  myLocation: DriverLocationType
+
+  """نجوم Captain Stars ونسبة العمولة"""
+  myStars: StarsType!
+}
+
+type SendOtpResponse {
+  devOtp: String
+  message: String!
+  success: Boolean!
+}
+
+type StarsType {
+  averageRating: Float!
+  completedRides: Int!
+  currentCommissionPercent: Float!
+  id: Int!
+  nextCommissionPercent: Float!
+  noCancelStreakWeeks: Int!
+  starsFromLongTrips: Float!
+  starsFromNoCancel: Float!
+  starsFromPeakHours: Float!
+  starsFromRating: Float!
+  starsToNextLevel: Float!
+  totalStars: Float!
+  updatedAt: DateTime!
+}
+
+type Subscription {
+  """تحديثات موقع السائق الفورية للراكب"""
+  driverLocationUpdated(driverId: Int!): DriverLocationType!
+
+  """تحديثات الطلب النشط الفورية"""
+  driverOrderUpdated: DriverOrderType!
+
+  """طلبات رحلة جديدة متاحة"""
+  newOrderAvailable: DriverOrderType!
+}
+
+input UpdateDriverInput {
+  avatarUrl: String
+  carBrand: String
+  carColor: String
+  carModel: String
+  carPhotoUrl: String
+  carYear: Int
+  fcmToken: String
+  firstName: String
+  lastName: String
+  plateNumber: String
+  serviceIds: [Int!]
+}
+
+input UpdateLocationInput {
+  heading: Int! = 0
+  lat: Float!
+  lng: Float!
+  serviceIds: [Int!]
+}

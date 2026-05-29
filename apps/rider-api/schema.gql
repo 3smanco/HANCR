@@ -1,0 +1,287 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthPayload {
+  accessToken: String!
+  isNewUser: Boolean!
+  rider: RiderType!
+}
+
+type BidOfferType {
+  carBrand: String
+  carColor: String
+  carModel: String
+  createdAt: DateTime!
+  currency: String!
+  driverAvatarUrl: String
+  driverId: Int!
+  driverName: String
+  driverRating: Float!
+  id: Int!
+  offeredPrice: Float!
+  plateNumber: String
+  status: String!
+}
+
+type BidType {
+  createdAt: DateTime!
+  currency: String!
+  expiresAt: DateTime!
+  id: Int!
+  offers: [BidOfferType!]!
+  riderProposedPrice: Float!
+  status: String!
+}
+
+input CreateBidInput {
+  addresses: [String!]!
+  points: [GeoPointInput!]!
+  proposedPrice: Float!
+  regionId: Int!
+  serviceId: Int!
+}
+
+input CreateOrderInput {
+  addresses: [String!]!
+  audioOff: Boolean = false
+  bookedHours: Int
+  couponId: Int
+  isBidOrder: Boolean = false
+  numberMasked: Boolean = false
+  paymentMode: String = "Cash"
+  points: [GeoPointInput!]!
+  proposedPrice: Float
+  quietRide: Boolean = false
+  receiverName: String
+  receiverPhone: String
+  regionId: Int!
+  requestedTemperature: Int
+  scheduledAt: DateTime
+  serviceId: Int!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input GeoPointInput {
+  lat: Float!
+  lng: Float!
+}
+
+type GeoPointType {
+  lat: Float!
+  lng: Float!
+}
+
+type LoyaltyType {
+  availableMiles: Float!
+  freeUpgradesRemaining: Int!
+  hasFreeCancellation: Boolean!
+  id: Int!
+  lifetimeMiles: Float!
+  surgeImmunityUntil: DateTime
+  tier: String!
+  totalMiles: Float!
+  updatedAt: DateTime!
+}
+
+type Mutation {
+  """قبول عرض سائق في Bid Mode"""
+  acceptBidOffer(offerId: Int!): BidType!
+
+  """إلغاء الطلب"""
+  cancelOrder(orderId: Int!): OrderType!
+
+  """حذف FCM token عند تسجيل الخروج"""
+  clearFcmToken: Boolean!
+
+  """فتح مزايدة جديدة (Bid Mode)"""
+  createBid(input: CreateBidInput!): BidType!
+
+  """طلب رحلة جديدة"""
+  createOrder(input: CreateOrderInput!): OrderType!
+
+  """تقييم السائق"""
+  rateDriver(input: RateDriverInput!): OrderType!
+
+  """ارسال رمز OTP لرقم الهاتف للتحقق"""
+  sendOtp(input: SendOtpInput!): SendOtpResponse!
+
+  """تحديث FCM token للإشعارات"""
+  updateFcmToken(token: String!): Boolean!
+
+  """تحديث بيانات الراكب"""
+  updateProfile(input: UpdateRiderInput!): RiderType!
+
+  """التحقق من OTP للتسليم الآمن"""
+  verifyDeliveryOtp(orderId: Int!, otp: String!): OrderType!
+
+  """التحقق من OTP واستلام Access Token"""
+  verifyOtp(input: VerifyOtpInput!): AuthPayload!
+}
+
+type OrderType {
+  addresses: [String!]!
+  audioOff: Boolean!
+  bidId: Int
+  carBrand: String
+  carColor: String
+  carModel: String
+  costAfterCoupon: Float!
+  costBest: Float!
+  createdOn: DateTime!
+  currency: String!
+  distanceBest: Int!
+  driverAvatarUrl: String
+  driverId: Int
+  driverName: String
+  driverPhone: String
+  driverRating: Float
+  durationBest: Int!
+  etaPickup: DateTime
+  expectedTimestamp: DateTime
+  finishTimestamp: DateTime
+  id: Int!
+  isBidOrder: Boolean!
+  numberMasked: Boolean!
+  otpCode: String
+  paidAmount: Float!
+  plateNumber: String
+  points: [GeoPointType!]
+  quietRide: Boolean!
+  receiverName: String
+  receiverPhone: String
+  regionId: Int!
+  requestedTemperature: Int
+  riderId: Int!
+  serviceId: Int!
+  startTimestamp: DateTime
+  status: String!
+  tipAmount: Float!
+  type: String!
+  updatedAt: DateTime!
+}
+
+type PoolMemberType {
+  id: Int!
+  joinedAt: DateTime!
+  riderId: Int!
+  riderName: String
+  role: String!
+}
+
+type PoolType {
+  active: Boolean!
+  createdAt: DateTime!
+  id: Int!
+  members: [PoolMemberType!]!
+  name: String!
+  ownerId: Int!
+  type: String!
+}
+
+type Query {
+  """المزايدة النشطة الحالية"""
+  activeBid: BidType
+
+  """الطلب النشط الحالي"""
+  activeOrder: OrderType
+
+  """بيانات الراكب المسجّل"""
+  me: RiderType!
+
+  """بيانات نقاط Hancr Miles"""
+  myLoyalty: LoyaltyType!
+
+  """المجموعة العائلية/المؤسسية للراكب"""
+  myPool: PoolType
+
+  """رصيد محفظة الراكب"""
+  myWallet: WalletType!
+
+  """سجل الرحلات"""
+  orderHistory(limit: Int! = 20, offset: Int! = 0): [OrderType!]!
+
+  """قائمة الخدمات المتاحة حسب المنطقة"""
+  services(regionId: Int!): [ServiceType!]!
+}
+
+input RateDriverInput {
+  comment: String
+  orderId: Int!
+  rating: Float!
+  tip: Float
+}
+
+type RiderType {
+  active: Boolean!
+  avatarUrl: String
+  balance: Float!
+  banned: Boolean!
+  countryCode: String!
+  createdAt: DateTime!
+  currency: String!
+  email: String
+  firstName: String
+  id: Int!
+  lastLoginAt: DateTime
+  lastName: String
+  phoneNumber: String!
+  rating: Float!
+  totalRides: Int!
+}
+
+input SendOtpInput {
+  phone: String!
+}
+
+type SendOtpResponse {
+  devOtp: String
+  message: String!
+  success: Boolean!
+}
+
+type ServiceType {
+  baseFare: Float!
+  bidModeEnabled: Boolean!
+  displayOrder: Int!
+  enabled: Boolean!
+  hourlyRate: Float
+  iconUrl: String
+  id: Int!
+  isVip: Boolean!
+  minimumFee: Float!
+  name: String!
+  nameEn: String!
+  searchRadius: Int!
+  serviceType: String!
+}
+
+type Subscription {
+  """عروض السائقين الفورية خلال Bid Mode"""
+  bidOfferReceived: BidType!
+
+  """تحديثات الطلب الفورية عبر WebSocket"""
+  orderUpdated: OrderType!
+}
+
+input UpdateRiderInput {
+  avatarUrl: String
+  email: String
+  fcmToken: String
+  firstName: String
+  lastName: String
+}
+
+input VerifyOtpInput {
+  code: String!
+  phone: String!
+}
+
+type WalletType {
+  balance: Float!
+  currency: String!
+}

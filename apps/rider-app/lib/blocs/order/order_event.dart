@@ -1,0 +1,86 @@
+import 'package:equatable/equatable.dart';
+import '../../core/models/order_model.dart';
+import '../../core/models/service_model.dart';
+
+abstract class OrderEvent extends Equatable {
+  const OrderEvent();
+  @override
+  List<Object?> get props => [];
+}
+
+class OrderActiveCheckRequested extends OrderEvent {
+  const OrderActiveCheckRequested();
+}
+
+class OrderCreateRequested extends OrderEvent {
+  final GeoPoint origin;
+  final GeoPoint destination;
+  final String originAddress;
+  final String destinationAddress;
+  final ServiceModel service;
+  final int regionId;
+  final bool quietRide;
+  final bool audioOff;
+  final bool numberMasked;
+
+  const OrderCreateRequested({
+    required this.origin,
+    required this.destination,
+    required this.originAddress,
+    required this.destinationAddress,
+    required this.service,
+    required this.regionId,
+    this.quietRide = false,
+    this.audioOff = false,
+    this.numberMasked = false,
+  });
+
+  @override
+  List<Object?> get props => [origin, destination, service.id];
+}
+
+class OrderCancelRequested extends OrderEvent {
+  final int orderId;
+  const OrderCancelRequested(this.orderId);
+  @override
+  List<Object?> get props => [orderId];
+}
+
+class OrderRateDriverRequested extends OrderEvent {
+  final int orderId;
+  final double rating;
+  final String? comment;
+  final double? tip;
+
+  const OrderRateDriverRequested({
+    required this.orderId,
+    required this.rating,
+    this.comment,
+    this.tip,
+  });
+
+  @override
+  List<Object?> get props => [orderId, rating];
+}
+
+class OrderUpdatedFromSubscription extends OrderEvent {
+  final OrderModel order;
+  const OrderUpdatedFromSubscription(this.order);
+  @override
+  List<Object?> get props => [order];
+}
+
+class OrderSubscriptionStart extends OrderEvent {
+  const OrderSubscriptionStart();
+}
+
+class OrderSubscriptionStop extends OrderEvent {
+  const OrderSubscriptionStop();
+}
+
+class OrderHistoryRequested extends OrderEvent {
+  final int page;
+  const OrderHistoryRequested({this.page = 0});
+  @override
+  List<Object?> get props => [page];
+}

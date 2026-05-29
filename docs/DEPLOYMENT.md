@@ -1,0 +1,287 @@
+# HANCR — Deployment Guide
+
+دليل خطوة بخطوة لنشر HANCR على سيرفر إنتاج.
+
+## 📋 المتطلبات الأساسية
+
+### السيرفر (الحد الأدنى لـ MVP):
+- **Specs**: 4 CPU cores, 8 GB RAM, 80 GB SSD
+- **OS**: Ubuntu 22.04 LTS (موصى بـ DigitalOcean / Hetzner / AWS Lightsail / Linode)
+- **Region**: قريب من المستخدمين (Frankfurt للخليج، Bahrain للمنطقة)
+
+### التكلفة المتوقَّعة (شهرياً، MVP):
+| البند | الخدمة | التكلفة |
+|------|--------|---------|
+| سيرفر | Hetzner CPX31 (4 vCPU, 8GB) | ~€16 |
+| Domain | hancr.com | $12/سنة |
+| Cloudflare | Free plan | $0 |
+| Sentry | Developer plan | $0 (5K events/شهر) |
+| Twilio | SMS (1000 رسالة) | ~$10 |
+| Firebase | Spark plan (push free) | $0 |
+| **المجموع** | | **~$30/شهر** |
+
+---
+
+## 🚀 خطوات النشر (One-time setup)
+
+### 1. إعداد السيرفر
+
+```bash
+# SSH للسيرفر
+ssh root@YOUR_SERVER_IP
+
+# تحديث النظام
+apt update && apt upgrade -y
+
+# تثبيت Docker + Docker Compose
+curl -fsSL https://get.docker.com | sh
+apt install -y docker-compose-plugin
+
+# Firewall
+ufw allow 22/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw enable
+
+# إنشاء user غير root للأمان
+adduser hancr
+usermod -aG docker hancr
+mkdir -p /opt/hancr
+chown hancr:hancr /opt/hancr
+```
+
+### 2. Clone المشروع
+
+```bash
+su - hancr
+cd /opt/hancr
+
+# استخدم SSH key أو HTTPS
+git clone https://github.com/YOUR_USERNAME/hancr.git .
+
+# أو لو الـ repo private:
+# git clone git@github.com:YOUR_USERNAME/hancr.git .
+```
+
+### 3. تهيئة الـ environment
+
+```bash
+cp .env.prod.example .env.prod
+nano .env.prod
+
+# املأ بعناية:
+#  - DATABASE_PASSWORD (32+ char strong)
+#  - REDIS_PASSWORD (32+ char strong)
+#  - JWT_SECRET (openssl rand -base64 48)
+#  - ADMIN_JWT_SECRET (مختلف عن JWT_SECRET)
+#  - GOOGLE_MAPS_API_KEY (من Google Cloud Console)
+#  - TWILIO_* (من twilio.com)
+#  - FIREBASE_* (من Firebase Console)
+#  - HYPERPAY_/MOYASAR_/STRIPE_ (من dashboards)
+#  - SENTRY_DSN_* (من sentry.io — 5 projects)
+```
+
+### 4. توليد JWT secrets قوية:
+
+```bash
+echo "JWT_SECRET=$(openssl rand -base64 48)"
+echo "ADMIN_JWT_SECRET=$(openssl rand -base64 48)"
+echo "DATABASE_PASSWORD=$(openssl rand -base64 32 | tr -d /=+)"
+echo "REDIS_PASSWORD=$(openssl rand -base64 32 | tr -d /=+)"
+```
+
+### 5. ضبط الـ DNS (Cloudflare)
+
+اتبع [`DNS_SETUP.md`](./DNS_SETUP.md) لإضافة:
+- `A @` → YOUR_SERVER_IP
+- `A api` → YOUR_SERVER_IP
+- `A admin` → YOUR_SERVER_IP
+
+انتظر propagation (5-30 دقيقة).
+
+### 6. أول build وتشغيل
+
+```bash
+cd /opt/hancr
+
+# Build all images
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod build
+
+# Start services (في الـ background)
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod up -d
+
+# تحقق من الحالة
+docker compose -f docker/docker-compose.prod.yml ps
+
+# شاهد الـ logs
+docker compose -f docker/docker-compose.prod.yml logs -f rider-api
+```
+
+### 7. تطبيق الـ migrations
+
+```bash
+docker compose -f docker/docker-compose.prod.yml exec rider-api \
+    node -e "require('./libs/database/dist/data-source.js').AppDataSource.initialize().then(ds => ds.runMigrations())"
+
+# أو نسخ data-source.ts للسيرفر وتشغيل:
+# TS_NODE_PROJECT=tsconfig.base.json npx typeorm-ts-node-commonjs migration:run -d libs/database/src/lib/data-source.ts
+```
+
+### 8. التحقق من النشر
+
+```bash
+# Health checks
+curl https://api.hancr.com/health
+curl https://api.hancr.com/rider/health/ready
+curl https://api.hancr.com/driver/health/ready
+curl https://api.hancr.com/admin/health/ready
+
+# Admin panel
+curl -I https://admin.hancr.com/
+
+# GraphQL endpoint
+curl -X POST https://api.hancr.com/rider/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query":"{__typename}"}'
+```
+
+---
+
+## 🔄 Deployments تالية (CI/CD)
+
+### الطريقة (أ): يدوي عبر SSH
+
+```bash
+ssh hancr@YOUR_SERVER_IP
+cd /opt/hancr
+git pull origin main
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod build
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod up -d
+docker image prune -f
+```
+
+### الطريقة (ب): GitHub Actions تلقائي
+
+أضف هذه الـ secrets في GitHub repo settings → Secrets:
+
+| Secret | القيمة |
+|--------|--------|
+| `DEPLOY_HOST` | `YOUR_SERVER_IP` |
+| `DEPLOY_USER` | `hancr` |
+| `DEPLOY_SSH_KEY` | محتوى الـ private SSH key |
+| `DOCKER_REGISTRY` | `ghcr.io` (أو docker.io) |
+| `DOCKER_USERNAME` | اسم المستخدم |
+| `DOCKER_PASSWORD` | personal access token |
+
+ثم فعِّل deploy.yml بإزالة الـ comments من خطوات Docker push و SSH deploy.
+
+عند push tag `v1.0.0`:
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+# → GitHub Actions يبني الـ images، يدفعها للـ registry، ويوصل للسيرفر
+```
+
+---
+
+## 🛠️ صيانة دورية
+
+### Backups (Postgres) — يومياً:
+
+```bash
+# أضف cron job
+crontab -e
+# 0 3 * * * /opt/hancr/scripts/backup-db.sh
+```
+
+`scripts/backup-db.sh`:
+```bash
+#!/bin/bash
+BACKUP_DIR=/opt/hancr/backups
+mkdir -p $BACKUP_DIR
+DATE=$(date +%Y%m%d_%H%M%S)
+docker compose -f /opt/hancr/docker/docker-compose.prod.yml exec -T postgres \
+    pg_dump -U hancr_prod hancr_prod | gzip > $BACKUP_DIR/hancr_$DATE.sql.gz
+# احتفظ بآخر 30 يوم فقط
+find $BACKUP_DIR -name "*.sql.gz" -mtime +30 -delete
+# upload to S3 (اختياري)
+# aws s3 cp $BACKUP_DIR/hancr_$DATE.sql.gz s3://hancr-backups/db/
+```
+
+### Log rotation
+
+Docker يدير logs لكن لو كبرت:
+```bash
+# أضف في /etc/docker/daemon.json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}
+systemctl restart docker
+```
+
+### Updates (Docker base images)
+
+شهرياً:
+```bash
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod build --pull
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod up -d
+docker image prune -f
+```
+
+---
+
+## 🚨 Troubleshooting
+
+### `502 Bad Gateway` من Nginx
+```bash
+# تحقق من حالة APIs
+docker compose ps
+# اعد start
+docker compose restart rider-api
+# logs
+docker compose logs -f rider-api
+```
+
+### Database connection errors
+```bash
+# تحقق من Postgres
+docker compose exec postgres pg_isready -U hancr_prod
+# في حالة فشل migrations:
+docker compose exec rider-api node -e "console.log(process.env.DATABASE_HOST)"
+```
+
+### High memory usage
+```bash
+# راقب
+docker stats
+# لو memory leak في API:
+docker compose restart rider-api
+# لو continuous: تحقق من Sentry لـ memory leaks
+```
+
+### SSL/CORS errors
+- تحقق من Cloudflare → SSL/TLS → Full (strict)
+- تحقق من `CORS_ORIGINS` في `.env.prod` يحتوي الـ domain الصحيح
+- جرّب من vincognito mode (بدون extensions)
+
+---
+
+## 📞 Emergency Contacts
+
+عند incident خطير:
+1. **Sentry** — سيرسل alert فوراً لأي 5xx
+2. **Cloudflare** — لو الـ origin offline، سترى 522 error
+3. **Logs** — `docker compose logs --tail 100 -f`
+
+### Quick rollback (آخر version عملت)
+
+```bash
+git log --oneline -10  # شوف آخر commits
+git checkout <previous-good-commit>
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod build
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod up -d
+```

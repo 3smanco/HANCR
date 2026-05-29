@@ -1,0 +1,92 @@
+# version: '3.9'  # obsolete attribute removed
+
+# =============================================
+# HANCR — بيئة التطوير الكاملة
+# PostgreSQL 16 + PostGIS | Redis 7 | pgAdmin
+# =============================================
+
+services:
+
+  # ===== قاعدة البيانات الرئيسية =====
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: hancr_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hancr
+      POSTGRES_PASSWORD: hancr_dev_pass
+      POSTGRES_DB: hancr
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432"   # 5432 occupied by Windows PostgreSQL 18
+    volumes:
+      - hancr_postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hancr -d hancr"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hancr_network
+
+  # ===== Redis 7 — Real-time Engine =====
+  redis:
+    image: redis:7-alpine
+    container_name: hancr_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - hancr_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hancr_network
+
+  # ===== pgAdmin — واجهة إدارة قاعدة البيانات =====
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: hancr_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@hancr.com
+      PGADMIN_DEFAULT_PASSWORD: hancr_admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - hancr_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hancr_network
+
+  # ===== Redis Commander — واجهة إدارة Redis =====
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: hancr_redis_commander
+    restart: unless-stopped
+    environment:
+      REDIS_HOSTS: hancr_redis:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - hancr_network
+
+volumes:
+  hancr_postgres_data:
+  hancr_redis_data:
+  hancr_pgadmin_data:
+
+networks:
+  hancr_network:
+    driver: bridge

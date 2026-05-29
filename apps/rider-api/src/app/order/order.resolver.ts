@@ -1,0 +1,122 @@
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Subscription,
+  Int,
+} from '@nestjs/graphql';
+import { UseGuards, Inject } from '@nestjs/common';
+import { RedisPubSub } from 'graphql-redis-subscriptions';
+import { OrderService, ORDER_UPDATED } from './order.service';
+import { OrderType } from './dto/order.type';
+import { CreateOrderInput } from './dto/create-order.input';
+import { RateDriverInput } from './dto/rate-driver.input';
+import { JwtAuthGuard, CurrentUser } from '../auth/jwt-auth.guard';
+import { AuthUser } from '../auth/jwt.strategy';
+import { PUB_SUB } from '../pubsub.provider';
+
+@Resolver(() => OrderType)
+export class OrderResolver {
+  constructor(
+    private readonly orderService: OrderService,
+    @Inject(PUB_SUB) private readonly pubSub: RedisPubSub,
+  ) {}
+
+  /**
+   * إنشاء طلب رحلة جديد
+   */
+  @Mutation(() => OrderType, { description: 'طلب رحلة جديدة' })
+  @UseGuards(JwtAuthGuard)
+  createOrder(
+    @CurrentUser() user: AuthUser,
+    @Args('input') input: CreateOrderInput,
+  ): Promise<OrderType> {
+    return this.orderService.createOrder(user.riderId, input);
+  }
+
+  /**
+   * إلغاء الطلب الحالي
+   */
+  @Mutation(() => OrderType, { description: 'إلغاء الطلب' })
+  @UseGuards(JwtAuthGuard)
+  cancelOrder(
+    @CurrentUser() user: AuthUser,
+    @Args('orderId', { type: () => Int }) orderId: number,
+  ): Promise<OrderType> {
+    return this.orderService.cancelOrder(user.riderId, orderId);
+  }
+
+  /**
+   * التحقق من OTP التسليم الآمن
+   */
+  @Mutation(() => OrderType, { description: 'التحقق من OTP للتسليم الآمن' })
+  @UseGuards(JwtAuthGuard)
+  verifyDeliveryOtp(
+    @CurrentUser() user: AuthUser,
+    @Args('orderId', { type: () => Int }) orderId: number,
+    @Args('otp') otp: string,
+  ): Promise<OrderType> {
+    return this.orderService.verifyDeliveryOtp(user.riderId, orderId, otp);
+  }
+
+  /**
+   * تقييم السائق بعد انتهاء الرحلة
+   */
+  @Mutation(() => OrderType, { description: 'تقييم السائق' })
+  @UseGuards(JwtAuthGuard)
+  rateDriver(
+    @CurrentUser() user: AuthUser,
+    @Args('input') input: RateDriverInput,
+  ): Promise<OrderType> {
+    return this.orderService.rateDriver(user.riderId, input);
+  }
+
+  /**
+   * الطلب النشط الحالي
+   */
+  @Query(() => OrderType, { nullable: true, description: 'الطلب النشط الحالي' })
+  @UseGuards(JwtAuthGuard)
+  activeOrder(@CurrentUser() user: AuthUser): Promise<OrderType | null> {
+    return this.orderService.getActiveOrder(user.riderId);
+  }
+
+  /**
+   * سجل الرحلات السابقة
+   */
+  @Query(() => [OrderType], { description: 'سجل الرحلات' })
+  @UseGuards(JwtAuthGuard)
+  orderHistory(
+    @CurrentUser() user: AuthUser,
+    @Args('limit', { type: () => Int, defaultValue: 20 }) limit: number,
+    @Args('offset', { type: () => Int, defaultValue: 0 }) offset: number,
+  ): Promise<OrderType[]> {
+    return this.orderService.getOrderHistory(user.riderId, limit, offset);
+  }
+
+  /**
+   * Subscription — تحديثات الطلب الفورية
+   * يستقبل الراكب تحديثات حالة طلبه لحظةً بلحظة
+   *
+   * subscription {
+   *   orderUpdated {
+   *     id status driverName driverPhone etaPickup
+   *   }
+   * }
+   */
+  @Subscription(() => OrderType, {
+    description: 'تحديثات الطلب الفورية عبر WebSocket',
+    filter(
+      payload: { orderUpdated: OrderType },
+      _variables: unknown,
+      context: { req: { user: AuthUser } },
+    ) {
+      // فلترة: الراكب يستقبل تحديثات طلباته فقط
+      return payload.orderUpdated.riderId === context.req.user.riderId;
+    },
+  })
+  @UseGuards(JwtAuthGuard)
+  orderUpdated(): AsyncIterator<unknown> {
+    return this.pubSub.asyncIterator(ORDER_UPDATED);
+  }
+}

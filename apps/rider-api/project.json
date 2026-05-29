@@ -1,0 +1,52 @@
+{
+  "name": "rider-api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/rider-api/src",
+  "projectType": "application",
+  "tags": ["scope:rider", "type:app"],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/rider-api",
+        "main": "apps/rider-api/src/main.ts",
+        "tsConfig": "apps/rider-api/tsconfig.app.json",
+        "assets": []
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "rider-api:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "rider-api:build:development"
+        },
+        "production": {
+          "buildTarget": "rider-api:build:production"
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/rider-api/jest.config.ts"
+      }
+    }
+  }
+}

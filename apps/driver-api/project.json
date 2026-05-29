@@ -1,0 +1,49 @@
+{
+  "name": "driver-api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/driver-api/src",
+  "projectType": "application",
+  "tags": ["scope:driver", "type:app"],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/driver-api",
+        "main": "apps/driver-api/src/main.ts",
+        "tsConfig": "apps/driver-api/tsconfig.app.json",
+        "assets": []
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "driver-api:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "driver-api:build:development"
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/driver-api/jest.config.ts"
+      }
+    }
+  }
+}

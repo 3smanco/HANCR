@@ -1,0 +1,50 @@
+# =============================================
+# HANCR Admin Panel (Next.js 14) — Multi-stage
+# =============================================
+
+# ─── Stage 1: Builder ───────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+WORKDIR /workspace
+
+COPY package.json package-lock.json* tsconfig.base.json nx.json ./
+COPY apps/admin-panel/package.json* apps/admin-panel/
+
+RUN npm ci --legacy-peer-deps
+
+COPY tsconfig*.json ./
+COPY libs ./libs
+COPY apps/admin-panel ./apps/admin-panel
+
+# Next.js standalone build
+WORKDIR /workspace/apps/admin-panel
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build || npx next build
+
+# ─── Stage 2: Runtime ───────────────────────────────────────────
+FROM node:20-alpine AS runtime
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+
+RUN apk add --no-cache curl tini && \
+    addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001 -G nodejs
+
+WORKDIR /app
+
+# Standalone output (Next.js 14)
+COPY --from=builder --chown=nextjs:nodejs /workspace/apps/admin-panel/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /workspace/apps/admin-panel/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /workspace/apps/admin-panel/public ./public
+
+USER nextjs
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:3000/ || exit 1
+
+EXPOSE 3000
+
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["node", "server.js"]

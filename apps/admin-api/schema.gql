@@ -1,0 +1,346 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AdminDriverType {
+  active: Boolean!
+  avatarUrl: String
+  balance: Float!
+  banned: Boolean!
+  carBrand: String
+  carColor: String
+  carModel: String
+  carYear: Float
+  countryCode: String!
+  createdAt: DateTime!
+  currency: String!
+  firstName: String!
+  id: Int!
+  lastName: String!
+  phoneNumber: String!
+  plateNumber: String
+  rating: Float!
+  ratingCount: Int!
+  regionId: Float
+  status: String!
+  updatedAt: DateTime!
+}
+
+type AdminLoginResponse {
+  accessToken: String!
+  email: String!
+  role: String!
+}
+
+type AdminOrderType {
+  costAfterCoupon: Float!
+  costBest: Float!
+  createdOn: DateTime!
+  currency: String!
+  distanceBest: Int!
+  driverId: Int
+  driverPhone: String
+  durationBest: Int!
+  finishTimestamp: DateTime
+  id: Int!
+  isBidOrder: Boolean!
+  paidAmount: Float!
+  paymentMode: String
+  providerShare: Float!
+  regionId: Int!
+  regionName: String
+  riderId: Int!
+  riderPhone: String
+  serviceId: Int!
+  serviceName: String
+  startTimestamp: DateTime
+  status: String!
+  type: String!
+  updatedAt: DateTime!
+}
+
+type AdminRegionType {
+  bidModeEnabled: Boolean!
+  boundary: JSON
+  createdAt: DateTime!
+  currency: String!
+  defaultSearchRadius: Int!
+  enabled: Boolean!
+  id: Int!
+  metroApiUrl: String
+  name: String!
+  nameEn: String!
+  updatedAt: DateTime!
+}
+
+type AdminRiderType {
+  active: Boolean!
+  avatarUrl: String
+  balance: Float!
+  banReason: String
+  banned: Boolean!
+  countryCode: String!
+  createdAt: DateTime!
+  currency: String!
+  email: String
+  firstName: String
+  id: Int!
+  lastLoginAt: DateTime
+  lastName: String
+  phoneNumber: String!
+  rating: Float!
+  totalRides: Int!
+  updatedAt: DateTime!
+}
+
+type AdminServiceType {
+  availableTimeFrom: String
+  availableTimeTo: String
+  baseFare: Float!
+  bidModeEnabled: Boolean!
+  cancellationDriverShare: Float!
+  cancellationTotalFee: Float!
+  createdAt: DateTime!
+  dateRangeMultipliers: JSON
+  displayOrder: Int!
+  enabled: Boolean!
+  extraMinuteRate: Float
+  hourlyRate: Float
+  iconUrl: String
+  id: Int!
+  isVip: Boolean!
+  minimumFee: Float!
+  name: String!
+  nameEn: String!
+  perHundredMeters: Float!
+  perMinuteDrive: Float!
+  perMinuteWait: Float!
+  prepayPercent: Float!
+  providerSharePercent: Float!
+  regionId: Int!
+  searchRadius: Int!
+  serviceType: String!
+  timeMultipliers: JSON
+  updatedAt: DateTime!
+  weekdayMultipliers: JSON
+}
+
+type AppConfigType {
+  configKey: String!
+  featureFlags: JSON
+  homeScreenConfig: JSON
+  id: Int!
+  loyaltyConfig: JSON
+  themeConfig: JSON
+  updatedAt: DateTime!
+  updatedBy: String
+  version: String!
+}
+
+input CreateRegionInput {
+  bidModeEnabled: Boolean
+  boundary: JSON
+  currency: String!
+  defaultSearchRadius: Int
+  metroApiUrl: String
+  name: String!
+  nameEn: String!
+}
+
+input CreateServiceInput {
+  baseFare: Float!
+  bidModeEnabled: Boolean
+  displayOrder: Int
+  extraMinuteRate: Float
+  hourlyRate: Float
+  iconUrl: String
+  isVip: Boolean
+  minimumFee: Float!
+  name: String!
+  nameEn: String!
+  perHundredMeters: Float!
+  perMinuteDrive: Float!
+  perMinuteWait: Float!
+  providerSharePercent: Float
+  regionId: Int!
+  serviceType: String!
+}
+
+type DashboardStats {
+  activeDrivers: Int!
+  canceledOrders: Int!
+  completedOrders: Int!
+  pendingDriverApprovals: Int!
+  platformRevenue: Float!
+  totalDrivers: Int!
+  totalOrders: Int!
+  totalRevenue: Float!
+  totalRiders: Int!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type DriverListResult {
+  items: [AdminDriverType!]!
+  limit: Int!
+  page: Int!
+  total: Int!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
+type Mutation {
+  """تسجيل دخول المشرف"""
+  adminLogin(email: String!, password: String!): AdminLoginResponse!
+
+  """اعتماد سائق جديد"""
+  approveDriver(id: Int!): AdminDriverType!
+
+  """حظر سائق"""
+  banDriver(id: Int!): AdminDriverType!
+
+  """حظر راكب"""
+  banRider(id: Int!, reason: String): AdminRiderType!
+
+  """إنشاء منطقة جديدة"""
+  createRegion(input: CreateRegionInput!): AdminRegionType!
+
+  """إنشاء خدمة جديدة"""
+  createService(input: CreateServiceInput!): AdminServiceType!
+
+  """إلغاء طلب قسراً"""
+  forceCancel(id: Int!): AdminOrderType!
+
+  """تفعيل/تعطيل منطقة"""
+  toggleRegionEnabled(id: Int!): AdminRegionType!
+
+  """تفعيل/تعطيل خدمة"""
+  toggleServiceEnabled(id: Int!): AdminServiceType!
+
+  """رفع الحظر عن سائق"""
+  unbanDriver(id: Int!): AdminDriverType!
+
+  """رفع الحظر عن راكب"""
+  unbanRider(id: Int!): AdminRiderType!
+
+  """تحديث إعداد التطبيق (SDUI)"""
+  updateAppConfig(configKey: String!, input: UpdateAppConfigInput!): AppConfigType!
+
+  """تحديث منطقة"""
+  updateRegion(id: Int!, input: UpdateRegionInput!): AdminRegionType!
+
+  """تحديث خدمة"""
+  updateService(id: Int!, input: UpdateServiceInput!): AdminServiceType!
+}
+
+type OrderListResult {
+  items: [AdminOrderType!]!
+  limit: Int!
+  page: Int!
+  total: Int!
+}
+
+type Query {
+  """بيانات سائق"""
+  adminGetDriver(id: Int!): AdminDriverType!
+
+  """بيانات راكب"""
+  adminGetRider(id: Int!): AdminRiderType!
+
+  """قائمة السائقين"""
+  adminListDrivers(limit: Int! = 20, page: Int! = 1, pendingOnly: Boolean! = false): DriverListResult!
+
+  """قائمة الركاب"""
+  adminListRiders(limit: Int! = 20, page: Int! = 1): RiderListResult!
+
+  """طلب بالمعرّف"""
+  adminOrder(id: Int!): AdminOrderType!
+
+  """قائمة الطلبات"""
+  adminOrders(driverId: Int, limit: Int! = 20, page: Int! = 1, riderId: Int, status: String): OrderListResult!
+
+  """منطقة بالمعرّف"""
+  adminRegion(id: Int!): AdminRegionType!
+
+  """قائمة المناطق"""
+  adminRegions: [AdminRegionType!]!
+
+  """خدمة بالمعرّف"""
+  adminService(id: Int!): AdminServiceType!
+
+  """قائمة الخدمات"""
+  adminServices(regionId: Int): [AdminServiceType!]!
+
+  """إعداد تطبيق بالمفتاح"""
+  appConfig(configKey: String!): AppConfigType!
+
+  """قائمة إعدادات التطبيق"""
+  appConfigs: [AppConfigType!]!
+
+  """إحصائيات لوحة التحكم"""
+  dashboardStats: DashboardStats!
+
+  """إحصائيات الإيرادات اليومية"""
+  revenueStats(days: Int! = 30): [RevenueStats!]!
+}
+
+type RevenueStats {
+  date: DateTime!
+  orderCount: Int!
+  platformRevenue: Float!
+  revenue: Float!
+}
+
+type RiderListResult {
+  items: [AdminRiderType!]!
+  limit: Int!
+  page: Int!
+  total: Int!
+}
+
+input UpdateAppConfigInput {
+  featureFlags: JSON
+  homeScreenConfig: JSON
+  loyaltyConfig: JSON
+  themeConfig: JSON
+  version: String
+}
+
+input UpdateRegionInput {
+  bidModeEnabled: Boolean
+  boundary: JSON
+  currency: String
+  defaultSearchRadius: Int
+  enabled: Boolean
+  metroApiUrl: String
+  name: String
+  nameEn: String
+}
+
+input UpdateServiceInput {
+  availableTimeFrom: String
+  availableTimeTo: String
+  baseFare: Float
+  bidModeEnabled: Boolean
+  cancellationTotalFee: Float
+  dateRangeMultipliers: JSON
+  displayOrder: Int
+  enabled: Boolean
+  iconUrl: String
+  isVip: Boolean
+  minimumFee: Float
+  name: String
+  nameEn: String
+  perHundredMeters: Float
+  perMinuteDrive: Float
+  perMinuteWait: Float
+  providerSharePercent: Float
+  timeMultipliers: JSON
+  weekdayMultipliers: JSON
+}

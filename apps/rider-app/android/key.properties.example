@@ -1,0 +1,15 @@
+# HANCR Rider — Android signing keys
+# انسخ إلى key.properties (مُتجاهل في .gitignore — لا تَرفعه)
+#
+# لتوليد keystore:
+#   keytool -genkey -v -keystore ~/hancr-rider-release.jks \
+#           -keyalg RSA -keysize 2048 -validity 10000 \
+#           -alias hancr-rider
+#
+# احتفظ بالـ keystore في مكان آمن (1Password, AWS Secrets Manager, etc.)
+# لو فقدته → لا يمكنك push updates للتطبيق على Play Store!
+
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=hancr-rider
+storeFile=/path/to/hancr-rider-release.jks

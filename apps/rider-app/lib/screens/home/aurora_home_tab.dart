@@ -1,0 +1,276 @@
+import 'package:flutter/material.dart';
+import '../../core/widgets/aurora/aurora.dart';
+
+/// AuroraHomeTab — شاشة الراكب الرئيسية بالـ Aurora design.
+///
+/// مستوحاة من تصميمك:
+///  - Tab switcher (Rides / Delivery) في الأعلى
+///  - Search bar "Where to?"
+///  - Home/Work shortcuts
+///  - Suggestions grid (Ride, 2-Wheels, Package, Rental Cars) مع Promo badges
+///  - Large promo cards (Go in luxury, Ride in an EV)
+class AuroraHomeTab extends StatefulWidget {
+  const AuroraHomeTab({super.key});
+
+  @override
+  State<AuroraHomeTab> createState() => _AuroraHomeTabState();
+}
+
+class _AuroraHomeTabState extends State<AuroraHomeTab> {
+  int _tabIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return AuroraBackground(
+      child: SafeArea(
+        bottom: false,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.lg),
+          children: [
+            const SizedBox(height: AuroraSpacing.md),
+
+            // ─── Tab Switcher ───
+            AuroraTabSwitcher(
+              selectedIndex: _tabIndex,
+              onChanged: (i) => setState(() => _tabIndex = i),
+              tabs: const [
+                AuroraTabItem(icon: Icons.directions_car, label: 'رحلات'),
+                AuroraTabItem(icon: Icons.delivery_dining, label: 'توصيل'),
+              ],
+            ),
+
+            const SizedBox(height: AuroraSpacing.lg),
+
+            // ─── Search bar ───
+            AuroraSearchBar(
+              hint: 'إلى أين؟',
+              onTap: () {},
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AuroraSpacing.md, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AuroraColors.smoke,
+                  borderRadius: BorderRadius.circular(AuroraRadius.pill),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.schedule,
+                        color: AuroraColors.textPrimary, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      'الآن',
+                      style: AuroraText.bodySmall.copyWith(
+                          color: AuroraColors.textPrimary,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    const Icon(Icons.keyboard_arrow_down,
+                        color: AuroraColors.textPrimary, size: 18),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: AuroraSpacing.md),
+
+            // ─── Saved place shortcut ───
+            _savedPlaceRow(
+              icon: Icons.home_outlined,
+              title: 'المنزل',
+              subtitle: 'حي العليا، الرياض',
+              onTap: () {},
+            ),
+
+            const SizedBox(height: AuroraSpacing.xl),
+
+            // ─── Suggestions ───
+            _sectionHeader('اقتراحات', 'عرض الكل'),
+            const SizedBox(height: AuroraSpacing.md),
+            SizedBox(
+              height: 116,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  AuroraIconTile(
+                    icon: Icons.local_taxi,
+                    label: 'رحلة',
+                    onTap: () {},
+                    selected: true,
+                  ),
+                  const SizedBox(width: AuroraSpacing.sm),
+                  AuroraIconTile(
+                    icon: Icons.electric_scooter,
+                    label: 'دراجة',
+                    onTap: () {},
+                  ),
+                  const SizedBox(width: AuroraSpacing.sm),
+                  AuroraIconTile(
+                    icon: Icons.inventory_2_outlined,
+                    label: 'طرد',
+                    badge: 'Promo',
+                    onTap: () {},
+                  ),
+                  const SizedBox(width: AuroraSpacing.sm),
+                  AuroraIconTile(
+                    icon: Icons.car_rental,
+                    label: 'تأجير',
+                    onTap: () {},
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: AuroraSpacing.xl),
+
+            // ─── More ways ───
+            Text(
+              'طرق أخرى للتنقل',
+              style: AuroraText.titleMedium,
+            ),
+            const SizedBox(height: AuroraSpacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: AuroraPromoCard(
+                    title: 'سفر فاخر',
+                    subtitle: 'سيارات فخمة عالية الفئة',
+                    icon: Icons.diamond_outlined,
+                    onTap: () {},
+                    gradientColors: [
+                      AuroraColors.ember.withValues(alpha: 0.3),
+                      AuroraColors.coal,
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AuroraSpacing.md),
+                Expanded(
+                  child: AuroraPromoCard(
+                    title: 'كهربائية',
+                    subtitle: 'دلِّل نفسك بسيارة EV',
+                    icon: Icons.electric_car_outlined,
+                    onTap: () {},
+                    gradientColors: [
+                      AuroraColors.info.withValues(alpha: 0.3),
+                      AuroraColors.coal,
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: AuroraSpacing.xl),
+
+            // ─── Schedule card (يشبه "Ride on your schedule") ───
+            _scheduleCta(),
+
+            const SizedBox(height: AuroraSpacing.huge),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  Widget _sectionHeader(String title, String action) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title, style: AuroraText.titleMedium),
+        TextButton(
+          onPressed: () {},
+          child: Text(
+            action,
+            style: AuroraText.bodyMedium.copyWith(color: AuroraColors.ember),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _savedPlaceRow({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return AuroraCard(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AuroraSpacing.lg, vertical: AuroraSpacing.md),
+      onTap: onTap,
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AuroraColors.smoke,
+              borderRadius: BorderRadius.circular(AuroraRadius.sm),
+              boxShadow: AuroraShadows.iconGlow,
+            ),
+            child: Icon(icon, color: AuroraColors.ember, size: 20),
+          ),
+          const SizedBox(width: AuroraSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AuroraText.titleSmall),
+                const SizedBox(height: 2),
+                Text(subtitle, style: AuroraText.bodySmall),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _scheduleCta() {
+    return Container(
+      padding: const EdgeInsets.all(AuroraSpacing.lg),
+      decoration: BoxDecoration(
+        gradient: AuroraColors.emberGradient,
+        borderRadius: BorderRadius.circular(AuroraRadius.lg),
+        boxShadow: AuroraShadows.emberGlow,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'احجز رحلة\nبجدولك',
+                  style: AuroraText.titleMedium.copyWith(
+                    color: AuroraColors.pearl,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: AuroraSpacing.xs),
+                Text(
+                  'حدِّد موعداً مسبقاً لرحلتك',
+                  style: AuroraText.bodySmall.copyWith(
+                    color: AuroraColors.pearl.withValues(alpha: 0.85),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: AuroraColors.pearl.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.schedule,
+              color: AuroraColors.pearl,
+              size: 30,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
