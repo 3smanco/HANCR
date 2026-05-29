@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TrackingResolver } from './tracking.resolver';
+import { pubSubProvider } from '../pubsub.provider';
 
 /**
  * TrackingModule — subscription لتتبع موقع السائق (للراكب).
- *
- * يعتمد على `pubSubProvider` الـ Global في rider-api.module.ts.
  */
 @Module({
-  providers: [TrackingResolver],
+  providers: [TrackingResolver, pubSubProvider],
 })
 export class TrackingModule {}
