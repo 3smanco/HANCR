@@ -1,13 +1,18 @@
 import { InputType, ObjectType, Field, Int, Float } from '@nestjs/graphql';
-import { IsNumber } from 'class-validator';
+import { IsNumber, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { GeoPointInput } from './geo-point.input';
 
 @InputType()
 export class RoutePreviewInput {
   @Field(() => GeoPointInput)
+  @ValidateNested()
+  @Type(() => GeoPointInput)
   origin!: GeoPointInput;
 
   @Field(() => GeoPointInput)
+  @ValidateNested()
+  @Type(() => GeoPointInput)
   destination!: GeoPointInput;
 
   @Field(() => Int)
