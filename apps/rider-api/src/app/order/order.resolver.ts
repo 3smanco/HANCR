@@ -12,6 +12,7 @@ import { OrderService, ORDER_UPDATED } from './order.service';
 import { OrderType } from './dto/order.type';
 import { CreateOrderInput } from './dto/create-order.input';
 import { RateDriverInput } from './dto/rate-driver.input';
+import { RoutePreviewInput, RoutePreviewType } from './dto/route-preview.type';
 import { JwtAuthGuard, CurrentUser } from '../auth/jwt-auth.guard';
 import { AuthUser } from '../auth/jwt.strategy';
 import { PUB_SUB } from '../pubsub.provider';
@@ -22,6 +23,23 @@ export class OrderResolver {
     private readonly orderService: OrderService,
     @Inject(PUB_SUB) private readonly pubSub: RedisPubSub,
   ) {}
+
+  /**
+   * معاينة المسار — مسافة الطريق الفعلية والأجرة التقديرية قبل الطلب
+   */
+  @Query(() => RoutePreviewType, { description: 'معاينة المسافة والأجرة بالطريق' })
+  @UseGuards(JwtAuthGuard)
+  routePreview(
+    @CurrentUser() user: AuthUser,
+    @Args('input') input: RoutePreviewInput,
+  ): Promise<RoutePreviewType> {
+    return this.orderService.previewRoute(
+      user.riderId,
+      { lat: input.origin.lat, lng: input.origin.lng },
+      { lat: input.destination.lat, lng: input.destination.lng },
+      input.serviceId,
+    );
+  }
 
   /**
    * إنشاء طلب رحلة جديد

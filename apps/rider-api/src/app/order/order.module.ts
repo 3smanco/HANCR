@@ -10,6 +10,7 @@ import {
 import { OrderService } from './order.service';
 import { OrderResolver } from './order.resolver';
 import { MatchingService } from './matching.service';
+import { DirectionsService } from './directions.service';
 import { pubSubProvider } from '../pubsub.provider';
 
 @Module({
@@ -26,6 +27,7 @@ import { pubSubProvider } from '../pubsub.provider';
     OrderService,
     OrderResolver,
     MatchingService,
+    DirectionsService,
     pubSubProvider,
   ],
   exports: [OrderService, MatchingService],

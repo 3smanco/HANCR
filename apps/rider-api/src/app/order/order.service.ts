@@ -27,6 +27,7 @@ import { CreateOrderInput } from './dto/create-order.input';
 import { RateDriverInput } from './dto/rate-driver.input';
 import { OrderType as OrderGqlType } from './dto/order.type';
 import { MatchingService } from './matching.service';
+import { DirectionsService } from './directions.service';
 
 // GraphQL Subscription events
 export const ORDER_UPDATED = 'ORDER_UPDATED';
@@ -54,6 +55,7 @@ export class OrderService {
 
     private readonly orderRedis: OrderRedisService,
     private readonly matchingService: MatchingService,
+    private readonly directionsService: DirectionsService,
     private readonly dataSource: DataSource,
     private readonly pushNotifications: PushNotificationService,
 
@@ -90,11 +92,12 @@ export class OrderService {
     });
     if (!service) throw new NotFoundException('Service not found');
 
-    // حساب المسافة والمدة (مبدئياً من الإحداثيات)
+    // حساب مسافة الطريق الفعلية ومدتها عبر Google Directions (مع احتياط haversine)
     const originPoint = input.points[0];
     const destPoint = input.points[input.points.length - 1];
-    const distanceMeters = this.estimateDistance(originPoint, destPoint);
-    const durationSeconds = Math.ceil(distanceMeters / 8); // ~30 كم/ساعة
+    const route = await this.directionsService.getRoute(originPoint, destPoint);
+    const distanceMeters = route.distanceMeters;
+    const durationSeconds = route.durationSeconds;
 
     // حساب السعر (baseFare + perHundredMeters→perKm + perMinuteDrive)
     const costBest = this.matchingService.estimateFare(
@@ -302,6 +305,47 @@ export class OrderService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  // =============================================
+  // previewRoute — معاينة المسافة والأجرة قبل الطلب (مسافة بالطريق)
+  // =============================================
+  async previewRoute(
+    riderId: number,
+    origin: { lat: number; lng: number },
+    destination: { lat: number; lng: number },
+    serviceId: number,
+  ): Promise<{
+    distanceMeters: number;
+    durationSeconds: number;
+    estimatedFare: number;
+    currency: string;
+    polyline?: string;
+  }> {
+    const service = await this.serviceRepo.findOne({
+      where: { id: serviceId },
+    });
+    if (!service) throw new NotFoundException('Service not found');
+
+    const route = await this.directionsService.getRoute(origin, destination);
+
+    const estimatedFare = this.matchingService.estimateFare(
+      route.distanceMeters,
+      route.durationSeconds,
+      Number(service.baseFare),
+      Number(service.perHundredMeters) * 10,
+      Number(service.perMinuteDrive),
+    );
+
+    const rider = await this.riderRepo.findOne({ where: { id: riderId } });
+
+    return {
+      distanceMeters: route.distanceMeters,
+      durationSeconds: route.durationSeconds,
+      estimatedFare: Math.round(estimatedFare * 100) / 100,
+      currency: rider?.currency ?? 'SAR',
+      polyline: route.polyline,
+    };
   }
 
   // =============================================

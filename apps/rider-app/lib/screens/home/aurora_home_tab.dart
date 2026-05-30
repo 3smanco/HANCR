@@ -192,7 +192,67 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
             // ─── Schedule card (يشبه "Ride on your schedule") ───
             _scheduleCta(),
 
-            const SizedBox(height: AuroraSpacing.huge),
+            const SizedBox(height: AuroraSpacing.xl),
+
+            // ─── Offers section ───
+            _sectionHeader('العروض والتخفيضات', 'عرض الكل'),
+            const SizedBox(height: AuroraSpacing.md),
+            SizedBox(
+              height: 120,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _offerCard('خصم 25٪', 'لأول رحلة — كود WELCOME',
+                      Icons.local_offer, AuroraColors.ember),
+                  const SizedBox(width: AuroraSpacing.md),
+                  _offerCard('عطلة نهاية الأسبوع', 'وفّر 15٪ الجمعة والسبت',
+                      Icons.weekend, AuroraColors.info),
+                  const SizedBox(width: AuroraSpacing.md),
+                  _offerCard('رحلات ليلية', 'أسعار مخفّضة بعد منتصف الليل',
+                      Icons.nightlight_round, AuroraColors.gold),
+                ],
+              ),
+            ),
+
+            // مساحة سفلية تكفي لتجاوز شريط التنقل العائم
+            const SizedBox(height: 120),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _offerCard(String title, String subtitle, IconData icon, Color color) {
+    return GestureDetector(
+      onTap: () => _open(context, const OffersScreen()),
+      child: Container(
+        width: 240,
+        padding: const EdgeInsets.all(AuroraSpacing.lg),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [color.withValues(alpha: 0.28), AuroraColors.coal],
+          ),
+          borderRadius: BorderRadius.circular(AuroraRadius.lg),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AuroraText.titleSmall),
+                  const SizedBox(height: 4),
+                  Text(subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AuroraText.bodySmall),
+                ],
+              ),
+            ),
+            const SizedBox(width: AuroraSpacing.sm),
+            Icon(icon, color: color, size: 32),
           ],
         ),
       ),
