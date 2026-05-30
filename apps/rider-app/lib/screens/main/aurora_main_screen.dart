@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../home/aurora_home_tab.dart';
 import '../rides/rides_tab.dart';
@@ -43,26 +44,26 @@ class _AuroraMainScreenState extends State<AuroraMainScreen> {
             ),
           );
         },
-        items: const [
+        items: [
           AuroraNavItem(
             icon: Icons.home_outlined,
             activeIcon: Icons.home,
-            label: 'الرئيسية',
+            label: tr('nav_home'),
           ),
           AuroraNavItem(
             icon: Icons.grid_view_outlined,
             activeIcon: Icons.grid_view,
-            label: 'الخدمات',
+            label: tr('nav_services'),
           ),
           AuroraNavItem(
             icon: Icons.receipt_long_outlined,
             activeIcon: Icons.receipt_long,
-            label: 'النشاط',
+            label: tr('nav_activity'),
           ),
           AuroraNavItem(
             icon: Icons.person_outline,
             activeIcon: Icons.person,
-            label: 'حسابي',
+            label: tr('nav_account'),
           ),
         ],
       ),

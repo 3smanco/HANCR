@@ -13,6 +13,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/models/order_model.dart';
 import '../../core/models/service_model.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
 /// AuroraBookingScreen — قلب تجربة الراكب: تحديد الوجهة + اختيار الخدمة + الطلب.
@@ -46,8 +47,8 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
       const GeoPoint(lat: AppConfig.defaultLat, lng: AppConfig.defaultLng);
   GeoPoint _destination =
       const GeoPoint(lat: AppConfig.defaultLat, lng: AppConfig.defaultLng);
-  String _originLabel = 'موقعي الحالي';
-  String _destinationLabel = 'حرِّك الخريطة لتحديد وجهتك';
+  String _originLabel = tr('myLocation');
+  String _destinationLabel = tr('moveMapHint');
 
   _BookingStep _step = _BookingStep.pickDestination;
 
@@ -417,7 +418,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           _routeRow(Icons.location_on, AuroraColors.ember, _destinationLabel),
           const SizedBox(height: AuroraSpacing.lg),
           AuroraButton.primary(
-            label: 'تأكيد الوجهة',
+            label: tr('confirmDestination'),
             icon: Icons.check,
             onPressed: _confirmDestination,
           ),
@@ -450,7 +451,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('اختر فئة الرحلة', style: AuroraText.titleMedium),
+          Text(tr('chooseRideType'), style: AuroraText.titleMedium),
           const SizedBox(height: 4),
           Row(
             children: [
@@ -458,7 +459,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               const SizedBox(width: 4),
               Text(
                 _loadingRoute
-                    ? 'جارٍ حساب المسار...'
+                    ? tr('calculatingRoute')
                     : _routeDistanceM != null
                         ? 'المسافة ${(_routeDistanceM! / 1000).toStringAsFixed(1)} كم • ${(_routeDurationS! / 60).ceil()} دقيقة (بالطريق)'
                         : 'المسافة ~${_distanceKm().toStringAsFixed(1)} كم',
@@ -485,19 +486,19 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           Row(
             children: [
               Expanded(
-                child: _prefChip(Icons.volume_off, 'رحلة هادئة', _quietRide,
+                child: _prefChip(Icons.volume_off, tr('quietRide'), _quietRide,
                     () => setState(() => _quietRide = !_quietRide)),
               ),
               const SizedBox(width: AuroraSpacing.sm),
               Expanded(
-                child: _prefChip(Icons.music_off, 'بدون موسيقى', _audioOff,
+                child: _prefChip(Icons.music_off, tr('noMusic'), _audioOff,
                     () => setState(() => _audioOff = !_audioOff)),
               ),
             ],
           ),
           const SizedBox(height: AuroraSpacing.lg),
           AuroraButton.primary(
-            label: 'اطلب الآن',
+            label: tr('requestNow'),
             icon: Icons.local_taxi,
             loading: creating,
             onPressed: (_selectedService != null && !creating)

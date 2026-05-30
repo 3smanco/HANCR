@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/models/order_model.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import 'home_extras.dart';
@@ -39,9 +40,8 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('مرحباً بك 👋', style: AuroraText.bodySmall),
-                      Text('إلى أين تريد الذهاب؟',
-                          style: AuroraText.titleMedium),
+                      Text(tr('greeting'), style: AuroraText.bodySmall),
+                      Text(tr('whereToGo'), style: AuroraText.titleMedium),
                     ],
                   ),
                 ),
@@ -69,7 +69,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
 
             // ─── Search bar ───
             AuroraSearchBar(
-              hint: 'إلى أين؟',
+              hint: tr('whereTo'),
               onTap: () => context.push('/book'),
               trailing: Container(
                 padding: const EdgeInsets.symmetric(
@@ -85,7 +85,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                         color: AuroraColors.textPrimary, size: 16),
                     const SizedBox(width: 4),
                     Text(
-                      'الآن',
+                      tr('now'),
                       style: AuroraText.bodySmall.copyWith(
                           color: AuroraColors.textPrimary,
                           fontWeight: FontWeight.w600),
@@ -102,7 +102,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
             // ─── Saved place shortcut ───
             _savedPlaceRow(
               icon: Icons.home_outlined,
-              title: 'المنزل',
+              title: tr('homePlace'),
               subtitle: 'حي العليا، الرياض',
               onTap: () => context.push('/book', extra: {
                 'destination': const GeoPoint(lat: 24.6911, lng: 46.6850),
@@ -113,7 +113,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
             const SizedBox(height: AuroraSpacing.xl),
 
             // ─── Suggestions ───
-            _sectionHeader('اقتراحات', 'عرض الكل'),
+            _sectionHeader(tr('suggestions'), tr('viewAll')),
             const SizedBox(height: AuroraSpacing.md),
             SizedBox(
               height: 116,
@@ -122,28 +122,28 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                 children: [
                   AuroraIconTile(
                     icon: Icons.local_taxi,
-                    label: 'رحلة',
+                    label: tr('ride'),
                     onTap: () => context.push('/book'),
                     selected: true,
                   ),
                   const SizedBox(width: AuroraSpacing.sm),
                   AuroraIconTile(
                     icon: Icons.electric_scooter,
-                    label: 'دراجة',
-                    onTap: () => AuroraToast.comingSoon(context, feature: 'الدراجات'),
+                    label: tr('bike'),
+                    onTap: () => AuroraToast.comingSoon(context, feature: tr('bike')),
                   ),
                   const SizedBox(width: AuroraSpacing.sm),
                   AuroraIconTile(
                     icon: Icons.inventory_2_outlined,
-                    label: 'طرد',
+                    label: tr('parcel'),
                     badge: 'Promo',
-                    onTap: () => AuroraToast.comingSoon(context, feature: 'توصيل الطرود'),
+                    onTap: () => AuroraToast.comingSoon(context, feature: tr('parcel')),
                   ),
                   const SizedBox(width: AuroraSpacing.sm),
                   AuroraIconTile(
                     icon: Icons.car_rental,
-                    label: 'تأجير',
-                    onTap: () => AuroraToast.comingSoon(context, feature: 'تأجير السيارات'),
+                    label: tr('rental'),
+                    onTap: () => AuroraToast.comingSoon(context, feature: tr('rental')),
                   ),
                 ],
               ),
@@ -153,7 +153,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
 
             // ─── More ways ───
             Text(
-              'طرق أخرى للتنقل',
+              tr('otherWays'),
               style: AuroraText.titleMedium,
             ),
             const SizedBox(height: AuroraSpacing.md),
@@ -161,8 +161,8 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
               children: [
                 Expanded(
                   child: AuroraPromoCard(
-                    title: 'سفر فاخر',
-                    subtitle: 'سيارات فخمة عالية الفئة',
+                    title: tr('luxury'),
+                    subtitle: tr('luxurySub'),
                     icon: Icons.diamond_outlined,
                     onTap: () => context.push('/book'),
                     gradientColors: [
@@ -174,8 +174,8 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                 const SizedBox(width: AuroraSpacing.md),
                 Expanded(
                   child: AuroraPromoCard(
-                    title: 'كهربائية',
-                    subtitle: 'دلِّل نفسك بسيارة EV',
+                    title: tr('electric'),
+                    subtitle: tr('electricSub'),
                     icon: Icons.electric_car_outlined,
                     onTap: () => context.push('/book'),
                     gradientColors: [
@@ -195,7 +195,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
             const SizedBox(height: AuroraSpacing.xl),
 
             // ─── Offers section ───
-            _sectionHeader('العروض والتخفيضات', 'عرض الكل'),
+            _sectionHeader(tr('offers'), tr('viewAll')),
             const SizedBox(height: AuroraSpacing.md),
             SizedBox(
               height: 120,
@@ -355,7 +355,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'احجز رحلة\nبجدولك',
+                  tr('scheduleTitle'),
                   style: AuroraText.titleMedium.copyWith(
                     color: AuroraColors.pearl,
                     height: 1.2,
@@ -363,7 +363,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                 ),
                 const SizedBox(height: AuroraSpacing.xs),
                 Text(
-                  'حدِّد موعداً مسبقاً لرحلتك',
+                  tr('scheduleSub'),
                   style: AuroraText.bodySmall.copyWith(
                     color: AuroraColors.pearl.withValues(alpha: 0.85),
                   ),

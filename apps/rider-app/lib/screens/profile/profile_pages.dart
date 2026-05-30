@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/rider/rider_bloc.dart';
 import '../../blocs/rider/rider_event.dart';
 import '../../blocs/rider/rider_state.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
 /// Scaffold موحّد لصفحات الحساب الفرعية بنمط Aurora.
@@ -310,26 +311,45 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notif = true;
   bool _promo = true;
-  bool _arabic = true;
 
   @override
   Widget build(BuildContext context) {
     return _AuroraPage(
-      title: 'الإعدادات',
+      title: tr('settings'),
       child: ListView(
         padding: const EdgeInsets.all(AuroraSpacing.lg),
         children: [
-          _sectionLabel('التنبيهات'),
-          _switchRow('إشعارات الرحلات', _notif, (v) => setState(() => _notif = v)),
-          _switchRow('عروض وتخفيضات', _promo, (v) => setState(() => _promo = v)),
+          _sectionLabel(tr('notifications')),
+          _switchRow(tr('rideNotifs'), _notif, (v) => setState(() => _notif = v)),
+          _switchRow(tr('promoNotifs'), _promo, (v) => setState(() => _promo = v)),
           const SizedBox(height: AuroraSpacing.lg),
-          _sectionLabel('اللغة'),
-          _switchRow('العربية', _arabic, (v) => setState(() => _arabic = v)),
+          _sectionLabel(tr('language')),
+          // مبدّل اللغة
+          Container(
+            margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
+            decoration: BoxDecoration(
+              color: AuroraColors.ash,
+              borderRadius: BorderRadius.circular(AuroraRadius.md),
+              border: Border.all(color: AuroraColors.border),
+            ),
+            child: ListTile(
+              leading: const Icon(Icons.translate, color: AuroraColors.ember),
+              title: Text(LocaleController.instance.currentLanguage.nativeName,
+                  style: AuroraText.bodyMedium
+                      .copyWith(color: AuroraColors.pearl)),
+              trailing: const Icon(Icons.chevron_left,
+                  color: AuroraColors.textSecondary),
+              onTap: () async {
+                await Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const LanguageScreen()));
+                if (mounted) setState(() {});
+              },
+            ),
+          ),
           const SizedBox(height: AuroraSpacing.lg),
-          _sectionLabel('حول'),
-          _infoRow('الإصدار', '1.0.0'),
-          _infoRow('سياسة الخصوصية', 'hancr.com/privacy'),
-          _infoRow('شروط الاستخدام', 'hancr.com/terms'),
+          _sectionLabel(tr('about')),
+          _infoRow(tr('version'), '1.0.0'),
+          _infoRow('hancr.com', 'hancr.com'),
         ],
       ),
     );
@@ -377,6 +397,77 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Expanded(child: Text(label, style: AuroraText.bodyMedium)),
           Text(value, style: AuroraText.bodySmall),
         ],
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// 5) اختيار اللغة (8 لغات)
+// ════════════════════════════════════════════════════════════════
+class LanguageScreen extends StatefulWidget {
+  const LanguageScreen({super.key});
+  @override
+  State<LanguageScreen> createState() => _LanguageScreenState();
+}
+
+class _LanguageScreenState extends State<LanguageScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final current = LocaleController.instance.value.languageCode;
+    return _AuroraPage(
+      title: tr('selectLanguage'),
+      child: ListView(
+        padding: const EdgeInsets.all(AuroraSpacing.lg),
+        children: kSupportedLanguages.map((lang) {
+          final selected = lang.code == current;
+          return GestureDetector(
+            onTap: () async {
+              await LocaleController.instance.setLanguage(lang.code);
+              if (context.mounted) setState(() {});
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
+              padding: const EdgeInsets.all(AuroraSpacing.md),
+              decoration: BoxDecoration(
+                color: selected ? AuroraColors.smoke : AuroraColors.ash,
+                borderRadius: BorderRadius.circular(AuroraRadius.md),
+                border: Border.all(
+                  color: selected ? AuroraColors.ember : AuroraColors.border,
+                  width: selected ? 1.5 : 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AuroraColors.coal,
+                      borderRadius: BorderRadius.circular(AuroraRadius.sm),
+                    ),
+                    child: Text(lang.code.toUpperCase().substring(0, 2),
+                        style: AuroraText.caption
+                            .copyWith(color: AuroraColors.ember)),
+                  ),
+                  const SizedBox(width: AuroraSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(lang.nativeName, style: AuroraText.titleSmall),
+                        Text(lang.englishName, style: AuroraText.caption),
+                      ],
+                    ),
+                  ),
+                  if (selected)
+                    const Icon(Icons.check_circle, color: AuroraColors.ember),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

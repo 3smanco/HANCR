@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # GraphQL (HTTP + WebSocket Subscriptions)
   graphql_flutter: ^5.1.2
@@ -49,7 +51,7 @@ dependencies:
   permission_handler: ^11.3.1
 
   # Utils
-  intl: ^0.19.0
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
