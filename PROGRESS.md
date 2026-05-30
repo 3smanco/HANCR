@@ -1,6 +1,52 @@
 # HANCR — سجل التقدم
 
-## آخر تحديث: 2026-05-27 (جلسة 4)
+## آخر تحديث: 2026-05-30 (جلسة 6 — إصلاح جذري + اختبار E2E)
+
+---
+
+## ✅ Phase 6 — حل المشاكل من الجذور + اختبار الرحلة الكامل (جلسة 6)
+
+### 6.1 — السبب الجذري: Redis NOAUTH (createOrder كان يفشل)
+**المشكلة:** `createOrder` يفشل بـ `Transaction is not started yet`. السبب الفعلي في السجلات: `[ioredis] NOAUTH Authentication required` متكرر.
+**الجذر:** `pubsub.provider.ts` في rider-api و driver-api ينشئ `new IORedis({host, port})` **بدون** `password`، بينما Redis يعمل بـ `--requirepass`.
+**الإصلاح:** أضفت `password: process.env['REDIS_PASSWORD']` لكل اتصالات IORedis في:
+- `apps/rider-api/src/app/pubsub.provider.ts`
+- `apps/driver-api/src/app/pubsub.provider.ts`
+- (`libs/sos/src/lib/sos.service.ts` و `libs/redis/redis.module.ts` كانا سليمين أصلاً)
+**النتيجة:** ✅ لا أخطاء NOAUTH بعد إعادة التشغيل — أكّدت السجلات النظيفة.
+
+### 6.2 — اختبار تدفق الرحلة الكامل عبر API (الإنتاج)
+سكربت `scripts/test-ride-flow.sh` — اختبار E2E على api.hancr.com:
+1. دخول راكب (OTP 123456) ✅
+2. دخول سائق (OTP 123456) ✅
+3. updateLocation + goOnline ✅
+4. createOrder → **Found** (31.74 SAR، السائق على بُعد) ✅
+5. acceptOrder → **DriverAccepted** ✅
+6. arrivedAtPickup → **Arrived** ✅
+7. startRide → **Started** ✅
+8. finishRide → **WaitingForReview** ✅
+9. activeOrder للراكب يعرض اسم السائق ✅
+**النتيجة:** ✅ دورة الرحلة الكاملة تعمل من الطلب حتى الإنهاء.
+
+### 6.3 — OTP من 6 خانات (متطابق)
+- الباكند (rider + driver) يولّد 6 أرقام؛ أرقام تجريبية = `123456`.
+- شاشة OTP في كلا التطبيقين `length: 6` — متطابقة. ✅
+- إصلاح rider verifyOtp: الحقل `code` داخل `input` (كان `otp`). ✅
+
+### 6.4 — الشاشة السوداء (حل جذري)
+- تحليل: تثبيت جديد → splash (يعرض اللوجو) → `/auth/phone` (واجهة Aurora نقية بلا اعتماد شبكة/خريطة). الشاشة السوداء كانت من APK قديم.
+- **حماية جذرية:** أضفت `ErrorWidget.builder` مخصص + `runZonedGuarded` في `main.dart` لكلا التطبيقين — أي خطأ يعرض رسالة مرئية بدل شاشة سوداء صامتة.
+- (المحاكي على جهاز التطوير يموت من نفاد الذاكرة — قيد موثّق؛ الاعتماد على تحليل الكود + الحماية الجديدة + نجاح API الدخول.)
+
+### 6.5 — APKs جديدة منشورة
+- rider: 22.9MB (arm64, ENV=production) → `https://hancr.com/downloads/hancr-rider.apk` ✅
+- driver: 22.7MB → `https://hancr.com/downloads/hancr-driver.apk` ✅
+
+### 6.6 — ألوان Aurora (لوحة التحكم + الهبوط) — مؤكَّدة في الإنتاج
+- CSS الهبوط: `ff7a1a` موجود، لا بقايا Twilight (لا 6c5ce7/0b1437). ✅
+- CSS لوحة التحكم: `0a0807` + `ff7a1a`، لا ألوان قديمة. ✅
+
+**الخطوة التالية المقترحة:** اختبار التطبيقات على جهاز فعلي (المحاكي يعاني OOM)، ثم الانتقال للمرحلة التالية.
 
 ---
 
@@ -493,11 +539,11 @@ mutation { adminLogin(email: "admin@hancr.com", password: "OS.009988.os") {
 - رسالة الإستجابة تذكر السبب الحقيقي للفشل
 
 ### الخطوة 8.2 — تحديث الـ env كامل
-- `JWT_SECRET=OS.009988.os` (موحَّد)
-- `TWILIO_ACCOUNT_SID=ACfd9c0c6704e82168a6a7aa6e4d8d5fcb`
-- `TWILIO_FROM_NUMBER=+16185434043`
+- `JWT_SECRET=<REDACTED>` (موحَّد — القيمة في .env على السيرفر فقط)
+- `TWILIO_ACCOUNT_SID=<REDACTED>`
+- `TWILIO_FROM_NUMBER=<REDACTED>`
 - `FIREBASE_PRIVATE_KEY_PATH=./secrets/firebase-adminsdk.json`
-- `FIREBASE_VAPID_KEY=BI76z26gTkR4PFqJ2FMPL7om64VX4GCfauHJyZiFE-DvxzTTvPYujzhrLJ-RwYPOvtupGkBUIci20bMBouqHkNg`
+- `FIREBASE_VAPID_KEY=<REDACTED>`
 
 ### الخطوة 8.3 — ترجمة كاملة لـ admin-panel (Arabic + English)
 **النتيجة:** ✅ 0 TS errors — كل صفحة تستخدم `useT()`
