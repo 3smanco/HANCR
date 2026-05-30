@@ -1,6 +1,15 @@
 # HANCR — سجل التقدم
 
-## آخر تحديث: 2026-05-30 (جلسة 9 — بناء تفاعلية تطبيق الراكب)
+## آخر تحديث: 2026-05-31 (جلسة 10 — تحسينات الراكب: تخطيط/مسافة/لغات)
+
+---
+
+## ✅ Phase 10 — طلبات المستخدم الأربعة (جلسة 10)
+1. **أسفل الرئيسية:** زيادة المساحة السفلية (120px) لتجاوز الـ bottom nav العائم + **قسم عروض أفقي** يربط بصفحة العروض.
+2. **مسافة بالطريق:** تفعيل Google Directions API + مفتاح خادم `AIzaSyAk9Wgmb-cTgNA9xx2sfqOykx4KlrJ6pgI` (مقيّد بـ Directions/DistanceMatrix). `DirectionsService` في rider-api (مع احتياط haversine×1.3). `createOrder` يستخدم مسافة الطريق للأجرة. استعلام `routePreview` → التطبيق يعرض المسافة الحقيقية + الأجرة + **يرسم خط المسار (polyline)**. مؤكَّد: 7702م طريق مقابل 4754م خطي.
+   - **مهم:** المفتاح في `/opt/hancr/.env.prod` + ecosystem.config.js (rider-api env block: `GOOGLE_MAPS_API_KEY`). إعادة التشغيل تتطلب `set -a; . ./.env.prod; set +a; export DATABASE_HOST=localhost REDIS_HOST=localhost; pm2 restart ecosystem.config.js --only rider-api --update-env` (لأن .env.prod فيه hosts خاصة بـ Docker = postgres/redis، يجب تجاوزها لـ localhost لتطبيقات pm2).
+3. **تعدد اللغات:** نظام i18n كامل (`core/i18n/app_localization.dart`) — 8 لغات: عربي/إنجليزي/أردو/هندي/بنغالي/فلبيني/فرنسي/تركي. لغة الجهاز افتراضياً، مبدّل دائم (StorageService.saveLanguage)، RTL/LTR تلقائي عبر flutter_localizations. شاشة `LanguageScreen` في الإعدادات. تُرجمت نصوص: التنقل، الرئيسية، الحجز، الإعدادات (البقية تتوسّع تدريجياً عبر `tr('key')`).
+   - أُضيف `flutter_localizations` + رُفع `intl` لـ ^0.20.2.
 
 ---
 
