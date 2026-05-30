@@ -51,7 +51,7 @@ fi
 
 echo "════════════ 6) DRIVER acceptOrder #$ORDER_ID ════════════"
 curl -s -X POST $API/driver/graphql -H "Content-Type: application/json" -H "Authorization: Bearer $DTOKEN" \
-  -d "{\"query\":\"mutation{acceptOrder(orderId:$ORDER_ID){id status driverId}}\"}"
+  -d "{\"query\":\"mutation{acceptOrder(orderId:$ORDER_ID){id status riderName costBest currency}}\"}"
 echo ""
 
 echo "════════════ 7) DRIVER arrivedAtPickup ════════════"
