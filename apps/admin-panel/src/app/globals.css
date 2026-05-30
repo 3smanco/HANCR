@@ -12,7 +12,7 @@
   * { box-sizing: border-box; }
 
   body {
-    @apply text-pearl antialiased;
+    @apply antialiased; color: #FFF5EE;
     background-color: #0A0807;
     font-family: 'Inter', 'Cairo', system-ui, sans-serif;
   }
@@ -41,7 +41,7 @@
     border-color: #FF7A1A;
   }
   .card-dark {
-    @apply rounded-2xl shadow-card-lg text-pearl;
+    @apply rounded-2xl shadow-card-lg; color: #FFF5EE;
     background-color: #13100E;
   }
 
@@ -79,11 +79,11 @@
     background: linear-gradient(135deg, #FF7A1A, #E55F00);
   }
   .btn-secondary {
-    @apply btn text-pearl;
+    @apply btn; color: #FFF5EE;
     background-color: #2A2421;
   }
   .btn-outline {
-    @apply btn text-pearl;
+    @apply btn; color: #FFF5EE;
     background-color: #1F1A17;
     border: 2px solid rgba(255,255,255,0.15);
   }
@@ -103,8 +103,9 @@
   .btn-sm  { @apply px-3 py-1.5 text-xs rounded-lg; }
   .btn-lg  { @apply px-6 py-3 text-base; }
   .btn-icon {
-    @apply inline-flex items-center justify-center w-10 h-10 rounded-xl text-pearl transition-colors
+    @apply inline-flex items-center justify-center w-10 h-10 rounded-xl transition-colors
            disabled:opacity-40 disabled:cursor-not-allowed;
+    color: #FFF5EE;
     background-color: #1F1A17;
     border: 1px solid rgba(255,255,255,0.1);
   }
@@ -112,8 +113,9 @@
 
   /* ─── Forms ─── */
   .input {
-    @apply w-full px-4 py-2.5 rounded-xl text-sm text-pearl
+    @apply w-full px-4 py-2.5 rounded-xl text-sm
            focus:outline-none focus:ring-2 transition-all;
+    color: #FFF5EE;
     background-color: #1F1A17;
     border: 1px solid rgba(255,255,255,0.1);
   }
@@ -178,7 +180,7 @@
     background: linear-gradient(135deg, #FF7A1A, #E55F00);
   }
   .promo-navy {
-    @apply rounded-2xl px-5 py-4 text-pearl shadow-card-lg;
+    @apply rounded-2xl px-5 py-4 shadow-card-lg; color: #FFF5EE;
     background: linear-gradient(135deg, #1F1A17, #13100E);
   }
   .promo-gold {
@@ -202,6 +204,15 @@
 
 [dir='rtl'] .ltr { direction: ltr; }
 [dir='ltr'] .rtl { direction: rtl; }
+
+/* Aurora utility classes (للاستخدام المباشر في tsx) */
+.text-pearl  { color: #FFF5EE; }
+.text-ember  { color: #FF7A1A; }
+.text-muted  { color: #A89B96; }
+.bg-obsidian { background-color: #0A0807; }
+.bg-coal     { background-color: #13100E; }
+.bg-ash      { background-color: #1F1A17; }
+.bg-ember    { background-color: #FF7A1A; }
 
 /* ════════════════════════════════════════════════════════════
  * Aurora override — يحوّل كل Tailwind light classes تلقائياً
