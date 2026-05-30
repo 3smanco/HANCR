@@ -1,10 +1,11 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * HANCR Design System v2 — Tailwind config
+ * HANCR Aurora — Tailwind config
+ * Cinematic dark + ember glow (matches Flutter AuroraColors)
  *
- * Aligned 1:1 with Flutter HancrColors tokens
- * (see apps/rider-app/lib/core/theme/app_theme.dart)
+ * نُبقي نفس class names القديمة (hancr.*, sidebar.*) لكن بقيم Aurora
+ * → كل الـ components تتحوّل تلقائياً بدون تعديل.
  */
 const config: Config = {
   darkMode: 'class',
@@ -17,53 +18,66 @@ const config: Config = {
     extend: {
       colors: {
         hancr: {
-          // ── Brand Primary ──
-          navy:        '#22223B',
-          violet:      '#B048FF',
-          'violet-deep':  '#8B2EE6',
-          'violet-light': '#E9D5FF',
-          purple:      '#4A4E69',
-          cream:       '#F2E9E4',
+          // ── Brand Primary (Aurora) ──
+          navy:        '#0A0807',   // obsidian (كانت navy)
+          violet:      '#FF7A1A',   // ember (كانت violet) ← الأهم
+          'violet-deep':  '#E55F00', // ember-deep
+          'violet-light': '#6B3920', // ember-mute
+          purple:      '#A89B96',   // muted text
+          cream:       '#FFF5EE',   // pearl
           blush:       '#C9ADA7',
+
+          // surfaces الجديدة
+          obsidian:    '#0A0807',
+          coal:        '#13100E',
+          ash:         '#1F1A17',
+          smoke:       '#2A2421',
+          stone:       '#3D3530',
+          ember:       '#FF7A1A',
+          'ember-light': '#FF9D4D',
+          'ember-deep':  '#E55F00',
+          pearl:       '#FFF5EE',
+          muted:       '#A89B96',
+          hint:        '#6F635E',
 
           // ── Functional ──
           success:     '#10B981',
-          'success-bg': '#D1FAE5',
-          warning:     '#F59E0B',
-          'warning-bg': '#FEF3C7',
-          error:       '#EF4444',
-          'error-bg':  '#FEE2E2',
+          'success-bg': 'rgba(16,185,129,0.15)',
+          warning:     '#FFB547',
+          'warning-bg': 'rgba(255,181,71,0.15)',
+          error:       '#FF4D4D',
+          'error-bg':  'rgba(255,77,77,0.15)',
           info:        '#3B82F6',
-          'info-bg':   '#DBEAFE',
+          'info-bg':   'rgba(59,130,246,0.15)',
 
           // ── Status ──
           online:      '#10B981',
-          offline:     '#9CA3AF',
-          'in-ride':   '#B048FF',
-          pending:     '#F59E0B',
-          banned:      '#EF4444',
+          offline:     '#6F635E',
+          'in-ride':   '#FF7A1A',
+          pending:     '#FFB547',
+          banned:      '#FF4D4D',
 
           // ── Loyalty Tiers ──
           'tier-bronze':   '#CD7F32',
           'tier-silver':   '#C0C0C0',
-          'tier-gold':     '#D4AF37',
+          'tier-gold':     '#FFB547',
           'tier-platinum': '#8E9DAB',
-          'tier-diamond':  '#B048FF',
+          'tier-diamond':  '#FF9D4D',
 
-          // ── Legacy neon accents (kept for backward compat) ──
-          cyan:        '#00F5FF',
-          rose:        '#FF3D8B',
-          lime:        '#39FF14',
+          // ── Accents (mapped to warm) ──
+          cyan:        '#FF9D4D',
+          rose:        '#FF4D4D',
+          lime:        '#FFB547',
         },
-        // ── Sidebar (navy theme) ──
+        // ── Sidebar (Aurora dark) ──
         sidebar: {
-          bg:          '#22223B',
-          hover:       '#2d2d4e',
-          active:      '#4A4E69',
-          text:        '#F2E9E4',
-          muted:       '#9A8C98',
-          border:      'rgba(249,232,220,0.1)',
-          'accent':    '#B048FF',
+          bg:          '#13100E',   // coal
+          hover:       '#1F1A17',   // ash
+          active:      '#2A2421',   // smoke
+          text:        '#FFF5EE',   // pearl
+          muted:       '#A89B96',
+          border:      'rgba(255,255,255,0.1)',
+          accent:      '#FF7A1A',   // ember
         },
       },
       fontFamily: {
@@ -72,11 +86,13 @@ const config: Config = {
         display: ['Cairo', 'Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        card:       '0 1px 3px rgba(34,34,59,0.05), 0 1px 2px rgba(34,34,59,0.04)',
-        'card-lg':  '0 4px 16px rgba(34,34,59,0.08)',
-        'card-xl':  '0 8px 24px rgba(34,34,59,0.12)',
-        violet:     '0 4px 16px rgba(176,72,255,0.25)',
-        'violet-lg':'0 8px 24px rgba(176,72,255,0.35)',
+        card:       '0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3)',
+        'card-lg':  '0 4px 16px rgba(0,0,0,0.5)',
+        'card-xl':  '0 8px 24px rgba(0,0,0,0.6)',
+        violet:     '0 0 24px -2px rgba(255,122,26,0.4)',   // ember glow
+        'violet-lg':'0 0 40px 2px rgba(255,122,26,0.35)',
+        ember:      '0 0 24px -2px rgba(255,122,26,0.4)',
+        'ember-lg': '0 0 40px 2px rgba(255,122,26,0.35)',
       },
       borderRadius: {
         DEFAULT: '12px',
@@ -87,14 +103,15 @@ const config: Config = {
         '2xl': '24px',
       },
       animation: {
-        'pulse-violet': 'pulseViolet 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'pulse-violet': 'pulseEmber 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'pulse-ember':  'pulseEmber 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'slide-up':     'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         'fade-in':      'fadeIn 0.2s ease-out',
       },
       keyframes: {
-        pulseViolet: {
-          '0%, 100%': { boxShadow: '0 0 0 0 rgba(176,72,255,0.6)' },
-          '50%':      { boxShadow: '0 0 0 12px rgba(176,72,255,0)' },
+        pulseEmber: {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(255,122,26,0.6)' },
+          '50%':      { boxShadow: '0 0 0 12px rgba(255,122,26,0)' },
         },
         slideUp: {
           '0%':   { transform: 'translateY(8px)', opacity: '0' },

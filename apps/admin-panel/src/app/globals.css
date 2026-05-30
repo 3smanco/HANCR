@@ -5,59 +5,68 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800&display=swap');
 
 /* ============================================================
- * HANCR Design System v2 — Admin Panel
+ * HANCR Aurora — Admin Panel (cinematic dark + ember glow)
  * ============================================================ */
 
 @layer base {
   * { box-sizing: border-box; }
 
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply text-pearl antialiased;
+    background-color: #0A0807;
     font-family: 'Inter', 'Cairo', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight text-gray-900;
+    @apply font-bold tracking-tight;
+    color: #FFF5EE;
   }
 }
 
 @layer components {
-  /* ─── Cards ─── */
+  /* ─── Cards (Aurora dark) ─── */
   .card {
-    @apply bg-white rounded-2xl border border-gray-100 shadow-card;
+    @apply rounded-2xl border shadow-card;
+    background-color: #1F1A17;
+    border-color: rgba(255,255,255,0.1);
   }
   .card-elevated {
-    @apply bg-white rounded-2xl shadow-card-lg;
+    @apply rounded-2xl shadow-card-lg;
+    background-color: #1F1A17;
+    border: 1px solid rgba(255,255,255,0.1);
   }
   .card-selected {
-    @apply bg-white rounded-2xl border-2 border-hancr-violet shadow-violet;
+    @apply rounded-2xl border-2 shadow-violet;
+    background-color: #1F1A17;
+    border-color: #FF7A1A;
   }
   .card-dark {
-    @apply bg-hancr-navy text-white rounded-2xl shadow-card-lg;
+    @apply rounded-2xl shadow-card-lg text-pearl;
+    background-color: #13100E;
   }
 
   /* ─── Badges (pill) ─── */
   .badge {
     @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold;
   }
-  .badge-green   { @apply bg-emerald-50 text-emerald-700; }
-  .badge-red     { @apply bg-red-50 text-red-700; }
-  .badge-yellow  { @apply bg-amber-50 text-amber-700; }
-  .badge-blue    { @apply bg-blue-50 text-blue-700; }
-  .badge-gray    { @apply bg-gray-100 text-gray-700; }
-  .badge-purple  { @apply bg-purple-50 text-hancr-violet-deep; }
-  .badge-violet  { @apply bg-hancr-violet-light text-hancr-violet-deep; }
-  .badge-navy    { @apply bg-hancr-navy text-white; }
+  .badge-green   { background: rgba(16,185,129,0.15); color: #34D399; }
+  .badge-red     { background: rgba(255,77,77,0.15); color: #FF6B6B; }
+  .badge-yellow  { background: rgba(255,181,71,0.15); color: #FFB547; }
+  .badge-blue    { background: rgba(59,130,246,0.15); color: #60A5FA; }
+  .badge-gray    { background: rgba(255,255,255,0.08); color: #A89B96; }
+  .badge-purple  { background: rgba(255,122,26,0.15); color: #FF9D4D; }
+  .badge-violet  { background: rgba(255,122,26,0.15); color: #FF9D4D; }
+  .badge-navy    { background: #13100E; color: #FFF5EE; }
 
   /* ─── Tier badges (gradient) ─── */
   .badge-tier {
     @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold text-white shadow-sm;
   }
-  .badge-tier-bronze   { @apply badge-tier bg-gradient-to-br from-hancr-tier-bronze to-amber-700; }
-  .badge-tier-silver   { @apply badge-tier bg-gradient-to-br from-hancr-tier-silver to-gray-500; }
-  .badge-tier-gold     { @apply badge-tier bg-gradient-to-br from-hancr-tier-gold to-yellow-600; }
-  .badge-tier-platinum { @apply badge-tier bg-gradient-to-br from-hancr-tier-platinum to-slate-600; }
-  .badge-tier-diamond  { @apply badge-tier bg-gradient-to-br from-hancr-violet to-hancr-violet-deep; }
+  .badge-tier-bronze   { @apply badge-tier; background: linear-gradient(135deg, #CD7F32, #92400E); }
+  .badge-tier-silver   { @apply badge-tier; background: linear-gradient(135deg, #C0C0C0, #6B7280); }
+  .badge-tier-gold     { @apply badge-tier; background: linear-gradient(135deg, #FFB547, #CA8A04); }
+  .badge-tier-platinum { @apply badge-tier; background: linear-gradient(135deg, #8E9DAB, #475569); }
+  .badge-tier-diamond  { @apply badge-tier; background: linear-gradient(135deg, #FF7A1A, #E55F00); }
 
   /* ─── Buttons ─── */
   .btn {
@@ -66,104 +75,179 @@
            active:scale-[0.98];
   }
   .btn-primary {
-    @apply btn bg-hancr-violet text-white hover:bg-hancr-violet-deep shadow-violet hover:shadow-violet-lg;
+    @apply btn text-white shadow-violet hover:shadow-violet-lg;
+    background: linear-gradient(135deg, #FF7A1A, #E55F00);
   }
   .btn-secondary {
-    @apply btn bg-hancr-navy text-white hover:bg-hancr-purple;
+    @apply btn text-pearl;
+    background-color: #2A2421;
   }
   .btn-outline {
-    @apply btn bg-white text-gray-800 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50;
+    @apply btn text-pearl;
+    background-color: #1F1A17;
+    border: 2px solid rgba(255,255,255,0.15);
   }
   .btn-ghost {
-    @apply btn bg-transparent text-hancr-violet hover:bg-hancr-violet-light;
+    @apply btn bg-transparent;
+    color: #FF7A1A;
   }
+  .btn-ghost:hover { background: rgba(255,122,26,0.12); }
   .btn-danger {
-    @apply btn bg-red-500 text-white hover:bg-red-600;
+    @apply btn text-white;
+    background-color: #FF4D4D;
   }
   .btn-success {
-    @apply btn bg-emerald-500 text-white hover:bg-emerald-600;
+    @apply btn text-white;
+    background-color: #10B981;
   }
   .btn-sm  { @apply px-3 py-1.5 text-xs rounded-lg; }
   .btn-lg  { @apply px-6 py-3 text-base; }
   .btn-icon {
-    @apply inline-flex items-center justify-center w-10 h-10 rounded-xl
-           border border-gray-200 bg-white text-gray-700
-           hover:bg-gray-50 hover:border-gray-300 transition-colors
+    @apply inline-flex items-center justify-center w-10 h-10 rounded-xl text-pearl transition-colors
            disabled:opacity-40 disabled:cursor-not-allowed;
+    background-color: #1F1A17;
+    border: 1px solid rgba(255,255,255,0.1);
   }
+  .btn-icon:hover { background-color: #2A2421; }
 
   /* ─── Forms ─── */
   .input {
-    @apply w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm
-           focus:outline-none focus:bg-white focus:ring-2 focus:ring-hancr-violet/30 focus:border-hancr-violet
-           placeholder:text-gray-400 transition-all
-           disabled:bg-gray-100 disabled:cursor-not-allowed;
+    @apply w-full px-4 py-2.5 rounded-xl text-sm text-pearl
+           focus:outline-none focus:ring-2 transition-all;
+    background-color: #1F1A17;
+    border: 1px solid rgba(255,255,255,0.1);
   }
+  .input:focus {
+    border-color: #FF7A1A;
+    --tw-ring-color: rgba(255,122,26,0.3);
+  }
+  .input::placeholder { color: #6F635E; }
   .label {
-    @apply block text-sm font-semibold text-gray-700 mb-1.5;
+    @apply block text-sm font-semibold mb-1.5;
+    color: #A89B96;
   }
   .help-text {
-    @apply text-xs text-gray-500 mt-1;
+    @apply text-xs mt-1;
+    color: #6F635E;
   }
 
   /* ─── Tables ─── */
   .table-container {
-    @apply overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-card;
+    @apply overflow-x-auto rounded-2xl shadow-card;
+    background-color: #1F1A17;
+    border: 1px solid rgba(255,255,255,0.1);
   }
   .table { @apply w-full text-sm; }
-  .table thead { @apply bg-gray-50/80; }
+  .table thead { background-color: #13100E; }
   .table th {
-    @apply px-4 py-3.5 text-start text-xs font-bold text-gray-500 uppercase tracking-wider;
+    @apply px-4 py-3.5 text-start text-xs font-bold uppercase tracking-wider;
+    color: #A89B96;
   }
   .table td {
-    @apply px-4 py-3.5 text-gray-800 border-t border-gray-50;
+    @apply px-4 py-3.5;
+    color: #F5EDE7;
+    border-top: 1px solid rgba(255,255,255,0.06);
   }
-  .table tbody tr {
-    @apply hover:bg-hancr-violet-light/30 transition-colors;
-  }
+  .table tbody tr { @apply transition-colors; }
+  .table tbody tr:hover { background: rgba(255,122,26,0.08); }
 
   /* ─── Stat tile (dashboard) ─── */
   .stat-tile {
     @apply card p-5 hover:shadow-card-lg transition-shadow cursor-default;
   }
   .stat-tile-label {
-    @apply text-xs font-bold text-gray-500 uppercase tracking-wider;
+    @apply text-xs font-bold uppercase tracking-wider;
+    color: #A89B96;
   }
   .stat-tile-value {
-    @apply text-3xl font-extrabold text-hancr-navy mt-1;
+    @apply text-3xl font-extrabold mt-1;
+    color: #FFF5EE;
   }
   .stat-tile-delta-up {
-    @apply inline-flex items-center gap-1 text-xs font-bold text-emerald-600;
+    @apply inline-flex items-center gap-1 text-xs font-bold;
+    color: #34D399;
   }
   .stat-tile-delta-down {
-    @apply inline-flex items-center gap-1 text-xs font-bold text-red-500;
+    @apply inline-flex items-center gap-1 text-xs font-bold;
+    color: #FF6B6B;
   }
 
   /* ─── Promo / hero banner ─── */
   .promo-violet {
-    @apply rounded-2xl px-5 py-4 text-white bg-gradient-to-r from-hancr-violet to-hancr-violet-deep shadow-violet;
+    @apply rounded-2xl px-5 py-4 text-white shadow-violet;
+    background: linear-gradient(135deg, #FF7A1A, #E55F00);
   }
   .promo-navy {
-    @apply rounded-2xl px-5 py-4 text-white bg-gradient-to-r from-hancr-navy to-hancr-purple shadow-card-lg;
+    @apply rounded-2xl px-5 py-4 text-pearl shadow-card-lg;
+    background: linear-gradient(135deg, #1F1A17, #13100E);
   }
   .promo-gold {
-    @apply rounded-2xl px-5 py-4 text-white bg-gradient-to-r from-amber-400 to-amber-600 shadow-card-lg;
+    @apply rounded-2xl px-5 py-4 text-white shadow-card-lg;
+    background: linear-gradient(135deg, #FFB547, #CA8A04);
   }
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { @apply bg-gray-300 rounded-full; }
-::-webkit-scrollbar-thumb:hover { @apply bg-gray-400; }
+::-webkit-scrollbar-thumb { background: #3D3530; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #4D4441; }
 
-/* Sidebar active indicator (used by Sidebar component) */
+/* Sidebar active indicator */
 .sidebar-item-active {
-  background: rgba(176, 72, 255, 0.12);
-  border-left: 3px solid #B048FF;
-  color: #ffffff !important;
+  background: rgba(255,122,26,0.15);
+  border-left: 3px solid #FF7A1A;
+  color: #FFF5EE !important;
 }
 
-/* RTL helpers (admin panel mostly LTR but Arabic strings may need RTL) */
 [dir='rtl'] .ltr { direction: ltr; }
 [dir='ltr'] .rtl { direction: rtl; }
+
+/* ════════════════════════════════════════════════════════════
+ * Aurora override — يحوّل كل Tailwind light classes تلقائياً
+ * (بدل تعديل 16 ملف يدوياً)
+ * ════════════════════════════════════════════════════════════ */
+
+/* Backgrounds: white/gray → Aurora dark surfaces */
+.bg-white        { background-color: #1F1A17 !important; }
+.bg-gray-50      { background-color: #13100E !important; }
+.bg-gray-100     { background-color: #2A2421 !important; }
+.bg-gray-200     { background-color: #3D3530 !important; }
+.bg-gray-50\/80  { background-color: #13100E !important; }
+.bg-gray-50\/30  { background-color: rgba(19,16,14,0.3) !important; }
+
+/* Text: dark grays → pearl/muted */
+.text-gray-900   { color: #FFF5EE !important; }
+.text-gray-800   { color: #F5EDE7 !important; }
+.text-gray-700   { color: #D9CFC8 !important; }
+.text-gray-600   { color: #A89B96 !important; }
+.text-gray-500   { color: #A89B96 !important; }
+.text-gray-400   { color: #6F635E !important; }
+
+/* Borders: light → subtle white */
+.border-gray-50  { border-color: rgba(255,255,255,0.06) !important; }
+.border-gray-100 { border-color: rgba(255,255,255,0.08) !important; }
+.border-gray-200 { border-color: rgba(255,255,255,0.12) !important; }
+.border-gray-300 { border-color: rgba(255,255,255,0.18) !important; }
+
+/* Hover states */
+.hover\:bg-gray-50:hover  { background-color: #2A2421 !important; }
+.hover\:bg-gray-100:hover { background-color: #2A2421 !important; }
+.hover\:border-gray-300:hover { border-color: rgba(255,255,255,0.2) !important; }
+
+/* Functional bg tints → dark variants */
+.bg-emerald-50 { background-color: rgba(16,185,129,0.15) !important; }
+.bg-red-50     { background-color: rgba(255,77,77,0.15) !important; }
+.bg-amber-50   { background-color: rgba(255,181,71,0.15) !important; }
+.bg-blue-50    { background-color: rgba(59,130,246,0.15) !important; }
+.bg-purple-50  { background-color: rgba(255,122,26,0.15) !important; }
+
+/* Functional text → brighter for dark bg */
+.text-emerald-700 { color: #34D399 !important; }
+.text-red-700     { color: #FF6B6B !important; }
+.text-amber-700   { color: #FFB547 !important; }
+.text-blue-700    { color: #60A5FA !important; }
+
+/* Login page often uses gradient backgrounds — keep ember */
+.from-hancr-violet { --tw-gradient-from: #FF7A1A !important; }
+.to-hancr-violet-deep { --tw-gradient-to: #E55F00 !important; }

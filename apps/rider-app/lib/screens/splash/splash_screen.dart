@@ -1,10 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/widgets/aurora/aurora.dart';
 
+/// SplashScreen — Aurora design (dark obsidian + ember glow).
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -49,55 +50,63 @@ class _SplashScreenState extends State<SplashScreen>
         }
       },
       child: Scaffold(
-        backgroundColor: HancrColors.primary,
-        body: Center(
-          child: FadeTransition(
-            opacity: _fadeAnim,
-            child: ScaleTransition(
-              scale: _scaleAnim,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Logo
-                  Container(
-                    width: 96,
-                    height: 96,
-                    decoration: BoxDecoration(
-                      color: HancrColors.accent,
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'H',
-                        style: TextStyle(
-                          fontSize: 52,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: -2,
+        backgroundColor: AuroraColors.obsidian,
+        body: AuroraBackground(
+          child: Center(
+            child: FadeTransition(
+              opacity: _fadeAnim,
+              child: ScaleTransition(
+                scale: _scaleAnim,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 96,
+                      height: 96,
+                      decoration: BoxDecoration(
+                        gradient: AuroraColors.emberGradient,
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: AuroraShadows.emberGlow,
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'H',
+                          style: TextStyle(
+                            fontSize: 52,
+                            fontWeight: FontWeight.w800,
+                            color: AuroraColors.pearl,
+                            letterSpacing: -2,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'HANCR',
-                    style: TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 6,
+                    const SizedBox(height: 24),
+                    Text(
+                      'HANCR',
+                      style: AuroraText.displayMedium.copyWith(
+                        color: AuroraColors.pearl,
+                        letterSpacing: 6,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Smart Mobility for MENA',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withValues(alpha: 0.6),
-                      letterSpacing: 1,
+                    const SizedBox(height: 8),
+                    Text(
+                      'Smart Mobility for MENA',
+                      style: AuroraText.bodySmall.copyWith(
+                        color: AuroraColors.textSecondary,
+                        letterSpacing: 1,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 40),
+                    const SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(AuroraColors.ember),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
