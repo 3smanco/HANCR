@@ -81,6 +81,24 @@
 
 ---
 
+## ✅ Phase 8 — إصلاح خطأين من المعاينة الفعلية (جلسة 8)
+
+### 8.1 — الراكب عالق على splash بعد إدخال الهاتف
+**الجذر:** في `app.dart` كان `redirect` يعامل `AuthLoading` (يحدث أثناء إرسال/تحقق OTP) كأنه بدء تطبيق فيقذف المستخدم لـ `/splash` ويعلق يدور.
+**الإصلاح:** فصل `AuthInitial` (بدء حقيقي → splash) عن `AuthLoading` (أثناء العمليات → يبقى في `/auth/*`).
+
+### 8.2 — السائق: الخريطة بيضاء
+**الجذر:** مفتاح Google Maps `AIza…Z3o` كان مُقيّداً بـ **referer (مواقع ويب)** — لا يعمل في Android SDK مطلقاً → خريطة بيضاء. كما أن "Maps SDK for Android" لم يكن مُفعّلاً.
+**الإصلاح (عبر gcloud):**
+- تفعيل `maps-android-backend.googleapis.com`.
+- إنشاء مفتاح جديد مقيّد بـ **Android apps**: `AIzaSyDTvp_NShN0LVoxH6N_F2b1cD_zrfFkX14`
+  - الحزم: `com.zancr.hancr_rider` + `com.zancr.hancr_driver`
+  - SHA-1 (debug keystore الحالي): `48:3B:B3:F2:50:4E:94:2B:7F:B1:D4:39:F1:B5:91:16:69:1B:CE:22`
+- استبدال المفتاح في manifest التطبيقين + إعادة بناء + نشر (تأكّد عبر aapt).
+**ملاحظة:** عند بناء release بـ keystore للنشر على Play Store، يجب إضافة SHA-1 الخاص به لنفس المفتاح.
+
+---
+
 ## ✅ Phase 4 — Design System v2 (جلسة 4)
 
 ### الخطوة 4.1 — تحليل مكتبة E:\UI (40+ ملف تصميم)
