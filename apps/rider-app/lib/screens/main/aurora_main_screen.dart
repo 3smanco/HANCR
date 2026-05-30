@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../home/aurora_home_tab.dart';
 import '../rides/rides_tab.dart';
@@ -138,12 +139,18 @@ class _ServicesTab extends StatelessWidget {
         childAspectRatio: 0.85,
       ),
       itemCount: items.length,
-      itemBuilder: (_, i) => AuroraIconTile(
+      itemBuilder: (ctx, i) => AuroraIconTile(
         icon: items[i].icon,
         label: items[i].label,
         badge: items[i].badge,
         size: 80,
-        onTap: () {},
+        onTap: () {
+          if (items[i].label == 'رحلة') {
+            ctx.push('/book');
+          } else {
+            AuroraToast.comingSoon(ctx, feature: items[i].label);
+          }
+        },
       ),
     );
   }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../core/models/order_model.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import 'home_extras.dart';
 
 /// AuroraHomeTab — شاشة الراكب الرئيسية بالـ Aurora design.
 ///
@@ -29,6 +32,29 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
           children: [
             const SizedBox(height: AuroraSpacing.md),
 
+            // ─── Header: greeting + offers + notifications ───
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('مرحباً بك 👋', style: AuroraText.bodySmall),
+                      Text('إلى أين تريد الذهاب؟',
+                          style: AuroraText.titleMedium),
+                    ],
+                  ),
+                ),
+                _headerIcon(Icons.local_offer_outlined,
+                    () => _open(context, const OffersScreen())),
+                const SizedBox(width: AuroraSpacing.sm),
+                _headerIcon(Icons.notifications_none,
+                    () => _open(context, const NotificationsScreen())),
+              ],
+            ),
+
+            const SizedBox(height: AuroraSpacing.lg),
+
             // ─── Tab Switcher ───
             AuroraTabSwitcher(
               selectedIndex: _tabIndex,
@@ -44,7 +70,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
             // ─── Search bar ───
             AuroraSearchBar(
               hint: 'إلى أين؟',
-              onTap: () {},
+              onTap: () => context.push('/book'),
               trailing: Container(
                 padding: const EdgeInsets.symmetric(
                     horizontal: AuroraSpacing.md, vertical: 6),
@@ -78,7 +104,10 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
               icon: Icons.home_outlined,
               title: 'المنزل',
               subtitle: 'حي العليا، الرياض',
-              onTap: () {},
+              onTap: () => context.push('/book', extra: {
+                'destination': const GeoPoint(lat: 24.6911, lng: 46.6850),
+                'label': 'المنزل — حي العليا، الرياض',
+              }),
             ),
 
             const SizedBox(height: AuroraSpacing.xl),
@@ -94,27 +123,27 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                   AuroraIconTile(
                     icon: Icons.local_taxi,
                     label: 'رحلة',
-                    onTap: () {},
+                    onTap: () => context.push('/book'),
                     selected: true,
                   ),
                   const SizedBox(width: AuroraSpacing.sm),
                   AuroraIconTile(
                     icon: Icons.electric_scooter,
                     label: 'دراجة',
-                    onTap: () {},
+                    onTap: () => AuroraToast.comingSoon(context, feature: 'الدراجات'),
                   ),
                   const SizedBox(width: AuroraSpacing.sm),
                   AuroraIconTile(
                     icon: Icons.inventory_2_outlined,
                     label: 'طرد',
                     badge: 'Promo',
-                    onTap: () {},
+                    onTap: () => AuroraToast.comingSoon(context, feature: 'توصيل الطرود'),
                   ),
                   const SizedBox(width: AuroraSpacing.sm),
                   AuroraIconTile(
                     icon: Icons.car_rental,
                     label: 'تأجير',
-                    onTap: () {},
+                    onTap: () => AuroraToast.comingSoon(context, feature: 'تأجير السيارات'),
                   ),
                 ],
               ),
@@ -135,7 +164,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                     title: 'سفر فاخر',
                     subtitle: 'سيارات فخمة عالية الفئة',
                     icon: Icons.diamond_outlined,
-                    onTap: () {},
+                    onTap: () => context.push('/book'),
                     gradientColors: [
                       AuroraColors.ember.withValues(alpha: 0.3),
                       AuroraColors.coal,
@@ -148,7 +177,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                     title: 'كهربائية',
                     subtitle: 'دلِّل نفسك بسيارة EV',
                     icon: Icons.electric_car_outlined,
-                    onTap: () {},
+                    onTap: () => context.push('/book'),
                     gradientColors: [
                       AuroraColors.info.withValues(alpha: 0.3),
                       AuroraColors.coal,
@@ -171,13 +200,37 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
   }
 
   // ─────────────────────────────────────────────────────────────
+  void _open(BuildContext context, Widget page) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+  }
+
+  Widget _headerIcon(IconData icon, VoidCallback onTap) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: AuroraColors.ash,
+        shape: BoxShape.circle,
+        border: Border.all(color: AuroraColors.border),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Icon(icon, color: AuroraColors.pearl, size: 20),
+        ),
+      ),
+    );
+  }
+
   Widget _sectionHeader(String title, String action) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(title, style: AuroraText.titleMedium),
         TextButton(
-          onPressed: () {},
+          onPressed: () => context.push('/book'),
           child: Text(
             action,
             style: AuroraText.bodyMedium.copyWith(color: AuroraColors.ember),
@@ -226,7 +279,9 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
   }
 
   Widget _scheduleCta() {
-    return Container(
+    return GestureDetector(
+      onTap: () => AuroraToast.comingSoon(context, feature: 'الحجز المسبق'),
+      child: Container(
       padding: const EdgeInsets.all(AuroraSpacing.lg),
       decoration: BoxDecoration(
         gradient: AuroraColors.emberGradient,
@@ -271,6 +326,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
           ),
         ],
       ),
+    ),
     );
   }
 }

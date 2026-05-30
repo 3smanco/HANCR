@@ -7,6 +7,13 @@ import '../../blocs/rider/rider_state.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../sos/aurora_emergency_contacts_screen.dart';
 import '../wallet/aurora_wallet_screen.dart';
+import '../rides/aurora_rides.dart';
+import '../loyalty/loyalty_tab.dart';
+import 'profile_pages.dart';
+
+void _open(BuildContext context, Widget page) {
+  Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+}
 
 /// AuroraProfileTab — مستوحاة من تصميمك:
 ///  - User card في الأعلى (avatar + name + email + crown + Edit/Add Device)
@@ -54,8 +61,7 @@ class AuroraProfileTab extends StatelessWidget {
                       child: _quickTile(
                         icon: Icons.support_agent_outlined,
                         label: 'مساعدة',
-                        onTap: () => AuroraToast.comingSoon(context,
-                            feature: 'مركز الدعم'),
+                        onTap: () => _open(context, const HelpCenterScreen()),
                       ),
                     ),
                     const SizedBox(width: AuroraSpacing.md),
@@ -74,8 +80,7 @@ class AuroraProfileTab extends StatelessWidget {
                       child: _quickTile(
                         icon: Icons.receipt_long_outlined,
                         label: 'النشاط',
-                        onTap: () => AuroraToast.comingSoon(context,
-                            feature: 'سجل الرحلات'),
+                        onTap: () => _open(context, const RidesHistoryScreen()),
                       ),
                     ),
                   ],
@@ -83,12 +88,24 @@ class AuroraProfileTab extends StatelessWidget {
 
                 const SizedBox(height: AuroraSpacing.lg),
 
+                // ─── HANCR Miles (الولاء) ───
+                _promoCard(
+                  title: 'HANCR Miles',
+                  subtitle: 'اطّلع على نقاطك ومستواك ومكافآتك',
+                  icon: Icons.military_tech,
+                  gradient: [AuroraColors.gold, AuroraColors.ember],
+                  onTap: () => _open(context, const LoyaltyTab()),
+                ),
+                const SizedBox(height: AuroraSpacing.md),
+
                 // ─── Promo cards ───
                 _promoCard(
                   title: 'جرِّب HANCR Premium مجاناً',
                   subtitle: 'احصل على 6% Cashback على رحلاتك وأكثر',
                   icon: Icons.workspace_premium,
                   gradient: [AuroraColors.ember, AuroraColors.emberDeep],
+                  onTap: () => AuroraToast.comingSoon(context,
+                      feature: 'اشتراك HANCR Premium'),
                 ),
                 const SizedBox(height: AuroraSpacing.md),
 
@@ -106,9 +123,10 @@ class AuroraProfileTab extends StatelessWidget {
                 const SizedBox(height: AuroraSpacing.md),
 
                 _simpleCard(
-                  title: 'فحص الخصوصية',
-                  subtitle: 'جولة تفاعلية لإعدادات خصوصيتك',
+                  title: 'الإعدادات والخصوصية',
+                  subtitle: 'التنبيهات، اللغة، الخصوصية، وحول التطبيق',
                   icon: Icons.shield_outlined,
+                  onTap: () => _open(context, const SettingsScreen()),
                 ),
                 const SizedBox(height: AuroraSpacing.md),
 
@@ -124,6 +142,7 @@ class AuroraProfileTab extends StatelessWidget {
                   title: 'ادعُ أصدقاءك',
                   subtitle: 'يحصل كلٌّ منكم على خصم 50٪ على رحلتين',
                   icon: Icons.card_giftcard,
+                  onTap: () => _open(context, const InviteFriendsScreen()),
                 ),
 
                 const SizedBox(height: AuroraSpacing.huge),
@@ -221,15 +240,13 @@ class AuroraProfileTab extends StatelessWidget {
                     _smallPill(
                       icon: Icons.edit_outlined,
                       label: 'تعديل',
-                      onTap: () => AuroraToast.comingSoon(context,
-                          feature: 'تعديل الملف الشخصي'),
+                      onTap: () => _open(context, const EditProfileScreen()),
                     ),
                     const SizedBox(width: AuroraSpacing.sm),
                     _smallPill(
-                      icon: Icons.add_circle_outline,
-                      label: 'إضافة جهاز',
-                      onTap: () => AuroraToast.comingSoon(context,
-                          feature: 'إضافة جهاز'),
+                      icon: Icons.settings_outlined,
+                      label: 'الإعدادات',
+                      onTap: () => _open(context, const SettingsScreen()),
                       primary: true,
                     ),
                   ],
@@ -337,8 +354,11 @@ class AuroraProfileTab extends StatelessWidget {
     required String subtitle,
     required IconData icon,
     required List<Color> gradient,
+    VoidCallback? onTap,
   }) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       padding: const EdgeInsets.all(AuroraSpacing.lg),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -370,6 +390,7 @@ class AuroraProfileTab extends StatelessWidget {
             child: Icon(icon, color: AuroraColors.pearl, size: 28),
           ),
         ],
+      ),
       ),
     );
   }
@@ -442,8 +463,10 @@ class AuroraProfileTab extends StatelessWidget {
     required String title,
     required String subtitle,
     required IconData icon,
+    VoidCallback? onTap,
   }) {
     return AuroraCard(
+      onTap: onTap,
       child: Row(
         children: [
           Expanded(

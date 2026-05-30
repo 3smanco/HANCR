@@ -16,6 +16,7 @@ import 'core/theme/aurora_theme.dart';
 import 'screens/auth/aurora_otp_screen.dart';
 import 'screens/auth/aurora_phone_screen.dart';
 import 'core/models/order_model.dart';
+import 'screens/booking/aurora_booking_screen.dart';
 import 'screens/booking/pickup_confirmation_screen.dart';
 import 'screens/booking/trip_end_screen.dart';
 import 'screens/main/aurora_main_screen.dart';
@@ -122,6 +123,19 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
           },
         ),
         GoRoute(path: '/home', builder: (_, __) => const AuroraMainScreen()),
+        GoRoute(
+          path: '/book',
+          builder: (_, state) {
+            final extra = state.extra;
+            if (extra is Map) {
+              return AuroraBookingScreen(
+                presetDestination: extra['destination'] as GeoPoint?,
+                presetDestinationLabel: extra['label'] as String?,
+              );
+            }
+            return const AuroraBookingScreen();
+          },
+        ),
         GoRoute(path: '/wallet', builder: (_, __) => const AuroraWalletScreen()),
         GoRoute(path: '/tracking', builder: (_, __) => const AuroraTrackingScreen()),
         GoRoute(path: '/rate', builder: (_, __) => const AuroraRateDriverScreen()),

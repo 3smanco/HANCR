@@ -106,7 +106,25 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
 
                 // ─── Terms ───
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () => showDialog<void>(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      backgroundColor: AuroraColors.ash,
+                      title: Text('الشروط والأحكام',
+                          style: AuroraText.titleSmall),
+                      content: Text(
+                        'يُضاف الرصيد إلى محفظتك فوراً بعد تأكيد الدفع. الرصيد غير قابل للاسترداد نقداً ويُستخدم في رحلات HANCR فقط.',
+                        style: AuroraText.bodySmall,
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text('حسناً',
+                              style: TextStyle(color: AuroraColors.ember)),
+                        ),
+                      ],
+                    ),
+                  ),
                   style: TextButton.styleFrom(
                     foregroundColor: AuroraColors.textSecondary,
                     alignment: Alignment.centerLeft,

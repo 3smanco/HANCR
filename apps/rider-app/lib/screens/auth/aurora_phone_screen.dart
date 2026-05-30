@@ -127,9 +127,20 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
 
                         const SizedBox(height: AuroraSpacing.xl),
 
-                        // ─── Existing account link ───
+                        // ─── Existing account link (نفس تدفق OTP) ───
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            if (_canSubmit) {
+                              _submit();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('أدخل رقم هاتفك للمتابعة'),
+                                  backgroundColor: AuroraColors.smoke,
+                                ),
+                              );
+                            }
+                          },
                           child: Text(
                             'دخول لحساب موجود',
                             style: AuroraText.bodyMedium.copyWith(

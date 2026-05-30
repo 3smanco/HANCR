@@ -191,7 +191,12 @@ class _ContactsView extends StatelessWidget {
 
   Widget _contactCard(BuildContext context, EmergencyContactModel c) {
     return AuroraCard(
-      onTap: () {},
+      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${c.name} — ${c.phoneNumber}'),
+          backgroundColor: AuroraColors.smoke,
+        ),
+      ),
       child: Row(
         children: [
           Container(

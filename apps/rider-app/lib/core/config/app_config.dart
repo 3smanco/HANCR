@@ -61,7 +61,7 @@ class AppConfig {
   static const int otpResendSeconds = 30;
 
   // ── Defaults ──────────────────────────────────────────────────────────────
-  static const int defaultRegionId = 1; // Riyadh
+  static const int defaultRegionId = 3; // Saudi Arabia / Riyadh (DB region id)
   static const double defaultLat = 24.7136;
   static const double defaultLng = 46.6753;
 
