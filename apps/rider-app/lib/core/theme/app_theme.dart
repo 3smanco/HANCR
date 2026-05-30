@@ -13,45 +13,45 @@ import 'package:google_fonts/google_fonts.dart';
 class HancrColors {
   HancrColors._();
 
-  // ===== Brand Primary =====
-  static const Color navy = Color(0xFF22223B); // الهوية الأساسية
-  static const Color violet = Color(0xFFB048FF); // الإجراء الرئيسي (CTA)
-  static const Color violetDeep = Color(0xFF8B2EE6); // hover / pressed
-  static const Color violetLight = Color(0xFFE9D5FF); // chip / accent bg
-  static const Color purple = Color(0xFF4A4E69); // ثانوي (subtitles)
-  static const Color cream = Color(0xFFF2E9E4); // خلفية دافئة
+  // ===== Brand Primary — مُعاد تعيينها لـ Aurora (obsidian + ember) =====
+  static const Color navy = Color(0xFF0A0807); // obsidian — الهوية الأساسية
+  static const Color violet = Color(0xFFFF7A1A); // ember — الإجراء الرئيسي (CTA)
+  static const Color violetDeep = Color(0xFFE55F00); // ember-deep — hover/pressed
+  static const Color violetLight = Color(0xFF6B3920); // ember-mute — chip/accent bg
+  static const Color purple = Color(0xFFA89B96); // muted — ثانوي (subtitles)
+  static const Color cream = Color(0xFF13100E); // coal — خلفية داكنة
 
   // ===== Aliases (لـ backward-compat) =====
   static const Color primary = navy;
   static const Color accent = violet;
   static const Color accentDark = violetDeep;
 
-  // ===== Surfaces =====
-  static const Color background = Color(0xFFFAFAFC); // off-white نقي
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceMute = Color(0xFFF5F6F8); // input bg
-  static const Color surfaceElevated = Color(0xFFFFFFFF);
+  // ===== Surfaces — Aurora dark =====
+  static const Color background = Color(0xFF0A0807); // obsidian
+  static const Color surface = Color(0xFF1F1A17); // ash
+  static const Color surfaceMute = Color(0xFF13100E); // coal — input bg
+  static const Color surfaceElevated = Color(0xFF1F1A17); // ash
 
-  // ===== Text =====
-  static const Color textPrimary = Color(0xFF111827);
-  static const Color textSecondary = Color(0xFF6B7280);
-  static const Color textHint = Color(0xFF9CA3AF);
+  // ===== Text — Aurora (light on dark) =====
+  static const Color textPrimary = Color(0xFFFFF5EE); // pearl
+  static const Color textSecondary = Color(0xFFA89B96); // muted
+  static const Color textHint = Color(0xFF6F635E);
   static const Color textOnDark = Color(0xFFFFFFFF);
 
-  // ===== Borders =====
-  static const Color border = Color(0xFFE5E7EB);
-  static const Color borderStrong = Color(0xFFD1D5DB);
-  static const Color divider = Color(0xFFEEF0F4);
+  // ===== Borders — Aurora (subtle white) =====
+  static const Color border = Color(0x1AFFFFFF); // 10% white
+  static const Color borderStrong = Color(0x33FFFFFF); // 20% white
+  static const Color divider = Color(0x14FFFFFF); // 8% white
 
-  // ===== Functional =====
-  static const Color success = Color(0xFF10B981);
-  static const Color successBg = Color(0xFFD1FAE5);
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color warningBg = Color(0xFFFEF3C7);
-  static const Color error = Color(0xFFEF4444);
-  static const Color errorBg = Color(0xFFFEE2E2);
-  static const Color info = Color(0xFF3B82F6);
-  static const Color infoBg = Color(0xFFDBEAFE);
+  // ===== Functional — brightened for dark bg =====
+  static const Color success = Color(0xFF34D399);
+  static const Color successBg = Color(0xFF12251C);
+  static const Color warning = Color(0xFFFFB547);
+  static const Color warningBg = Color(0xFF2A2114);
+  static const Color error = Color(0xFFFF6B6B);
+  static const Color errorBg = Color(0xFF2A1414);
+  static const Color info = Color(0xFF60A5FA);
+  static const Color infoBg = Color(0xFF14203A);
 
   // ===== Status (Driver / Order) =====
   static const Color statusOnline = Color(0xFF10B981); // Captain online
@@ -79,7 +79,7 @@ class HancrColors {
   static const LinearGradient brandGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [navy, Color(0xFF4A4E69)],
+    colors: [navy, Color(0xFF1F1A17)],
   );
 
   static const LinearGradient violetGradient = LinearGradient(
