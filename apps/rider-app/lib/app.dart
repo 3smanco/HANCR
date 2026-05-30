@@ -65,9 +65,16 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
         // Showcase + previews: bypass auth (dev-only visual reference)
         if (loc == '/showcase' || loc.startsWith('/preview')) return null;
 
-        // Still loading
-        if (authState is AuthLoading || authState is AuthInitial) {
+        // بدء التطبيق الحقيقي فقط (فحص التوكن) → splash
+        if (authState is AuthInitial) {
           return loc == '/splash' ? null : '/splash';
+        }
+
+        // AuthLoading يحدث أيضاً أثناء إرسال/تحقق OTP — لا نقذف المستخدم لـ splash
+        // إذا كان داخل تدفق المصادقة؛ نتركه في شاشته (هاتف/OTP).
+        if (authState is AuthLoading) {
+          if (loc.startsWith('/auth') || loc == '/splash') return null;
+          return '/splash';
         }
 
         // Not authenticated
