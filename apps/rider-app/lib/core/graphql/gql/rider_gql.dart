@@ -59,3 +59,16 @@ const String walletQuery = r'''
     }
   }
 ''';
+
+// معاينة المسار — مسافة الطريق الفعلية + الأجرة + polyline
+const String routePreviewQuery = r'''
+  query RoutePreview($input: RoutePreviewInput!) {
+    routePreview(input: $input) {
+      distanceMeters
+      durationSeconds
+      estimatedFare
+      currency
+      polyline
+    }
+  }
+''';

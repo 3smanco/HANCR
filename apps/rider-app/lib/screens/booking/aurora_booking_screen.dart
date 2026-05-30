@@ -57,6 +57,14 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   bool _loadingServices = false;
   String? _servicesError;
 
+  // المسار الفعلي (Google Directions عبر الـ API)
+  int? _routeDistanceM;
+  int? _routeDurationS;
+  double? _routeFare;
+  String _routeCurrency = 'ر.س';
+  bool _loadingRoute = false;
+  final Set<Polyline> _polylines = {};
+
   // التفضيلات
   bool _quietRide = false;
   bool _audioOff = false;
@@ -138,6 +146,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         _selectedService = list.isNotEmpty ? list.first : null;
         _loadingServices = false;
       });
+      if (_selectedService != null) _loadRoute();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -149,7 +158,104 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
 
   void _confirmDestination() {
     setState(() => _step = _BookingStep.pickService);
-    if (_services.isEmpty) _loadServices();
+    if (_services.isEmpty) {
+      _loadServices();
+    } else {
+      _loadRoute();
+    }
+  }
+
+  /// يحمّل المسار الفعلي (مسافة بالطريق + أجرة + polyline) للخدمة المختارة.
+  Future<void> _loadRoute() async {
+    final service = _selectedService;
+    if (service == null) return;
+    setState(() => _loadingRoute = true);
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(routePreviewQuery),
+        fetchPolicy: FetchPolicy.networkOnly,
+        variables: {
+          'input': {
+            'origin': {'lat': _origin.lat, 'lng': _origin.lng},
+            'destination': {'lat': _destination.lat, 'lng': _destination.lng},
+            'serviceId': service.id,
+          }
+        },
+      ));
+      final d = res.data?['routePreview'] as Map<String, dynamic>?;
+      if (!mounted) return;
+      if (d != null) {
+        setState(() {
+          _routeDistanceM = (d['distanceMeters'] as num?)?.toInt();
+          _routeDurationS = (d['durationSeconds'] as num?)?.toInt();
+          _routeFare = (d['estimatedFare'] as num?)?.toDouble();
+          _routeCurrency = d['currency'] as String? ?? 'ر.س';
+          _drawPolyline(d['polyline'] as String?);
+          _loadingRoute = false;
+        });
+      } else {
+        setState(() => _loadingRoute = false);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loadingRoute = false);
+    }
+  }
+
+  void _drawPolyline(String? encoded) {
+    _polylines.clear();
+    if (encoded == null || encoded.isEmpty) return;
+    final pts = _decodePolyline(encoded);
+    if (pts.isEmpty) return;
+    _polylines.add(Polyline(
+      polylineId: const PolylineId('route'),
+      color: AuroraColors.ember,
+      width: 5,
+      points: pts,
+    ));
+    // ضبط الكاميرا لتشمل المسار
+    final bounds = _boundsOf(pts);
+    _mapCtrl?.animateCamera(CameraUpdate.newLatLngBounds(bounds, 80));
+  }
+
+  /// فك ترميز Google encoded polyline.
+  List<LatLng> _decodePolyline(String e) {
+    final List<LatLng> poly = [];
+    int index = 0, lat = 0, lng = 0;
+    while (index < e.length) {
+      int b, shift = 0, result = 0;
+      do {
+        b = e.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      lat += (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      shift = 0;
+      result = 0;
+      do {
+        b = e.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      lng += (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      poly.add(LatLng(lat / 1e5, lng / 1e5));
+    }
+    return poly;
+  }
+
+  LatLngBounds _boundsOf(List<LatLng> pts) {
+    double minLat = pts.first.latitude, maxLat = pts.first.latitude;
+    double minLng = pts.first.longitude, maxLng = pts.first.longitude;
+    for (final p in pts) {
+      minLat = p.latitude < minLat ? p.latitude : minLat;
+      maxLat = p.latitude > maxLat ? p.latitude : maxLat;
+      minLng = p.longitude < minLng ? p.longitude : minLng;
+      maxLng = p.longitude > maxLng ? p.longitude : maxLng;
+    }
+    return LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
   }
 
   void _requestRide() {
@@ -216,6 +322,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                   myLocationButtonEnabled: false,
                   zoomControlsEnabled: false,
                   compassEnabled: false,
+                  polylines: _polylines,
                   onCameraMove: (pos) {
                     _destination =
                         GeoPoint(lat: pos.target.latitude, lng: pos.target.longitude);
@@ -345,8 +452,20 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         children: [
           Text('اختر فئة الرحلة', style: AuroraText.titleMedium),
           const SizedBox(height: 4),
-          Text('المسافة ~${_distanceKm().toStringAsFixed(1)} كم',
-              style: AuroraText.bodySmall),
+          Row(
+            children: [
+              Icon(Icons.route, size: 14, color: AuroraColors.textSecondary),
+              const SizedBox(width: 4),
+              Text(
+                _loadingRoute
+                    ? 'جارٍ حساب المسار...'
+                    : _routeDistanceM != null
+                        ? 'المسافة ${(_routeDistanceM! / 1000).toStringAsFixed(1)} كم • ${(_routeDurationS! / 60).ceil()} دقيقة (بالطريق)'
+                        : 'المسافة ~${_distanceKm().toStringAsFixed(1)} كم',
+                style: AuroraText.bodySmall,
+              ),
+            ],
+          ),
           const SizedBox(height: AuroraSpacing.md),
 
           if (_loadingServices)
@@ -393,7 +512,10 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   Widget _serviceRow(ServiceModel s) {
     final selected = _selectedService?.id == s.id;
     return GestureDetector(
-      onTap: () => setState(() => _selectedService = s),
+      onTap: () {
+        setState(() => _selectedService = s);
+        _loadRoute();
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
         padding: const EdgeInsets.all(AuroraSpacing.md),
@@ -427,8 +549,19 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                 children: [
                   Text(s.name, style: AuroraText.titleSmall),
                   const SizedBox(height: 2),
-                  Text('تبدأ من ${s.minimumFee.toStringAsFixed(0)} ر.س',
-                      style: AuroraText.bodySmall),
+                  Text(
+                    (selected && _routeFare != null)
+                        ? '${_routeFare!.toStringAsFixed(2)} $_routeCurrency'
+                        : 'تبدأ من ${s.minimumFee.toStringAsFixed(0)} ر.س',
+                    style: AuroraText.bodySmall.copyWith(
+                      color: (selected && _routeFare != null)
+                          ? AuroraColors.ember
+                          : AuroraColors.textSecondary,
+                      fontWeight: (selected && _routeFare != null)
+                          ? FontWeight.w700
+                          : FontWeight.w400,
+                    ),
+                  ),
                 ],
               ),
             ),
