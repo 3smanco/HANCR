@@ -40,7 +40,7 @@ export class AuthService {
   // sendOtp — إرسال رمز OTP للتحقق من الهاتف
   // =============================================
   // أرقام تجريبية بـ OTP ثابت — للـ demo + Play Store reviewers
-  // OTP الثابت: 1234
+  // OTP الثابت: 123456 (6 خانات)
   private static readonly TEST_PHONES = new Set<string>([
     '+966500000001', // Rider demo
     '+966500000002', // Rider demo 2
@@ -51,10 +51,10 @@ export class AuthService {
     const key = `hancr:otp:login:${phone}`;
     const isTestPhone = AuthService.TEST_PHONES.has(phone);
 
-    // الأرقام التجريبية: OTP ثابت = 1234
+    // الأرقام التجريبية: OTP ثابت = 123456. الباقي: 6 خانات عشوائية
     const code = isTestPhone
-      ? '1234'
-      : Math.floor(1000 + Math.random() * 9000).toString();
+      ? '123456'
+      : Math.floor(100000 + Math.random() * 900000).toString();
     const isDev = this.configService.get<string>('NODE_ENV') === 'development';
 
     // تخزين OTP في Redis مع TTL = 5 دقائق

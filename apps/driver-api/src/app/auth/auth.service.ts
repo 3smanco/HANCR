@@ -29,7 +29,7 @@ export class AuthService {
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
-  // أرقام تجريبية بـ OTP ثابت = 1234 (للـ demo + Play reviewers)
+  // أرقام تجريبية بـ OTP ثابت = 123456 (6 خانات)
   private static readonly TEST_DRIVER_PHONES = new Set<string>([
     '+966500000010', // Driver demo
     '+966500000011', // Driver demo 2
@@ -41,8 +41,8 @@ export class AuthService {
     const key = `hancr:otp:driver:${phone}`;
     const isTestPhone = AuthService.TEST_DRIVER_PHONES.has(phone);
     const code = isTestPhone
-      ? '1234'
-      : Math.floor(1000 + Math.random() * 9000).toString();
+      ? '123456'
+      : Math.floor(100000 + Math.random() * 900000).toString();
     const isDev = this.configService.get<string>('NODE_ENV') === 'development';
 
     await this.redis.setex(
