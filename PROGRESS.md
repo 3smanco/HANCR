@@ -50,6 +50,37 @@
 
 ---
 
+## ✅ Phase 7 — مراجعة جذرية شاملة للكود + تجهيز المعاينة (جلسة 7)
+
+### 7.1 — فحص الترجمة (compilation) — كل المشروع
+| المكوّن | النتيجة |
+|---------|---------|
+| rider-api (tsc) | ✅ 0 أخطاء |
+| driver-api (tsc) | ✅ 0 أخطاء |
+| admin-api (tsc) | ✅ 0 أخطاء |
+| rider-app (flutter analyze) | ✅ 0 أخطاء (3 تحذيرات غير ضارة) |
+| driver-app (flutter analyze) | ✅ 0 أخطاء (1 تحذير) |
+| admin-panel (tsc) | ✅ 0 أخطاء |
+| landing (tsc) | ✅ 0 أخطاء |
+
+### 7.2 — أهم اكتشاف: تسرّب التصميم القديم (Twilight فاتح)
+**المشكلة:** `core/theme/app_theme.dart` في كلا التطبيقين يعرّف `HancrColors` بألوان Twilight القديمة (navy #22223B، violet #B048FF، خلفية بيضاء #FAFAFC). شاشات نشطة كانت تستخدمه فتظهر **فاتحة** وسط ثيم Aurora الداكن:
+- **السائق:** phone_screen, otp_screen, onboarding_screen (سبب تذمّر المستخدم من تصميم السائق)
+- **الراكب:** rides_tab (تبويب النشاط), loyalty_tab, pickup_confirmation, trip_end
+**الإصلاح:** أعدت تعيين كامل لوحة `HancrColors` لقيم Aurora (obsidian/ember/pearl) في كلا الملفين — تُصلح كل الشاشات دفعة واحدة. أُعيد بناء الـ APKs ونُشرت.
+
+### 7.3 — تنظيف
+- حذف مجلدي scaffolding فارغين: `admin-api/src/app/features` و `pricing` (Feature Flags مُغطّاة عبر app-config؛ التسعير عبر services).
+
+### 7.4 — حالة الصفحات/الشاشات
+- لوحة التحكم: 12 صفحة كاملة (login, dashboard, analytics, orders, regions, services, settings, sos, users/drivers, users/riders, features). ✅ لا صفحات ناقصة.
+- التطبيقان: كل الشاشات الأساسية موجودة وعاملة. ميزات "قريباً" مقصودة لـ v2 (تسجيل اجتماعي، مساعد AI، إرسال أموال، كشف PDF، استرداد مكافآت).
+- دين تقني (غير حرج): شاشات قديمة مكرّرة بجانب نسخ aurora_ (غير موصولة بالـ routers).
+
+**الخلاصة:** المشروع جاهز للمعاينة النهائية — صفر أخطاء ترجمة، كل التدفقات الأساسية تعمل، التصميم موحّد Aurora في كل مكان.
+
+---
+
 ## ✅ Phase 4 — Design System v2 (جلسة 4)
 
 ### الخطوة 4.1 — تحليل مكتبة E:\UI (40+ ملف تصميم)
