@@ -71,7 +71,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final result = await client.mutate(
         MutationOptions(
           document: gql(verifyOtpMutation),
-          variables: {'phone': event.phone, 'otp': event.otp},
+          variables: {'phone': event.phone, 'code': event.otp},
         ),
       );
       if (result.hasException) {
