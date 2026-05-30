@@ -185,7 +185,7 @@ class PushService {
             channelDescription: _channelDesc,
             importance: Importance.high,
             priority: Priority.high,
-            color: const Color(0xFFB048FF), // HANCR violet
+            color: const Color(0xFFFF7A1A), // HANCR ember (Aurora)
           ),
           iOS: const DarwinNotificationDetails(),
         ),
