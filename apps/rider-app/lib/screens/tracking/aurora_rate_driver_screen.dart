@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../blocs/order/order_bloc.dart';
 import '../../blocs/order/order_event.dart';
@@ -55,8 +56,24 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
           builder: (context, state) {
             final order = state is OrderAwaitingReview ? state.order : null;
             if (order == null) {
-              return const Center(
-                child: CircularProgressIndicator(color: AuroraColors.ember),
+              // لا نعلق أبداً: دوران لحظي + مهرب للرئيسية.
+              return SafeArea(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircularProgressIndicator(
+                          color: AuroraColors.ember),
+                      const SizedBox(height: AuroraSpacing.lg),
+                      TextButton(
+                        onPressed: () => context.go('/home'),
+                        child: Text('العودة للرئيسية',
+                            style: AuroraText.bodyMedium
+                                .copyWith(color: AuroraColors.ember)),
+                      ),
+                    ],
+                  ),
+                ),
               );
             }
             return SafeArea(

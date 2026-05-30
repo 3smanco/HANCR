@@ -29,10 +29,9 @@ class _AuroraMainScreenState extends State<AuroraMainScreen> {
     return Scaffold(
       backgroundColor: AuroraColors.obsidian,
       extendBody: true,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _tabs,
-      ),
+      // نعرض التبويب النشط فقط (بدل IndexedStack) حتى لا يُنفّذ تبويب النشاط
+      // طلب السجل تلقائياً ويطمس حالة الطلب النشط (active/awaiting-review).
+      body: _tabs[_currentIndex],
       bottomNavigationBar: AuroraBottomNav(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
