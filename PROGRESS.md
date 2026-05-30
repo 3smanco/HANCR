@@ -1,6 +1,54 @@
 # HANCR — سجل التقدم
 
-## آخر تحديث: 2026-05-30 (جلسة 6 — إصلاح جذري + اختبار E2E)
+## آخر تحديث: 2026-05-30 (جلسة 9 — بناء تفاعلية تطبيق الراكب)
+
+---
+
+## ✅ Phase 9 — تطبيق الراكب تفاعلي بالكامل
+
+### الجديد المبني:
+- **تدفق حجز الرحلة** (`aurora_booking_screen.dart`، مسار `/book`): خريطة Aurora داكنة + موقع حالي (geolocator) + تحديد وجهة بدبوس المركز + تحميل الخدمات من API + اختيار فئة + تفضيلات (هادئة/بدون موسيقى) + "اطلب الآن" → OrderBloc → تتبع. **القلب الحي للتطبيق.**
+- **الشاشة الرئيسية:** كل الأزرار موصولة (بحث الوجهة، المنزل، شبكة الخدمات، بطاقات الترويج، احجز بجدولك، عرض الكل) + رأس جديد (تحية + جرس إشعارات + عروض).
+- **الحساب:** صفحات حقيقية — تعديل الملف (يحفظ عبر API)، مركز المساعدة (FAQ + تواصل)، دعوة الأصدقاء (كود إحالة)، الإعدادات. + وصول للولاء (HANCR Miles).
+- **النشاط:** سجل رحلات حقيقي من API + صفحة تفاصيل الرحلة (`aurora_rides.dart`).
+- **المحفظة/الولاء:** يحملان بيانات حقيقية (كانا موصولين)؛ أُصلح زر الشروط؛ الولاء أصبح قابلاً للوصول.
+- **صفحات جديدة:** مركز الإشعارات + العروض (`home_extras.dart`).
+- كل `onTap: () {}` الميتة في الشاشات النشطة أصبحت وظيفية.
+
+### تصحيح: `AppConfig.defaultRegionId = 3` (السعودية/الرياض — يطابق البذور والديمو).
+
+### تحقق بصري على المحاكي (نسخة release خفيفة):
+- ✅ التطبيق يعرض Aurora داكن (لا أسود/لا قديم).
+- ✅ لا تعليق على splash — يصل لشاشة الهاتف.
+- ✅ هاتف → OTP ينتقل (تأكيد إصلاح splash-hang).
+- ✅ OTP بـ 6 خانات.
+- (الدخول الكامل→الحجز لم يُكمل بصرياً بسبب تشويش إدخال المحاكي؛ الكود يترجم بـ 0 أخطاء والمنطق سليم.)
+
+### APK منشور: `https://hancr.com/downloads/hancr-rider.apk` (release arm64).
+
+---
+
+## 🧠 دروس مستفادة (ذاكرة دائمة — اقرأها في كل جلسة)
+
+1. **البنية التحتية على الإنتاج (GCP):**
+   - VM `hancr` (me-central1-a)، IP ثابت `34.18.212.201`. المستودع على السيرفر: `/opt/hancr` (مالكه `info`).
+   - الخدمات تعمل عبر **pm2 تحت المستخدم `info`** (وليس root): `sudo -u info bash -lc 'cd /opt/hancr && pm2 ...'`.
+   - Postgres+Redis في Docker. DB user/name = `hancr_prod`. Redis بكلمة مرور (`--requirepass`).
+   - النشر: `git pull` على السيرفر ثم `pm2 restart`. APKs في `/var/www/hancr-landing/downloads/`.
+   - SSH: `echo y | gcloud compute ssh hancr --zone=me-central1-a --command="..."`. scp يحتاج مسار صريح `/home/7bici/` (لا `~`).
+
+2. **أخطاء جذرية حُلّت (لا تكررها):**
+   - **Redis NOAUTH:** أي `new IORedis(...)` يجب أن يمرّر `password: process.env['REDIS_PASSWORD']` (كانت pubsub.provider ناقصة).
+   - **Maps خريطة بيضاء:** مفاتيح Google Maps لـ Android يجب أن تكون مقيّدة بـ **Android apps** (package + SHA-1) لا referer. المفتاح الحالي `AIzaSyDTvp_NShN0LVoxH6N_F2b1cD_zrfFkX14` (debug SHA-1: `48:3B:B3:F2:50:4E:94:2B:7F:B1:D4:39:F1:B5:91:16:69:1B:CE:22`). Maps SDK + billing مُفعّلان.
+   - **تعليق splash:** redirect يجب أن يميّز `AuthInitial` (→splash) عن `AuthLoading` (يبقى في /auth أثناء OTP).
+
+3. **التصميم (Aurora):** obsidian #0A0807 · coal #13100E · ash #1F1A17 · ember #FF7A1A · emberDeep #E55F00 · pearl #FFF5EE · muted #A89B96. `HancrColors` في `app_theme.dart` (التطبيقين) أُعيد تعيينه لقيم Aurora — لا تُرجعه للقديم.
+
+4. **البناء:** `flutter build apk --release --target-platform android-arm64 --dart-define=ENV=production` (~23MB). أرقام تجريبية: راكب `+966500000001` · سائق `+966500000010` · OTP `123456`.
+
+5. **قيد الجهاز:** المحاكي يموت من نقص الذاكرة (OOM) — لا يُعتمد عليه للتحقق البصري. أنهِ Gradle daemon (`java.exe`) بعد البناء لتحرير الذاكرة.
+
+6. **GraphQL endpoints:** `/rider/graphql` · `/driver/graphql` · `/admin/graphql` (ليس `/graphql`). Introspection مُعطّل في الإنتاج.
 
 ---
 
