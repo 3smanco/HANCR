@@ -100,3 +100,22 @@ const String driverOrderUpdatedSubscription = '''
     }
   }
 ''';
+
+// ─── Bid Mode (المزايدة) ───
+const String availableBidsQuery = r'''
+  query AvailableBids {
+    availableBids {
+      id riderProposedPrice currency
+      originAddress destinationAddress
+      estimatedDistance serviceId regionId expiresAt alreadyOffered
+    }
+  }
+''';
+
+const String submitBidOfferMutation = r'''
+  mutation SubmitBidOffer($bidId: Int!, $offeredPrice: Float!) {
+    submitBidOffer(bidId: $bidId, offeredPrice: $offeredPrice) {
+      success offerId offeredPrice message
+    }
+  }
+''';

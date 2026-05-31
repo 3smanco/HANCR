@@ -72,3 +72,31 @@ const String routePreviewQuery = r'''
     }
   }
 ''';
+
+// ─── Bid Mode (المزايدة) ───
+const String createBidMutation = r'''
+  mutation CreateBid($input: CreateBidInput!) {
+    createBid(input: $input) {
+      id status riderProposedPrice currency expiresAt
+    }
+  }
+''';
+
+const String activeBidQuery = r'''
+  query ActiveBid {
+    activeBid {
+      id status riderProposedPrice currency expiresAt
+      offers {
+        id driverId driverName driverRating
+        carBrand carModel carColor plateNumber
+        offeredPrice currency status
+      }
+    }
+  }
+''';
+
+const String acceptBidOfferMutation = r'''
+  mutation AcceptBidOffer($offerId: Int!) {
+    acceptBidOffer(offerId: $offerId) { id status }
+  }
+''';

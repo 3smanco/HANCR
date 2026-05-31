@@ -1,7 +1,7 @@
-import { Resolver, Mutation, Args, Float, Int } from '@nestjs/graphql';
+import { Resolver, Mutation, Query, Args, Float, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import { BidOfferEntity, BidEntity, BidStatus } from '@hancr/database';
 import { BidRedisService } from '@hancr/redis';
 import { ObjectType, Field } from '@nestjs/graphql';
@@ -17,6 +17,20 @@ class BidOfferResult {
   @Field() message!: string;
 }
 
+@ObjectType()
+class AvailableBidType {
+  @Field(() => Int) id!: number;
+  @Field(() => Float) riderProposedPrice!: number;
+  @Field() currency!: string;
+  @Field({ nullable: true }) originAddress?: string;
+  @Field({ nullable: true }) destinationAddress?: string;
+  @Field(() => Int) estimatedDistance!: number;
+  @Field(() => Int) serviceId!: number;
+  @Field(() => Int) regionId!: number;
+  @Field() expiresAt!: Date;
+  @Field() alreadyOffered!: boolean;
+}
+
 @Resolver()
 export class BidResolver {
   private readonly logger = new Logger(BidResolver.name);
@@ -30,6 +44,41 @@ export class BidResolver {
 
     private readonly bidRedis: BidRedisService,
   ) {}
+
+  /**
+   * المزايدات المفتوحة المتاحة للسائق (للعرض عليها)
+   */
+  @Query(() => [AvailableBidType], { description: 'المزايدات المفتوحة المتاحة' })
+  @UseGuards(JwtAuthGuard)
+  async availableBids(
+    @CurrentDriver() driver: AuthDriver,
+  ): Promise<AvailableBidType[]> {
+    const bids = await this.bidRepo.find({
+      where: { status: BidStatus.Open, expiresAt: MoreThan(new Date()) },
+      order: { createdAt: 'DESC' },
+      take: 20,
+    });
+    if (bids.length === 0) return [];
+
+    // عروض السائق السابقة لتمييز المزايدات التي عرض عليها
+    const myOffers = await this.offerRepo.find({
+      where: { driverId: driver.driverId },
+    });
+    const offeredBidIds = new Set(myOffers.map((o) => o.bidId));
+
+    return bids.map((b) => ({
+      id: b.id,
+      riderProposedPrice: Number(b.riderProposedPrice),
+      currency: b.currency,
+      originAddress: b.addresses?.[0],
+      destinationAddress: b.addresses?.[b.addresses.length - 1],
+      estimatedDistance: b.estimatedDistance,
+      serviceId: b.serviceId,
+      regionId: b.regionId,
+      expiresAt: b.expiresAt,
+      alreadyOffered: offeredBidIds.has(b.id),
+    }));
+  }
 
   /**
    * السائق يقدّم عرضاً على مزايدة

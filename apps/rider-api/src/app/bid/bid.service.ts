@@ -15,6 +15,10 @@ import {
   BidOfferEntity,
   BidStatus,
   DriverEntity,
+  OrderEntity,
+  OrderStatus,
+  OrderType,
+  PaymentMode,
 } from '@hancr/database';
 import { BidRedisService } from '@hancr/redis';
 import { PUB_SUB } from '../pubsub.provider';
@@ -37,6 +41,9 @@ export class BidService {
 
     @InjectRepository(DriverEntity)
     private readonly driverRepo: Repository<DriverEntity>,
+
+    @InjectRepository(OrderEntity)
+    private readonly orderRepo: Repository<OrderEntity>,
 
     private readonly bidRedis: BidRedisService,
 
@@ -129,8 +136,30 @@ export class BidService {
     // إزالة المزايدة من Redis
     await this.bidRedis.removeBid(offer.bid.id);
 
+    // إنشاء طلب رحلة فعلي بالسعر المتّفق عليه — مُسنَد للسائق مباشرةً
+    const bid = offer.bid;
+    const price = Number(offer.offeredPrice);
+    const order = this.orderRepo.create({
+      riderId,
+      driverId: offer.driverId,
+      serviceId: bid.serviceId,
+      regionId: bid.regionId,
+      type: OrderType.Ride,
+      status: OrderStatus.DriverAccepted,
+      points: bid.points ?? [],
+      addresses: bid.addresses ?? [],
+      distanceBest: bid.estimatedDistance,
+      durationBest: bid.estimatedDuration,
+      costBest: price,
+      costAfterCoupon: price,
+      currency: bid.currency,
+      paymentMode: PaymentMode.Cash,
+      isBidOrder: true,
+    });
+    await this.orderRepo.save(order);
+
     this.logger.log(
-      `Bid #${offer.bid.id} accepted — driver #${offer.driverId}, price ${offer.offeredPrice}`,
+      `Bid #${offer.bid.id} accepted — driver #${offer.driverId}, price ${offer.offeredPrice} → order #${order.id}`,
     );
 
     const updatedBid = await this.bidRepo.findOne({

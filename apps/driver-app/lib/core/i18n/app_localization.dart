@@ -86,6 +86,15 @@ const Map<String, Map<String, String>> _t = {
   'youOffline': {'ar': 'أنت غير متصل الآن', 'en': 'You are offline', 'ur': 'آپ آف لائن ہیں', 'hi': 'आप ऑफ़लाइन हैं', 'bn': 'আপনি অফলাইন', 'fil': 'Offline ka', 'fr': 'Vous êtes hors ligne', 'tr': 'Çevrimdışısınız'},
   'youOnline': {'ar': 'أنت متصل الآن 🚗', 'en': 'You are online 🚗', 'ur': 'آپ آن لائن ہیں 🚗', 'hi': 'आप ऑनलाइन हैं 🚗', 'bn': 'আপনি অনলাইন 🚗', 'fil': 'Online ka na 🚗', 'fr': 'Vous êtes en ligne 🚗', 'tr': 'Çevrimiçisiniz 🚗'},
   'activeRide': {'ar': 'رحلة نشطة', 'en': 'Active ride', 'ur': 'فعال سواری', 'hi': 'सक्रिय राइड', 'bn': 'সক্রিয় রাইড', 'fil': 'Aktibong sakay', 'fr': 'Course active', 'tr': 'Aktif yolculuk'},
+  'bids': {'ar': 'المزايدات', 'en': 'Bids', 'ur': 'بولیاں', 'hi': 'बिड्स', 'bn': 'বিড', 'fil': 'Mga bid', 'fr': 'Enchères', 'tr': 'Teklifler'},
+  'availableBids': {'ar': 'المزايدات المتاحة', 'en': 'Available bids', 'ur': 'دستیاب بولیاں', 'hi': 'उपलब्ध बिड्स', 'bn': 'উপলব্ধ বিড', 'fil': 'Available na bid', 'fr': 'Enchères disponibles', 'tr': 'Mevcut teklifler'},
+  'noBids': {'ar': 'لا توجد مزايدات حالياً', 'en': 'No open bids right now', 'ur': 'ابھی کوئی بولی نہیں', 'hi': 'अभी कोई बिड नहीं', 'bn': 'এখন কোনো বিড নেই', 'fil': 'Walang bukas na bid ngayon', 'fr': 'Aucune enchère ouverte', 'tr': 'Şu an açık teklif yok'},
+  'riderProposed': {'ar': 'سعر الراكب', 'en': 'Rider\'s price', 'ur': 'مسافر کی قیمت', 'hi': 'राइडर की कीमत', 'bn': 'যাত্রীর দাম', 'fil': 'Presyo ng pasahero', 'fr': 'Prix du passager', 'tr': 'Yolcunun fiyatı'},
+  'submitOffer': {'ar': 'قدّم عرضاً', 'en': 'Submit offer', 'ur': 'پیشکش دیں', 'hi': 'ऑफ़र दें', 'bn': 'অফার দিন', 'fil': 'Mag-alok', 'fr': 'Faire une offre', 'tr': 'Teklif ver'},
+  'yourOffer': {'ar': 'سعرك المعروض', 'en': 'Your offered price', 'ur': 'آپ کی پیشکش', 'hi': 'आपका ऑफ़र', 'bn': 'আপনার অফার', 'fil': 'Iyong alok', 'fr': 'Votre offre', 'tr': 'Teklifiniz'},
+  'offerSent': {'ar': 'تم إرسال عرضك ✓', 'en': 'Offer sent ✓', 'ur': 'پیشکش بھیج دی ✓', 'hi': 'ऑफ़र भेजा गया ✓', 'bn': 'অফার পাঠানো হয়েছে ✓', 'fil': 'Naipadala ang alok ✓', 'fr': 'Offre envoyée ✓', 'tr': 'Teklif gönderildi ✓'},
+  'offered': {'ar': 'تم العرض', 'en': 'Offered', 'ur': 'پیشکش کر دی', 'hi': 'ऑफ़र किया', 'bn': 'অফার করা হয়েছে', 'fil': 'Inalok na', 'fr': 'Offert', 'tr': 'Teklif verildi'},
+  'send': {'ar': 'إرسال', 'en': 'Send', 'ur': 'بھیجیں', 'hi': 'भेजें', 'bn': 'পাঠান', 'fil': 'Ipadala', 'fr': 'Envoyer', 'tr': 'Gönder'},
 
   // ─── Earnings ───
   'today': {'ar': 'اليوم', 'en': 'Today', 'ur': 'آج', 'hi': 'आज', 'bn': 'আজ', 'fil': 'Ngayon', 'fr': 'Aujourd\'hui', 'tr': 'Bugün'},

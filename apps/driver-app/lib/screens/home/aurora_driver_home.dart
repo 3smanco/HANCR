@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
+import '../bids/driver_bids_screen.dart';
 import '../../blocs/location/location_bloc.dart';
 import '../../blocs/location/location_event.dart';
 import '../../blocs/location/location_state.dart';
@@ -157,6 +158,44 @@ class _MapTab extends StatelessWidget {
           left: AuroraSpacing.lg,
           right: AuroraSpacing.lg,
           child: const _DriverTopBar(),
+        ),
+
+        // ─── Bids access ───
+        Positioned(
+          top: MediaQuery.of(context).padding.top + 76,
+          left: AuroraSpacing.lg,
+          child: BlocBuilder<OrderBloc, OrderState>(
+            builder: (ctx, state) {
+              if (state is OrderActive) return const SizedBox.shrink();
+              return GestureDetector(
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const DriverBidsScreen())),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AuroraSpacing.md, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AuroraColors.ash,
+                    borderRadius: BorderRadius.circular(AuroraRadius.pill),
+                    border: Border.all(color: AuroraColors.border),
+                    boxShadow: AuroraShadows.cardDepth,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.gavel,
+                          color: AuroraColors.ember, size: 16),
+                      const SizedBox(width: 6),
+                      Text(tr('bids'),
+                          style: const TextStyle(
+                              color: AuroraColors.pearl,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13)),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
         ),
 
         // ─── Online toggle CTA ───

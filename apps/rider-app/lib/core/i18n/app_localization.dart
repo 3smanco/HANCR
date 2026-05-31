@@ -150,6 +150,14 @@ const Map<String, Map<String, String>> _t = {
   'quietRide': {'ar': 'رحلة هادئة', 'en': 'Quiet ride', 'ur': 'پُرسکون سواری', 'hi': 'शांत राइड', 'bn': 'নিরিবিলি রাইড', 'fil': 'Tahimik na sakay', 'fr': 'Course silencieuse', 'tr': 'Sessiz yolculuk'},
   'noMusic': {'ar': 'بدون موسيقى', 'en': 'No music', 'ur': 'موسیقی کے بغیر', 'hi': 'बिना संगीत', 'bn': 'গান ছাড়া', 'fil': 'Walang musika', 'fr': 'Sans musique', 'tr': 'Müziksiz'},
   'requestNow': {'ar': 'اطلب الآن', 'en': 'Request now', 'ur': 'ابھی منگوائیں', 'hi': 'अभी बुक करें', 'bn': 'এখন অনুরোধ করুন', 'fil': 'Mag-request', 'fr': 'Commander', 'tr': 'Şimdi iste'},
+  'bidMode': {'ar': 'اقترح سعرك (مزايدة)', 'en': 'Name your price (Bid)', 'ur': 'اپنی قیمت بتائیں (بولی)', 'hi': 'अपनी कीमत बताएं (बिड)', 'bn': 'আপনার দাম বলুন (বিড)', 'fil': 'Pangalanan ang presyo (Bid)', 'fr': 'Proposez votre prix (Enchère)', 'tr': 'Fiyatını söyle (Teklif)'},
+  'yourPrice': {'ar': 'سعرك المقترح', 'en': 'Your proposed price', 'ur': 'آپ کی تجویز کردہ قیمت', 'hi': 'आपकी प्रस्तावित कीमत', 'bn': 'আপনার প্রস্তাবিত দাম', 'fil': 'Iyong inaalok na presyo', 'fr': 'Votre prix proposé', 'tr': 'Önerdiğiniz fiyat'},
+  'sendBid': {'ar': 'أرسل المزايدة', 'en': 'Send bid', 'ur': 'بولی بھیجیں', 'hi': 'बिड भेजें', 'bn': 'বিড পাঠান', 'fil': 'Ipadala ang bid', 'fr': 'Envoyer l\'enchère', 'tr': 'Teklifi gönder'},
+  'waitingOffers': {'ar': 'بانتظار عروض السائقين...', 'en': 'Waiting for driver offers...', 'ur': 'ڈرائیور کی پیشکش کا انتظار...', 'hi': 'ड्राइवर ऑफ़र की प्रतीक्षा...', 'bn': 'চালকের অফারের অপেক্ষায়...', 'fil': 'Naghihintay ng alok ng drayber...', 'fr': 'En attente des offres...', 'tr': 'Sürücü tekliflerini bekliyor...'},
+  'noOffersYet': {'ar': 'لا توجد عروض بعد', 'en': 'No offers yet', 'ur': 'ابھی کوئی پیشکش نہیں', 'hi': 'अभी कोई ऑफ़र नहीं', 'bn': 'এখনও কোনো অফার নেই', 'fil': 'Wala pang alok', 'fr': 'Aucune offre', 'tr': 'Henüz teklif yok'},
+  'acceptOffer': {'ar': 'قبول', 'en': 'Accept', 'ur': 'قبول کریں', 'hi': 'स्वीकार करें', 'bn': 'গ্রহণ করুন', 'fil': 'Tanggapin', 'fr': 'Accepter', 'tr': 'Kabul et'},
+  'offersReceived': {'ar': 'العروض الواردة', 'en': 'Offers received', 'ur': 'موصولہ پیشکشیں', 'hi': 'प्राप्त ऑफ़र', 'bn': 'প্রাপ্ত অফার', 'fil': 'Mga natanggap na alok', 'fr': 'Offres reçues', 'tr': 'Gelen teklifler'},
+  'bidExpired': {'ar': 'انتهت مدة المزايدة', 'en': 'Bid expired', 'ur': 'بولی ختم ہو گئی', 'hi': 'बिड समाप्त', 'bn': 'বিড শেষ', 'fil': 'Nag-expire ang bid', 'fr': 'Enchère expirée', 'tr': 'Teklif süresi doldu'},
 
   // ─── Rides / Activity ───
   'noRides': {'ar': 'لا توجد رحلات بعد', 'en': 'No rides yet', 'ur': 'ابھی کوئی سواری نہیں', 'hi': 'अभी तक कोई राइड नहीं', 'bn': 'এখনও কোনো রাইড নেই', 'fil': 'Wala pang sakay', 'fr': 'Pas encore de courses', 'tr': 'Henüz yolculuk yok'},

@@ -15,6 +15,7 @@ import '../../core/models/order_model.dart';
 import '../../core/models/service_model.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import 'aurora_bid_waiting_screen.dart';
 
 /// AuroraBookingScreen — قلب تجربة الراكب: تحديد الوجهة + اختيار الخدمة + الطلب.
 ///
@@ -69,6 +70,9 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   // التفضيلات
   bool _quietRide = false;
   bool _audioOff = false;
+  bool _bidMode = false;
+  final TextEditingController _bidPriceCtrl = TextEditingController();
+  bool _sendingBid = false;
 
   static const String _darkMapStyle = '''
 [
@@ -262,6 +266,10 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   void _requestRide() {
     final service = _selectedService;
     if (service == null) return;
+    if (_bidMode) {
+      _sendBid(service);
+      return;
+    }
     context.read<OrderBloc>().add(OrderCreateRequested(
           origin: _origin,
           destination: _destination,
@@ -272,6 +280,52 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           quietRide: _quietRide,
           audioOff: _audioOff,
         ));
+  }
+
+  Future<void> _sendBid(ServiceModel service) async {
+    final price = double.tryParse(_bidPriceCtrl.text.trim()) ?? 0;
+    if (price < 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(tr('yourPrice')), backgroundColor: AuroraColors.smoke),
+      );
+      return;
+    }
+    setState(() => _sendingBid = true);
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.mutate(MutationOptions(
+        document: gql(createBidMutation),
+        variables: {
+          'input': {
+            'points': [
+              {'lat': _origin.lat, 'lng': _origin.lng},
+              {'lat': _destination.lat, 'lng': _destination.lng},
+            ],
+            'addresses': [_originLabel, _destinationLabel],
+            'proposedPrice': price,
+            'serviceId': service.id,
+            'regionId': AppConfig.defaultRegionId,
+          }
+        },
+      ));
+      if (res.hasException) throw res.exception!;
+      final bid = res.data?['createBid'] as Map<String, dynamic>?;
+      if (!mounted) return;
+      setState(() => _sendingBid = false);
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => AuroraBidWaitingScreen(
+          proposedPrice: price,
+          currency: bid?['currency'] as String? ?? 'ر.س',
+        ),
+      ));
+    } catch (e) {
+      if (mounted) {
+        setState(() => _sendingBid = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$e'), backgroundColor: AuroraColors.danger),
+        );
+      }
+    }
   }
 
   double _distanceKm() {
@@ -496,12 +550,43 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               ),
             ],
           ),
+
+          const SizedBox(height: AuroraSpacing.sm),
+
+          // وضع المزايدة (اقترح سعرك)
+          _prefChip(Icons.gavel, tr('bidMode'), _bidMode,
+              () => setState(() => _bidMode = !_bidMode)),
+          if (_bidMode) ...[
+            const SizedBox(height: AuroraSpacing.sm),
+            TextField(
+              controller: _bidPriceCtrl,
+              keyboardType: TextInputType.number,
+              style: AuroraText.titleSmall.copyWith(color: AuroraColors.pearl),
+              decoration: InputDecoration(
+                hintText: tr('yourPrice'),
+                prefixIcon:
+                    const Icon(Icons.attach_money, color: AuroraColors.ember),
+                filled: true,
+                fillColor: AuroraColors.ash,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AuroraRadius.md),
+                  borderSide: const BorderSide(color: AuroraColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AuroraRadius.md),
+                  borderSide:
+                      const BorderSide(color: AuroraColors.ember, width: 1.5),
+                ),
+              ),
+            ),
+          ],
+
           const SizedBox(height: AuroraSpacing.lg),
           AuroraButton.primary(
-            label: tr('requestNow'),
-            icon: Icons.local_taxi,
-            loading: creating,
-            onPressed: (_selectedService != null && !creating)
+            label: _bidMode ? tr('sendBid') : tr('requestNow'),
+            icon: _bidMode ? Icons.gavel : Icons.local_taxi,
+            loading: creating || _sendingBid,
+            onPressed: (_selectedService != null && !creating && !_sendingBid)
                 ? _requestRide
                 : null,
           ),
