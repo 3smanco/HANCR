@@ -1,6 +1,16 @@
 # HANCR — سجل التقدم
 
-## آخر تحديث: 2026-05-31 (جلسة 11 — ترجمة كل شاشات الراكب)
+## آخر تحديث: 2026-05-31 (جلسة 12 — تطبيق السائق: تعدد لغات + تفاعلية)
+
+---
+
+## ✅ Phase 12 — تطبيق السائق (8 لغات + تفعيل الأزرار)
+- نظام i18n كامل للسائق (`core/i18n/app_localization.dart`، بنية مفتاح-أولاً، 8 لغات) + ربط MaterialApp (locale/delegates/ValueListenableBuilder) + تحميل لغة الجهاز في main + StorageService.saveLanguage + `flutter_localizations` + رفع intl لـ 0.20.2.
+- تُرجمت كل الشاشات النشطة: الرئيسية/الخريطة (متصل/غير متصل/ابدأ الاستقبال)، الأرباح، النجوم، الحساب، المحفظة، السحب، SOS+إضافة جهة، onboarding (نموذج التسجيل الكامل + الألوان).
+- شاشة `DriverLanguageScreen` (الحساب ← الإعدادات).
+- تفعيل كل الأزرار الميتة (الدعم، بيانات السيارة/الرخصة، الحساب البنكي، مشكلة الرصيد → coming soon؛ الإعدادات → اللغة).
+- معالجة const+tr (تحويل static const lists لـ getters، إزالة const من Text/InputDecoration/Row الحاوية لـ tr).
+- 0 أخطاء. APK منشور: `https://hancr.com/downloads/hancr-driver.apk`.
 
 ---
 
