@@ -19,6 +19,7 @@ import {
   OrderStatus,
   OrderType,
   PaymentMode,
+  RiderEntity,
 } from '@hancr/database';
 import { BidRedisService } from '@hancr/redis';
 import { PUB_SUB } from '../pubsub.provider';
@@ -45,6 +46,9 @@ export class BidService {
     @InjectRepository(OrderEntity)
     private readonly orderRepo: Repository<OrderEntity>,
 
+    @InjectRepository(RiderEntity)
+    private readonly riderRepo: Repository<RiderEntity>,
+
     private readonly bidRedis: BidRedisService,
 
     @Inject(PUB_SUB)
@@ -56,7 +60,10 @@ export class BidService {
   // =============================================
   async createBid(riderId: number, input: CreateBidInput): Promise<BidType> {
     const origin = input.points[0];
-    const expiresAt = new Date(Date.now() + 30_000); // 30 ثانية
+    const expiresAt = new Date(Date.now() + 90_000); // 90 ثانية
+
+    const rider = await this.riderRepo.findOne({ where: { id: riderId } });
+    const currency = rider?.currency ?? 'SAR';
 
     const bid = this.bidRepo.create({
       riderId,
@@ -64,6 +71,7 @@ export class BidService {
       regionId: input.regionId,
       status: BidStatus.Open,
       riderProposedPrice: input.proposedPrice,
+      currency,
       expiresAt,
       points: input.points.map((p) => ({ lat: p.lat, lng: p.lng })),
       addresses: input.addresses,
@@ -80,7 +88,7 @@ export class BidService {
       lat: origin.lat,
       lng: origin.lng,
       proposedPrice: input.proposedPrice,
-      currency: 'QAR',
+      currency,
     });
 
     this.logger.log(

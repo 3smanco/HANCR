@@ -5,6 +5,7 @@ import {
   BidOfferEntity,
   DriverEntity,
   OrderEntity,
+  RiderEntity,
 } from '@hancr/database';
 import { BidService } from './bid.service';
 import { BidResolver } from './bid.resolver';
@@ -17,6 +18,7 @@ import { pubSubProvider } from '../pubsub.provider';
       BidOfferEntity,
       DriverEntity,
       OrderEntity,
+      RiderEntity,
     ]),
   ],
   providers: [BidService, BidResolver, pubSubProvider],
