@@ -246,7 +246,7 @@ export class BidService {
       id: bid.id,
       status: bid.status,
       riderProposedPrice: Number(bid.riderProposedPrice),
-      currency: 'QAR',
+      currency: bid.currency ?? 'SAR',
       expiresAt: bid.expiresAt,
       offers,
       createdAt: bid.createdAt,
