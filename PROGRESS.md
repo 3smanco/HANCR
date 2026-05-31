@@ -1,6 +1,17 @@
 # HANCR — سجل التقدم
 
-## آخر تحديث: 2026-05-31 (جلسة 12 — تطبيق السائق: تعدد لغات + تفاعلية)
+## آخر تحديث: 2026-05-31 (جلسة 13 — لوحة التحكم: تعديل الأسعار حياً)
+
+---
+
+## ✅ Phase 13 — لوحة التحكم
+- **مراجعة:** اللوحة حيّة (admin.hancr.com)، الدخول يعمل (`admin@hancr.com` / `bYjEa2VmwdWSTd3d`)، 12 صفحة، i18n عربي+إنجليزي، Aurora داكن، بيانات حقيقية (dashboardStats: 2 ركاب/2 سائقين/7 طلبات).
+- **فجوة حُلّت — تعديل الأسعار حياً:** كانت صفحة الخدمات تعرض الأسعار للقراءة فقط. أضفت نافذة تعديل (baseFare/perKm/perMinute/minFee/commission) عبر mutation `UPDATE_SERVICE`.
+- **إصلاح باكند جذري:** `updateService` كان **معطّلاً** لأن `UpdateServiceInput` ينقصه decorators من class-validator، فالـ ValidationPipe (whitelist) يرفض الإدخال. أضفت `@IsOptional()` لكل الحقول → الآن يعمل (مؤكَّد: baseFare 6/minFee 9 ثم استُعيد 5/8).
+- فعّلت منطقة السعودية (region 3) لتتسق مع حجز الراكب.
+- 0 أخطاء tsc. نُشر (next build + pm2 restart).
+
+**بيانات الدخول للوحة:** https://admin.hancr.com — `admin@hancr.com` / `bYjEa2VmwdWSTd3d`
 
 ---
 
