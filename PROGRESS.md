@@ -1,6 +1,18 @@
 # HANCR — سجل التقدم
 
-## آخر تحديث: 2026-05-31 (جلسة 13 — لوحة التحكم: تعديل الأسعار حياً)
+## آخر تحديث: 2026-06-01 (جلسة 14 — المرحلة 1.1: وضع المزايدة Bid)
+
+---
+
+## ✅ Phase 14 — وضع المزايدة (Bid Mode) — مكتمل end-to-end
+- **باكند:** أضفت استعلام `availableBids` للسائق (driver-api)، وجعلت `acceptOffer` ينشئ `OrderEntity` (DriverAccepted، isBidOrder، السعر المتّفق) ليتتبّعه الطرفان. أصلحت bug: createBid لم يكن يعيّن `currency` (NOT NULL) — يُجلب الآن من الراكب؛ مدة المزايدة 90 ثانية؛ toType يستخدم العملة الصحيحة.
+- **راكب:** مفتاح "اقترح سعرك" + حقل السعر في شاشة الحجز → `createBid` → شاشة `aurora_bid_waiting_screen` (تستقبل العروض بالـ polling + قبول).
+- **سائق:** زر "المزايدات" في الخريطة → `driver_bids_screen` (قائمة المزايدات + تقديم عرض).
+- i18n: 8 لغات للمفاتيح الجديدة (راكب + سائق).
+- **اختبار E2E عبر API نجح:** createBid 20 → driver availableBids → submitBidOffer 18 → rider activeBid يعرض العرض → acceptBidOffer → activeOrder #8 = DriverAccepted/18/محمد السائق ✅.
+- 0 أخطاء. APKs منشورة.
+
+**التالي:** 1.2 الحجز المسبق + كرون، 1.3 توصيل الطرود، 1.4 السائق بالساعة.
 
 ---
 
