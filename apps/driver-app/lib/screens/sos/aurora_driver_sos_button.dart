@@ -1,3 +1,4 @@
+import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/sos/sos_bloc.dart';
@@ -104,10 +105,10 @@ class _AuroraDriverSosButtonState extends State<AuroraDriverSosButton>
     if (state is SosLoaded && state.contacts.isEmpty) {
       final add = await _showAuroraDialog<bool>(
         context: context,
-        title: 'لا توجد جهات طوارئ',
-        body: 'يُنصح بإضافة جهات قبل التفعيل.',
-        confirm: 'إضافة الآن',
-        cancel: 'تفعيل بدون',
+        title: tr('noContactsTitle'),
+        body: tr('noContactsBody'),
+        confirm: tr('addNow'),
+        cancel: tr('activateWithout'),
       );
       if (!context.mounted) return;
       if (add == true) {
@@ -120,10 +121,10 @@ class _AuroraDriverSosButtonState extends State<AuroraDriverSosButton>
     }
     final ok = await _showAuroraDialog<bool>(
       context: context,
-      title: '🚨 تفعيل الطوارئ؟',
-      body: 'سيُرسَل موقعك ورسالة استغاثة فوراً لكل جهات الطوارئ.',
-      confirm: 'نعم، فعِّل',
-      cancel: 'إلغاء',
+      title: tr('sosActivateConfirm'),
+      body: tr('sosActivateBody'),
+      confirm: tr('yesActivate'),
+      cancel: tr('cancel'),
       dangerConfirm: true,
     );
     if (!context.mounted) return;
@@ -140,10 +141,10 @@ class _AuroraDriverSosButtonState extends State<AuroraDriverSosButton>
       BuildContext context, int incidentId, int notified) async {
     final ok = await _showAuroraDialog<bool>(
       context: context,
-      title: '🚨 طوارئ نشطة',
+      title: tr('sosActiveTitle'),
       body: 'تم إشعار $notified جهة. هل أنت بأمان الآن؟',
-      confirm: 'نعم، بأمان',
-      cancel: 'الخطر مستمر',
+      confirm: tr('yesSafe'),
+      cancel: tr('dangerContinues'),
     );
     if (!context.mounted) return;
     if (ok == true) context.read<SosBloc>().add(SosCancelled(incidentId));

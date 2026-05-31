@@ -1,3 +1,4 @@
+import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/auth/auth_bloc.dart';
@@ -7,6 +8,13 @@ import '../../blocs/driver/driver_state.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../sos/driver_emergency_contacts_screen.dart';
 import '../wallet/aurora_driver_wallet_screen.dart';
+import 'language_screen.dart';
+
+void _soon(BuildContext c) => ScaffoldMessenger.of(c).showSnackBar(
+      SnackBar(
+          content: Text('${tr('comingSoon')} ✨'),
+          backgroundColor: AuroraColors.ash),
+    );
 
 class AuroraDriverProfileTab extends StatelessWidget {
   const AuroraDriverProfileTab({super.key});
@@ -23,7 +31,7 @@ class AuroraDriverProfileTab extends StatelessWidget {
                   ? [state.driver.firstName, state.driver.lastName]
                       .where((s) => s.isNotEmpty)
                       .join(' ')
-                  : 'السائق';
+                  : tr('driver');
               return ListView(
                 padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.lg),
                 children: [
@@ -31,7 +39,7 @@ class AuroraDriverProfileTab extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('حسابي', style: AuroraText.displayMedium),
+                      Text(tr('myAccount'), style: AuroraText.displayMedium),
                       _circleBtn(
                         icon: Icons.logout,
                         onTap: () => context
@@ -52,7 +60,7 @@ class AuroraDriverProfileTab extends StatelessWidget {
                     children: [
                       Expanded(child: _quickTile(
                         icon: Icons.account_balance_wallet,
-                        label: 'محفظة',
+                        label: tr('wallet'),
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
                               builder: (_) =>
@@ -62,7 +70,7 @@ class AuroraDriverProfileTab extends StatelessWidget {
                       const SizedBox(width: AuroraSpacing.md),
                       Expanded(child: _quickTile(
                         icon: Icons.shield,
-                        label: 'جهات الطوارئ',
+                        label: tr('emergencyContacts'),
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
                               builder: (_) =>
@@ -72,8 +80,8 @@ class AuroraDriverProfileTab extends StatelessWidget {
                       const SizedBox(width: AuroraSpacing.md),
                       Expanded(child: _quickTile(
                         icon: Icons.support_agent,
-                        label: 'دعم',
-                        onTap: () {},
+                        label: tr('support'),
+                        onTap: () => _soon(context),
                       )),
                     ],
                   ),
@@ -86,25 +94,25 @@ class AuroraDriverProfileTab extends StatelessWidget {
                       children: [
                         _menuItem(
                           icon: Icons.directions_car,
-                          label: 'بيانات السيارة',
+                          label: tr('carData'),
                           subtitle: state is DriverLoaded
                               ? '${state.driver.carBrand ?? ''} ${state.driver.carModel ?? ''}'.trim()
                               : '—',
-                          onTap: () {},
+                          onTap: () => _soon(context),
                         ),
                         const Divider(height: 1, color: AuroraColors.divider),
                         _menuItem(
                           icon: Icons.badge_outlined,
-                          label: 'بيانات الرخصة',
-                          subtitle: 'موثَّق ✓',
-                          onTap: () {},
+                          label: tr('licenseData'),
+                          subtitle: tr('verified'),
+                          onTap: () => _soon(context),
                           subtitleColor: AuroraColors.success,
                         ),
                         const Divider(height: 1, color: AuroraColors.divider),
                         _menuItem(
                           icon: Icons.settings,
-                          label: 'الإعدادات',
-                          onTap: () {},
+                          label: tr('settings'),
+                          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DriverLanguageScreen())),
                         ),
                       ],
                     ),
@@ -173,7 +181,7 @@ class AuroraDriverProfileTab extends StatelessWidget {
                           color: AuroraColors.success, size: 12),
                       const SizedBox(width: 4),
                       Text(
-                        'سائق موثَّق',
+                        tr('verifiedDriver'),
                         style: AuroraText.caption.copyWith(
                           color: AuroraColors.success,
                           fontWeight: FontWeight.w700,

@@ -1,3 +1,4 @@
+import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -64,11 +65,11 @@ class _AuroraDriverHomeState extends State<AuroraDriverHome> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _navItem(0, Icons.map_outlined, Icons.map, 'الخريطة'),
+              _navItem(0, Icons.map_outlined, Icons.map, tr('nav_map')),
               _navItem(1, Icons.attach_money_outlined,
-                  Icons.attach_money, 'الأرباح'),
-              _navItem(2, Icons.star_outline, Icons.star, 'النجوم'),
-              _navItem(3, Icons.person_outline, Icons.person, 'حسابي'),
+                  Icons.attach_money, tr('nav_earnings')),
+              _navItem(2, Icons.star_outline, Icons.star, tr('nav_stars')),
+              _navItem(3, Icons.person_outline, Icons.person, tr('nav_account')),
             ],
           ),
         ),
@@ -257,7 +258,7 @@ class _DriverTopBar extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: Text(
-                          online ? 'متصل' : 'غير متصل',
+                          online ? tr('online') : tr('offline'),
                           style: AuroraText.bodySmall.copyWith(
                             color: AuroraColors.pearl,
                             fontWeight: FontWeight.w700,
@@ -371,7 +372,7 @@ class _OnlineToggleState extends State<_OnlineToggle>
                   ),
                 const SizedBox(height: AuroraSpacing.sm),
                 Text(
-                  online ? 'متصل — تستقبل الطلبات' : 'ابدأ الاستقبال',
+                  online ? tr('onlineReceiving') : tr('startReceiving'),
                   style: AuroraText.titleSmall.copyWith(
                     color: AuroraColors.pearl,
                   ),
@@ -394,14 +395,14 @@ class _OnlineToggleState extends State<_OnlineToggle>
         locBloc.add(const LocationStopTracking());
         await client.mutate(MutationOptions(document: gql(goOfflineMutation)));
         messenger.showSnackBar(SnackBar(
-          content: Text('أنت غير متصل الآن', style: AuroraText.bodyMedium),
+          content: Text(tr('youOffline'), style: AuroraText.bodyMedium),
           backgroundColor: AuroraColors.smoke,
         ));
       } else {
         await client.mutate(MutationOptions(document: gql(goOnlineMutation)));
         locBloc.add(const LocationStartTracking());
         messenger.showSnackBar(SnackBar(
-          content: Text('أنت متصل الآن 🚗', style: AuroraText.bodyMedium),
+          content: Text(tr('youOnline'), style: AuroraText.bodyMedium),
           backgroundColor: AuroraColors.success,
         ));
       }
@@ -454,7 +455,7 @@ class _ActiveRideCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'رحلة نشطة',
+                      tr('activeRide'),
                       style: AuroraText.titleSmall,
                     ),
                     Text(

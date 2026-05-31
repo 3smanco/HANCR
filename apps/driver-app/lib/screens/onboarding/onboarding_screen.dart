@@ -1,3 +1,4 @@
+import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -80,7 +81,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _next() {
     if (!_validateStep(_currentStep)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('أكمل جميع الحقول المطلوبة')),
+        SnackBar(content: Text(tr('completeAllFields'))),
       );
       return;
     }
@@ -156,8 +157,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 padding: const EdgeInsets.all(HancrSpacing.lg),
                 child: HancrButton.primary(
                   label: _currentStep == _totalSteps - 1
-                      ? 'إنهاء التسجيل'
-                      : 'متابعة',
+                      ? tr('finishRegistration')
+                      : tr('continueBtn'),
                   icon: _currentStep == _totalSteps - 1
                       ? Icons.check_rounded
                       : Icons.arrow_forward_rounded,
@@ -280,8 +281,8 @@ class _Header extends StatelessWidget {
             ],
           ),
           const SizedBox(height: HancrSpacing.lg),
-          const Text(
-            'انضم كقبطان HANCR',
+          Text(
+            tr('joinAsCaptain'),
             style: TextStyle(
               color: Colors.white,
               fontSize: 24,
@@ -337,13 +338,13 @@ class _Header extends StatelessWidget {
   static String _stepHint(int step) {
     switch (step) {
       case 0:
-        return 'أخبرنا عن نفسك';
+        return tr('aboutYou');
       case 1:
-        return 'تفاصيل السيارة';
+        return tr('carDetailsStep');
       case 2:
-        return 'الرخصة والترقيم';
+        return tr('licensePlateStep');
       case 3:
-        return 'الوثائق المطلوبة';
+        return tr('requiredDocs');
     }
     return '';
   }
@@ -371,14 +372,14 @@ class _Step1Personal extends StatelessWidget {
         const SizedBox(height: HancrSpacing.xl),
         _SectionTitle(
           icon: Icons.person_rounded,
-          title: 'المعلومات الشخصية',
+          title: tr('personalInfo'),
         ),
         const SizedBox(height: HancrSpacing.lg),
         TextField(
           controller: firstCtrl,
           textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(
-            labelText: 'الاسم الأول',
+          decoration: InputDecoration(
+            labelText: tr('firstName'),
             prefixIcon: Icon(Icons.person_outline_rounded),
           ),
         ),
@@ -386,8 +387,8 @@ class _Step1Personal extends StatelessWidget {
         TextField(
           controller: lastCtrl,
           textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(
-            labelText: 'اسم العائلة',
+          decoration: InputDecoration(
+            labelText: tr('lastName'),
             prefixIcon: Icon(Icons.person_outline_rounded),
           ),
         ),
@@ -395,7 +396,7 @@ class _Step1Personal extends StatelessWidget {
         HancrCard(
           backgroundColor: HancrColors.violetLight.withValues(alpha: 0.4),
           child: Row(
-            children: const [
+            children: [
               Icon(
                 Icons.shield_rounded,
                 color: HancrColors.violetDeep,
@@ -404,7 +405,7 @@ class _Step1Personal extends StatelessWidget {
               SizedBox(width: HancrSpacing.sm),
               Expanded(
                 child: Text(
-                  'بياناتك محمية ولن تُشارَك مع طرف ثالث',
+                  tr('dataProtected'),
                   style: TextStyle(
                     fontSize: 12,
                     color: HancrColors.violetDeep,
@@ -440,15 +441,15 @@ class _Step2Vehicle extends StatelessWidget {
   final String? selectedColor;
   final void Function(String) onColorSelect;
 
-  static const _colors = [
-    ('أبيض', Color(0xFFFFFFFF)),
-    ('أسود', Color(0xFF1F2937)),
-    ('فضي', Color(0xFFC0C0C0)),
-    ('رمادي', Color(0xFF6B7280)),
-    ('أحمر', Color(0xFFDC2626)),
-    ('أزرق', Color(0xFF2563EB)),
-    ('بني', Color(0xFF92400E)),
-    ('ذهبي', Color(0xFFD4AF37)),
+  List<(String, Color)> get _colors => [
+    (tr('colWhite'), Color(0xFFFFFFFF)),
+    (tr('colBlack'), Color(0xFF1F2937)),
+    (tr('colSilver'), Color(0xFFC0C0C0)),
+    (tr('colGray'), Color(0xFF6B7280)),
+    (tr('colRed'), Color(0xFFDC2626)),
+    (tr('colBlue'), Color(0xFF2563EB)),
+    (tr('colBrown'), Color(0xFF92400E)),
+    (tr('colGold'), Color(0xFFD4AF37)),
   ];
 
   @override
@@ -459,14 +460,14 @@ class _Step2Vehicle extends StatelessWidget {
         const SizedBox(height: HancrSpacing.xl),
         _SectionTitle(
           icon: Icons.directions_car_rounded,
-          title: 'بيانات السيارة',
+          title: tr('carDataSection'),
         ),
         const SizedBox(height: HancrSpacing.lg),
         TextField(
           controller: brandCtrl,
           textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(
-            labelText: 'الماركة (Toyota، Honda...)',
+          decoration: InputDecoration(
+            labelText: tr('brandHint'),
             prefixIcon: Icon(Icons.directions_car_outlined),
           ),
         ),
@@ -474,8 +475,8 @@ class _Step2Vehicle extends StatelessWidget {
         TextField(
           controller: modelCtrl,
           textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(
-            labelText: 'الموديل (Camry، Accord...)',
+          decoration: InputDecoration(
+            labelText: tr('modelHint'),
             prefixIcon: Icon(Icons.car_repair_rounded),
           ),
         ),
@@ -484,16 +485,16 @@ class _Step2Vehicle extends StatelessWidget {
           controller: yearCtrl,
           keyboardType: TextInputType.number,
           maxLength: 4,
-          decoration: const InputDecoration(
-            labelText: 'سنة الصنع',
+          decoration: InputDecoration(
+            labelText: tr('manufactureYear'),
             prefixIcon: Icon(Icons.calendar_today_rounded),
             counterText: '',
           ),
         ),
         const SizedBox(height: HancrSpacing.lg),
         // Color picker
-        const Text(
-          'لون السيارة',
+        Text(
+          tr('carColor'),
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
@@ -588,22 +589,22 @@ class _Step3License extends StatelessWidget {
         const SizedBox(height: HancrSpacing.xl),
         _SectionTitle(
           icon: Icons.confirmation_number_rounded,
-          title: 'الترقيم والرخصة',
+          title: tr('plateLicenseSection'),
         ),
         const SizedBox(height: HancrSpacing.lg),
         TextField(
           controller: plateCtrl,
           textCapitalization: TextCapitalization.characters,
-          decoration: const InputDecoration(
-            labelText: 'رقم اللوحة (ABC 1234)',
+          decoration: InputDecoration(
+            labelText: tr('plateHint'),
             prefixIcon: Icon(Icons.pin_rounded),
           ),
         ),
         const SizedBox(height: HancrSpacing.md),
         TextField(
           controller: licenseCtrl,
-          decoration: const InputDecoration(
-            labelText: 'رقم رخصة القيادة',
+          decoration: InputDecoration(
+            labelText: tr('licenseNumber'),
             prefixIcon: Icon(Icons.badge_outlined),
           ),
         ),
@@ -611,7 +612,7 @@ class _Step3License extends StatelessWidget {
         HancrCard(
           backgroundColor: HancrColors.warningBg,
           child: Row(
-            children: const [
+            children: [
               Icon(
                 Icons.info_outline_rounded,
                 color: Color(0xFF92400E),
@@ -620,7 +621,7 @@ class _Step3License extends StatelessWidget {
               SizedBox(width: HancrSpacing.sm),
               Expanded(
                 child: Text(
-                  'تأكَّد من إدخال البيانات بدقة — ستُستخدم للتحقق من هويتك',
+                  tr('verifyAccuracy'),
                   style: TextStyle(
                     fontSize: 12,
                     color: Color(0xFF92400E),
@@ -667,7 +668,7 @@ class _Step4Documents extends StatelessWidget {
         const SizedBox(height: HancrSpacing.xl),
         _SectionTitle(
           icon: Icons.upload_file_rounded,
-          title: 'الوثائق المطلوبة',
+          title: tr('requiredDocs'),
         ),
         const SizedBox(height: HancrSpacing.lg),
         _UploadCard(
@@ -700,7 +701,7 @@ class _Step4Documents extends StatelessWidget {
         HancrCard(
           backgroundColor: HancrColors.successBg,
           child: Row(
-            children: const [
+            children: [
               Icon(
                 Icons.verified_user_rounded,
                 color: HancrColors.success,

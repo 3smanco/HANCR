@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'core/i18n/app_localization.dart';
 import 'blocs/auth/auth_bloc.dart';
 import 'blocs/auth/auth_event.dart';
 import 'blocs/auth/auth_state.dart';
@@ -124,13 +126,25 @@ class _HancrCaptainAppState extends State<HancrCaptainApp> {
             PushService.instance.registerWithBackend();
           }
         },
-        child: MaterialApp.router(
-          title: 'HANCR Captain',
-          theme: AuroraTheme.dark,
-          darkTheme: AuroraTheme.dark,
-          themeMode: ThemeMode.dark,
-          routerConfig: _router,
-          debugShowCheckedModeBanner: false,
+        child: ValueListenableBuilder<Locale>(
+          valueListenable: LocaleController.instance,
+          builder: (context, locale, _) {
+            return MaterialApp.router(
+              title: 'HANCR Captain',
+              theme: AuroraTheme.dark,
+              darkTheme: AuroraTheme.dark,
+              themeMode: ThemeMode.dark,
+              routerConfig: _router,
+              debugShowCheckedModeBanner: false,
+              locale: locale,
+              supportedLocales: kSupportedLocales,
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+            );
+          },
         ),
       ),
     );

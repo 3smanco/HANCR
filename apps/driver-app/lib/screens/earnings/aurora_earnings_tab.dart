@@ -1,3 +1,4 @@
+import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -5,6 +6,12 @@ import '../../blocs/driver/driver_bloc.dart';
 import '../../blocs/driver/driver_state.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../wallet/aurora_driver_wallet_screen.dart';
+
+void _soon(BuildContext c) => ScaffoldMessenger.of(c).showSnackBar(
+      SnackBar(
+          content: Text('${tr('comingSoon')} ✨'),
+          backgroundColor: AuroraColors.ash),
+    );
 
 /// AuroraEarningsTab — صفحة الأرباح بنمط Aurora.
 class AuroraEarningsTab extends StatefulWidget {
@@ -16,7 +23,7 @@ class AuroraEarningsTab extends StatefulWidget {
 
 class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
   int _periodIdx = 0;
-  static const _periods = ['اليوم', 'الأسبوع', 'الشهر', 'الإجمالي'];
+  List<String> get _periods => [tr('today'), tr('week'), tr('month'), tr('total')];
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +45,7 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
                       horizontal: AuroraSpacing.lg),
                   children: [
                     const SizedBox(height: AuroraSpacing.md),
-                    Text('الأرباح', style: AuroraText.displayMedium),
+                    Text(tr('earnings'), style: AuroraText.displayMedium),
                     const SizedBox(height: AuroraSpacing.xl),
 
                     // ─── Hero balance card ───
@@ -56,13 +63,13 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
                       children: [
                         Expanded(child: _statCard(
                           icon: Icons.directions_car,
-                          label: 'الرحلات',
+                          label: tr('trips'),
                           value: '${d.ratingCount}',
                         )),
                         const SizedBox(width: AuroraSpacing.sm),
                         Expanded(child: _statCard(
                           icon: Icons.star,
-                          label: 'التقييم',
+                          label: tr('rating'),
                           value: d.rating.toStringAsFixed(1),
                           iconColor: AuroraColors.gold,
                         )),
@@ -73,13 +80,13 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
                       children: [
                         Expanded(child: _statCard(
                           icon: Icons.timer,
-                          label: 'الساعات',
+                          label: tr('hours'),
                           value: '0h',
                         )),
                         const SizedBox(width: AuroraSpacing.sm),
                         Expanded(child: _statCard(
                           icon: Icons.straighten,
-                          label: 'الكيلومترات',
+                          label: tr('kilometers'),
                           value: '0',
                         )),
                       ],
@@ -89,7 +96,7 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
 
                     // ─── Withdraw CTA ───
                     AuroraButton.primary(
-                      label: 'سحب الرصيد',
+                      label: tr('withdraw'),
                       icon: Icons.account_balance,
                       onPressed: d.balance > 0
                           ? () => Navigator.of(context).push(
@@ -110,8 +117,8 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
                         children: [
                           _menuRow(
                             icon: Icons.receipt_long,
-                            label: 'كشف الحساب',
-                            subtitle: 'تفاصيل كل رحلة',
+                            label: tr('statement'),
+                            subtitle: tr('tripDetails'),
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (_) =>
@@ -123,17 +130,17 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
                               height: 1, color: AuroraColors.divider),
                           _menuRow(
                             icon: Icons.credit_card,
-                            label: 'الحساب البنكي',
-                            subtitle: 'لم يُربط بعد',
-                            onTap: () {},
+                            label: tr('bankAccount'),
+                            subtitle: tr('notLinked'),
+                            onTap: () => _soon(context),
                           ),
                           const Divider(
                               height: 1, color: AuroraColors.divider),
                           _menuRow(
                             icon: Icons.help_outline,
-                            label: 'مشكلة في الرصيد؟',
-                            subtitle: 'تواصل مع الدعم',
-                            onTap: () {},
+                            label: tr('balanceIssue'),
+                            subtitle: tr('contactSupport'),
+                            onTap: () => _soon(context),
                           ),
                         ],
                       ),
@@ -144,7 +151,7 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
                 );
               }
               return Center(
-                child: Text('لا توجد بيانات', style: AuroraText.bodyMedium),
+                child: Text(tr('noData'), style: AuroraText.bodyMedium),
               );
             },
           ),
@@ -172,7 +179,7 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
                   color: AuroraColors.pearl, size: 20),
               const SizedBox(width: AuroraSpacing.sm),
               Text(
-                'الأرباح المتاحة للسحب',
+                tr('availableToWithdraw'),
                 style: AuroraText.bodyMedium.copyWith(
                   color: AuroraColors.pearl.withValues(alpha: 0.9),
                 ),

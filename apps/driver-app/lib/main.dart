@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app.dart';
+import 'core/i18n/app_localization.dart';
 import 'core/services/push_service.dart';
 
 Future<void> main() async {
@@ -48,6 +49,7 @@ Future<void> main() async {
         systemNavigationBarColor: Color(0xFF0A0807),
       ),
     );
+    await LocaleController.instance.load();
     try {
       await PushService.instance.initialize();
     } catch (e) {

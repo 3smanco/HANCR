@@ -1,3 +1,4 @@
+import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -125,7 +126,7 @@ class _View extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AuroraSpacing.md),
-        Text('محفظتي', style: AuroraText.titleLarge),
+        Text(tr('myWallet'), style: AuroraText.titleLarge),
       ],
     );
   }
@@ -148,7 +149,7 @@ class _View extends StatelessWidget {
               const Icon(Icons.savings, color: AuroraColors.pearl, size: 20),
               const SizedBox(width: AuroraSpacing.sm),
               Text(
-                'الأرباح المتاحة',
+                tr('availableEarnings'),
                 style: AuroraText.bodyMedium.copyWith(
                   color: AuroraColors.pearl.withValues(alpha: 0.9),
                 ),
@@ -203,7 +204,7 @@ class _View extends StatelessWidget {
                     const SizedBox(width: AuroraSpacing.sm),
                     Text(
                       canWithdraw
-                          ? 'طلب سحب'
+                          ? tr('requestWithdrawal')
                           : 'الحد الأدنى 50 ${w.currency}',
                       style: AuroraText.titleSmall.copyWith(
                         color: canWithdraw
@@ -225,7 +226,7 @@ class _View extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('المعاملات', style: AuroraText.titleMedium),
+        Text(tr('transactions'), style: AuroraText.titleMedium),
         Container(
           padding: const EdgeInsets.symmetric(
               horizontal: AuroraSpacing.sm, vertical: 2),
@@ -303,7 +304,7 @@ class _View extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    'بانتظار الموافقة',
+                    tr('pendingApproval'),
                     style: AuroraText.caption.copyWith(
                       color: AuroraColors.warning,
                       fontSize: 9,
@@ -339,7 +340,7 @@ class _View extends StatelessWidget {
           Icon(Icons.receipt_long_outlined,
               size: 64, color: AuroraColors.textHint),
           const SizedBox(height: AuroraSpacing.md),
-          Text('لا توجد معاملات', style: AuroraText.titleSmall),
+          Text(tr('noTransactions'), style: AuroraText.titleSmall),
         ],
       ),
     );
@@ -358,7 +359,7 @@ class _View extends StatelessWidget {
             Text(msg, style: AuroraText.bodyMedium, textAlign: TextAlign.center),
             const SizedBox(height: AuroraSpacing.lg),
             AuroraButton.primary(
-              label: 'إعادة المحاولة',
+              label: tr('retry'),
               fullWidth: false,
               onPressed: () =>
                   ctx.read<WalletBloc>().add(const WalletLoadRequested()),
@@ -405,7 +406,7 @@ class _View extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: AuroraSpacing.lg),
-                  Text('طلب سحب', style: AuroraText.titleLarge),
+                  Text(tr('requestWithdrawal'), style: AuroraText.titleLarge),
                   const SizedBox(height: 4),
                   Text(
                     'الرصيد المتاح: ${w.balance.toStringAsFixed(2)} ${w.currency}',
@@ -417,7 +418,7 @@ class _View extends StatelessWidget {
                     keyboardType: TextInputType.number,
                     style: AuroraText.titleLarge,
                     decoration: InputDecoration(
-                      hintText: 'المبلغ',
+                      hintText: tr('amount'),
                       suffix: Text(w.currency, style: AuroraText.bodyMedium),
                     ),
                   ),

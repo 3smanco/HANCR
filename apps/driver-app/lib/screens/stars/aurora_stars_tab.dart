@@ -1,3 +1,4 @@
+import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/driver/driver_bloc.dart';
@@ -80,13 +81,13 @@ class AuroraStarsTab extends StatelessWidget {
                     children: [
                       Expanded(child: _stat(
                         icon: Icons.directions_car,
-                        label: 'الرحلات',
+                        label: tr('trips'),
                         value: '${d.ratingCount}',
                       )),
                       const SizedBox(width: AuroraSpacing.sm),
                       Expanded(child: _stat(
                         icon: Icons.star,
-                        label: 'التقييم',
+                        label: tr('rating'),
                         value: d.rating.toStringAsFixed(1),
                         color: AuroraColors.gold,
                       )),
@@ -96,14 +97,14 @@ class AuroraStarsTab extends StatelessWidget {
                   const SizedBox(height: AuroraSpacing.lg),
 
                   // ─── Perks ───
-                  Text('مزاياك', style: AuroraText.titleMedium),
+                  Text(tr('yourBenefits'), style: AuroraText.titleMedium),
                   const SizedBox(height: AuroraSpacing.md),
-                  _perk(Icons.fast_forward, 'أولوية في الطلبات',
-                      'احصل على أكثر الطلبات قيمة'),
-                  _perk(Icons.handshake_outlined, 'عمولات أقل',
-                      'وفّر حتى 3% من العمولة'),
-                  _perk(Icons.trending_up, 'مكافآت أداء',
-                      'مكافآت إضافية لإكمال أهداف يومية'),
+                  _perk(Icons.fast_forward, tr('priorityOrders'),
+                      tr('priorityOrdersSub')),
+                  _perk(Icons.handshake_outlined, tr('lowerCommission'),
+                      tr('lowerCommissionSub')),
+                  _perk(Icons.trending_up, tr('perfRewards'),
+                      tr('perfRewardsSub')),
                   const SizedBox(height: AuroraSpacing.huge),
                 ],
               );

@@ -1,3 +1,4 @@
+import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -56,7 +57,7 @@ class _WithdrawalSheetState extends State<WithdrawalSheet> {
   }
 
   String? _validate(double? amount) {
-    if (amount == null || amount <= 0) return 'أدخل مبلغاً صحيحاً';
+    if (amount == null || amount <= 0) return tr('enterValidAmount');
     if (amount < minWithdrawal) {
       return 'الحد الأدنى للسحب: ${minWithdrawal.toStringAsFixed(0)} ${widget.currency}';
     }
@@ -121,8 +122,8 @@ class _WithdrawalSheetState extends State<WithdrawalSheet> {
               const SizedBox(height: 20),
 
               // ───── Quick percent buttons ─────
-              const Text(
-                'اختر نسبة من رصيدك',
+              Text(
+                tr('choosePercent'),
                 style: TextStyle(
                   color: HancrColors.textPrimary,
                   fontSize: 13,
@@ -150,7 +151,7 @@ class _WithdrawalSheetState extends State<WithdrawalSheet> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: _PercentButton(
-                      label: 'الكل',
+                      label: tr('all'),
                       onTap: () => _selectPercent(1.0),
                       selected: _isSelected(1.0),
                     ),
@@ -168,7 +169,7 @@ class _WithdrawalSheetState extends State<WithdrawalSheet> {
                   _selectedAmount = null;
                 }),
                 decoration: InputDecoration(
-                  labelText: 'أو أدخل مبلغاً مخصصاً',
+                  labelText: tr('orCustomAmount'),
                   prefixIcon: const Icon(Icons.edit_outlined, size: 18),
                   suffix: Text(widget.currency),
                   errorText: error,
@@ -187,7 +188,7 @@ class _WithdrawalSheetState extends State<WithdrawalSheet> {
                   color: HancrColors.infoBg,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Row(
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(Icons.info_outline,
@@ -195,7 +196,7 @@ class _WithdrawalSheetState extends State<WithdrawalSheet> {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'سيُحوَّل المبلغ إلى حسابك البنكي المسجَّل خلال 1-3 أيام عمل بعد موافقة الإدارة. سيُحجز المبلغ من رصيدك فور تقديم الطلب.',
+                        tr('withdrawalNote'),
                         style: TextStyle(
                           color: HancrColors.textPrimary,
                           fontSize: 12,

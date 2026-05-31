@@ -34,5 +34,11 @@ class StorageService {
 
   static Future<String?> getPhone() => _storage.read(key: _phoneKey);
 
+  // ── اللغة المختارة ──
+  static const _langKey = 'hancr_driver_lang';
+  static Future<void> saveLanguage(String code) =>
+      _storage.write(key: _langKey, value: code);
+  static Future<String?> getLanguage() => _storage.read(key: _langKey);
+
   static Future<void> clearAll() => _storage.deleteAll();
 }

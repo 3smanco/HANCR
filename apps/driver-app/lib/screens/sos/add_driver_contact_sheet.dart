@@ -1,3 +1,4 @@
+import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/sos/sos_bloc.dart';
@@ -61,8 +62,8 @@ class _AddDriverContactSheetState extends State<AddDriverContactSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'إضافة جهة طوارئ',
+              Text(
+                tr('addContact'),
                 style: TextStyle(
                   color: HancrColors.textPrimary,
                   fontSize: 20,
@@ -70,8 +71,8 @@ class _AddDriverContactSheetState extends State<AddDriverContactSheet> {
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                'سيُرسَل لها SMS تلقائياً عند تفعيل الطوارئ',
+              Text(
+                tr('contactSmsHint'),
                 style: TextStyle(
                   color: HancrColors.textSecondary,
                   fontSize: 13,
@@ -84,8 +85,8 @@ class _AddDriverContactSheetState extends State<AddDriverContactSheet> {
                 textCapitalization: TextCapitalization.words,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  labelText: 'الاسم',
-                  hintText: 'مثال: أبي',
+                  labelText: tr('name'),
+                  hintText: tr('nameExample'),
                   prefixIcon: const Icon(Icons.person_outline),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -98,10 +99,10 @@ class _AddDriverContactSheetState extends State<AddDriverContactSheet> {
                 keyboardType: TextInputType.phone,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  labelText: 'رقم الهاتف',
+                  labelText: tr('phoneNumber'),
                   hintText: '+966501234567',
                   prefixIcon: const Icon(Icons.phone_outlined),
-                  helperText: 'بصيغة دولية كاملة (E.164)',
+                  helperText: tr('e164Hint'),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -110,8 +111,8 @@ class _AddDriverContactSheetState extends State<AddDriverContactSheet> {
               const SizedBox(height: 16),
 
               // ───── Relation selector ─────
-              const Text(
-                'العلاقة',
+              Text(
+                tr('relation'),
                 style: TextStyle(
                   color: HancrColors.textPrimary,
                   fontSize: 13,
@@ -170,15 +171,15 @@ class _AddDriverContactSheetState extends State<AddDriverContactSheet> {
                   value: _autoShare,
                   onChanged: (v) => setState(() => _autoShare = v),
                   activeColor: HancrColors.violet,
-                  title: const Text(
-                    'مشاركة الرحلات تلقائياً',
+                  title: Text(
+                    tr('autoShareRides'),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  subtitle: const Text(
-                    'تُشارَك تفاصيل كل رحلة مع هذه الجهة',
+                  subtitle: Text(
+                    tr('autoShareSub'),
                     style: TextStyle(
                       fontSize: 11,
                       color: HancrColors.textSecondary,
@@ -189,7 +190,7 @@ class _AddDriverContactSheetState extends State<AddDriverContactSheet> {
               const SizedBox(height: 20),
 
               HancrButton.primary(
-                label: 'إضافة الجهة',
+                label: tr('addThisContact'),
                 onPressed: _isValid
                     ? () {
                         context.read<SosBloc>().add(
