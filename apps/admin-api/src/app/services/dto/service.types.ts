@@ -1,5 +1,6 @@
 import { ObjectType, InputType, Field, Int, Float } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-scalars';
+import { IsOptional } from 'class-validator';
 
 @ObjectType()
 export class AdminServiceType {
@@ -64,23 +65,23 @@ export class CreateServiceInput {
 
 @InputType()
 export class UpdateServiceInput {
-  @Field({ nullable: true }) name?: string;
-  @Field({ nullable: true }) nameEn?: string;
-  @Field(() => Float, { nullable: true }) baseFare?: number;
-  @Field(() => Float, { nullable: true }) perHundredMeters?: number;
-  @Field(() => Float, { nullable: true }) perMinuteDrive?: number;
-  @Field(() => Float, { nullable: true }) perMinuteWait?: number;
-  @Field(() => Float, { nullable: true }) minimumFee?: number;
-  @Field(() => Float, { nullable: true }) providerSharePercent?: number;
-  @Field(() => Float, { nullable: true }) cancellationTotalFee?: number;
-  @Field({ nullable: true }) enabled?: boolean;
-  @Field({ nullable: true }) bidModeEnabled?: boolean;
-  @Field({ nullable: true }) isVip?: boolean;
-  @Field({ nullable: true }) iconUrl?: string;
-  @Field(() => Int, { nullable: true }) displayOrder?: number;
-  @Field({ nullable: true }) availableTimeFrom?: string;
-  @Field({ nullable: true }) availableTimeTo?: string;
-  @Field(() => GraphQLJSON, { nullable: true }) timeMultipliers?: unknown;
-  @Field(() => GraphQLJSON, { nullable: true }) weekdayMultipliers?: unknown;
-  @Field(() => GraphQLJSON, { nullable: true }) dateRangeMultipliers?: unknown;
+  @IsOptional() @Field({ nullable: true }) name?: string;
+  @IsOptional() @Field({ nullable: true }) nameEn?: string;
+  @IsOptional() @Field(() => Float, { nullable: true }) baseFare?: number;
+  @IsOptional() @Field(() => Float, { nullable: true }) perHundredMeters?: number;
+  @IsOptional() @Field(() => Float, { nullable: true }) perMinuteDrive?: number;
+  @IsOptional() @Field(() => Float, { nullable: true }) perMinuteWait?: number;
+  @IsOptional() @Field(() => Float, { nullable: true }) minimumFee?: number;
+  @IsOptional() @Field(() => Float, { nullable: true }) providerSharePercent?: number;
+  @IsOptional() @Field(() => Float, { nullable: true }) cancellationTotalFee?: number;
+  @IsOptional() @Field({ nullable: true }) enabled?: boolean;
+  @IsOptional() @Field({ nullable: true }) bidModeEnabled?: boolean;
+  @IsOptional() @Field({ nullable: true }) isVip?: boolean;
+  @IsOptional() @Field({ nullable: true }) iconUrl?: string;
+  @IsOptional() @Field(() => Int, { nullable: true }) displayOrder?: number;
+  @IsOptional() @Field({ nullable: true }) availableTimeFrom?: string;
+  @IsOptional() @Field({ nullable: true }) availableTimeTo?: string;
+  @IsOptional() @Field(() => GraphQLJSON, { nullable: true }) timeMultipliers?: unknown;
+  @IsOptional() @Field(() => GraphQLJSON, { nullable: true }) weekdayMultipliers?: unknown;
+  @IsOptional() @Field(() => GraphQLJSON, { nullable: true }) dateRangeMultipliers?: unknown;
 }
