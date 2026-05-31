@@ -300,6 +300,7 @@ const ar = {
     emptyHint: 'أضف خدمة جديدة',
     emptyHintRegion: 'لا توجد خدمات بهذه المنطقة',
     updated: 'تم تحديث الخدمة',
+    editPrices: 'تعديل الأسعار',
   },
 
   // ── Features ──
@@ -654,6 +655,7 @@ const en: typeof ar = {
     emptyHint: 'Add a new service',
     emptyHintRegion: 'No services in this region',
     updated: 'Service updated',
+    editPrices: 'Edit prices',
   },
 
   features: {

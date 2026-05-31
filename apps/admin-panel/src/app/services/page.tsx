@@ -12,9 +12,11 @@ import {
   PowerOff,
   Power,
   TrendingUp,
+  Pencil,
+  X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { LIST_SERVICES, LIST_REGIONS, TOGGLE_SERVICE_ENABLED } from '@/lib/gql';
+import { LIST_SERVICES, LIST_REGIONS, TOGGLE_SERVICE_ENABLED, UPDATE_SERVICE } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { useT } from '@/i18n/LocaleProvider';
 
@@ -38,6 +40,7 @@ export default function ServicesPage() {
     HourlyChauffeur: t('services.types.HourlyChauffeur'),
   };
   const [regionId, setRegionId] = useState<number | undefined>(undefined);
+  const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
 
   const { data: regionsData } = useQuery(LIST_REGIONS);
   const { data, loading, refetch } = useQuery(LIST_SERVICES, {
@@ -47,6 +50,15 @@ export default function ServicesPage() {
   const [toggleEnabled] = useMutation(TOGGLE_SERVICE_ENABLED, {
     onCompleted: () => {
       toast.success(t('services.updated'));
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const [updateService, { loading: saving }] = useMutation(UPDATE_SERVICE, {
+    onCompleted: () => {
+      toast.success(t('services.updated'));
+      setEditing(null);
       refetch();
     },
     onError: (e) => toast.error(e.message),
@@ -172,30 +184,153 @@ export default function ServicesPage() {
                     </div>
                   </div>
 
-                  {/* Toggle */}
-                  <button
-                    onClick={() => toggleEnabled({ variables: { id: s.id } })}
-                    className={`btn-sm w-full mt-4 ${
-                      enabled ? 'btn-outline' : 'btn-success'
-                    }`}
-                  >
-                    {enabled ? (
-                      <>
-                        <PowerOff className="w-3.5 h-3.5" />
-                        {t('regions.actions.disable')}
-                      </>
-                    ) : (
-                      <>
-                        <Power className="w-3.5 h-3.5" />
-                        {t('regions.actions.enable')}
-                      </>
-                    )}
-                  </button>
+                  {/* Actions */}
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      onClick={() => setEditing(s)}
+                      className="btn-sm btn-primary flex-1"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                      {t('services.editPrices')}
+                    </button>
+                    <button
+                      onClick={() => toggleEnabled({ variables: { id: s.id } })}
+                      className={`btn-sm flex-1 ${
+                        enabled ? 'btn-outline' : 'btn-success'
+                      }`}
+                    >
+                      {enabled ? (
+                        <>
+                          <PowerOff className="w-3.5 h-3.5" />
+                          {t('regions.actions.disable')}
+                        </>
+                      ) : (
+                        <>
+                          <Power className="w-3.5 h-3.5" />
+                          {t('regions.actions.enable')}
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
+      </div>
+
+      {editing && (
+        <PriceEditModal
+          service={editing}
+          saving={saving}
+          onClose={() => setEditing(null)}
+          onSave={(input) =>
+            updateService({ variables: { id: editing.id, input } })
+          }
+          t={t}
+        />
+      )}
+    </div>
+  );
+}
+
+function PriceEditModal({
+  service,
+  saving,
+  onClose,
+  onSave,
+  t,
+}: {
+  service: Record<string, unknown>;
+  saving: boolean;
+  onClose: () => void;
+  onSave: (input: Record<string, number>) => void;
+  t: (path: string, vars?: Record<string, string | number>) => string;
+}) {
+  const [baseFare, setBaseFare] = useState(String(service.baseFare ?? 0));
+  const [perKm, setPerKm] = useState(
+    String(((service.perHundredMeters as number) * 10).toFixed(2)),
+  );
+  const [perMin, setPerMin] = useState(String(service.perMinuteDrive ?? 0));
+  const [minFee, setMinFee] = useState(String(service.minimumFee ?? 0));
+  const [commission, setCommission] = useState(
+    String(service.providerSharePercent ?? 15),
+  );
+
+  const handleSave = () => {
+    onSave({
+      baseFare: Number(baseFare),
+      perHundredMeters: Number(perKm) / 10,
+      perMinuteDrive: Number(perMin),
+      minimumFee: Number(minFee),
+      providerSharePercent: Number(commission),
+    });
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="card-elevated w-full max-w-md p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-extrabold text-gray-900 text-lg">
+            {t('services.editPrices')} — {service.name as string}
+          </h2>
+          <button onClick={onClose} className="btn-icon">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          <Field label={t('services.pricing.baseFare')} value={baseFare} onChange={setBaseFare} />
+          <Field label={t('services.pricing.perKm')} value={perKm} onChange={setPerKm} />
+          <Field label={t('services.pricing.perMinute')} value={perMin} onChange={setPerMin} />
+          <Field label={t('services.pricing.minimumFee')} value={minFee} onChange={setMinFee} />
+          <Field label={t('services.pricing.commission')} value={commission} onChange={setCommission} suffix="%" />
+        </div>
+
+        <div className="flex gap-2 mt-6">
+          <button onClick={onClose} className="btn-outline flex-1">
+            {t('common.cancel')}
+          </button>
+          <button onClick={handleSave} disabled={saving} className="btn-primary flex-1">
+            {saving ? t('common.loading') : t('common.save')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  suffix = 'SAR',
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  suffix?: string;
+}) {
+  return (
+    <div>
+      <label className="label">{label}</label>
+      <div className="relative">
+        <input
+          type="number"
+          inputMode="decimal"
+          className="input pe-14"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+          {suffix}
+        </span>
       </div>
     </div>
   );

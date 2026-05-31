@@ -248,6 +248,20 @@ export const TOGGLE_SERVICE_ENABLED = gql`
   }
 `;
 
+export const UPDATE_SERVICE = gql`
+  mutation UpdateService($id: Int!, $input: UpdateServiceInput!) {
+    updateService(id: $id, input: $input) {
+      id
+      baseFare
+      perHundredMeters
+      perMinuteDrive
+      perMinuteWait
+      minimumFee
+      providerSharePercent
+    }
+  }
+`;
+
 // ─── APP CONFIG (Feature Flags + Theme + SDUI) ─────────────────────────────
 
 export const GET_APP_CONFIG = gql`
