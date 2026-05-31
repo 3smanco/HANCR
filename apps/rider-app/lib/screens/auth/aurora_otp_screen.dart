@@ -5,6 +5,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
 /// AuroraOtpScreen — تحقق من الـ OTP بنمط Aurora.
@@ -138,13 +139,13 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
 
                     // ─── Title ───
                     Text(
-                      'تحقق من رقمك',
+                      tr('otpTitle'),
                       textAlign: TextAlign.center,
                       style: AuroraText.displayMedium,
                     ),
                     const SizedBox(height: AuroraSpacing.sm),
                     Text(
-                      'أرسلنا رمز التحقق إلى',
+                      tr('otpSentTo'),
                       textAlign: TextAlign.center,
                       style: AuroraText.bodyMedium,
                     ),
@@ -192,7 +193,7 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
 
                     // ─── Verify button ───
                     AuroraButton.primary(
-                      label: 'تحقق',
+                      label: tr('verify'),
                       icon: Icons.check_circle_outline,
                       loading: state is AuthLoading,
                       onPressed: _otpCtrl.text.length >= 4
@@ -208,8 +209,8 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                         onPressed: _resendIn == 0 ? _resend : null,
                         child: Text(
                           _resendIn == 0
-                              ? 'إعادة إرسال الرمز'
-                              : 'إعادة الإرسال خلال $_resendIn ث',
+                              ? tr('resendCode')
+                              : '${tr('resendInPrefix')} $_resendIn ${tr('seconds')}',
                           style: AuroraText.bodyMedium.copyWith(
                             color: _resendIn == 0
                                 ? AuroraColors.ember

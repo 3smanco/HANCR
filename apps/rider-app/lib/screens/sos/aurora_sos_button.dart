@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/sos/sos_bloc.dart';
 import '../../blocs/sos/sos_event.dart';
 import '../../blocs/sos/sos_state.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import 'aurora_emergency_contacts_screen.dart';
 
@@ -109,11 +110,11 @@ class _AuroraSosCompactButtonState extends State<AuroraSosCompactButton>
     if (state is SosLoaded && state.contacts.isEmpty) {
       final addNow = await _showAuroraDialog<bool>(
         context: context,
-        title: 'لا توجد جهات طوارئ',
+        title: tr('noContactsTitle'),
         body:
-            'لم تُسجِّل جهات طوارئ بعد. يُنصح بإضافتها أولاً ليتم إشعارها تلقائياً.',
-        confirmLabel: 'إضافة الآن',
-        cancelLabel: 'تفعيل بدون جهات',
+            tr('noContactsBody'),
+        confirmLabel: tr('addNow'),
+        cancelLabel: tr('activateWithout'),
         confirmIsPrimary: true,
       );
       if (!context.mounted) return;
@@ -130,11 +131,11 @@ class _AuroraSosCompactButtonState extends State<AuroraSosCompactButton>
 
     final confirmed = await _showAuroraDialog<bool>(
       context: context,
-      title: '🚨 تفعيل الطوارئ؟',
+      title: tr('sosActivateConfirm'),
       body:
-          'سيُرسَل موقعك ورسالة استغاثة لكل جهات الطوارئ المسجَّلة. فعِّل هذا الزر فقط في حالات الخطر الحقيقي.',
-      confirmLabel: 'نعم، فعِّل الآن',
-      cancelLabel: 'إلغاء',
+          tr('sosActivateBody'),
+      confirmLabel: tr('yesActivate'),
+      cancelLabel: tr('cancel'),
       confirmIsDanger: true,
     );
 
@@ -158,8 +159,8 @@ class _AuroraSosCompactButtonState extends State<AuroraSosCompactButton>
       title: '🚨 طوارئ نشطة',
       body:
           'تم إشعار $contactsNotified جهة طوارئ.\nهل أنت بأمان الآن؟',
-      confirmLabel: 'نعم، أنا بأمان',
-      cancelLabel: 'لا، الخطر مستمر',
+      confirmLabel: tr('yesSafe'),
+      cancelLabel: tr('noContinueDanger'),
     );
     if (!context.mounted) return;
     if (result == true) {
@@ -242,7 +243,7 @@ class AuroraSosExpandedButton extends StatelessWidget {
           );
         }
         return AuroraButton.danger(
-          label: 'تفعيل الطوارئ',
+          label: tr('sosActivate'),
           icon: Icons.warning_amber_rounded,
           onPressed: () {
             // delegate to compact button logic via dialog
@@ -324,10 +325,10 @@ class AuroraActiveSosBanner extends StatelessWidget {
             onPressed: () async {
               final ok = await _showAuroraDialog<bool>(
                 context: context,
-                title: 'إلغاء الإنذار',
+                title: tr('cancelAlarm'),
                 body:
-                    'هل أنت بأمان الآن؟ سيتم إغلاق الحادثة وإعلام فريق HANCR.',
-                confirmLabel: 'نعم، أنا بأمان',
+                    tr('areYouSafe'),
+                confirmLabel: tr('yesSafe'),
                 cancelLabel: 'لا',
               );
               if (ok == true && context.mounted) {

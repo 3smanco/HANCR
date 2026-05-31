@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
 /// AuroraPhoneScreen — شاشة تسجيل الدخول بالنمط الجديد.
@@ -109,7 +110,7 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
                             border: Border.all(color: AuroraColors.border),
                           ),
                           child: Text(
-                            'تابع باستخدام:',
+                            tr('continueWith'),
                             style: AuroraText.bodyMedium.copyWith(
                               color: AuroraColors.textPrimary,
                             ),
@@ -134,15 +135,15 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
                               _submit();
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('أدخل رقم هاتفك للمتابعة'),
+                                SnackBar(
+                                  content: Text(tr('enterPhoneFirst')),
                                   backgroundColor: AuroraColors.smoke,
                                 ),
                               );
                             }
                           },
                           child: Text(
-                            'دخول لحساب موجود',
+                            tr('existingAccount'),
                             style: AuroraText.bodyMedium.copyWith(
                               color: AuroraColors.textPrimary,
                               decoration: TextDecoration.underline,
@@ -182,7 +183,7 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
         ),
         const SizedBox(height: 4),
         Text(
-          'دخول / تسجيل',
+          tr('loginSignup'),
           style: AuroraText.bodyMedium.copyWith(
             color: AuroraColors.textPrimary,
           ),
@@ -196,14 +197,14 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'HANCR — اختيارك المتميِّز',
+          tr('tagline'),
           style: AuroraText.bodyLarge.copyWith(
             color: AuroraColors.textPrimary,
           ),
         ),
         const SizedBox(height: AuroraSpacing.sm),
         Text(
-          'تنقل ذكي،\nأعيد تصميمه.',
+          tr('heroTitle'),
           style: AuroraText.displayLarge.copyWith(
             color: AuroraColors.pearl,
             fontSize: 36,
@@ -215,8 +216,7 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
         Divider(color: AuroraColors.border, height: 1),
         const SizedBox(height: AuroraSpacing.md),
         Text(
-          'احجز رحلات فاخرة في ثوانٍ، تتبَّع السائقين مباشرة، '
-          'واستمتع برحلات شخصية في مدينتك.',
+          tr('heroSub'),
           style: AuroraText.bodyMedium.copyWith(
             color: AuroraColors.textSecondary,
             height: 1.6,
@@ -251,7 +251,7 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
   Widget _buildPhoneSection(AuthState state) {
     if (!_expanded) {
       return AuroraButton.primary(
-        label: 'تسجيل برقم الهاتف',
+        label: tr('signupPhone'),
         icon: Icons.phone_iphone,
         loading: state is AuthLoading,
         onPressed: () => setState(() => _expanded = true),
@@ -303,7 +303,7 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
         ),
         const SizedBox(height: AuroraSpacing.md),
         AuroraButton.primary(
-          label: 'متابعة',
+          label: tr('continueBtn'),
           trailingIcon: Icons.arrow_forward,
           loading: state is AuthLoading,
           onPressed: _canSubmit ? _submit : null,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/loyalty_gql.dart';
 import '../../core/models/loyalty_model.dart';
@@ -99,7 +100,7 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
           children: [
             Expanded(
               child: _StatBox(
-                label: 'الأميال المتاحة',
+                label: tr('availableMiles'),
                 value: l.availableMiles.toStringAsFixed(0),
                 icon: Icons.stars_rounded,
                 gradient: const LinearGradient(
@@ -110,7 +111,7 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
             const SizedBox(width: HancrSpacing.md),
             Expanded(
               child: _StatBox(
-                label: 'الإجمالي مدى الحياة',
+                label: tr('lifetimeTotal'),
                 value: l.lifetimeMiles.toStringAsFixed(0),
                 icon: Icons.timeline_rounded,
                 gradient: const LinearGradient(
@@ -123,7 +124,7 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
         const SizedBox(height: HancrSpacing.xxl),
 
         // ─── Perks ───
-        _SectionTitle(title: 'مزاياك', icon: Icons.workspace_premium_rounded),
+        _SectionTitle(title: tr('yourBenefits'), icon: Icons.workspace_premium_rounded),
         const SizedBox(height: HancrSpacing.md),
         HancrCard(
           padding: EdgeInsets.zero,
@@ -131,22 +132,22 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
             children: [
               _PerkRow(
                 icon: Icons.upgrade_rounded,
-                label: 'ترقية مجانية للفئة الأعلى',
+                label: tr('freeUpgrade'),
                 value: '${l.freeUpgradesRemaining} متبقي',
                 active: l.freeUpgradesRemaining > 0,
               ),
               const Divider(height: 1, color: HancrColors.divider),
               _PerkRow(
                 icon: Icons.cancel_outlined,
-                label: 'إلغاء مجاني للطلبات',
-                value: l.hasFreeCancellation ? 'مفعَّل' : 'غير متاح',
+                label: tr('freeCancel'),
+                value: l.hasFreeCancellation ? tr('enabled') : tr('notAvailable'),
                 active: l.hasFreeCancellation,
               ),
               if (l.surgeImmunityUntil != null) ...[
                 const Divider(height: 1, color: HancrColors.divider),
                 _PerkRow(
                   icon: Icons.shield_rounded,
-                  label: 'حماية من Surge Pricing',
+                  label: tr('surgeProtection'),
                   value:
                       'حتى ${l.surgeImmunityUntil!.day}/${l.surgeImmunityUntil!.month}',
                   active: l.surgeImmunityUntil!.isAfter(DateTime.now()),
@@ -158,7 +159,7 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
         const SizedBox(height: HancrSpacing.xxl),
 
         // ─── Rewards Catalog ───
-        _SectionTitle(title: 'المكافآت المتاحة', icon: Icons.redeem_rounded),
+        _SectionTitle(title: tr('availableRewards'), icon: Icons.redeem_rounded),
         const SizedBox(height: HancrSpacing.md),
         GridView.count(
           shrinkWrap: true,
@@ -169,23 +170,23 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
           childAspectRatio: 1.15,
           children: [
             _RewardCard(
-              title: 'خصم 10%',
-              subtitle: 'على رحلتك القادمة',
+              title: tr('discount10'),
+              subtitle: tr('onNextRide'),
               cost: 500,
               available: l.availableMiles >= 500,
               icon: Icons.local_offer_rounded,
               color: HancrColors.violet,
             ),
             _RewardCard(
-              title: 'ترقية مجانية',
-              subtitle: 'للفئة Plus',
+              title: tr('freeUpgradePlus'),
+              subtitle: tr('forPlus'),
               cost: 800,
               available: l.availableMiles >= 800,
               icon: Icons.upgrade_rounded,
               color: HancrColors.info,
             ),
             _RewardCard(
-              title: 'رحلة مجانية',
+              title: tr('freeRide'),
               subtitle: 'حتى 50 ر.س',
               cost: 2000,
               available: l.availableMiles >= 2000,
@@ -193,8 +194,8 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
               color: HancrColors.success,
             ),
             _RewardCard(
-              title: 'باقة شهرية',
-              subtitle: '10% خصم لشهر',
+              title: tr('monthlyPack'),
+              subtitle: tr('monthlyPackSub'),
               cost: 3000,
               available: l.availableMiles >= 3000,
               icon: Icons.calendar_month_rounded,
@@ -206,35 +207,35 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
 
         // ─── How to Earn ───
         _SectionTitle(
-          title: 'كيف تكسب المزيد',
+          title: tr('howToEarnMore'),
           icon: Icons.trending_up_rounded,
         ),
         const SizedBox(height: HancrSpacing.md),
         HancrCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               _EarnRow(
                 icon: Icons.directions_car_rounded,
-                text: 'اكسب 1 ميل لكل 1 ر.س تنفقه',
+                text: tr('earn1Mile'),
                 color: HancrColors.violet,
               ),
               SizedBox(height: HancrSpacing.md),
               _EarnRow(
                 icon: Icons.star_rounded,
-                text: 'قيّم سائقك واكسب 10 أميال إضافية',
+                text: tr('rateEarn'),
                 color: HancrColors.warning,
               ),
               SizedBox(height: HancrSpacing.md),
               _EarnRow(
                 icon: Icons.card_giftcard_rounded,
-                text: 'العروض الترويجية = ضعف الأميال',
+                text: tr('promoDouble'),
                 color: HancrColors.success,
               ),
               SizedBox(height: HancrSpacing.md),
               _EarnRow(
                 icon: Icons.group_add_rounded,
-                text: 'ادعُ صديقاً واحصل على 500 ميل',
+                text: tr('inviteEarn500'),
                 color: HancrColors.info,
               ),
             ],
@@ -270,11 +271,11 @@ class _TierHero extends StatelessWidget {
   String _nextTierLabel() {
     switch (loyalty.tier) {
       case LoyaltyTier.bronze:
-        return 'فضي';
+        return tr('silver');
       case LoyaltyTier.silver:
-        return 'ذهبي';
+        return tr('gold');
       case LoyaltyTier.gold:
-        return 'بلاتيني';
+        return tr('platinum');
       case LoyaltyTier.platinum:
         return '';
     }
@@ -321,8 +322,8 @@ class _TierHero extends StatelessWidget {
                 children: [
                   HancrTierBadge(tier: _tierName()),
                   const SizedBox(width: HancrSpacing.sm),
-                  const Text(
-                    'مستواك الحالي',
+                  Text(
+                    tr('yourTier'),
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 12,
@@ -389,8 +390,8 @@ class _TierHero extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'تقدُّمك',
+                    Text(
+                      tr('yourProgress'),
                       style: TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                     Text(
@@ -717,8 +718,8 @@ class _ErrorState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: HancrSpacing.lg),
-            const Text(
-              'حدث خطأ في تحميل البيانات',
+            Text(
+              tr('loadError'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -736,7 +737,7 @@ class _ErrorState extends StatelessWidget {
             ),
             const SizedBox(height: HancrSpacing.xl),
             HancrButton.primary(
-              label: 'إعادة المحاولة',
+              label: tr('retry'),
               icon: Icons.refresh_rounded,
               onPressed: onRetry,
               fullWidth: false,
@@ -774,8 +775,8 @@ class _EmptyState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: HancrSpacing.lg),
-            const Text(
-              'ابدأ رحلتك الأولى',
+            Text(
+              tr('startFirstRide'),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
@@ -783,8 +784,8 @@ class _EmptyState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: HancrSpacing.sm),
-            const Text(
-              'احجز رحلتك الأولى لتبدأ في كسب Hancr Miles',
+            Text(
+              tr('startFirstRideSub'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,

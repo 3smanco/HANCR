@@ -4,6 +4,7 @@ import '../../blocs/sos/sos_bloc.dart';
 import '../../blocs/sos/sos_event.dart';
 import '../../blocs/sos/sos_state.dart';
 import '../../core/models/sos_model.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import 'aurora_add_contact_sheet.dart';
 
@@ -57,7 +58,7 @@ class _ContactsView extends StatelessWidget {
                         const SizedBox(width: AuroraSpacing.md),
                         Expanded(
                           child: Text(
-                            'جهات الطوارئ',
+                            tr('emergencyContacts'),
                             style: AuroraText.titleLarge,
                           ),
                         ),
@@ -101,7 +102,7 @@ class _ContactsView extends StatelessWidget {
               Text(state.message, style: AuroraText.bodyMedium),
               const SizedBox(height: AuroraSpacing.lg),
               AuroraButton.primary(
-                label: 'إعادة المحاولة',
+                label: tr('retry'),
                 fullWidth: false,
                 onPressed: () =>
                     context.read<SosBloc>().add(const SosLoadRequested()),
@@ -169,14 +170,14 @@ class _ContactsView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'سلامتك أولويتنا',
+                  tr('safetyFirst'),
                   style: AuroraText.titleSmall.copyWith(
                     color: AuroraColors.pearl,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'عند الضغط على زر الطوارئ، نُرسل موقعك ورسالة استغاثة لهذه الجهات فوراً.',
+                  tr('sosShareMsg'),
                   style: AuroraText.bodySmall.copyWith(
                     color: AuroraColors.pearl.withValues(alpha: 0.9),
                   ),
@@ -290,16 +291,16 @@ class _ContactsView extends StatelessWidget {
           const Icon(Icons.contact_phone_outlined,
               size: 64, color: AuroraColors.textHint),
           const SizedBox(height: AuroraSpacing.md),
-          Text('لم تضف جهات طوارئ بعد', style: AuroraText.titleSmall),
+          Text(tr('noContactsYet'), style: AuroraText.titleSmall),
           const SizedBox(height: 4),
           Text(
-            'أضف الأشخاص الذين تثق بهم ليُشعَروا في حالات الطوارئ',
+            tr('noContactsSub'),
             style: AuroraText.bodySmall,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AuroraSpacing.lg),
           AuroraButton.primary(
-            label: 'إضافة جهة طوارئ',
+            label: tr('addContact'),
             icon: Icons.add,
             fullWidth: false,
             onPressed: () => _openAdd(context),
@@ -371,18 +372,18 @@ class _ContactsView extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('حذف جهة الطوارئ', style: AuroraText.titleMedium),
+              Text(tr('deleteContact'), style: AuroraText.titleMedium),
               const SizedBox(height: AuroraSpacing.sm),
               Text('هل تريد حذف ${c.name}؟', style: AuroraText.bodyMedium),
               const SizedBox(height: AuroraSpacing.xl),
               AuroraButton.danger(
-                label: 'حذف',
+                label: tr('delete'),
                 icon: Icons.delete_outline,
                 onPressed: () => Navigator.of(dCtx).pop(true),
               ),
               const SizedBox(height: AuroraSpacing.sm),
               AuroraButton.ghost(
-                label: 'إلغاء',
+                label: tr('cancel'),
                 fullWidth: true,
                 onPressed: () => Navigator.of(dCtx).pop(false),
               ),

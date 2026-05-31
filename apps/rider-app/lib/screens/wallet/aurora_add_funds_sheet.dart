@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/wallet/wallet_bloc.dart';
 import '../../blocs/wallet/wallet_event.dart';
 import '../../core/models/wallet_model.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
 /// AuroraAddFundsSheet — مستوحاة من تصميمك "Add Funds":
@@ -61,10 +62,10 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
                 const SizedBox(height: AuroraSpacing.xxl),
 
                 // ─── Title ───
-                Text('إضافة رصيد', style: AuroraText.displayMedium),
+                Text(tr('addFunds'), style: AuroraText.displayMedium),
                 const SizedBox(height: AuroraSpacing.sm),
                 Text(
-                  'كم تريد أن تُضيف إلى محفظتك؟',
+                  tr('howMuchAdd'),
                   style: AuroraText.bodyLarge.copyWith(
                     color: AuroraColors.textSecondary,
                   ),
@@ -110,16 +111,16 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
                     context: context,
                     builder: (_) => AlertDialog(
                       backgroundColor: AuroraColors.ash,
-                      title: Text('الشروط والأحكام',
+                      title: Text(tr('termsTitle'),
                           style: AuroraText.titleSmall),
                       content: Text(
-                        'يُضاف الرصيد إلى محفظتك فوراً بعد تأكيد الدفع. الرصيد غير قابل للاسترداد نقداً ويُستخدم في رحلات HANCR فقط.',
+                        tr('termsBody'),
                         style: AuroraText.bodySmall,
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: Text('حسناً',
+                          child: Text(tr('ok'),
                               style: TextStyle(color: AuroraColors.ember)),
                         ),
                       ],
@@ -129,8 +130,8 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
                     foregroundColor: AuroraColors.textSecondary,
                     alignment: Alignment.centerLeft,
                   ),
-                  child: const Text(
-                    'تطبَّق الشروط',
+                  child: Text(
+                    tr('applyTerms'),
                     style: TextStyle(decoration: TextDecoration.underline),
                   ),
                 ),
@@ -144,7 +145,7 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
 
                 // ─── CTA ───
                 AuroraButton.primary(
-                  label: 'إضافة الرصيد',
+                  label: tr('addFundsBtn'),
                   onPressed: _isValid ? _confirm : null,
                 ),
 

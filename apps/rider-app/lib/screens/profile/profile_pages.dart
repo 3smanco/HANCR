@@ -58,8 +58,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           email: _email.text.trim().isEmpty ? null : _email.text.trim(),
         ));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('تم حفظ التغييرات ✓'),
+      SnackBar(
+        content: Text(tr('saved')),
         backgroundColor: AuroraColors.success,
       ),
     );
@@ -77,22 +77,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return _AuroraPage(
-      title: 'تعديل الملف الشخصي',
+      title: tr('editProfile'),
       child: BlocBuilder<RiderBloc, RiderState>(
         builder: (context, state) {
           _seed(state);
           return ListView(
             padding: const EdgeInsets.all(AuroraSpacing.lg),
             children: [
-              _field('الاسم الأول', _first, Icons.person_outline),
+              _field(tr('firstName'), _first, Icons.person_outline),
               const SizedBox(height: AuroraSpacing.md),
-              _field('الاسم الأخير', _last, Icons.person_outline),
+              _field(tr('lastName'), _last, Icons.person_outline),
               const SizedBox(height: AuroraSpacing.md),
-              _field('البريد الإلكتروني', _email, Icons.mail_outline,
+              _field(tr('email'), _email, Icons.mail_outline,
                   keyboard: TextInputType.emailAddress),
               const SizedBox(height: AuroraSpacing.xl),
               AuroraButton.primary(
-                  label: 'حفظ', icon: Icons.check, onPressed: _save),
+                  label: tr('save'), icon: Icons.check, onPressed: _save),
             ],
           );
         },
@@ -136,24 +136,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 class HelpCenterScreen extends StatelessWidget {
   const HelpCenterScreen({super.key});
 
-  static const _faqs = [
-    ('كيف أطلب رحلة؟', 'من الشاشة الرئيسية اضغط "إلى أين؟"، حدِّد وجهتك على الخريطة، اختر فئة الرحلة ثم اضغط "اطلب الآن".'),
-    ('كيف أدفع؟', 'يمكنك الدفع نقداً أو عبر محفظة HANCR. اشحن محفظتك من تبويب المحفظة.'),
-    ('كيف ألغي رحلة؟', 'أثناء التتبع اضغط "إلغاء الطلب". قد تُطبَّق رسوم إلغاء حسب حالة الرحلة.'),
-    ('ميزات الأمان', 'زر الطوارئ SOS متاح في كل رحلة، ويمكنك إضافة جهات اتصال للطوارئ ومشاركة رحلتك.'),
-    ('كيف أكسب نقاط الولاء؟', 'تكسب نقاطاً مع كل رحلة، وترتقي بين المستويات للحصول على مزايا أكبر.'),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final faqs = <(String, String)>[
+      (tr('faqQ1'), tr('faqA1')),
+      (tr('faqQ2'), tr('faqA2')),
+      (tr('faqQ3'), tr('faqA3')),
+      (tr('faqQ4'), tr('faqA4')),
+      (tr('faqQ5'), tr('faqA5')),
+    ];
     return _AuroraPage(
-      title: 'مركز المساعدة',
+      title: tr('helpCenter'),
       child: ListView(
         padding: const EdgeInsets.all(AuroraSpacing.lg),
         children: [
-          Text('الأسئلة الشائعة', style: AuroraText.titleMedium),
+          Text(tr('faq'), style: AuroraText.titleMedium),
           const SizedBox(height: AuroraSpacing.md),
-          ..._faqs.map((f) => Container(
+          ...faqs.map((f) => Container(
                 margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
                 decoration: BoxDecoration(
                   color: AuroraColors.ash,
@@ -178,7 +177,7 @@ class HelpCenterScreen extends StatelessWidget {
                 ),
               )),
           const SizedBox(height: AuroraSpacing.lg),
-          Text('تواصل معنا', style: AuroraText.titleMedium),
+          Text(tr('contactUs'), style: AuroraText.titleMedium),
           const SizedBox(height: AuroraSpacing.md),
           _contactRow(context, Icons.email_outlined, 'support@hancr.com'),
           const SizedBox(height: AuroraSpacing.sm),
@@ -194,7 +193,7 @@ class HelpCenterScreen extends StatelessWidget {
         Clipboard.setData(ClipboardData(text: value));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('تم نسخ: $value'),
+            content: Text('${tr('copied')}: $value'),
             backgroundColor: AuroraColors.smoke,
           ),
         );
@@ -223,7 +222,7 @@ class InviteFriendsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     const code = 'HANCR-7BICII';
     return _AuroraPage(
-      title: 'ادعُ أصدقاءك',
+      title: tr('inviteFriends'),
       child: ListView(
         padding: const EdgeInsets.all(AuroraSpacing.lg),
         children: [
@@ -242,7 +241,7 @@ class InviteFriendsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AuroraSpacing.lg),
-          Text('اربح مع كل صديق',
+          Text(tr('inviteHeadline'),
               textAlign: TextAlign.center, style: AuroraText.titleMedium),
           const SizedBox(height: 6),
           Text(
@@ -268,8 +267,8 @@ class InviteFriendsScreen extends StatelessWidget {
                   onTap: () {
                     Clipboard.setData(const ClipboardData(text: code));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('تم نسخ كود الإحالة ✓'),
+                      SnackBar(
+                        content: Text(tr('codeCopied')),
                         backgroundColor: AuroraColors.success,
                       ),
                     );
@@ -281,7 +280,7 @@ class InviteFriendsScreen extends StatelessWidget {
           ),
           const SizedBox(height: AuroraSpacing.xl),
           AuroraButton.primary(
-            label: 'مشاركة الكود',
+            label: tr('shareCode'),
             icon: Icons.share,
             onPressed: () {
               Clipboard.setData(const ClipboardData(text: code));

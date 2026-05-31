@@ -10,6 +10,7 @@ import '../../blocs/sos/sos_event.dart';
 import '../../blocs/sos/sos_state.dart';
 import '../../blocs/tracking/tracking_bloc.dart';
 import '../../core/models/order_model.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../sos/aurora_sos_button.dart';
 
@@ -172,7 +173,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
         anchor: const Offset(0.5, 0.5),
         flat: true,
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
-        infoWindow: const InfoWindow(title: 'السائق'),
+        infoWindow: InfoWindow(title: tr('driver')),
       ));
     }
 
@@ -265,16 +266,16 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
     String text;
     Color color;
     if (order.status == OrderStatus.driverAccepted) {
-      text = 'السائق في الطريق';
+      text = tr('driverOnWay');
       color = AuroraColors.ember;
     } else if (order.status == OrderStatus.arrived) {
-      text = 'السائق وصل';
+      text = tr('driverArrived');
       color = AuroraColors.success;
     } else if (order.status == OrderStatus.started) {
-      text = 'في الرحلة';
+      text = tr('inRide');
       color = AuroraColors.info;
     } else {
-      text = 'جاري التنفيذ';
+      text = tr('inProgress');
       color = AuroraColors.textSecondary;
     }
 
@@ -356,27 +357,27 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
                     Expanded(
                       child: _action(
                         icon: Icons.phone,
-                        label: 'اتصال',
+                        label: tr('call'),
                         onTap: () => AuroraToast.comingSoon(rowCtx,
-                            feature: 'الاتصال بالسائق'),
+                            feature: tr('callDriver')),
                       ),
                     ),
                     const SizedBox(width: AuroraSpacing.sm),
                     Expanded(
                       child: _action(
                         icon: Icons.chat_bubble_outline,
-                        label: 'رسالة',
+                        label: tr('message'),
                         onTap: () => AuroraToast.comingSoon(rowCtx,
-                            feature: 'المحادثة'),
+                            feature: tr('chat')),
                       ),
                     ),
                     const SizedBox(width: AuroraSpacing.sm),
                     Expanded(
                       child: _action(
                         icon: Icons.share_outlined,
-                        label: 'مشاركة',
+                        label: tr('share'),
                         onTap: () => AuroraToast.comingSoon(rowCtx,
-                            feature: 'مشاركة الرحلة'),
+                            feature: tr('shareRide')),
                       ),
                     ),
                   ],
@@ -390,7 +391,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
   }
 
   Widget _driverInfoRow(OrderModel order) {
-    final name = order.driverName ?? 'السائق';
+    final name = order.driverName ?? tr('driver');
     final rating = order.driverRating?.toStringAsFixed(1) ?? '—';
     final car = [order.carBrand, order.carModel]
         .where((s) => s != null)
@@ -483,7 +484,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
       if (mins > 0) {
         etaText = '$mins د';
       } else {
-        etaText = 'وصل';
+        etaText = tr('arrivedShort');
       }
     }
 
@@ -495,7 +496,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('وقت الوصول', style: AuroraText.caption),
+                Text(tr('eta'), style: AuroraText.caption),
                 const SizedBox(height: 2),
                 Text(
                   etaText,
@@ -514,7 +515,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('الأجرة', style: AuroraText.caption),
+                Text(tr('fare'), style: AuroraText.caption),
                 const SizedBox(height: 2),
                 Text(
                   '${fmt.format(order.costAfterCoupon)} ${order.currency}',
@@ -575,16 +576,16 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
         ),
         child: AlertDialog(
           backgroundColor: AuroraColors.ash,
-          title: Text('إلغاء الرحلة', style: AuroraText.titleMedium),
+          title: Text(tr('cancelRide'), style: AuroraText.titleMedium),
           content: Text(
-            'هل أنت متأكد من إلغاء الرحلة؟ قد تُطبَّق رسوم إلغاء.',
+            tr('cancelRideConfirm'),
             style: AuroraText.bodyMedium,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dCtx),
               child: Text(
-                'تراجع',
+                tr('undo'),
                 style: AuroraText.bodyMedium.copyWith(color: AuroraColors.ember),
               ),
             ),
@@ -597,7 +598,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
                 backgroundColor: AuroraColors.danger,
               ),
               child: Text(
-                'إلغاء الرحلة',
+                tr('cancelRide'),
                 style: AuroraText.buttonMedium.copyWith(color: AuroraColors.pearl),
               ),
             ),

@@ -6,6 +6,7 @@ import '../../blocs/order/order_bloc.dart';
 import '../../blocs/order/order_event.dart';
 import '../../blocs/order/order_state.dart';
 import '../../core/models/order_model.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
 /// AuroraRateDriverScreen — تقييم السائق بنمط Aurora.
@@ -30,14 +31,14 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
   final _commentCtrl = TextEditingController();
   final Set<String> _tags = {};
 
-  static const _tagOptions = [
-    'سائق محترف',
-    'سيارة نظيفة',
-    'قيادة آمنة',
-    'هادئ ومريح',
-    'ودود',
-    'ملتزم بالطريق',
-  ];
+  List<String> get _tagOptions => [
+        tr('ratePro'),
+        tr('rateClean'),
+        tr('rateSafe'),
+        tr('rateCalm'),
+        tr('rateFriendly'),
+        tr('rateOnRoute'),
+      ];
 
   static const _tips = [0.0, 2.0, 5.0, 10.0];
 
@@ -67,7 +68,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                       const SizedBox(height: AuroraSpacing.lg),
                       TextButton(
                         onPressed: () => context.go('/home'),
-                        child: Text('العودة للرئيسية',
+                        child: Text(tr('backHome'),
                             style: AuroraText.bodyMedium
                                 .copyWith(color: AuroraColors.ember)),
                       ),
@@ -88,11 +89,11 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('تقييم الرحلة', style: AuroraText.titleLarge),
+                        Text(tr('rateTitle'), style: AuroraText.titleLarge),
                         TextButton(
                           onPressed: () => _skip(context, order),
                           child: Text(
-                            'تخطّي',
+                            tr('skip'),
                             style: AuroraText.bodyMedium.copyWith(
                               color: AuroraColors.textSecondary,
                               fontWeight: FontWeight.w700,
@@ -116,7 +117,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
 
                     // ─── Stars rating ───
                     Text(
-                      'كيف كانت رحلتك؟',
+                      tr('howWasRide'),
                       style: AuroraText.titleMedium,
                       textAlign: TextAlign.center,
                     ),
@@ -138,7 +139,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                     // ─── Tags (إيجابيات) ───
                     if (_rating >= 4) ...[
                       Text(
-                        'ما أعجبك؟ (اختياري)',
+                        tr('whatLiked'),
                         style: AuroraText.titleSmall,
                       ),
                       const SizedBox(height: AuroraSpacing.md),
@@ -153,7 +154,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                     // ─── Tip ───
                     if (_rating >= 4) ...[
                       Text(
-                        'إكرامية للسائق (اختياري)',
+                        tr('tipDriver'),
                         style: AuroraText.titleSmall,
                       ),
                       const SizedBox(height: AuroraSpacing.md),
@@ -164,7 +165,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                     ],
 
                     // ─── Comment ───
-                    Text('تعليق إضافي', style: AuroraText.titleSmall),
+                    Text(tr('extraComment'), style: AuroraText.titleSmall),
                     const SizedBox(height: AuroraSpacing.md),
                     TextField(
                       controller: _commentCtrl,
@@ -172,8 +173,8 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                       style: AuroraText.bodyMedium.copyWith(
                         color: AuroraColors.pearl,
                       ),
-                      decoration: const InputDecoration(
-                        hintText: 'شاركنا تجربتك...',
+                      decoration: InputDecoration(
+                        hintText: tr('shareExperience'),
                       ),
                     ),
 
@@ -182,8 +183,8 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                     // ─── Submit ───
                     AuroraButton.primary(
                       label: _tip > 0
-                          ? 'إرسال التقييم + إكرامية ${_tip.toStringAsFixed(0)} ${order.currency}'
-                          : 'إرسال التقييم',
+                          ? '${tr('sendRating')} (+${_tip.toStringAsFixed(0)} ${order.currency})'
+                          : tr('sendRating'),
                       icon: Icons.send_rounded,
                       loading: state is OrderLoading,
                       onPressed: () => _submit(context, order),
@@ -219,7 +220,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                   color: AuroraColors.pearl, size: 20),
               const SizedBox(width: AuroraSpacing.sm),
               Text(
-                'اكتملت الرحلة',
+                tr('rideCompleted'),
                 style: AuroraText.bodyMedium.copyWith(
                   color: AuroraColors.pearl.withValues(alpha: 0.9),
                 ),
@@ -291,7 +292,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
   }
 
   Widget _driverCard(OrderModel order) {
-    final name = order.driverName ?? 'السائق';
+    final name = order.driverName ?? tr('driver');
     return AuroraCard(
       child: Row(
         children: [
@@ -369,15 +370,15 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
   String _ratingLabel() {
     switch (_rating) {
       case 5:
-        return 'ممتاز! ⭐';
+        return tr('star5');
       case 4:
-        return 'جيد جداً';
+        return tr('star4');
       case 3:
-        return 'مقبول';
+        return tr('star3');
       case 2:
-        return 'سيِّئ';
+        return tr('star2');
       case 1:
-        return 'سيِّئ جداً';
+        return tr('star1');
       default:
         return '';
     }
@@ -418,7 +419,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
 
   Widget _tipChip(double amount) {
     final selected = _tip == amount;
-    final label = amount == 0 ? 'بدون' : amount.toStringAsFixed(0);
+    final label = amount == 0 ? tr('none') : amount.toStringAsFixed(0);
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(left: AuroraSpacing.sm),

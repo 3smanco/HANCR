@@ -5,6 +5,7 @@ import '../../blocs/wallet/wallet_bloc.dart';
 import '../../blocs/wallet/wallet_event.dart';
 import '../../blocs/wallet/wallet_state.dart';
 import '../../core/models/wallet_model.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import 'aurora_add_funds_sheet.dart';
 
@@ -49,7 +50,7 @@ class _WalletView extends StatelessWidget {
                       Text(state.message, style: AuroraText.bodyMedium),
                       const SizedBox(height: AuroraSpacing.lg),
                       AuroraButton.primary(
-                        label: 'إعادة المحاولة',
+                        label: tr('retry'),
                         fullWidth: false,
                         onPressed: () => context
                             .read<WalletBloc>()
@@ -106,7 +107,7 @@ class _WalletView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AuroraSpacing.md),
-                Text('المحفظة', style: AuroraText.titleLarge),
+                Text(tr('walletTitle'), style: AuroraText.titleLarge),
               ],
             ),
 
@@ -126,7 +127,7 @@ class _WalletView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('المعاملات', style: AuroraText.titleMedium),
+                Text(tr('transactions'), style: AuroraText.titleMedium),
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: AuroraSpacing.sm, vertical: 2),
@@ -182,7 +183,7 @@ class _WalletView extends StatelessWidget {
                   color: AuroraColors.pearl, size: 20),
               const SizedBox(width: AuroraSpacing.sm),
               Text(
-                'الرصيد المتاح',
+                tr('availableBalance'),
                 style: AuroraText.bodyMedium.copyWith(
                   color: AuroraColors.pearl.withValues(alpha: 0.85),
                 ),
@@ -224,7 +225,7 @@ class _WalletView extends StatelessWidget {
         Expanded(
           child: _actionBtn(
             icon: Icons.add,
-            label: 'شحن',
+            label: tr('topup'),
             primary: true,
             onTap: () => _openRecharge(context, wallet),
           ),
@@ -233,17 +234,17 @@ class _WalletView extends StatelessWidget {
         Expanded(
           child: _actionBtn(
             icon: Icons.send_outlined,
-            label: 'إرسال',
-            onTap: () => AuroraToast.comingSoon(context, feature: 'إرسال الأموال'),
+            label: tr('send'),
+            onTap: () => AuroraToast.comingSoon(context, feature: tr('sendMoney')),
           ),
         ),
         const SizedBox(width: AuroraSpacing.md),
         Expanded(
           child: _actionBtn(
             icon: Icons.receipt_long_outlined,
-            label: 'كشف',
+            label: tr('statement'),
             onTap: () =>
-                AuroraToast.comingSoon(context, feature: 'كشف PDF'),
+                AuroraToast.comingSoon(context, feature: tr('statementPdf')),
           ),
         ),
       ],
@@ -429,10 +430,10 @@ class _WalletView extends StatelessWidget {
           Icon(Icons.receipt_long_outlined,
               size: 64, color: AuroraColors.textHint),
           const SizedBox(height: AuroraSpacing.md),
-          Text('لا توجد معاملات بعد', style: AuroraText.titleSmall),
+          Text(tr('noTransactions'), style: AuroraText.titleSmall),
           const SizedBox(height: 4),
           Text(
-            'ستظهر معاملاتك هنا فور أول رحلة أو شحن',
+            tr('noTransactionsSub'),
             style: AuroraText.bodySmall,
             textAlign: TextAlign.center,
           ),

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/sos/sos_bloc.dart';
 import '../../blocs/sos/sos_event.dart';
 import '../../core/models/sos_model.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
 /// AuroraAddContactSheet — bottom sheet لإضافة جهة طوارئ بنمط Aurora.
@@ -67,26 +68,26 @@ class _AuroraAddContactSheetState extends State<AuroraAddContactSheet> {
               const SizedBox(height: AuroraSpacing.lg),
 
               // Title
-              Text('إضافة جهة طوارئ', style: AuroraText.titleLarge),
+              Text(tr('addContact'), style: AuroraText.titleLarge),
               const SizedBox(height: 4),
               Text(
-                'سيُرسَل لها SMS تلقائياً عند تفعيل الطوارئ',
+                tr('contactSmsHint'),
                 style: AuroraText.bodySmall,
               ),
               const SizedBox(height: AuroraSpacing.xl),
 
               // Name
-              _label('الاسم'),
+              _label(tr('name')),
               const SizedBox(height: AuroraSpacing.sm),
               _field(
                 controller: _nameCtrl,
-                hint: 'مثال: أبي',
+                hint: tr('nameExample'),
                 icon: Icons.person_outline,
               ),
               const SizedBox(height: AuroraSpacing.lg),
 
               // Phone
-              _label('رقم الهاتف'),
+              _label(tr('phoneNumber')),
               const SizedBox(height: AuroraSpacing.sm),
               _field(
                 controller: _phoneCtrl,
@@ -96,13 +97,13 @@ class _AuroraAddContactSheetState extends State<AuroraAddContactSheet> {
               ),
               const SizedBox(height: 4),
               Text(
-                'بصيغة دولية كاملة (E.164)',
+                tr('e164Hint'),
                 style: AuroraText.caption,
               ),
               const SizedBox(height: AuroraSpacing.lg),
 
               // Relation chips
-              _label('العلاقة'),
+              _label(tr('relation')),
               const SizedBox(height: AuroraSpacing.sm),
               Wrap(
                 spacing: AuroraSpacing.sm,
@@ -133,12 +134,12 @@ class _AuroraAddContactSheetState extends State<AuroraAddContactSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'مشاركة الرحلات تلقائياً',
+                            tr('autoShareRides'),
                             style: AuroraText.titleSmall.copyWith(fontSize: 14),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'تُشارَك تفاصيل كل رحلة مع هذه الجهة',
+                            tr('autoShareSub'),
                             style: AuroraText.bodySmall,
                           ),
                         ],
@@ -159,7 +160,7 @@ class _AuroraAddContactSheetState extends State<AuroraAddContactSheet> {
               const SizedBox(height: AuroraSpacing.xl),
 
               AuroraButton.primary(
-                label: 'إضافة الجهة',
+                label: tr('addThisContact'),
                 icon: Icons.shield_outlined,
                 onPressed: _isValid
                     ? () {

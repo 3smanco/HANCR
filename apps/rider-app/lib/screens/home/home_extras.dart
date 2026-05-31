@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
 /// عناصر إضافية للشاشة الرئيسية: مركز الإشعارات + العروض.
@@ -9,20 +10,19 @@ import '../../core/widgets/aurora/aurora.dart';
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
 
-  static const _items = [
-    (Icons.local_offer, 'عرض خاص!', 'خصم 25٪ على رحلتك القادمة باستخدام كود WELCOME', 'منذ ساعة'),
-    (Icons.verified, 'مرحباً بك في HANCR', 'أكمل ملفك الشخصي واحصل على رحلة مجانية', 'أمس'),
-    (Icons.bolt, 'وضع الذروة', 'الأسعار مرتفعة قليلاً في منطقتك الآن', 'أمس'),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final items = <(IconData, String, String, String)>[
+      (Icons.local_offer, tr('notifOfferTitle'), tr('notifOfferBody'), tr('hourAgo')),
+      (Icons.verified, tr('notifWelcomeTitle'), tr('notifWelcomeBody'), tr('yesterday')),
+      (Icons.bolt, tr('notifSurgeTitle'), tr('notifSurgeBody'), tr('yesterday')),
+    ];
     return Scaffold(
       backgroundColor: AuroraColors.obsidian,
       appBar: AppBar(
         backgroundColor: AuroraColors.obsidian,
         elevation: 0,
-        title: Text('الإشعارات', style: AuroraText.titleMedium),
+        title: Text(tr('notifications'), style: AuroraText.titleMedium),
         iconTheme: const IconThemeData(color: AuroraColors.pearl),
       ),
       body: AuroraBackground(
@@ -30,9 +30,9 @@ class NotificationsScreen extends StatelessWidget {
           top: false,
           child: ListView.builder(
             padding: const EdgeInsets.all(AuroraSpacing.lg),
-            itemCount: _items.length,
+            itemCount: items.length,
             itemBuilder: (_, i) {
-              final n = _items[i];
+              final n = items[i];
               return Container(
                 margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
                 padding: const EdgeInsets.all(AuroraSpacing.md),
@@ -90,20 +90,19 @@ class NotificationsScreen extends StatelessWidget {
 class OffersScreen extends StatelessWidget {
   const OffersScreen({super.key});
 
-  static const _offers = [
-    ('WELCOME', 'خصم 25٪ لأول رحلة', 'صالح حتى نهاية الشهر', AuroraColors.ember),
-    ('WEEKEND', 'وفّر 15٪ في عطلة نهاية الأسبوع', 'الجمعة والسبت', AuroraColors.info),
-    ('NIGHT', 'رحلات ليلية بسعر مخفّض', 'من 12 ص حتى 6 ص', AuroraColors.gold),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final offers = <(String, String, String, Color)>[
+      ('WELCOME', tr('offerWelcomeTitle'), tr('offerWelcomeSub'), AuroraColors.ember),
+      ('WEEKEND', tr('offerWeekendTitle'), tr('offerWeekendSub'), AuroraColors.info),
+      ('NIGHT', tr('offerNightTitle'), tr('offerNightSub'), AuroraColors.gold),
+    ];
     return Scaffold(
       backgroundColor: AuroraColors.obsidian,
       appBar: AppBar(
         backgroundColor: AuroraColors.obsidian,
         elevation: 0,
-        title: Text('العروض', style: AuroraText.titleMedium),
+        title: Text(tr('offersTitle'), style: AuroraText.titleMedium),
         iconTheme: const IconThemeData(color: AuroraColors.pearl),
       ),
       body: AuroraBackground(
@@ -111,9 +110,9 @@ class OffersScreen extends StatelessWidget {
           top: false,
           child: ListView.builder(
             padding: const EdgeInsets.all(AuroraSpacing.lg),
-            itemCount: _offers.length,
+            itemCount: offers.length,
             itemBuilder: (_, i) {
-              final o = _offers[i];
+              final o = offers[i];
               final color = o.$4;
               return Container(
                 margin: const EdgeInsets.only(bottom: AuroraSpacing.md),
@@ -144,7 +143,7 @@ class OffersScreen extends StatelessWidget {
                                   BorderRadius.circular(AuroraRadius.sm),
                               border: Border.all(color: color),
                             ),
-                            child: Text('كود: ${o.$1}',
+                            child: Text('${tr('codePrefix')} ${o.$1}',
                                 style: AuroraText.caption
                                     .copyWith(color: color)),
                           ),

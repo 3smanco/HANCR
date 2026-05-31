@@ -38,8 +38,8 @@ class _AuroraMainScreenState extends State<AuroraMainScreen> {
         onTap: (i) => setState(() => _currentIndex = i),
         onCenterPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('HANCR AI Assistant قريباً ✨'),
+            SnackBar(
+              content: Text(tr('aiSoon')),
               backgroundColor: AuroraColors.ash,
             ),
           );
@@ -84,38 +84,38 @@ class _ServicesTab extends StatelessWidget {
           padding: const EdgeInsets.all(AuroraSpacing.lg),
           children: [
             const SizedBox(height: AuroraSpacing.md),
-            Text('الخدمات', style: AuroraText.displayMedium),
+            Text(tr('nav_services'), style: AuroraText.displayMedium),
             const SizedBox(height: AuroraSpacing.xxl),
 
-            _section('انتقل لأي مكان'),
+            _section(tr('goAnywhere')),
             const SizedBox(height: AuroraSpacing.md),
-            _grid([
-              const _ServiceItem(icon: Icons.local_taxi, label: 'رحلة'),
-              const _ServiceItem(icon: Icons.electric_scooter, label: 'دراجة'),
-              const _ServiceItem(
-                  icon: Icons.car_rental, label: 'تأجير', badge: 'Promo'),
-              const _ServiceItem(icon: Icons.schedule, label: 'حجز مسبق'),
-              const _ServiceItem(icon: Icons.groups, label: 'رحلة جماعية'),
-              const _ServiceItem(icon: Icons.av_timer, label: 'بالساعة'),
-              const _ServiceItem(icon: Icons.school, label: 'للطلاب'),
-              const _ServiceItem(icon: Icons.airline_seat_recline_normal, label: 'فاخرة'),
+            _grid(context, [
+              _ServiceItem(icon: Icons.local_taxi, label: tr('ride'), isRide: true),
+              _ServiceItem(icon: Icons.electric_scooter, label: tr('bike')),
+              _ServiceItem(
+                  icon: Icons.car_rental, label: tr('rental'), badge: 'Promo'),
+              _ServiceItem(icon: Icons.schedule, label: tr('scheduledRide')),
+              _ServiceItem(icon: Icons.groups, label: tr('groupRide')),
+              _ServiceItem(icon: Icons.av_timer, label: tr('hourly')),
+              _ServiceItem(icon: Icons.school, label: tr('students')),
+              _ServiceItem(icon: Icons.airline_seat_recline_normal, label: tr('premiumCat')),
             ]),
 
             const SizedBox(height: AuroraSpacing.xxl),
 
-            _section('أوصِل أي شيء'),
+            _section(tr('deliverAnything')),
             const SizedBox(height: AuroraSpacing.md),
-            _grid([
-              const _ServiceItem(
-                  icon: Icons.restaurant, label: 'طعام', badge: 'Promo'),
-              const _ServiceItem(
-                  icon: Icons.shopping_basket, label: 'بقالة', badge: 'Promo'),
-              const _ServiceItem(icon: Icons.medication, label: 'دواء'),
-              const _ServiceItem(icon: Icons.local_florist, label: 'هدايا'),
-              const _ServiceItem(icon: Icons.local_grocery_store, label: 'مستلزمات'),
-              const _ServiceItem(icon: Icons.baby_changing_station, label: 'أطفال'),
-              const _ServiceItem(icon: Icons.spa, label: 'العناية'),
-              const _ServiceItem(icon: Icons.coffee, label: 'قهوة'),
+            _grid(context, [
+              _ServiceItem(
+                  icon: Icons.restaurant, label: tr('food'), badge: 'Promo'),
+              _ServiceItem(
+                  icon: Icons.shopping_basket, label: tr('grocery'), badge: 'Promo'),
+              _ServiceItem(icon: Icons.medication, label: tr('medicine')),
+              _ServiceItem(icon: Icons.local_florist, label: tr('gifts')),
+              _ServiceItem(icon: Icons.local_grocery_store, label: tr('supplies')),
+              _ServiceItem(icon: Icons.baby_changing_station, label: tr('kids')),
+              _ServiceItem(icon: Icons.spa, label: tr('care')),
+              _ServiceItem(icon: Icons.coffee, label: tr('coffee')),
             ]),
 
             const SizedBox(height: AuroraSpacing.huge),
@@ -128,7 +128,7 @@ class _ServicesTab extends StatelessWidget {
   Widget _section(String title) =>
       Text(title, style: AuroraText.titleMedium);
 
-  Widget _grid(List<_ServiceItem> items) {
+  Widget _grid(BuildContext context, List<_ServiceItem> items) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -145,7 +145,7 @@ class _ServicesTab extends StatelessWidget {
         badge: items[i].badge,
         size: 80,
         onTap: () {
-          if (items[i].label == 'رحلة') {
+          if (items[i].isRide) {
             ctx.push('/book');
           } else {
             AuroraToast.comingSoon(ctx, feature: items[i].label);
@@ -160,5 +160,7 @@ class _ServiceItem {
   final IconData icon;
   final String label;
   final String? badge;
-  const _ServiceItem({required this.icon, required this.label, this.badge});
+  final bool isRide;
+  const _ServiceItem(
+      {required this.icon, required this.label, this.badge, this.isRide = false});
 }

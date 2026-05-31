@@ -4,6 +4,7 @@ import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/rider/rider_bloc.dart';
 import '../../blocs/rider/rider_state.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../sos/aurora_emergency_contacts_screen.dart';
 import '../wallet/aurora_wallet_screen.dart';
@@ -38,7 +39,7 @@ class AuroraProfileTab extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('حسابي', style: AuroraText.displayMedium),
+                    Text(tr('myAccount'), style: AuroraText.displayMedium),
                     _circleIconButton(
                       icon: Icons.logout,
                       onTap: () =>
@@ -60,7 +61,7 @@ class AuroraProfileTab extends StatelessWidget {
                     Expanded(
                       child: _quickTile(
                         icon: Icons.support_agent_outlined,
-                        label: 'مساعدة',
+                        label: tr('help'),
                         onTap: () => _open(context, const HelpCenterScreen()),
                       ),
                     ),
@@ -68,7 +69,7 @@ class AuroraProfileTab extends StatelessWidget {
                     Expanded(
                       child: _quickTile(
                         icon: Icons.account_balance_wallet_outlined,
-                        label: 'محفظة',
+                        label: tr('wallet'),
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
                               builder: (_) => const AuroraWalletScreen()),
@@ -79,7 +80,7 @@ class AuroraProfileTab extends StatelessWidget {
                     Expanded(
                       child: _quickTile(
                         icon: Icons.receipt_long_outlined,
-                        label: 'النشاط',
+                        label: tr('nav_activity'),
                         onTap: () => _open(context, const RidesHistoryScreen()),
                       ),
                     ),
@@ -91,7 +92,7 @@ class AuroraProfileTab extends StatelessWidget {
                 // ─── HANCR Miles (الولاء) ───
                 _promoCard(
                   title: 'HANCR Miles',
-                  subtitle: 'اطّلع على نقاطك ومستواك ومكافآتك',
+                  subtitle: tr('milesSub'),
                   icon: Icons.military_tech,
                   gradient: [AuroraColors.gold, AuroraColors.ember],
                   onTap: () => _open(context, const LoyaltyTab()),
@@ -100,18 +101,18 @@ class AuroraProfileTab extends StatelessWidget {
 
                 // ─── Promo cards ───
                 _promoCard(
-                  title: 'جرِّب HANCR Premium مجاناً',
-                  subtitle: 'احصل على 6% Cashback على رحلاتك وأكثر',
+                  title: tr('premiumTitle'),
+                  subtitle: tr('premiumSub'),
                   icon: Icons.workspace_premium,
                   gradient: [AuroraColors.ember, AuroraColors.emberDeep],
                   onTap: () => AuroraToast.comingSoon(context,
-                      feature: 'اشتراك HANCR Premium'),
+                      feature: tr('premiumTitle')),
                 ),
                 const SizedBox(height: AuroraSpacing.md),
 
                 _checkupCard(
-                  title: 'فحص الأمان',
-                  subtitle: 'فعِّل ميزات الأمان الإضافية',
+                  title: tr('safetyCheck'),
+                  subtitle: tr('safetyCheckSub'),
                   progress: 1,
                   total: 7,
                   onTap: () => Navigator.of(context).push(
@@ -123,15 +124,15 @@ class AuroraProfileTab extends StatelessWidget {
                 const SizedBox(height: AuroraSpacing.md),
 
                 _simpleCard(
-                  title: 'الإعدادات والخصوصية',
-                  subtitle: 'التنبيهات، اللغة، الخصوصية، وحول التطبيق',
+                  title: tr('settingsPrivacy'),
+                  subtitle: tr('settingsPrivacySub'),
                   icon: Icons.shield_outlined,
                   onTap: () => _open(context, const SettingsScreen()),
                 ),
                 const SizedBox(height: AuroraSpacing.md),
 
                 _statCard(
-                  title: 'CO₂ موفَّر',
+                  title: tr('co2Saved'),
                   trailing: '0 ج',
                   icon: Icons.eco_outlined,
                   iconColor: AuroraColors.success,
@@ -139,8 +140,8 @@ class AuroraProfileTab extends StatelessWidget {
                 const SizedBox(height: AuroraSpacing.md),
 
                 _simpleCard(
-                  title: 'ادعُ أصدقاءك',
-                  subtitle: 'يحصل كلٌّ منكم على خصم 50٪ على رحلتين',
+                  title: tr('inviteFriends'),
+                  subtitle: tr('inviteSub'),
                   icon: Icons.card_giftcard,
                   onTap: () => _open(context, const InviteFriendsScreen()),
                 ),
@@ -156,7 +157,7 @@ class AuroraProfileTab extends StatelessWidget {
 
   // ─────────────────────────────────────────────────────────────
   Widget _userCard(RiderState state, BuildContext context) {
-    String name = 'مستخدم HANCR';
+    String name = tr('hancrUser');
     String email = 'user@hancr.com';
     if (state is RiderLoaded) {
       final r = state.rider;
@@ -239,13 +240,13 @@ class AuroraProfileTab extends StatelessWidget {
                   children: [
                     _smallPill(
                       icon: Icons.edit_outlined,
-                      label: 'تعديل',
+                      label: tr('edit'),
                       onTap: () => _open(context, const EditProfileScreen()),
                     ),
                     const SizedBox(width: AuroraSpacing.sm),
                     _smallPill(
                       icon: Icons.settings_outlined,
-                      label: 'الإعدادات',
+                      label: tr('settings'),
                       onTap: () => _open(context, const SettingsScreen()),
                       primary: true,
                     ),

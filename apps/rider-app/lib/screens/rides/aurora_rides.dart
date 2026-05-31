@@ -5,6 +5,7 @@ import '../../blocs/order/order_bloc.dart';
 import '../../blocs/order/order_event.dart';
 import '../../blocs/order/order_state.dart';
 import '../../core/models/order_model.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
 /// قائمة الرحلات القابلة لإعادة الاستخدام (تبويب + صفحة مدفوعة).
@@ -58,9 +59,9 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
           const Icon(Icons.receipt_long_outlined,
               color: AuroraColors.textHint, size: 64),
           const SizedBox(height: AuroraSpacing.md),
-          Text('لا توجد رحلات بعد', style: AuroraText.titleMedium),
+          Text(tr('noRides'), style: AuroraText.titleMedium),
           const SizedBox(height: 4),
-          Text('رحلاتك المكتملة ستظهر هنا', style: AuroraText.bodySmall),
+          Text(tr('ridesEmptySub'), style: AuroraText.bodySmall),
         ],
       ),
     );
@@ -145,7 +146,7 @@ class RidesHistoryScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AuroraColors.obsidian,
         elevation: 0,
-        title: Text('رحلاتي', style: AuroraText.titleMedium),
+        title: Text(tr('myRides'), style: AuroraText.titleMedium),
         iconTheme: const IconThemeData(color: AuroraColors.pearl),
       ),
       body: const AuroraBackground(child: AuroraRidesView()),
@@ -166,7 +167,7 @@ class RideDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AuroraColors.obsidian,
         elevation: 0,
-        title: Text('تفاصيل الرحلة', style: AuroraText.titleMedium),
+        title: Text(tr('rideDetails'), style: AuroraText.titleMedium),
         iconTheme: const IconThemeData(color: AuroraColors.pearl),
       ),
       body: AuroraBackground(
@@ -197,20 +198,20 @@ class RideDetailsScreen extends StatelessWidget {
               // معلومات
               _card(Column(
                 children: [
-                  _infoRow('التاريخ', df.format(order.createdOn)),
+                  _infoRow(tr('date'), df.format(order.createdOn)),
                   _divider(),
-                  _infoRow('الحالة', order.status.label),
+                  _infoRow(tr('status'), order.status.label),
                   _divider(),
-                  _infoRow('المسافة', order.distanceLabel),
+                  _infoRow(tr('distance'), order.distanceLabel),
                   _divider(),
-                  _infoRow('المدة', order.durationLabel),
+                  _infoRow(tr('duration'), order.durationLabel),
                   if (order.driverName != null) ...[
                     _divider(),
-                    _infoRow('السائق', order.driverName!),
+                    _infoRow(tr('driver'), order.driverName!),
                   ],
                   if (order.carModel != null) ...[
                     _divider(),
-                    _infoRow('السيارة',
+                    _infoRow(tr('car'),
                         '${order.carBrand ?? ''} ${order.carModel ?? ''} ${order.plateNumber ?? ''}'),
                   ],
                 ],
@@ -220,11 +221,11 @@ class RideDetailsScreen extends StatelessWidget {
               // الفاتورة
               _card(Column(
                 children: [
-                  _infoRow('التكلفة',
+                  _infoRow(tr('cost'),
                       '${order.costBest.toStringAsFixed(2)} ${order.currency}'),
                   if (order.paidAmount > 0) ...[
                     _divider(),
-                    _infoRow('المدفوع',
+                    _infoRow(tr('paid'),
                         '${order.paidAmount.toStringAsFixed(2)} ${order.currency}'),
                   ],
                 ],
