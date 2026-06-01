@@ -83,6 +83,8 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
               if (event.bookedHours != null) 'bookedHours': event.bookedHours,
               if (event.scheduledAt != null)
                 'scheduledAt': event.scheduledAt!.toUtc().toIso8601String(),
+              if (event.couponCode != null && event.couponCode!.isNotEmpty)
+                'couponCode': event.couponCode,
             },
           },
         ),

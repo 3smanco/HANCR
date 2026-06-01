@@ -85,8 +85,23 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   // سائق بالساعة
   int _bookedHours = 1;
 
+  // كوبون الخصم
+  final TextEditingController _couponCtrl = TextEditingController();
+  String? _appliedCoupon;
+  double? _couponDiscount;
+  bool _couponLoading = false;
+  String? _couponError;
+
   bool get _isDelivery => _selectedService?.serviceType == 'PackageDelivery';
   bool get _isHourly => _selectedService?.serviceType == 'HourlyChauffeur';
+
+  /// الأجرة التقديرية الحالية لمعاينة الكوبون
+  int get _estimatedFare {
+    if (_isHourly && _selectedService?.hourlyRate != null) {
+      return (_selectedService!.hourlyRate! * _bookedHours).round();
+    }
+    return (_routeFare ?? 0).round();
+  }
 
   static const String _darkMapStyle = '''
 [
@@ -322,6 +337,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           receiverName: _isDelivery ? _receiverNameCtrl.text.trim() : null,
           receiverPhone: _isDelivery ? _receiverPhoneCtrl.text.trim() : null,
           bookedHours: _isHourly ? _bookedHours : null,
+          couponCode: _appliedCoupon,
         ));
   }
 
@@ -353,6 +369,61 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   String _formatSchedule(DateTime dt) {
     String two(int n) => n.toString().padLeft(2, '0');
     return '${two(dt.day)}/${two(dt.month)} — ${two(dt.hour)}:${two(dt.minute)}';
+  }
+
+  Future<void> _applyCoupon() async {
+    final code = _couponCtrl.text.trim().toUpperCase();
+    if (code.isEmpty) return;
+    final fare = _estimatedFare;
+    if (fare <= 0) {
+      setState(() => _couponError = tr('couponWaitFare'));
+      return;
+    }
+    setState(() {
+      _couponLoading = true;
+      _couponError = null;
+    });
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(validateCouponQuery),
+        variables: {
+          'code': code,
+          'fare': fare,
+          'regionId': AppConfig.defaultRegionId,
+        },
+        fetchPolicy: FetchPolicy.networkOnly,
+      ));
+      if (res.hasException) {
+        throw Exception(res.exception?.graphqlErrors.firstOrNull?.message ??
+            tr('couponInvalid'));
+      }
+      final d = res.data?['validateCoupon'] as Map<String, dynamic>?;
+      if (d == null) throw Exception(tr('couponInvalid'));
+      if (!mounted) return;
+      setState(() {
+        _appliedCoupon = d['code'] as String?;
+        _couponDiscount = (d['discountAmount'] as num?)?.toDouble();
+        _couponLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _couponLoading = false;
+        _couponError = e.toString().replaceFirst('Exception: ', '');
+        _appliedCoupon = null;
+        _couponDiscount = null;
+      });
+    }
+  }
+
+  void _removeCoupon() {
+    setState(() {
+      _appliedCoupon = null;
+      _couponDiscount = null;
+      _couponError = null;
+      _couponCtrl.clear();
+    });
   }
 
   InputDecoration _fieldDecoration(String hint, IconData icon) =>
@@ -813,6 +884,85 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
             ),
           ],
           ], // نهاية قسم المشاوير فقط
+
+          // ─── كود الخصم ───
+          if (!_bidMode) ...[
+            const SizedBox(height: AuroraSpacing.md),
+            if (_appliedCoupon == null)
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _couponCtrl,
+                      textCapitalization: TextCapitalization.characters,
+                      style: AuroraText.bodyMedium
+                          .copyWith(color: AuroraColors.pearl),
+                      decoration:
+                          _fieldDecoration(tr('couponCode'), Icons.local_offer),
+                    ),
+                  ),
+                  const SizedBox(width: AuroraSpacing.sm),
+                  SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _couponLoading ? null : _applyCoupon,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AuroraColors.smoke,
+                        foregroundColor: AuroraColors.ember,
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AuroraRadius.md),
+                        ),
+                      ),
+                      child: _couponLoading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: AuroraColors.ember))
+                          : Text(tr('apply')),
+                    ),
+                  ),
+                ],
+              )
+            else
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
+                decoration: BoxDecoration(
+                  color: AuroraColors.success.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AuroraRadius.md),
+                  border: Border.all(
+                      color: AuroraColors.success.withValues(alpha: 0.4)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.check_circle,
+                        color: AuroraColors.success, size: 18),
+                    const SizedBox(width: AuroraSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        '$_appliedCoupon — ${tr('youSaved')} ${_couponDiscount?.toStringAsFixed(0) ?? ''} $_routeCurrency',
+                        style: AuroraText.bodySmall
+                            .copyWith(color: AuroraColors.pearl),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: _removeCoupon,
+                      child: const Icon(Icons.close,
+                          size: 18, color: AuroraColors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+            if (_couponError != null)
+              Padding(
+                padding: const EdgeInsets.only(top: AuroraSpacing.xs),
+                child: Text(_couponError!,
+                    style: AuroraText.bodySmall
+                        .copyWith(color: AuroraColors.danger)),
+              ),
+          ],
 
           const SizedBox(height: AuroraSpacing.lg),
           AuroraButton.primary(

@@ -23,6 +23,7 @@ import { OrderMessageEntity } from './entities/order-message.entity';
 import { WalletTransactionEntity } from './entities/wallet-transaction.entity';
 import { EmergencyContactEntity } from './entities/emergency-contact.entity';
 import { SosIncidentEntity } from './entities/sos-incident.entity';
+import { CouponEntity } from './entities/coupon.entity';
 
 /**
  * قائمة كاملة بجميع Entities في HANCR
@@ -46,6 +47,7 @@ export const HANCR_ENTITIES = [
   WalletTransactionEntity,
   EmergencyContactEntity,
   SosIncidentEntity,
+  CouponEntity,
 ];
 
 /**

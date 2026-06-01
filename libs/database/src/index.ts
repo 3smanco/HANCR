@@ -21,8 +21,10 @@ export { OrderMessageEntity } from './lib/entities/order-message.entity';
 export { WalletTransactionEntity } from './lib/entities/wallet-transaction.entity';
 export { EmergencyContactEntity } from './lib/entities/emergency-contact.entity';
 export { SosIncidentEntity } from './lib/entities/sos-incident.entity';
+export { CouponEntity } from './lib/entities/coupon.entity';
 
 // Enums
+export { CouponType } from './lib/enums/coupon-type.enum';
 export { OrderStatus } from './lib/enums/order-status.enum';
 export { OrderType } from './lib/enums/order-type.enum';
 export { ServiceType } from './lib/enums/service-type.enum';

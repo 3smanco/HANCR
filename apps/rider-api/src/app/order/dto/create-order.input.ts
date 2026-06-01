@@ -128,4 +128,10 @@ export class CreateOrderInput {
   @Field(() => Int, { nullable: true })
   @IsOptional()
   couponId?: number;
+
+  /** كود الخصم الذي يُدخله الراكب */
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  couponCode?: string;
 }

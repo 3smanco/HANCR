@@ -67,6 +67,18 @@ export class OrderEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, name: 'cost_after_coupon' })
   costAfterCoupon!: number;
 
+  /** الكوبون المُطبَّق (إن وُجد) */
+  @Column({ type: 'int', nullable: true, name: 'coupon_id' })
+  couponId?: number;
+
+  /** كود الكوبون المُطبَّق (للعرض) */
+  @Column({ type: 'varchar', length: 40, nullable: true, name: 'coupon_code' })
+  couponCode?: string;
+
+  /** مبلغ الخصم المُطبَّق */
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, name: 'discount_amount' })
+  discountAmount!: number;
+
   /** المبلغ المدفوع فعلاً */
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, name: 'paid_amount' })
   paidAmount!: number;

@@ -19,6 +19,12 @@ export class OrderType {
   @Field(() => Float)
   costAfterCoupon!: number;
 
+  @Field(() => Float, { nullable: true })
+  discountAmount?: number;
+
+  @Field({ nullable: true })
+  couponCode?: string;
+
   @Field(() => Float)
   paidAmount!: number;
 

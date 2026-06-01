@@ -262,6 +262,43 @@ export const UPDATE_SERVICE = gql`
   }
 `;
 
+// ─── COUPONS (Phase 2.1) ───────────────────────────────────────────────────
+
+const COUPON_FIELDS = `
+  id code type value maxDiscount minFare maxUses usedCount
+  perUserLimit regionIds expiresAt active createdAt
+`;
+
+export const LIST_COUPONS = gql`
+  query AdminCoupons {
+    adminCoupons { ${COUPON_FIELDS} }
+  }
+`;
+
+export const CREATE_COUPON = gql`
+  mutation CreateCoupon($input: CreateCouponInput!) {
+    createCoupon(input: $input) { ${COUPON_FIELDS} }
+  }
+`;
+
+export const UPDATE_COUPON = gql`
+  mutation UpdateCoupon($id: Int!, $input: UpdateCouponInput!) {
+    updateCoupon(id: $id, input: $input) { ${COUPON_FIELDS} }
+  }
+`;
+
+export const TOGGLE_COUPON_ACTIVE = gql`
+  mutation ToggleCouponActive($id: Int!) {
+    toggleCouponActive(id: $id) { id active }
+  }
+`;
+
+export const DELETE_COUPON = gql`
+  mutation DeleteCoupon($id: Int!) {
+    deleteCoupon(id: $id)
+  }
+`;
+
 // ─── APP CONFIG (Feature Flags + Theme + SDUI) ─────────────────────────────
 
 export const GET_APP_CONFIG = gql`

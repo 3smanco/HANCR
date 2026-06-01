@@ -29,6 +29,7 @@ import { RateDriverInput } from './dto/rate-driver.input';
 import { OrderType as OrderGqlType } from './dto/order.type';
 import { MatchingService } from './matching.service';
 import { DirectionsService } from './directions.service';
+import { CouponService } from './coupon.service';
 
 // GraphQL Subscription events
 export const ORDER_UPDATED = 'ORDER_UPDATED';
@@ -57,6 +58,7 @@ export class OrderService {
     private readonly orderRedis: OrderRedisService,
     private readonly matchingService: MatchingService,
     private readonly directionsService: DirectionsService,
+    private readonly couponService: CouponService,
     private readonly dataSource: DataSource,
     private readonly pushNotifications: PushNotificationService,
 
@@ -114,6 +116,24 @@ export class OrderService {
       costBest = Number(service.hourlyRate) * input.bookedHours;
     }
 
+    // تطبيق كوبون الخصم (إن وُجد) — يرمي خطأً واضحاً عند رفض الكود
+    let costAfterCoupon = costBest;
+    let appliedCouponId: number | undefined;
+    let appliedCouponCode: string | undefined;
+    let discountAmount = 0;
+    if (input.couponCode && input.couponCode.trim().length > 0) {
+      const applied = await this.couponService.validate(
+        input.couponCode,
+        costBest,
+        input.regionId,
+        riderId,
+      );
+      costAfterCoupon = applied.costAfterCoupon;
+      discountAmount = applied.discountAmount;
+      appliedCouponId = applied.coupon.id;
+      appliedCouponCode = applied.coupon.code;
+    }
+
     // استخدام Transaction لضمان الاتساق
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -138,7 +158,10 @@ export class OrderService {
         distanceBest: distanceMeters,
         durationBest: durationSeconds,
         costBest,
-        costAfterCoupon: costBest,
+        costAfterCoupon,
+        couponId: appliedCouponId,
+        couponCode: appliedCouponCode,
+        discountAmount,
         currency: rider.currency,
         paymentMode: (input.paymentMode as PaymentMode) ?? PaymentMode.Cash,
         // Ride Moods
@@ -171,6 +194,11 @@ export class OrderService {
       await queryRunner.manager.save(activity);
 
       await queryRunner.commitTransaction();
+
+      // زيادة عدّاد استخدام الكوبون بعد نجاح الإنشاء
+      if (appliedCouponId) {
+        await this.couponService.incrementUsage(appliedCouponId);
+      }
 
       // حجز مسبق مستقبلي: لا مطابقة الآن — يُفعَّل لاحقاً عبر الكرون (status=Booked)
       if (
@@ -651,6 +679,8 @@ export class OrderService {
       status: order.status,
       costBest: Number(order.costBest),
       costAfterCoupon: Number(order.costAfterCoupon),
+      discountAmount: Number(order.discountAmount ?? 0),
+      couponCode: order.couponCode,
       paidAmount: Number(order.paidAmount),
       tipAmount: Number(order.tipAmount),
       currency: order.currency,

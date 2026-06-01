@@ -73,6 +73,17 @@ const String routePreviewQuery = r'''
   }
 ''';
 
+// ─── Coupons ───
+const String validateCouponQuery = r'''
+  query ValidateCoupon($code: String!, $fare: Int!, $regionId: Int!) {
+    validateCoupon(code: $code, fare: $fare, regionId: $regionId) {
+      code
+      discountAmount
+      costAfterCoupon
+    }
+  }
+''';
+
 // ─── Bid Mode (المزايدة) ───
 const String createBidMutation = r'''
   mutation CreateBid($input: CreateBidInput!) {

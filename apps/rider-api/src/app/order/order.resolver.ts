@@ -13,6 +13,8 @@ import { OrderType } from './dto/order.type';
 import { CreateOrderInput } from './dto/create-order.input';
 import { RateDriverInput } from './dto/rate-driver.input';
 import { RoutePreviewInput, RoutePreviewType } from './dto/route-preview.type';
+import { CouponPreviewType } from './dto/coupon-preview.type';
+import { CouponService } from './coupon.service';
 import { JwtAuthGuard, CurrentUser } from '../auth/jwt-auth.guard';
 import { AuthUser } from '../auth/jwt.strategy';
 import { PUB_SUB } from '../pubsub.provider';
@@ -21,8 +23,28 @@ import { PUB_SUB } from '../pubsub.provider';
 export class OrderResolver {
   constructor(
     private readonly orderService: OrderService,
+    private readonly couponService: CouponService,
     @Inject(PUB_SUB) private readonly pubSub: RedisPubSub,
   ) {}
+
+  /**
+   * معاينة كوبون الخصم قبل الطلب
+   */
+  @Query(() => CouponPreviewType, { description: 'التحقق من كود الخصم وحساب الخصم' })
+  @UseGuards(JwtAuthGuard)
+  async validateCoupon(
+    @CurrentUser() user: AuthUser,
+    @Args('code') code: string,
+    @Args('fare', { type: () => Int }) fare: number,
+    @Args('regionId', { type: () => Int }) regionId: number,
+  ): Promise<CouponPreviewType> {
+    const r = await this.couponService.validate(code, fare, regionId, user.riderId);
+    return {
+      code: r.coupon.code,
+      discountAmount: r.discountAmount,
+      costAfterCoupon: r.costAfterCoupon,
+    };
+  }
 
   /**
    * معاينة المسار — مسافة الطريق الفعلية والأجرة التقديرية قبل الطلب

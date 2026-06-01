@@ -6,11 +6,13 @@ import {
   ServiceEntity,
   RequestActivityEntity,
   DriverEntity,
+  CouponEntity,
 } from '@hancr/database';
 import { OrderService } from './order.service';
 import { OrderResolver } from './order.resolver';
 import { MatchingService } from './matching.service';
 import { DirectionsService } from './directions.service';
+import { CouponService } from './coupon.service';
 import { pubSubProvider } from '../pubsub.provider';
 
 @Module({
@@ -21,6 +23,7 @@ import { pubSubProvider } from '../pubsub.provider';
       ServiceEntity,
       RequestActivityEntity,
       DriverEntity,
+      CouponEntity,
     ]),
   ],
   providers: [
@@ -28,6 +31,7 @@ import { pubSubProvider } from '../pubsub.provider';
     OrderResolver,
     MatchingService,
     DirectionsService,
+    CouponService,
     pubSubProvider,
   ],
   exports: [OrderService, MatchingService],

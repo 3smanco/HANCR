@@ -177,6 +177,13 @@ const Map<String, Map<String, String>> _t = {
   'deliveryCode': {'ar': 'كود التسليم', 'en': 'Delivery code', 'ur': 'ڈیلیوری کوڈ', 'hi': 'डिलीवरी कोड', 'bn': 'ডেলিভারি কোড', 'fil': 'Delivery code', 'fr': 'Code de livraison', 'tr': 'Teslimat kodu'},
   'deliveryCodeHint': {'ar': 'اعطِ هذا الكود للسائق عند التسليم', 'en': 'Give this code to the driver at delivery', 'ur': 'ڈیلیوری پر یہ کوڈ ڈرائیور کو دیں', 'hi': 'डिलीवरी पर यह कोड ड्राइवर को दें', 'bn': 'ডেলিভারিতে এই কোড চালককে দিন', 'fil': 'Ibigay ang code na ito sa drayber sa delivery', 'fr': 'Donnez ce code au chauffeur à la livraison', 'tr': 'Teslimatta bu kodu sürücüye verin'},
 
+  // ─── Coupons ───
+  'couponCode': {'ar': 'كود الخصم', 'en': 'Discount code', 'ur': 'ڈسکاؤنٹ کوڈ', 'hi': 'डिस्काउंट कोड', 'bn': 'ডিসকাউন্ট কোড', 'fil': 'Discount code', 'fr': 'Code promo', 'tr': 'İndirim kodu'},
+  'apply': {'ar': 'تطبيق', 'en': 'Apply', 'ur': 'لاگو کریں', 'hi': 'लागू करें', 'bn': 'প্রয়োগ', 'fil': 'Ilapat', 'fr': 'Appliquer', 'tr': 'Uygula'},
+  'youSaved': {'ar': 'وفّرت', 'en': 'You saved', 'ur': 'آپ نے بچایا', 'hi': 'आपने बचाया', 'bn': 'আপনি সাশ্রয় করেছেন', 'fil': 'Nakatipid ka ng', 'fr': 'Vous avez économisé', 'tr': 'Tasarruf ettiniz'},
+  'couponInvalid': {'ar': 'كود الخصم غير صالح', 'en': 'Invalid discount code', 'ur': 'غلط ڈسکاؤنٹ کوڈ', 'hi': 'अमान्य कोड', 'bn': 'অবৈধ কোড', 'fil': 'Di-wastong code', 'fr': 'Code promo invalide', 'tr': 'Geçersiz indirim kodu'},
+  'couponWaitFare': {'ar': 'انتظر حساب الأجرة أولاً', 'en': 'Wait for fare calculation first', 'ur': 'پہلے کرایہ کیلکولیشن کا انتظار کریں', 'hi': 'पहले किराया गणना की प्रतीक्षा करें', 'bn': 'আগে ভাড়া হিসাবের অপেক্ষা করুন', 'fil': 'Hintayin muna ang pamasahe', 'fr': 'Attendez le calcul du tarif', 'tr': 'Önce ücret hesabını bekleyin'},
+
   // ─── Rides / Activity ───
   'noRides': {'ar': 'لا توجد رحلات بعد', 'en': 'No rides yet', 'ur': 'ابھی کوئی سواری نہیں', 'hi': 'अभी तक कोई राइड नहीं', 'bn': 'এখনও কোনো রাইড নেই', 'fil': 'Wala pang sakay', 'fr': 'Pas encore de courses', 'tr': 'Henüz yolculuk yok'},
   'ridesEmptySub': {'ar': 'رحلاتك المكتملة ستظهر هنا', 'en': 'Your completed rides will appear here', 'ur': 'آپ کی مکمل سواریاں یہاں نظر آئیں گی', 'hi': 'आपकी पूर्ण राइड यहाँ दिखेंगी', 'bn': 'আপনার সম্পন্ন রাইড এখানে দেখাবে', 'fil': 'Lalabas dito ang tapos na sakay', 'fr': 'Vos courses terminées apparaîtront ici', 'tr': 'Tamamlanan yolculuklar burada görünür'},
