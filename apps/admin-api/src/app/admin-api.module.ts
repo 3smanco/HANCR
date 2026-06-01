@@ -24,6 +24,7 @@ import {
   OrderMessageEntity,
   SosIncidentEntity,
   EmergencyContactEntity,
+  CouponEntity,
 } from '@hancr/database';
 
 // Feature Modules
@@ -80,6 +81,7 @@ import { ObservabilityModule } from '@hancr/observability';
           OrderMessageEntity,
           SosIncidentEntity,
           EmergencyContactEntity,
+          CouponEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
