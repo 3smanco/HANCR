@@ -21,6 +21,7 @@ const String _orderFragment = r'''
     numberMasked
     otpCode
     receiverName
+    receiverPhone
     isBidOrder
     etaPickup
     startTimestamp
@@ -78,6 +79,15 @@ const String driverCancelOrderMutation = '''
   $_orderFragment
   mutation DriverCancelOrder(\$orderId: Int!) {
     driverCancelOrder(orderId: \$orderId) {
+      ...OrderFields
+    }
+  }
+''';
+
+const String confirmDeliveryMutation = '''
+  $_orderFragment
+  mutation ConfirmDelivery(\$orderId: Int!, \$otp: String!) {
+    confirmDelivery(orderId: \$orderId, otp: \$otp) {
       ...OrderFields
     }
   }

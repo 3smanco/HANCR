@@ -22,6 +22,10 @@ class OrderCreateRequested extends OrderEvent {
   final bool quietRide;
   final bool audioOff;
   final bool numberMasked;
+  final String? receiverName;
+  final String? receiverPhone;
+  final int? bookedHours;
+  final DateTime? scheduledAt;
 
   const OrderCreateRequested({
     required this.origin,
@@ -33,6 +37,10 @@ class OrderCreateRequested extends OrderEvent {
     this.quietRide = false,
     this.audioOff = false,
     this.numberMasked = false,
+    this.receiverName,
+    this.receiverPhone,
+    this.bookedHours,
+    this.scheduledAt,
   });
 
   @override

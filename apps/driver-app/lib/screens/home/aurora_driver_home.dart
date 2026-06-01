@@ -9,7 +9,9 @@ import '../../blocs/location/location_bloc.dart';
 import '../../blocs/location/location_event.dart';
 import '../../blocs/location/location_state.dart';
 import '../../blocs/order/order_bloc.dart';
+import '../../blocs/order/order_event.dart';
 import '../../blocs/order/order_state.dart';
+import '../../core/models/order_model.dart';
 import '../../blocs/sos/sos_bloc.dart';
 import '../../blocs/sos/sos_event.dart';
 import '../../core/graphql/graphql_client.dart';
@@ -457,9 +459,21 @@ class _OnlineToggleState extends State<_OnlineToggle>
 }
 
 /// Active ride card (في الـ map)
-class _ActiveRideCard extends StatelessWidget {
-  final dynamic order;
+class _ActiveRideCard extends StatefulWidget {
+  final DriverOrderModel order;
   const _ActiveRideCard({required this.order});
+
+  @override
+  State<_ActiveRideCard> createState() => _ActiveRideCardState();
+}
+
+class _ActiveRideCardState extends State<_ActiveRideCard> {
+  bool _busy = false;
+
+  DriverOrderModel get order => widget.order;
+  bool get _isDelivery =>
+      order.type == 'ParcelDelivery' ||
+      (order.receiverPhone ?? '').isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -485,8 +499,10 @@ class _ActiveRideCard extends StatelessWidget {
                   color: AuroraColors.ember.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.local_taxi,
-                    color: AuroraColors.ember, size: 22),
+                child: Icon(
+                    _isDelivery ? Icons.local_shipping : Icons.local_taxi,
+                    color: AuroraColors.ember,
+                    size: 22),
               ),
               const SizedBox(width: AuroraSpacing.md),
               Expanded(
@@ -494,11 +510,11 @@ class _ActiveRideCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      tr('activeRide'),
+                      _isDelivery ? tr('parcelDelivery') : tr('activeRide'),
                       style: AuroraText.titleSmall,
                     ),
                     Text(
-                      '${fmt.format(order.costAfterCoupon ?? 0)} ${order.currency ?? ''}',
+                      '${fmt.format(order.costAfterCoupon)} ${order.currency}',
                       style: AuroraText.bodySmall.copyWith(
                         color: AuroraColors.ember,
                         fontWeight: FontWeight.w700,
@@ -507,12 +523,199 @@ class _ActiveRideCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios,
-                  color: AuroraColors.textSecondary, size: 14),
+              _StatusChip(status: order.status),
             ],
+          ),
+
+          // بيانات المستلم للتوصيل
+          if (_isDelivery && (order.receiverName ?? '').isNotEmpty) ...[
+            const SizedBox(height: AuroraSpacing.md),
+            Row(
+              children: [
+                const Icon(Icons.person_pin_circle,
+                    size: 18, color: AuroraColors.textSecondary),
+                const SizedBox(width: AuroraSpacing.sm),
+                Expanded(
+                  child: Text(
+                    '${order.receiverName}'
+                    '${(order.receiverPhone ?? '').isNotEmpty ? ' • ${order.receiverPhone}' : ''}',
+                    style: AuroraText.bodySmall,
+                  ),
+                ),
+              ],
+            ),
+          ],
+
+          // الوجهة
+          const SizedBox(height: AuroraSpacing.sm),
+          Row(
+            children: [
+              const Icon(Icons.location_on,
+                  size: 18, color: AuroraColors.ember),
+              const SizedBox(width: AuroraSpacing.sm),
+              Expanded(
+                child: Text(order.destinationAddress,
+                    style: AuroraText.bodySmall,
+                    overflow: TextOverflow.ellipsis),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AuroraSpacing.lg),
+          _buildAction(),
+
+          if (order.status == OrderStatus.driverAccepted ||
+              order.status == OrderStatus.arrived) ...[
+            const SizedBox(height: AuroraSpacing.xs),
+            TextButton(
+              onPressed: _busy
+                  ? null
+                  : () => context
+                      .read<OrderBloc>()
+                      .add(OrderCancelRequested(order.id)),
+              child: Text(tr('cancelRide'),
+                  style: const TextStyle(color: AuroraColors.danger)),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAction() {
+    switch (order.status) {
+      case OrderStatus.driverAccepted:
+        return AuroraButton.primary(
+          label: tr('arrivedPickup'),
+          icon: Icons.my_location,
+          onPressed: () => context
+              .read<OrderBloc>()
+              .add(OrderArrivedAtPickupRequested(order.id)),
+        );
+      case OrderStatus.arrived:
+        return AuroraButton.primary(
+          label: tr('startRide'),
+          icon: Icons.play_arrow,
+          onPressed: () => context
+              .read<OrderBloc>()
+              .add(OrderStartRideRequested(order.id)),
+        );
+      case OrderStatus.started:
+        return AuroraButton.primary(
+          label: _isDelivery ? tr('confirmDelivery') : tr('finishRide'),
+          icon: _isDelivery ? Icons.verified : Icons.flag,
+          loading: _busy,
+          onPressed: _busy
+              ? null
+              : (_isDelivery
+                  ? _openOtpDialog
+                  : () => context
+                      .read<OrderBloc>()
+                      .add(OrderFinishRideRequested(order.id))),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Future<void> _openOtpDialog() async {
+    final ctrl = TextEditingController();
+    final otp = await showDialog<String>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        backgroundColor: AuroraColors.coal,
+        title: Text(tr('confirmDelivery'),
+            style: AuroraText.titleSmall),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(tr('askReceiverCode'),
+                style: AuroraText.bodySmall
+                    .copyWith(color: AuroraColors.textSecondary)),
+            const SizedBox(height: AuroraSpacing.md),
+            TextField(
+              controller: ctrl,
+              keyboardType: TextInputType.number,
+              maxLength: 4,
+              textAlign: TextAlign.center,
+              style: AuroraText.titleMedium
+                  .copyWith(color: AuroraColors.ember, letterSpacing: 8),
+              decoration: const InputDecoration(
+                counterText: '',
+                hintText: '••••',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dctx),
+            child: Text(tr('cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dctx, ctrl.text.trim()),
+            child: Text(tr('confirm')),
           ),
         ],
       ),
     );
+    if (otp == null || otp.isEmpty || !mounted) return;
+    setState(() => _busy = true);
+    final err = await context.read<OrderBloc>().confirmDelivery(order.id, otp);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (err != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(tr('invalidCode')),
+          backgroundColor: AuroraColors.danger,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(tr('deliveryConfirmed')),
+          backgroundColor: AuroraColors.success,
+        ),
+      );
+    }
+  }
+}
+
+/// شارة حالة صغيرة
+class _StatusChip extends StatelessWidget {
+  final OrderStatus status;
+  const _StatusChip({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(horizontal: AuroraSpacing.sm, vertical: 4),
+      decoration: BoxDecoration(
+        color: AuroraColors.ember.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(AuroraRadius.sm),
+      ),
+      child: Text(
+        _label(status),
+        style: AuroraText.bodySmall.copyWith(
+          color: AuroraColors.ember,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  String _label(OrderStatus s) {
+    switch (s) {
+      case OrderStatus.driverAccepted:
+        return tr('onTheWay');
+      case OrderStatus.arrived:
+        return tr('arrivedStatus');
+      case OrderStatus.started:
+        return tr('inProgress');
+      default:
+        return '';
+    }
   }
 }

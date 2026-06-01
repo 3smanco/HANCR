@@ -96,6 +96,20 @@ const Map<String, Map<String, String>> _t = {
   'offered': {'ar': 'تم العرض', 'en': 'Offered', 'ur': 'پیشکش کر دی', 'hi': 'ऑफ़र किया', 'bn': 'অফার করা হয়েছে', 'fil': 'Inalok na', 'fr': 'Offert', 'tr': 'Teklif verildi'},
   'send': {'ar': 'إرسال', 'en': 'Send', 'ur': 'بھیجیں', 'hi': 'भेजें', 'bn': 'পাঠান', 'fil': 'Ipadala', 'fr': 'Envoyer', 'tr': 'Gönder'},
 
+  // ─── Active ride actions & Parcel delivery ───
+  'parcelDelivery': {'ar': 'توصيل أمانة', 'en': 'Parcel delivery', 'ur': 'پارسل ڈیلیوری', 'hi': 'पार्सल डिलीवरी', 'bn': 'পার্সেল ডেলিভারি', 'fil': 'Paghahatid ng parsela', 'fr': 'Livraison de colis', 'tr': 'Koli teslimatı'},
+  'cancelRide': {'ar': 'إلغاء الرحلة', 'en': 'Cancel ride', 'ur': 'سواری منسوخ کریں', 'hi': 'राइड रद्द करें', 'bn': 'রাইড বাতিল করুন', 'fil': 'Kanselahin ang biyahe', 'fr': 'Annuler la course', 'tr': 'Yolculuğu iptal et'},
+  'arrivedPickup': {'ar': 'وصلت لنقطة الانطلاق', 'en': 'Arrived at pickup', 'ur': 'پک اپ پر پہنچ گیا', 'hi': 'पिकअप पर पहुंचे', 'bn': 'পিকআপে পৌঁছেছি', 'fil': 'Dumating sa pickup', 'fr': 'Arrivé au point de départ', 'tr': 'Alış noktasına geldim'},
+  'startRide': {'ar': 'ابدأ الرحلة', 'en': 'Start ride', 'ur': 'سواری شروع کریں', 'hi': 'राइड शुरू करें', 'bn': 'রাইড শুরু করুন', 'fil': 'Simulan ang biyahe', 'fr': 'Démarrer la course', 'tr': 'Yolculuğu başlat'},
+  'finishRide': {'ar': 'إنهاء الرحلة', 'en': 'Finish ride', 'ur': 'سواری ختم کریں', 'hi': 'राइड समाप्त करें', 'bn': 'রাইড শেষ করুন', 'fil': 'Tapusin ang biyahe', 'fr': 'Terminer la course', 'tr': 'Yolculuğu bitir'},
+  'confirmDelivery': {'ar': 'تأكيد التسليم', 'en': 'Confirm delivery', 'ur': 'ڈیلیوری کی تصدیق', 'hi': 'डिलीवरी की पुष्टि करें', 'bn': 'ডেলিভারি নিশ্চিত করুন', 'fil': 'Kumpirmahin ang delivery', 'fr': 'Confirmer la livraison', 'tr': 'Teslimatı onayla'},
+  'askReceiverCode': {'ar': 'اطلب كود التسليم من المستلم وأدخله', 'en': 'Ask the receiver for the delivery code and enter it', 'ur': 'وصول کنندہ سے کوڈ مانگ کر درج کریں', 'hi': 'प्राप्तकर्ता से कोड मांगें और दर्ज करें', 'bn': 'প্রাপকের কাছ থেকে কোড নিয়ে লিখুন', 'fil': 'Hingin ang code sa tatanggap at ilagay', 'fr': 'Demandez le code au destinataire et saisissez-le', 'tr': 'Alıcıdan teslimat kodunu isteyip girin'},
+  'invalidCode': {'ar': 'كود غير صحيح', 'en': 'Invalid code', 'ur': 'غلط کوڈ', 'hi': 'गलत कोड', 'bn': 'ভুল কোড', 'fil': 'Maling code', 'fr': 'Code invalide', 'tr': 'Geçersiz kod'},
+  'deliveryConfirmed': {'ar': 'تم تأكيد التسليم', 'en': 'Delivery confirmed', 'ur': 'ڈیلیوری کی تصدیق ہو گئی', 'hi': 'डिलीवरी की पुष्टि हुई', 'bn': 'ডেলিভারি নিশ্চিত হয়েছে', 'fil': 'Nakumpirma ang delivery', 'fr': 'Livraison confirmée', 'tr': 'Teslimat onaylandı'},
+  'onTheWay': {'ar': 'في الطريق', 'en': 'On the way', 'ur': 'راستے میں', 'hi': 'रास्ते में', 'bn': 'পথে', 'fil': 'Papunta na', 'fr': 'En route', 'tr': 'Yolda'},
+  'arrivedStatus': {'ar': 'وصل', 'en': 'Arrived', 'ur': 'پہنچ گیا', 'hi': 'पहुंचे', 'bn': 'পৌঁছেছে', 'fil': 'Dumating', 'fr': 'Arrivé', 'tr': 'Geldi'},
+  'inProgress': {'ar': 'جارية', 'en': 'In progress', 'ur': 'جاری', 'hi': 'जारी', 'bn': 'চলছে', 'fil': 'Isinasagawa', 'fr': 'En cours', 'tr': 'Devam ediyor'},
+
   // ─── Earnings ───
   'today': {'ar': 'اليوم', 'en': 'Today', 'ur': 'آج', 'hi': 'आज', 'bn': 'আজ', 'fil': 'Ngayon', 'fr': 'Aujourd\'hui', 'tr': 'Bugün'},
   'week': {'ar': 'الأسبوع', 'en': 'Week', 'ur': 'ہفتہ', 'hi': 'सप्ताह', 'bn': 'সপ্তাহ', 'fil': 'Linggo', 'fr': 'Semaine', 'tr': 'Hafta'},

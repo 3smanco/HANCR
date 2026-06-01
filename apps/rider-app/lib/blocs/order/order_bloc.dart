@@ -77,6 +77,12 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
               'quietRide': event.quietRide,
               'audioOff': event.audioOff,
               'numberMasked': event.numberMasked,
+              if (event.receiverName != null) 'receiverName': event.receiverName,
+              if (event.receiverPhone != null)
+                'receiverPhone': event.receiverPhone,
+              if (event.bookedHours != null) 'bookedHours': event.bookedHours,
+              if (event.scheduledAt != null)
+                'scheduledAt': event.scheduledAt!.toUtc().toIso8601String(),
             },
           },
         ),
@@ -94,6 +100,11 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         return;
       }
       final order = OrderModel.fromJson(data);
+      // حجز مسبق (Booked) — لا يُتتبَّع الآن
+      if (order.status == OrderStatus.booked) {
+        emit(OrderScheduled(order));
+        return;
+      }
       emit(OrderActive(order));
       add(const OrderSubscriptionStart());
     } catch (e) {

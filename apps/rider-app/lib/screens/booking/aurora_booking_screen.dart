@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../blocs/order/order_bloc.dart';
 import '../../blocs/order/order_event.dart';
@@ -28,10 +29,14 @@ class AuroraBookingScreen extends StatefulWidget {
   final GeoPoint? presetDestination;
   final String? presetDestinationLabel;
 
+  /// نوع خدمة مُفضَّل لاختياره تلقائياً (PackageDelivery / HourlyChauffeur).
+  final String? preferServiceType;
+
   const AuroraBookingScreen({
     super.key,
     this.presetDestination,
     this.presetDestinationLabel,
+    this.preferServiceType,
   });
 
   @override
@@ -73,6 +78,15 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   bool _bidMode = false;
   final TextEditingController _bidPriceCtrl = TextEditingController();
   bool _sendingBid = false;
+  DateTime? _scheduledAt;
+  // توصيل أمانات
+  final TextEditingController _receiverNameCtrl = TextEditingController();
+  final TextEditingController _receiverPhoneCtrl = TextEditingController();
+  // سائق بالساعة
+  int _bookedHours = 1;
+
+  bool get _isDelivery => _selectedService?.serviceType == 'PackageDelivery';
+  bool get _isHourly => _selectedService?.serviceType == 'HourlyChauffeur';
 
   static const String _darkMapStyle = '''
 [
@@ -146,9 +160,20 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           .map((e) => ServiceModel.fromJson(e as Map<String, dynamic>))
           .toList();
       if (!mounted) return;
+      // اختيار الخدمة المفضّلة (توصيل/بالساعة) إن طُلبت، وإلا أول خدمة
+      ServiceModel? preferred;
+      if (widget.preferServiceType != null) {
+        for (final s in list) {
+          if (s.serviceType == widget.preferServiceType) {
+            preferred = s;
+            break;
+          }
+        }
+      }
       setState(() {
         _services = list;
-        _selectedService = list.isNotEmpty ? list.first : null;
+        _selectedService =
+            preferred ?? (list.isNotEmpty ? list.first : null);
         _loadingServices = false;
       });
       if (_selectedService != null) _loadRoute();
@@ -266,9 +291,23 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   void _requestRide() {
     final service = _selectedService;
     if (service == null) return;
-    if (_bidMode) {
+    if (_bidMode && !_isDelivery && !_isHourly) {
       _sendBid(service);
       return;
+    }
+    // التحقق من بيانات المستلم للتوصيل
+    if (_isDelivery) {
+      final name = _receiverNameCtrl.text.trim();
+      final phone = _receiverPhoneCtrl.text.trim();
+      if (name.isEmpty || phone.length < 6) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(tr('receiverRequired')),
+            backgroundColor: AuroraColors.smoke,
+          ),
+        );
+        return;
+      }
     }
     context.read<OrderBloc>().add(OrderCreateRequested(
           origin: _origin,
@@ -279,8 +318,60 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           regionId: AppConfig.defaultRegionId,
           quietRide: _quietRide,
           audioOff: _audioOff,
+          scheduledAt: _isDelivery || _isHourly ? null : _scheduledAt,
+          receiverName: _isDelivery ? _receiverNameCtrl.text.trim() : null,
+          receiverPhone: _isDelivery ? _receiverPhoneCtrl.text.trim() : null,
+          bookedHours: _isHourly ? _bookedHours : null,
         ));
   }
+
+  Future<void> _pickSchedule() async {
+    final now = DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: now.add(const Duration(minutes: 30)),
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 14)),
+    );
+    if (date == null || !mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(now.add(const Duration(minutes: 30))),
+    );
+    if (time == null || !mounted) return;
+    final picked = DateTime(
+        date.year, date.month, date.day, time.hour, time.minute);
+    if (picked.isBefore(now.add(const Duration(minutes: 5)))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(tr('scheduleTooSoon')), backgroundColor: AuroraColors.smoke),
+      );
+      return;
+    }
+    setState(() => _scheduledAt = picked);
+  }
+
+  String _formatSchedule(DateTime dt) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${two(dt.day)}/${two(dt.month)} — ${two(dt.hour)}:${two(dt.minute)}';
+  }
+
+  InputDecoration _fieldDecoration(String hint, IconData icon) =>
+      InputDecoration(
+        hintText: hint,
+        hintStyle: AuroraText.bodyMedium
+            .copyWith(color: AuroraColors.textSecondary),
+        prefixIcon: Icon(icon, color: AuroraColors.ember, size: 20),
+        filled: true,
+        fillColor: AuroraColors.ash,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AuroraRadius.md),
+          borderSide: const BorderSide(color: AuroraColors.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AuroraRadius.md),
+          borderSide: const BorderSide(color: AuroraColors.ember, width: 1.5),
+        ),
+      );
 
   Future<void> _sendBid(ServiceModel service) async {
     final price = double.tryParse(_bidPriceCtrl.text.trim()) ?? 0;
@@ -357,6 +448,15 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                 backgroundColor: AuroraColors.danger,
               ),
             );
+          } else if (state is OrderScheduled) {
+            // حجز مسبق تم بنجاح — عرض تأكيد والعودة للرئيسية
+            ScaffoldMessenger.of(ctx).showSnackBar(
+              SnackBar(
+                content: Text(tr('rideScheduledOk')),
+                backgroundColor: AuroraColors.success,
+              ),
+            );
+            ctx.go('/home');
           }
           // OrderCreated / OrderActive → الـ router يوجّه تلقائياً لـ /tracking
         },
@@ -536,7 +636,80 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
 
           const SizedBox(height: AuroraSpacing.md),
 
-          // التفضيلات
+          // ─── توصيل الأمانات: بيانات المستلم ───
+          if (_isDelivery) ...[
+            Text(tr('receiverInfo'),
+                style: AuroraText.titleSmall.copyWith(color: AuroraColors.pearl)),
+            const SizedBox(height: AuroraSpacing.sm),
+            TextField(
+              controller: _receiverNameCtrl,
+              style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
+              decoration: _fieldDecoration(tr('receiverName'), Icons.person),
+            ),
+            const SizedBox(height: AuroraSpacing.sm),
+            TextField(
+              controller: _receiverPhoneCtrl,
+              keyboardType: TextInputType.phone,
+              style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
+              decoration: _fieldDecoration(tr('receiverPhone'), Icons.phone),
+            ),
+            const SizedBox(height: AuroraSpacing.sm),
+          ],
+
+          // ─── سائق بالساعة: عدد الساعات ───
+          if (_isHourly) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
+              decoration: BoxDecoration(
+                color: AuroraColors.ash,
+                borderRadius: BorderRadius.circular(AuroraRadius.md),
+                border: Border.all(color: AuroraColors.border),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.timer, size: 18, color: AuroraColors.ember),
+                  const SizedBox(width: AuroraSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      '${tr('hours')}: $_bookedHours',
+                      style: AuroraText.bodyMedium
+                          .copyWith(color: AuroraColors.pearl),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.remove_circle_outline,
+                        color: AuroraColors.textSecondary),
+                    onPressed: _bookedHours > 1
+                        ? () => setState(() => _bookedHours--)
+                        : null,
+                  ),
+                  Text('$_bookedHours',
+                      style: AuroraText.titleMedium
+                          .copyWith(color: AuroraColors.ember)),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline,
+                        color: AuroraColors.ember),
+                    onPressed: _bookedHours < 12
+                        ? () => setState(() => _bookedHours++)
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+            if (_selectedService?.hourlyRate != null)
+              Padding(
+                padding: const EdgeInsets.only(top: AuroraSpacing.xs),
+                child: Text(
+                  '${tr('estimatedPrice')}: ${(_selectedService!.hourlyRate! * _bookedHours).toStringAsFixed(0)}',
+                  style: AuroraText.bodySmall,
+                ),
+              ),
+            const SizedBox(height: AuroraSpacing.sm),
+          ],
+
+          // التفضيلات + المزايدة (للمشاوير فقط)
+          if (!_isDelivery && !_isHourly) ...[
           Row(
             children: [
               Expanded(
@@ -581,10 +754,86 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
             ),
           ],
 
+          if (!_bidMode) ...[
+            const SizedBox(height: AuroraSpacing.md),
+            InkWell(
+              onTap: _pickSchedule,
+              borderRadius: BorderRadius.circular(AuroraRadius.md),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
+                decoration: BoxDecoration(
+                  color: AuroraColors.ash,
+                  borderRadius: BorderRadius.circular(AuroraRadius.md),
+                  border: Border.all(
+                    color: _scheduledAt != null
+                        ? AuroraColors.ember
+                        : AuroraColors.border,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _scheduledAt != null
+                          ? Icons.event_available
+                          : Icons.schedule,
+                      size: 18,
+                      color: _scheduledAt != null
+                          ? AuroraColors.ember
+                          : AuroraColors.textSecondary,
+                    ),
+                    const SizedBox(width: AuroraSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        _scheduledAt != null
+                            ? _formatSchedule(_scheduledAt!)
+                            : tr('rideNow'),
+                        style: TextStyle(
+                          color: _scheduledAt != null
+                              ? AuroraColors.textPrimary
+                              : AuroraColors.textSecondary,
+                          fontWeight: _scheduledAt != null
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                    if (_scheduledAt != null)
+                      GestureDetector(
+                        onTap: () => setState(() => _scheduledAt = null),
+                        child: const Icon(Icons.close,
+                            size: 18, color: AuroraColors.textSecondary),
+                      )
+                    else
+                      const Icon(Icons.keyboard_arrow_down,
+                          size: 18, color: AuroraColors.textSecondary),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          ], // نهاية قسم المشاوير فقط
+
           const SizedBox(height: AuroraSpacing.lg),
           AuroraButton.primary(
-            label: _bidMode ? tr('sendBid') : tr('requestNow'),
-            icon: _bidMode ? Icons.gavel : Icons.local_taxi,
+            label: _isDelivery
+                ? tr('requestDelivery')
+                : _isHourly
+                    ? tr('bookHourly')
+                    : _bidMode
+                        ? tr('sendBid')
+                        : (_scheduledAt != null
+                            ? tr('scheduleRide')
+                            : tr('requestNow')),
+            icon: _isDelivery
+                ? Icons.local_shipping
+                : _isHourly
+                    ? Icons.timer
+                    : _bidMode
+                        ? Icons.gavel
+                        : (_scheduledAt != null
+                            ? Icons.event
+                            : Icons.local_taxi),
             loading: creating || _sendingBid,
             onPressed: (_selectedService != null && !creating && !_sendingBid)
                 ? _requestRide

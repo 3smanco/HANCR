@@ -7,7 +7,8 @@ import {
   Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, LessThanOrEqual } from 'typeorm';
+import { Cron } from '@nestjs/schedule';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import {
   OrderEntity,
@@ -100,13 +101,18 @@ export class OrderService {
     const durationSeconds = route.durationSeconds;
 
     // حساب السعر (baseFare + perHundredMeters→perKm + perMinuteDrive)
-    const costBest = this.matchingService.estimateFare(
+    let costBest = this.matchingService.estimateFare(
       distanceMeters,
       durationSeconds,
       Number(service.baseFare),
       Number(service.perHundredMeters) * 10,
       Number(service.perMinuteDrive),
     );
+
+    // السائق بالساعة: السعر = hourlyRate × عدد الساعات
+    if (input.bookedHours && service.hourlyRate) {
+      costBest = Number(service.hourlyRate) * input.bookedHours;
+    }
 
     // استخدام Transaction لضمان الاتساق
     const queryRunner = this.dataSource.createQueryRunner();
@@ -119,12 +125,12 @@ export class OrderService {
         riderId,
         serviceId: input.serviceId,
         regionId: input.regionId,
-        type: input.bookedHours
+        type: input.receiverPhone
+          ? OrderType.ParcelDelivery
+          : input.bookedHours
           ? OrderType.HourlyChauffeur
           : input.scheduledAt
           ? OrderType.ScheduledRide
-          : input.isBidOrder
-          ? OrderType.Ride
           : OrderType.Ride,
         status: OrderStatus.Requested,
         points: input.points.map((p) => ({ lat: p.lat, lng: p.lng })),
@@ -140,9 +146,13 @@ export class OrderService {
         requestedTemperature: input.requestedTemperature,
         audioOff: input.audioOff ?? false,
         numberMasked: input.numberMasked ?? false,
-        // OTP
+        // OTP — لتوصيل الأمانات: نولّد الكود عند الإنشاء ليعرضه الراكب للمستلم،
+        // والسائق يُدخله عند التسليم لإثبات الاستلام (confirmDelivery)
         receiverPhone: input.receiverPhone,
         receiverName: input.receiverName,
+        ...(input.receiverPhone
+          ? { otpCode: Math.floor(1000 + Math.random() * 9000).toString() }
+          : {}),
         // Bid
         isBidOrder: input.isBidOrder ?? false,
         // Chauffeur
@@ -161,6 +171,23 @@ export class OrderService {
       await queryRunner.manager.save(activity);
 
       await queryRunner.commitTransaction();
+
+      // حجز مسبق مستقبلي: لا مطابقة الآن — يُفعَّل لاحقاً عبر الكرون (status=Booked)
+      if (
+        input.scheduledAt &&
+        new Date(input.scheduledAt).getTime() > Date.now() + 60_000
+      ) {
+        await this.orderRepo.update(savedOrder.id, {
+          status: OrderStatus.Booked,
+        });
+        this.logger.log(
+          `Order #${savedOrder.id} scheduled for ${input.scheduledAt} (Booked)`,
+        );
+        return this.toGqlType({
+          ...savedOrder,
+          status: OrderStatus.Booked,
+        } as OrderEntity);
+      }
 
       // إضافة الطلب إلى Redis للمطابقة الفورية
       await this.orderRedis.addOrder({
@@ -359,6 +386,7 @@ export class OrderService {
       OrderStatus.NotFound,
       OrderStatus.Found,
       OrderStatus.DriverAccepted,
+      OrderStatus.Booked,
     ];
 
     if (!cancellableStatuses.includes(order.status)) {
@@ -569,6 +597,7 @@ export class OrderService {
         { riderId, status: OrderStatus.Finished },
         { riderId, status: OrderStatus.RiderCanceled },
         { riderId, status: OrderStatus.DriverCanceled },
+        { riderId, status: OrderStatus.Booked },
       ],
       order: { createdOn: 'DESC' },
       take: limit,
@@ -673,5 +702,106 @@ export class OrderService {
       .set({ fcmToken: undefined })
       .where('fcm_token IN (:...tokens)', { tokens })
       .execute();
+  }
+
+  // =============================================
+  // كرون: تفعيل الحجوزات المسبقة عند اقتراب موعدها
+  // =============================================
+  @Cron('30 * * * * *') // كل دقيقة (الثانية 30)
+  async activateDueScheduledOrders(): Promise<void> {
+    // فعّل الطلبات المحجوزة التي حان موعدها (خلال دقيقتين)
+    const due = await this.orderRepo.find({
+      where: {
+        status: OrderStatus.Booked,
+        expectedTimestamp: LessThanOrEqual(new Date(Date.now() + 2 * 60_000)),
+      },
+      take: 20,
+    });
+    for (const order of due) {
+      try {
+        await this.activateScheduledOrder(order);
+      } catch (e) {
+        this.logger.warn(
+          `Failed to activate scheduled order #${order.id}: ${(e as Error).message}`,
+        );
+      }
+    }
+  }
+
+  /** يفعّل طلباً محجوزاً: مطابقة السائقين + نشر الإشعارات. */
+  private async activateScheduledOrder(order: OrderEntity): Promise<void> {
+    const rider = await this.riderRepo.findOne({ where: { id: order.riderId } });
+    if (!rider) return;
+    const origin = order.points?.[0];
+    if (!origin) return;
+
+    await this.orderRedis.addOrder({
+      orderId: order.id,
+      riderId: order.riderId,
+      serviceId: order.serviceId,
+      lat: origin.lat,
+      lng: origin.lng,
+    });
+
+    const matches = await this.matchingService.findNearbyDrivers(
+      origin.lat,
+      origin.lng,
+      order.serviceId,
+    );
+
+    if (matches.length > 0) {
+      const etaPickup = new Date(Date.now() + matches[0].etaMinutes * 60_000);
+      await this.orderRepo.update(order.id, {
+        status: OrderStatus.Found,
+        etaPickup,
+      });
+      await this.pubSub.publish(NEW_ORDER_AVAILABLE, {
+        newOrderAvailable: {
+          id: order.id,
+          type: order.type,
+          status: OrderStatus.Found,
+          riderId: order.riderId,
+          riderName: rider.firstName
+            ? `${rider.firstName} ${rider.lastName ?? ''}`.trim()
+            : undefined,
+          riderPhone: order.numberMasked ? undefined : rider.phoneNumber,
+          riderRating: Number(rider.rating),
+          points: order.points ?? [],
+          addresses: order.addresses,
+          distanceBest: order.distanceBest,
+          durationBest: order.durationBest,
+          costBest: Number(order.costBest),
+          costAfterCoupon: Number(order.costAfterCoupon),
+          currency: order.currency,
+          paymentMode: order.paymentMode ?? PaymentMode.Cash,
+          quietRide: order.quietRide,
+          requestedTemperature: order.requestedTemperature,
+          audioOff: order.audioOff,
+          numberMasked: order.numberMasked,
+          otpCode: order.otpCode,
+          receiverName: order.receiverName,
+          isBidOrder: order.isBidOrder,
+          etaPickup,
+          createdOn: order.createdOn,
+        },
+      });
+      await this.pubSub.publish(ORDER_UPDATED, {
+        orderUpdated: this.toGqlType({
+          ...order,
+          status: OrderStatus.Found,
+          etaPickup,
+        } as OrderEntity),
+      });
+      this.logger.log(`Scheduled order #${order.id} activated → Found`);
+    } else {
+      await this.orderRepo.update(order.id, { status: OrderStatus.NotFound });
+      await this.pubSub.publish(ORDER_UPDATED, {
+        orderUpdated: this.toGqlType({
+          ...order,
+          status: OrderStatus.NotFound,
+        } as OrderEntity),
+      });
+      this.logger.warn(`Scheduled order #${order.id} activated → NotFound`);
+    }
   }
 }

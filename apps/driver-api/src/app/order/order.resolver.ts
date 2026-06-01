@@ -61,6 +61,17 @@ export class OrderResolver {
     return this.orderService.finishRide(driver.driverId, orderId);
   }
 
+  /** تأكيد تسليم أمانة عبر OTP */
+  @Mutation(() => DriverOrderType, { description: 'تأكيد تسليم أمانة عبر OTP' })
+  @UseGuards(JwtAuthGuard)
+  confirmDelivery(
+    @CurrentDriver() driver: AuthDriver,
+    @Args('orderId', { type: () => Int }) orderId: number,
+    @Args('otp') otp: string,
+  ): Promise<DriverOrderType> {
+    return this.orderService.confirmDelivery(driver.driverId, orderId, otp);
+  }
+
   /** إلغاء الطلب */
   @Mutation(() => DriverOrderType, { description: 'إلغاء الطلب' })
   @UseGuards(JwtAuthGuard)

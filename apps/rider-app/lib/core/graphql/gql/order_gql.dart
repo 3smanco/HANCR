@@ -16,6 +16,9 @@ const String createOrderMutation = r'''
       audioOff
       numberMasked
       isBidOrder
+      otpCode
+      receiverName
+      receiverPhone
       riderId
       serviceId
       regionId
@@ -73,6 +76,9 @@ const String activeOrderQuery = r'''
       audioOff
       numberMasked
       isBidOrder
+      otpCode
+      receiverName
+      receiverPhone
       riderId
       serviceId
       regionId
@@ -129,6 +135,9 @@ const String orderUpdatedSubscription = r'''
       plateNumber
       driverAvatarUrl
       addresses
+      otpCode
+      receiverName
+      receiverPhone
       riderId
     }
   }

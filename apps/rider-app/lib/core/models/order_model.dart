@@ -28,7 +28,8 @@ enum OrderStatus {
   waitingForReview,
   finished,
   riderCanceled,
-  driverCanceled;
+  driverCanceled,
+  booked;
 
   static OrderStatus fromString(String s) {
     switch (s) {
@@ -56,6 +57,8 @@ enum OrderStatus {
         return OrderStatus.riderCanceled;
       case 'DriverCanceled':
         return OrderStatus.driverCanceled;
+      case 'Booked':
+        return OrderStatus.booked;
       default:
         return OrderStatus.requested;
     }
@@ -65,7 +68,10 @@ enum OrderStatus {
         OrderStatus.finished,
         OrderStatus.riderCanceled,
         OrderStatus.driverCanceled,
+        OrderStatus.booked,
       ].contains(this);
+
+  bool get isScheduled => this == OrderStatus.booked;
 
   bool get hasDriver => [
         OrderStatus.driverAccepted,
@@ -106,6 +112,8 @@ enum OrderStatus {
         return 'Cancelled';
       case OrderStatus.driverCanceled:
         return 'Cancelled by driver';
+      case OrderStatus.booked:
+        return 'Scheduled';
     }
   }
 }
@@ -140,6 +148,10 @@ class OrderModel extends Equatable {
   final bool audioOff;
   final bool numberMasked;
   final bool isBidOrder;
+  // Parcel delivery
+  final String? otpCode;
+  final String? receiverName;
+  final String? receiverPhone;
   // IDs
   final int riderId;
   final int serviceId;
@@ -174,6 +186,9 @@ class OrderModel extends Equatable {
     required this.audioOff,
     required this.numberMasked,
     required this.isBidOrder,
+    this.otpCode,
+    this.receiverName,
+    this.receiverPhone,
     required this.riderId,
     required this.serviceId,
     required this.regionId,
@@ -218,6 +233,9 @@ class OrderModel extends Equatable {
         audioOff: json['audioOff'] as bool? ?? false,
         numberMasked: json['numberMasked'] as bool? ?? false,
         isBidOrder: json['isBidOrder'] as bool? ?? false,
+        otpCode: json['otpCode'] as String?,
+        receiverName: json['receiverName'] as String?,
+        receiverPhone: json['receiverPhone'] as String?,
         riderId: json['riderId'] as int? ?? 0,
         serviceId: json['serviceId'] as int? ?? 0,
         regionId: json['regionId'] as int? ?? 0,

@@ -208,6 +208,32 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     } catch (_) {}
   }
 
+  /// تأكيد تسليم أمانة عبر OTP — يُستدعى مباشرة من الواجهة لتمرير رسائل الخطأ.
+  /// يُرجع رسالة خطأ عند الفشل، أو null عند النجاح.
+  Future<String?> confirmDelivery(int orderId, String otp) async {
+    try {
+      final client = await GraphQLClientManager.get();
+      final result = await client.mutate(
+        MutationOptions(
+          document: gql(confirmDeliveryMutation),
+          variables: {'orderId': orderId, 'otp': otp},
+        ),
+      );
+      if (result.hasException) {
+        return result.exception?.graphqlErrors.isNotEmpty == true
+            ? result.exception!.graphqlErrors.first.message
+            : 'فشل تأكيد التسليم';
+      }
+      final data = result.data?['confirmDelivery'] as Map<String, dynamic>?;
+      if (data == null) return 'لا توجد بيانات';
+      // إعادة فحص الطلب النشط لتحديث الحالة (مكتمل / بانتظار التقييم)
+      add(const OrderCheckActiveRequested());
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
   @override
   Future<void> close() async {
     await _newOrderSub?.cancel();

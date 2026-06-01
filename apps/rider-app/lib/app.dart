@@ -133,6 +133,7 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
               return AuroraBookingScreen(
                 presetDestination: extra['destination'] as GeoPoint?,
                 presetDestinationLabel: extra['label'] as String?,
+                preferServiceType: extra['preferServiceType'] as String?,
               );
             }
             return const AuroraBookingScreen();

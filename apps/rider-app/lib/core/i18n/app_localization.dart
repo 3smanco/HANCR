@@ -159,6 +159,24 @@ const Map<String, Map<String, String>> _t = {
   'offersReceived': {'ar': 'العروض الواردة', 'en': 'Offers received', 'ur': 'موصولہ پیشکشیں', 'hi': 'प्राप्त ऑफ़र', 'bn': 'প্রাপ্ত অফার', 'fil': 'Mga natanggap na alok', 'fr': 'Offres reçues', 'tr': 'Gelen teklifler'},
   'bidExpired': {'ar': 'انتهت مدة المزايدة', 'en': 'Bid expired', 'ur': 'بولی ختم ہو گئی', 'hi': 'बिड समाप्त', 'bn': 'বিড শেষ', 'fil': 'Nag-expire ang bid', 'fr': 'Enchère expirée', 'tr': 'Teklif süresi doldu'},
 
+  // ─── Scheduled rides ───
+  'rideNow': {'ar': 'الآن', 'en': 'Ride now', 'ur': 'ابھی', 'hi': 'अभी', 'bn': 'এখন', 'fil': 'Ngayon', 'fr': 'Maintenant', 'tr': 'Şimdi'},
+  'scheduleRide': {'ar': 'جدولة الرحلة', 'en': 'Schedule ride', 'ur': 'سفر شیڈول کریں', 'hi': 'राइड शेड्यूल करें', 'bn': 'রাইড নির্ধারণ করুন', 'fil': 'Iiskedyul ang biyahe', 'fr': 'Planifier le trajet', 'tr': 'Yolculuğu planla'},
+  'scheduleTooSoon': {'ar': 'اختر وقتاً بعد 5 دقائق على الأقل', 'en': 'Pick a time at least 5 minutes away', 'ur': 'کم از کم 5 منٹ بعد کا وقت منتخب کریں', 'hi': 'कम से कम 5 मिनट बाद का समय चुनें', 'bn': 'অন্তত ৫ মিনিট পরের সময় বাছুন', 'fil': 'Pumili ng oras na hindi bababa sa 5 minuto', 'fr': 'Choisissez une heure dans au moins 5 minutes', 'tr': 'En az 5 dakika sonrası için bir zaman seçin'},
+  'rideScheduledOk': {'ar': 'تم جدولة رحلتك بنجاح', 'en': 'Your ride is scheduled', 'ur': 'آپ کا سفر شیڈول ہو گیا', 'hi': 'आपकी राइड शेड्यूल हो गई', 'bn': 'আপনার রাইড নির্ধারিত হয়েছে', 'fil': 'Naka-iskedyul na ang iyong biyahe', 'fr': 'Votre trajet est planifié', 'tr': 'Yolculuğunuz planlandı'},
+
+  // ─── Parcel delivery & Hourly ───
+  'receiverInfo': {'ar': 'بيانات المستلم', 'en': 'Receiver details', 'ur': 'وصول کنندہ کی تفصیلات', 'hi': 'प्राप्तकर्ता विवरण', 'bn': 'প্রাপকের তথ্য', 'fil': 'Detalye ng tatanggap', 'fr': 'Détails du destinataire', 'tr': 'Alıcı bilgileri'},
+  'receiverName': {'ar': 'اسم المستلم', 'en': 'Receiver name', 'ur': 'وصول کنندہ کا نام', 'hi': 'प्राप्तकर्ता का नाम', 'bn': 'প্রাপকের নাম', 'fil': 'Pangalan ng tatanggap', 'fr': 'Nom du destinataire', 'tr': 'Alıcı adı'},
+  'receiverPhone': {'ar': 'هاتف المستلم', 'en': 'Receiver phone', 'ur': 'وصول کنندہ کا فون', 'hi': 'प्राप्तकर्ता का फ़ोन', 'bn': 'প্রাপকের ফোন', 'fil': 'Telepono ng tatanggap', 'fr': 'Téléphone du destinataire', 'tr': 'Alıcı telefonu'},
+  'receiverRequired': {'ar': 'أدخل اسم وهاتف المستلم', 'en': 'Enter receiver name and phone', 'ur': 'وصول کنندہ کا نام اور فون درج کریں', 'hi': 'प्राप्तकर्ता का नाम और फ़ोन दर्ज करें', 'bn': 'প্রাপকের নাম ও ফোন দিন', 'fil': 'Ilagay ang pangalan at telepono ng tatanggap', 'fr': 'Saisissez le nom et le téléphone du destinataire', 'tr': 'Alıcı adı ve telefonunu girin'},
+  'requestDelivery': {'ar': 'اطلب توصيل', 'en': 'Request delivery', 'ur': 'ترسیل کی درخواست', 'hi': 'डिलीवरी का अनुरोध', 'bn': 'ডেলিভারি অনুরোধ', 'fil': 'Humiling ng delivery', 'fr': 'Demander une livraison', 'tr': 'Teslimat iste'},
+  'bookHourly': {'ar': 'احجز بالساعة', 'en': 'Book hourly', 'ur': 'گھنٹہ وار بک کریں', 'hi': 'घंटे के हिसाब से बुक करें', 'bn': 'ঘণ্টা হিসেবে বুক করুন', 'fil': 'Mag-book kada oras', 'fr': 'Réserver à l\'heure', 'tr': 'Saatlik rezervasyon'},
+  'hours': {'ar': 'الساعات', 'en': 'Hours', 'ur': 'گھنٹے', 'hi': 'घंटे', 'bn': 'ঘণ্টা', 'fil': 'Oras', 'fr': 'Heures', 'tr': 'Saat'},
+  'estimatedPrice': {'ar': 'السعر التقديري', 'en': 'Estimated price', 'ur': 'تخمینی قیمت', 'hi': 'अनुमानित मूल्य', 'bn': 'আনুমানিক মূল্য', 'fil': 'Tinatayang presyo', 'fr': 'Prix estimé', 'tr': 'Tahmini fiyat'},
+  'deliveryCode': {'ar': 'كود التسليم', 'en': 'Delivery code', 'ur': 'ڈیلیوری کوڈ', 'hi': 'डिलीवरी कोड', 'bn': 'ডেলিভারি কোড', 'fil': 'Delivery code', 'fr': 'Code de livraison', 'tr': 'Teslimat kodu'},
+  'deliveryCodeHint': {'ar': 'اعطِ هذا الكود للسائق عند التسليم', 'en': 'Give this code to the driver at delivery', 'ur': 'ڈیلیوری پر یہ کوڈ ڈرائیور کو دیں', 'hi': 'डिलीवरी पर यह कोड ड्राइवर को दें', 'bn': 'ডেলিভারিতে এই কোড চালককে দিন', 'fil': 'Ibigay ang code na ito sa drayber sa delivery', 'fr': 'Donnez ce code au chauffeur à la livraison', 'tr': 'Teslimatta bu kodu sürücüye verin'},
+
   // ─── Rides / Activity ───
   'noRides': {'ar': 'لا توجد رحلات بعد', 'en': 'No rides yet', 'ur': 'ابھی کوئی سواری نہیں', 'hi': 'अभी तक कोई राइड नहीं', 'bn': 'এখনও কোনো রাইড নেই', 'fil': 'Wala pang sakay', 'fr': 'Pas encore de courses', 'tr': 'Henüz yolculuk yok'},
   'ridesEmptySub': {'ar': 'رحلاتك المكتملة ستظهر هنا', 'en': 'Your completed rides will appear here', 'ur': 'آپ کی مکمل سواریاں یہاں نظر آئیں گی', 'hi': 'आपकी पूर्ण राइड यहाँ दिखेंगी', 'bn': 'আপনার সম্পন্ন রাইড এখানে দেখাবে', 'fil': 'Lalabas dito ang tapos na sakay', 'fr': 'Vos courses terminées apparaîtront ici', 'tr': 'Tamamlanan yolculuklar burada görünür'},

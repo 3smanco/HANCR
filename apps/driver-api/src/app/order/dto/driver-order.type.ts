@@ -39,6 +39,7 @@ export class DriverOrderType {
   /** OTP */
   @Field({ nullable: true }) otpCode?: string;
   @Field({ nullable: true }) receiverName?: string;
+  @Field({ nullable: true }) receiverPhone?: string;
 
   /** Bid */
   @Field() isBidOrder!: boolean;

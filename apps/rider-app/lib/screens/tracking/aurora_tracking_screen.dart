@@ -343,6 +343,13 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
               // Driver info
               _driverInfoRow(order),
 
+              // كود التسليم للأمانات
+              if ((order.otpCode ?? '').isNotEmpty &&
+                  (order.receiverPhone ?? '').isNotEmpty) ...[
+                const SizedBox(height: AuroraSpacing.lg),
+                _deliveryCodeCard(order),
+              ],
+
               const SizedBox(height: AuroraSpacing.lg),
 
               // ETA + fare
@@ -386,6 +393,47 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _deliveryCodeCard(OrderModel order) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AuroraSpacing.md),
+      decoration: BoxDecoration(
+        color: AuroraColors.ember.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AuroraRadius.lg),
+        border: Border.all(color: AuroraColors.ember.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.lock_outline, color: AuroraColors.ember),
+          const SizedBox(width: AuroraSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(tr('deliveryCode'),
+                    style: AuroraText.bodySmall
+                        .copyWith(color: AuroraColors.textSecondary)),
+                const SizedBox(height: 2),
+                Text(
+                  order.otpCode ?? '',
+                  style: AuroraText.titleLarge.copyWith(
+                    color: AuroraColors.ember,
+                    letterSpacing: 6,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(tr('deliveryCodeHint'),
+                    style: AuroraText.bodySmall
+                        .copyWith(color: AuroraColors.textSecondary)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

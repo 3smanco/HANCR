@@ -95,6 +95,7 @@ class DriverOrderModel {
   final bool numberMasked;
   final String? otpCode;
   final String? receiverName;
+  final String? receiverPhone;
   final bool isBidOrder;
   final DateTime? etaPickup;
   final DateTime? startTimestamp;
@@ -123,6 +124,7 @@ class DriverOrderModel {
     required this.numberMasked,
     this.otpCode,
     this.receiverName,
+    this.receiverPhone,
     required this.isBidOrder,
     this.etaPickup,
     this.startTimestamp,
@@ -158,6 +160,7 @@ class DriverOrderModel {
       numberMasked: json['numberMasked'] as bool? ?? false,
       otpCode: json['otpCode'] as String?,
       receiverName: json['receiverName'] as String?,
+      receiverPhone: json['receiverPhone'] as String?,
       isBidOrder: json['isBidOrder'] as bool? ?? false,
       etaPickup: json['etaPickup'] != null
           ? DateTime.parse(json['etaPickup'] as String)
@@ -212,6 +215,7 @@ class DriverOrderModel {
         numberMasked: numberMasked,
         otpCode: otpCode,
         receiverName: receiverName,
+        receiverPhone: receiverPhone,
         isBidOrder: isBidOrder,
         etaPickup: etaPickup,
         startTimestamp: startTimestamp,

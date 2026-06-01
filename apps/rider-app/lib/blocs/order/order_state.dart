@@ -36,6 +36,14 @@ class OrderCreated extends OrderState {
   List<Object?> get props => [order];
 }
 
+/// Order scheduled for later (Booked) — not active yet
+class OrderScheduled extends OrderState {
+  final OrderModel order;
+  const OrderScheduled(this.order);
+  @override
+  List<Object?> get props => [order];
+}
+
 /// Order completed — show rating screen
 class OrderAwaitingReview extends OrderState {
   final OrderModel order;

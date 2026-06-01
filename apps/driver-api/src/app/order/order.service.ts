@@ -12,6 +12,7 @@ import { RedisPubSub } from 'graphql-redis-subscriptions';
 import {
   OrderEntity,
   OrderStatus,
+  OrderType,
   DriverEntity,
   DriverStatus,
   RiderEntity,
@@ -349,6 +350,81 @@ export class OrderService {
   }
 
   // =============================================
+  // confirmDelivery — تأكيد تسليم أمانة عبر OTP
+  // الراكب يعرض الكود للمستلم، والسائق يُدخله هنا لإثبات التسليم
+  // =============================================
+  async confirmDelivery(
+    driverId: number,
+    orderId: number,
+    otpCode: string,
+  ): Promise<DriverOrderType> {
+    const order = await this.getAssignedOrder(driverId, orderId);
+
+    if (order.status !== OrderStatus.Started) {
+      throw new BadRequestException('Delivery has not started yet');
+    }
+    if (!order.receiverPhone) {
+      throw new BadRequestException('This order is not a parcel delivery');
+    }
+    if (!order.otpCode) {
+      throw new BadRequestException('No delivery OTP set for this order');
+    }
+    if (order.otpAttempts >= 5) {
+      throw new BadRequestException('Too many failed OTP attempts');
+    }
+    if (order.otpCode !== otpCode.trim()) {
+      await this.orderRepo.update(orderId, {
+        otpAttempts: (order.otpAttempts ?? 0) + 1,
+      });
+      throw new BadRequestException(
+        `Invalid OTP. ${5 - ((order.otpAttempts ?? 0) + 1)} attempts remaining.`,
+      );
+    }
+
+    // OTP صحيح — إنهاء التسليم
+    const nextStatus =
+      order.paymentMode === PaymentMode.Cash
+        ? OrderStatus.WaitingForReview
+        : OrderStatus.WaitingForPostPay;
+
+    await this.orderRepo.update(orderId, {
+      status: nextStatus,
+      finishTimestamp: new Date(),
+    });
+
+    await this.activityRepo.save(
+      this.activityRepo.create({
+        orderId,
+        type: RequestActivityType.OtpVerified,
+      }),
+    );
+
+    await this.driverRepo.update(driverId, { status: DriverStatus.Online });
+    await this.driverRedis.setStatus(driverId, 'Online');
+
+    try {
+      await this._settlePayment(order);
+    } catch (e) {
+      this.logger.error(
+        `Payment settlement failed for order #${orderId}: ${(e as Error).message}`,
+      );
+    }
+
+    const updated = await this.getOrderWithRider(orderId);
+    await this.pubSub.publish(DRIVER_ORDER_UPDATED, {
+      driverOrderUpdated: updated,
+    });
+    this.pushToRider(updated.riderId, {
+      type: 'order_completed',
+      amount: Number(updated.costAfterCoupon),
+      currency: updated.currency,
+    });
+
+    this.logger.log(`Delivery confirmed for order #${orderId}`);
+    return updated;
+  }
+
+  // =============================================
   // cancelOrder — السائق يلغي الطلب
   // =============================================
   async cancelOrder(driverId: number, orderId: number): Promise<DriverOrderType> {
@@ -525,8 +601,11 @@ export class OrderService {
       requestedTemperature: order.requestedTemperature,
       audioOff: order.audioOff,
       numberMasked: order.numberMasked,
-      otpCode: order.otpCode,
+      // ملاحظة أمنية: لا نُرسل otpCode للسائق في توصيل الأمانات —
+      // المستلم يعرضه والسائق يُدخله عبر confirmDelivery لإثبات التسليم.
+      otpCode: order.type === OrderType.ParcelDelivery ? undefined : order.otpCode,
       receiverName: order.receiverName,
+      receiverPhone: order.numberMasked ? undefined : order.receiverPhone,
       isBidOrder: order.isBidOrder,
       etaPickup: order.etaPickup,
       startTimestamp: order.startTimestamp,

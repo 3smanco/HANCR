@@ -137,7 +137,8 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                     icon: Icons.inventory_2_outlined,
                     label: tr('parcel'),
                     badge: 'Promo',
-                    onTap: () => AuroraToast.comingSoon(context, feature: tr('parcel')),
+                    onTap: () => context.push('/book',
+                        extra: {'preferServiceType': 'PackageDelivery'}),
                   ),
                   const SizedBox(width: AuroraSpacing.sm),
                   AuroraIconTile(
@@ -340,7 +341,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
 
   Widget _scheduleCta() {
     return GestureDetector(
-      onTap: () => AuroraToast.comingSoon(context, feature: 'الحجز المسبق'),
+      onTap: () => context.push('/book'),
       child: Container(
       padding: const EdgeInsets.all(AuroraSpacing.lg),
       decoration: BoxDecoration(

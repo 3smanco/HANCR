@@ -94,9 +94,19 @@ class _ServicesTab extends StatelessWidget {
               _ServiceItem(icon: Icons.electric_scooter, label: tr('bike')),
               _ServiceItem(
                   icon: Icons.car_rental, label: tr('rental'), badge: 'Promo'),
-              _ServiceItem(icon: Icons.schedule, label: tr('scheduledRide')),
+              _ServiceItem(
+                  icon: Icons.schedule,
+                  label: tr('scheduledRide'),
+                  bookServiceType: ''),
               _ServiceItem(icon: Icons.groups, label: tr('groupRide')),
-              _ServiceItem(icon: Icons.av_timer, label: tr('hourly')),
+              _ServiceItem(
+                  icon: Icons.av_timer,
+                  label: tr('hourly'),
+                  bookServiceType: 'HourlyChauffeur'),
+              _ServiceItem(
+                  icon: Icons.inventory_2_outlined,
+                  label: tr('parcel'),
+                  bookServiceType: 'PackageDelivery'),
               _ServiceItem(icon: Icons.school, label: tr('students')),
               _ServiceItem(icon: Icons.airline_seat_recline_normal, label: tr('premiumCat')),
             ]),
@@ -145,10 +155,14 @@ class _ServicesTab extends StatelessWidget {
         badge: items[i].badge,
         size: 80,
         onTap: () {
-          if (items[i].isRide) {
+          final item = items[i];
+          if (item.isRide || item.bookServiceType == '') {
             ctx.push('/book');
+          } else if (item.bookServiceType != null) {
+            ctx.push('/book',
+                extra: {'preferServiceType': item.bookServiceType});
           } else {
-            AuroraToast.comingSoon(ctx, feature: items[i].label);
+            AuroraToast.comingSoon(ctx, feature: item.label);
           }
         },
       ),
@@ -161,6 +175,12 @@ class _ServiceItem {
   final String label;
   final String? badge;
   final bool isRide;
+  /// إن لم يكن null، يفتح شاشة الحجز بنوع خدمة مُفضَّل (أو رحلة عادية عند '').
+  final String? bookServiceType;
   const _ServiceItem(
-      {required this.icon, required this.label, this.badge, this.isRide = false});
+      {required this.icon,
+      required this.label,
+      this.badge,
+      this.isRide = false,
+      this.bookServiceType});
 }
