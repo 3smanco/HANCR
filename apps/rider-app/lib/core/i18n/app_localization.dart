@@ -192,6 +192,11 @@ const Map<String, Map<String, String>> _t = {
   // ─── Payment method ───
   'cash': {'ar': 'نقداً', 'en': 'Cash', 'ur': 'نقد', 'hi': 'नकद', 'bn': 'নগদ', 'fil': 'Cash', 'fr': 'Espèces', 'tr': 'Nakit'},
 
+  // ─── Referral ───
+  'inviteDesc': {'ar': 'يحصل صديقك على مكافأة عند أول رحلة، وتحصل أنت على رصيد محفظة أيضاً.', 'en': 'Your friend gets a bonus on their first ride, and you get wallet credit too.', 'ur': 'آپ کے دوست کو پہلی سواری پر انعام ملے گا، اور آپ کو بھی والیٹ کریڈٹ۔', 'hi': 'आपके मित्र को पहली राइड पर बोनस मिलेगा, और आपको भी वॉलेट क्रेडिट।', 'bn': 'আপনার বন্ধু প্রথম রাইডে বোনাস পাবে, আপনিও ওয়ালেট ক্রেডিট পাবেন।', 'fil': 'May bonus ang kaibigan mo sa unang biyahe, at may wallet credit ka rin.', 'fr': 'Votre ami reçoit un bonus à sa première course, et vous obtenez aussi du crédit.', 'tr': 'Arkadaşınız ilk yolculuğunda bonus alır, siz de cüzdan kredisi kazanırsınız.'},
+  'friendsInvited': {'ar': 'أصدقاء انضمّوا بكودك', 'en': 'Friends joined with your code', 'ur': 'آپ کے کوڈ سے شامل دوست', 'hi': 'आपके कोड से जुड़े मित्र', 'bn': 'আপনার কোডে যোগ দেওয়া বন্ধু', 'fil': 'Mga kaibigang sumali sa code mo', 'fr': 'Amis inscrits avec votre code', 'tr': 'Kodunuzla katılan arkadaşlar'},
+  'referralCodeOptional': {'ar': 'كود إحالة (اختياري)', 'en': 'Referral code (optional)', 'ur': 'ریفرل کوڈ (اختیاری)', 'hi': 'रेफ़रल कोड (वैकल्पिक)', 'bn': 'রেফারেল কোড (ঐচ্ছিক)', 'fil': 'Referral code (opsyonal)', 'fr': 'Code de parrainage (facultatif)', 'tr': 'Davet kodu (isteğe bağlı)'},
+
   // ─── Rides / Activity ───
   'noRides': {'ar': 'لا توجد رحلات بعد', 'en': 'No rides yet', 'ur': 'ابھی کوئی سواری نہیں', 'hi': 'अभी तक कोई राइड नहीं', 'bn': 'এখনও কোনো রাইড নেই', 'fil': 'Wala pang sakay', 'fr': 'Pas encore de courses', 'tr': 'Henüz yolculuk yok'},
   'ridesEmptySub': {'ar': 'رحلاتك المكتملة ستظهر هنا', 'en': 'Your completed rides will appear here', 'ur': 'آپ کی مکمل سواریاں یہاں نظر آئیں گی', 'hi': 'आपकी पूर्ण राइड यहाँ दिखेंगी', 'bn': 'আপনার সম্পন্ন রাইড এখানে দেখাবে', 'fil': 'Lalabas dito ang tapos na sakay', 'fr': 'Vos courses terminées apparaîtront ici', 'tr': 'Tamamlanan yolculuklar burada görünür'},

@@ -70,6 +70,18 @@ export class RiderEntity {
   @Column({ nullable: true, name: 'pool_id' })
   poolId?: number;
 
+  /** كود الإحالة الخاص بالراكب (يشاركه لدعوة الأصدقاء) */
+  @Column({ type: 'varchar', length: 12, nullable: true, name: 'referral_code' })
+  referralCode?: string;
+
+  /** معرّف الراكب الذي أحال هذا الراكب (إن وُجد) */
+  @Column({ type: 'int', nullable: true, name: 'referred_by' })
+  referredBy?: number;
+
+  /** هل مُنحت مكافأة الإحالة (تُمنح عند أول رحلة مكتملة) */
+  @Column({ default: false, name: 'referral_rewarded' })
+  referralRewarded!: boolean;
+
   /** تقييم الراكب (من 1 إلى 5) */
   @Column({ type: 'decimal', precision: 3, scale: 2, default: 5.0 })
   rating!: number;

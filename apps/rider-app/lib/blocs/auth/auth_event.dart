@@ -20,9 +20,14 @@ class AuthSendOtpRequested extends AuthEvent {
 class AuthVerifyOtpRequested extends AuthEvent {
   final String phone;
   final String otp;
-  const AuthVerifyOtpRequested({required this.phone, required this.otp});
+  final String? referralCode;
+  const AuthVerifyOtpRequested({
+    required this.phone,
+    required this.otp,
+    this.referralCode,
+  });
   @override
-  List<Object?> get props => [phone, otp];
+  List<Object?> get props => [phone, otp, referralCode];
 }
 
 class AuthLogoutRequested extends AuthEvent {

@@ -20,9 +20,13 @@ import {
   RequestActivityEntity,
   RequestActivityType,
   DriverEntity,
+  WalletOwnerType,
+  WalletTransactionType,
+  WalletTransactionStatus,
 } from '@hancr/database';
 import { OrderRedisService } from '@hancr/redis';
 import { PushNotificationService } from '@hancr/notifications';
+import { WalletService } from '@hancr/wallet';
 import { PUB_SUB } from '../pubsub.provider';
 import { CreateOrderInput } from './dto/create-order.input';
 import { RateDriverInput } from './dto/rate-driver.input';
@@ -61,6 +65,7 @@ export class OrderService {
     private readonly directionsService: DirectionsService,
     private readonly couponService: CouponService,
     private readonly loyaltyService: LoyaltyService,
+    private readonly walletService: WalletService,
     private readonly dataSource: DataSource,
     private readonly pushNotifications: PushNotificationService,
 
@@ -581,6 +586,15 @@ export class OrderService {
       );
     }
 
+    // مكافأة الإحالة عند أول رحلة مكتملة للمُحال (يُكافأ الطرفان مرة واحدة)
+    try {
+      await this.grantReferralRewardIfEligible(riderId);
+    } catch (e) {
+      this.logger.error(
+        `Referral reward failed for rider #${riderId}: ${(e as Error).message}`,
+      );
+    }
+
     const updated = {
       ...order,
       status: OrderStatus.Finished,
@@ -683,6 +697,57 @@ export class OrderService {
       Math.sin(dLat / 2) ** 2 +
       Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
     return Math.round(R * 2 * Math.atan2(Math.sqrt(ha), Math.sqrt(1 - ha)));
+  }
+
+  /**
+   * يمنح مكافأة الإحالة للطرفين عند أول رحلة مكتملة للراكب المُحال.
+   * يُنفَّذ مرة واحدة فقط (referralRewarded).
+   */
+  private async grantReferralRewardIfEligible(riderId: number): Promise<void> {
+    const REFERRAL_BONUS = 15; // مكافأة لكل طرف بعملته
+    const rider = await this.riderRepo.findOne({
+      where: { id: riderId },
+      select: ['id', 'referredBy', 'referralRewarded', 'currency'],
+    });
+    if (!rider || !rider.referredBy || rider.referralRewarded) return;
+
+    // علّم المكافأة كممنوحة أولاً لمنع التكرار حتى لو تكرّر النداء
+    const upd = await this.riderRepo.update(
+      { id: riderId, referralRewarded: false },
+      { referralRewarded: true },
+    );
+    if (!upd.affected) return; // مُنحت بالفعل بنداء متزامن
+
+    // مكافأة المُحال (الراكب الجديد)
+    await this.walletService.credit({
+      ownerType: WalletOwnerType.Rider,
+      ownerId: riderId,
+      type: WalletTransactionType.PromoBonus,
+      amount: REFERRAL_BONUS,
+      currency: rider.currency,
+      status: WalletTransactionStatus.Completed,
+      description: 'مكافأة إحالة — أول رحلة',
+    });
+
+    // مكافأة المُحيل (صاحب الكود) بعملته
+    const referrer = await this.riderRepo.findOne({
+      where: { id: rider.referredBy },
+      select: ['id', 'currency'],
+    });
+    if (referrer) {
+      await this.walletService.credit({
+        ownerType: WalletOwnerType.Rider,
+        ownerId: referrer.id,
+        type: WalletTransactionType.PromoBonus,
+        amount: REFERRAL_BONUS,
+        currency: referrer.currency,
+        status: WalletTransactionStatus.Completed,
+        description: 'مكافأة دعوة صديق',
+      });
+    }
+    this.logger.log(
+      `Referral reward granted: rider #${riderId} + referrer #${rider.referredBy}`,
+    );
   }
 
   toGqlType(order: OrderEntity): OrderGqlType {
