@@ -192,6 +192,19 @@ const Map<String, Map<String, String>> _t = {
   // ─── Payment method ───
   'cash': {'ar': 'نقداً', 'en': 'Cash', 'ur': 'نقد', 'hi': 'नकद', 'bn': 'নগদ', 'fil': 'Cash', 'fr': 'Espèces', 'tr': 'Nakit'},
 
+  // ─── Saved places ───
+  'addSavedPlace': {'ar': 'أضف مكاناً مفضّلاً', 'en': 'Add a saved place', 'ur': 'پسندیدہ جگہ شامل کریں', 'hi': 'पसंदीदा स्थान जोड़ें', 'bn': 'প্রিয় স্থান যোগ করুন', 'fil': 'Magdagdag ng lugar', 'fr': 'Ajouter un lieu favori', 'tr': 'Favori yer ekle'},
+  'savedPlacesHint': {'ar': 'احفظ المنزل والعمل للحجز السريع', 'en': 'Save home & work for quick booking', 'ur': 'گھر اور کام محفوظ کریں', 'hi': 'घर और काम सहेजें', 'bn': 'বাড়ি ও কর্মস্থল সংরক্ষণ করুন', 'fil': 'I-save ang bahay at trabaho', 'fr': 'Enregistrez domicile et travail', 'tr': 'Ev ve işi kaydedin'},
+  'savePlace': {'ar': 'حفظ المكان', 'en': 'Save place', 'ur': 'جگہ محفوظ کریں', 'hi': 'स्थान सहेजें', 'bn': 'স্থান সংরক্ষণ', 'fil': 'I-save ang lugar', 'fr': 'Enregistrer le lieu', 'tr': 'Yeri kaydet'},
+  'placeLabel': {'ar': 'اسم المكان', 'en': 'Place name', 'ur': 'جگہ کا نام', 'hi': 'स्थान का नाम', 'bn': 'স্থানের নাম', 'fil': 'Pangalan ng lugar', 'fr': 'Nom du lieu', 'tr': 'Yer adı'},
+  'place_home': {'ar': 'المنزل', 'en': 'Home', 'ur': 'گھر', 'hi': 'घर', 'bn': 'বাড়ি', 'fil': 'Bahay', 'fr': 'Domicile', 'tr': 'Ev'},
+  'place_work': {'ar': 'العمل', 'en': 'Work', 'ur': 'کام', 'hi': 'काम', 'bn': 'কাজ', 'fil': 'Trabaho', 'fr': 'Travail', 'tr': 'İş'},
+  'place_other': {'ar': 'آخر', 'en': 'Other', 'ur': 'دیگر', 'hi': 'अन्य', 'bn': 'অন্যান্য', 'fil': 'Iba pa', 'fr': 'Autre', 'tr': 'Diğer'},
+  'placeSaved': {'ar': 'تم حفظ المكان', 'en': 'Place saved', 'ur': 'جگہ محفوظ ہو گئی', 'hi': 'स्थान सहेजा गया', 'bn': 'স্থান সংরক্ষিত', 'fil': 'Na-save ang lugar', 'fr': 'Lieu enregistré', 'tr': 'Yer kaydedildi'},
+  'saveFailed': {'ar': 'تعذّر الحفظ', 'en': 'Save failed', 'ur': 'محفوظ نہیں ہوا', 'hi': 'सहेजना विफल', 'bn': 'সংরক্ষণ ব্যর্থ', 'fil': 'Nabigo ang pag-save', 'fr': 'Échec de l\'enregistrement', 'tr': 'Kaydedilemedi'},
+  'managePlaces': {'ar': 'الأماكن المفضّلة', 'en': 'Saved places', 'ur': 'پسندیدہ مقامات', 'hi': 'सहेजे गए स्थान', 'bn': 'সংরক্ষিত স্থান', 'fil': 'Mga naka-save na lugar', 'fr': 'Lieux enregistrés', 'tr': 'Kayıtlı yerler'},
+  'noSavedPlaces': {'ar': 'لا أماكن محفوظة بعد', 'en': 'No saved places yet', 'ur': 'ابھی کوئی محفوظ جگہ نہیں', 'hi': 'अभी कोई सहेजा स्थान नहीं', 'bn': 'এখনও কোনো সংরক্ষিত স্থান নেই', 'fil': 'Wala pang naka-save', 'fr': 'Aucun lieu enregistré', 'tr': 'Henüz kayıtlı yer yok'},
+
   // ─── Call & external navigation ───
   'noPhoneAvailable': {'ar': 'لا يوجد رقم متاح', 'en': 'No phone available', 'ur': 'کوئی نمبر دستیاب نہیں', 'hi': 'कोई फ़ोन उपलब्ध नहीं', 'bn': 'কোনো ফোন নেই', 'fil': 'Walang telepono', 'fr': 'Aucun numéro disponible', 'tr': 'Telefon yok'},
   'cannotCall': {'ar': 'تعذّر إجراء الاتصال', 'en': 'Cannot place call', 'ur': 'کال نہیں ہو سکی', 'hi': 'कॉल नहीं हो सका', 'bn': 'কল করা যায়নি', 'fil': 'Hindi makatawag', 'fr': 'Appel impossible', 'tr': 'Arama yapılamadı'},

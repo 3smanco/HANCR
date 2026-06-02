@@ -22,6 +22,7 @@ export { WalletTransactionEntity } from './lib/entities/wallet-transaction.entit
 export { EmergencyContactEntity } from './lib/entities/emergency-contact.entity';
 export { SosIncidentEntity } from './lib/entities/sos-incident.entity';
 export { CouponEntity } from './lib/entities/coupon.entity';
+export { SavedPlaceEntity } from './lib/entities/saved-place.entity';
 
 // Enums
 export { CouponType } from './lib/enums/coupon-type.enum';
