@@ -13,6 +13,7 @@ import { OrderResolver } from './order.resolver';
 import { MatchingService } from './matching.service';
 import { DirectionsService } from './directions.service';
 import { CouponService } from './coupon.service';
+import { LoyaltyModule } from '../loyalty/loyalty.module';
 import { pubSubProvider } from '../pubsub.provider';
 
 @Module({
@@ -25,6 +26,7 @@ import { pubSubProvider } from '../pubsub.provider';
       DriverEntity,
       CouponEntity,
     ]),
+    LoyaltyModule,
   ],
   providers: [
     OrderService,

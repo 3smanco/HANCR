@@ -30,6 +30,7 @@ import { OrderType as OrderGqlType } from './dto/order.type';
 import { MatchingService } from './matching.service';
 import { DirectionsService } from './directions.service';
 import { CouponService } from './coupon.service';
+import { LoyaltyService } from '../loyalty/loyalty.service';
 
 // GraphQL Subscription events
 export const ORDER_UPDATED = 'ORDER_UPDATED';
@@ -59,6 +60,7 @@ export class OrderService {
     private readonly matchingService: MatchingService,
     private readonly directionsService: DirectionsService,
     private readonly couponService: CouponService,
+    private readonly loyaltyService: LoyaltyService,
     private readonly dataSource: DataSource,
     private readonly pushNotifications: PushNotificationService,
 
@@ -566,6 +568,18 @@ export class OrderService {
     await this.riderRepo.update(riderId, {
       totalRides: () => 'total_rides + 1',
     });
+
+    // منح نقاط الولاء (Hancr Miles) بناءً على المبلغ المدفوع
+    try {
+      await this.loyaltyService.addMiles(
+        riderId,
+        Number(order.costAfterCoupon),
+      );
+    } catch (e) {
+      this.logger.error(
+        `Failed to add loyalty miles for rider #${riderId}: ${(e as Error).message}`,
+      );
+    }
 
     const updated = {
       ...order,

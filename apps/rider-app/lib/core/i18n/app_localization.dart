@@ -184,6 +184,11 @@ const Map<String, Map<String, String>> _t = {
   'couponInvalid': {'ar': 'كود الخصم غير صالح', 'en': 'Invalid discount code', 'ur': 'غلط ڈسکاؤنٹ کوڈ', 'hi': 'अमान्य कोड', 'bn': 'অবৈধ কোড', 'fil': 'Di-wastong code', 'fr': 'Code promo invalide', 'tr': 'Geçersiz indirim kodu'},
   'couponWaitFare': {'ar': 'انتظر حساب الأجرة أولاً', 'en': 'Wait for fare calculation first', 'ur': 'پہلے کرایہ کیلکولیشن کا انتظار کریں', 'hi': 'पहले किराया गणना की प्रतीक्षा करें', 'bn': 'আগে ভাড়া হিসাবের অপেক্ষা করুন', 'fil': 'Hintayin muna ang pamasahe', 'fr': 'Attendez le calcul du tarif', 'tr': 'Önce ücret hesabını bekleyin'},
 
+  // ─── Loyalty redeem ───
+  'redeemReward': {'ar': 'استبدال المكافأة', 'en': 'Redeem reward', 'ur': 'انعام حاصل کریں', 'hi': 'इनाम भुनाएं', 'bn': 'পুরস্কার রিডিম করুন', 'fil': 'I-redeem ang reward', 'fr': 'Échanger la récompense', 'tr': 'Ödülü kullan'},
+  'redeemSuccess': {'ar': 'تم الاستبدال! أُضيف لمحفظتك', 'en': 'Redeemed! Added to your wallet:', 'ur': 'کامیاب! آپ کے والیٹ میں شامل:', 'hi': 'भुनाया गया! वॉलेट में जोड़ा:', 'bn': 'রিডিম হয়েছে! ওয়ালেটে যোগ হয়েছে:', 'fil': 'Na-redeem! Naidagdag sa wallet:', 'fr': 'Échangé ! Ajouté à votre portefeuille :', 'tr': 'Kullanıldı! Cüzdanınıza eklendi:'},
+  'redeemFailed': {'ar': 'تعذّر الاستبدال', 'en': 'Redemption failed', 'ur': 'استبدال ناکام', 'hi': 'भुनाना विफल', 'bn': 'রিডিম ব্যর্থ', 'fil': 'Nabigo ang pag-redeem', 'fr': 'Échec de l\'échange', 'tr': 'Kullanım başarısız'},
+
   // ─── Rides / Activity ───
   'noRides': {'ar': 'لا توجد رحلات بعد', 'en': 'No rides yet', 'ur': 'ابھی کوئی سواری نہیں', 'hi': 'अभी तक कोई राइड नहीं', 'bn': 'এখনও কোনো রাইড নেই', 'fil': 'Wala pang sakay', 'fr': 'Pas encore de courses', 'tr': 'Henüz yolculuk yok'},
   'ridesEmptySub': {'ar': 'رحلاتك المكتملة ستظهر هنا', 'en': 'Your completed rides will appear here', 'ur': 'آپ کی مکمل سواریاں یہاں نظر آئیں گی', 'hi': 'आपकी पूर्ण राइड यहाँ दिखेंगी', 'bn': 'আপনার সম্পন্ন রাইড এখানে দেখাবে', 'fil': 'Lalabas dito ang tapos na sakay', 'fr': 'Vos courses terminées apparaîtront ici', 'tr': 'Tamamlanan yolculuklar burada görünür'},

@@ -13,3 +13,15 @@ const String myLoyaltyQuery = r'''
     }
   }
 ''';
+
+const String redeemRewardMutation = r'''
+  mutation RedeemReward($miles: Int!) {
+    redeemReward(miles: $miles) {
+      success
+      redeemedMiles
+      creditedAmount
+      currency
+      remainingMiles
+    }
+  }
+''';

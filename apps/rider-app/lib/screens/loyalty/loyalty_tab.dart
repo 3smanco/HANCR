@@ -58,6 +58,57 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
     }
   }
 
+  Future<void> _redeem(int cost, String title) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        title: Text(tr('redeemReward')),
+        content: Text('$title — $cost ${tr('availableMiles')}؟'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dctx, false),
+            child: Text(tr('cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dctx, true),
+            child: Text(tr('confirm')),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.mutate(MutationOptions(
+        document: gql(redeemRewardMutation),
+        variables: {'miles': cost},
+      ));
+      if (res.hasException) {
+        throw Exception(res.exception?.graphqlErrors.firstOrNull?.message ??
+            tr('redeemFailed'));
+      }
+      final d = res.data?['redeemReward'] as Map<String, dynamic>?;
+      if (!mounted) return;
+      final credited = (d?['creditedAmount'] as num?)?.toStringAsFixed(0) ?? '';
+      final currency = d?['currency'] as String? ?? '';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${tr('redeemSuccess')} $credited $currency'),
+          backgroundColor: HancrColors.success,
+        ),
+      );
+      _load();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: HancrColors.error,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,6 +227,7 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
               available: l.availableMiles >= 500,
               icon: Icons.local_offer_rounded,
               color: HancrColors.violet,
+              onRedeem: () => _redeem(500, tr('discount10')),
             ),
             _RewardCard(
               title: tr('freeUpgradePlus'),
@@ -184,6 +236,7 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
               available: l.availableMiles >= 800,
               icon: Icons.upgrade_rounded,
               color: HancrColors.info,
+              onRedeem: () => _redeem(800, tr('freeUpgradePlus')),
             ),
             _RewardCard(
               title: tr('freeRide'),
@@ -192,6 +245,7 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
               available: l.availableMiles >= 2000,
               icon: Icons.directions_car_rounded,
               color: HancrColors.success,
+              onRedeem: () => _redeem(2000, tr('freeRide')),
             ),
             _RewardCard(
               title: tr('monthlyPack'),
@@ -200,6 +254,7 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
               available: l.availableMiles >= 3000,
               icon: Icons.calendar_month_rounded,
               color: const Color(0xFFD4AF37),
+              onRedeem: () => _redeem(3000, tr('monthlyPack')),
             ),
           ],
         ),
@@ -573,6 +628,7 @@ class _RewardCard extends StatelessWidget {
     required this.available,
     required this.icon,
     required this.color,
+    this.onRedeem,
   });
 
   final String title;
@@ -581,19 +637,14 @@ class _RewardCard extends StatelessWidget {
   final bool available;
   final IconData icon;
   final Color color;
+  final VoidCallback? onRedeem;
 
   @override
   Widget build(BuildContext context) {
     return Opacity(
       opacity: available ? 1 : 0.55,
       child: HancrCard(
-        onTap: available
-            ? () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('استرداد "$title" قريباً')),
-                );
-              }
-            : null,
+        onTap: available ? onRedeem : null,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
