@@ -1,5 +1,7 @@
 import { Resolver, Query, Mutation, Args, Int, Float } from '@nestjs/graphql';
 import { UseGuards, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Throttle } from '@nestjs/throttler';
 import {
   WalletService,
@@ -10,6 +12,7 @@ import {
   WalletTransactionType,
   WalletTransactionStatus,
   PaymentGateway,
+  AppConfigEntity,
 } from '@hancr/database';
 import {
   WalletType,
@@ -19,12 +22,24 @@ import {
 import { JwtAuthGuard, CurrentUser } from '../auth/jwt-auth.guard';
 import { AuthUser } from '../auth/jwt.strategy';
 
+/** مفتاح تفعيل الدفع بالبطاقة عبر بوابات الدفع (HyperPay…). معطّل افتراضياً. */
+const CARD_PAYMENTS_FLAG = 'payments_card_enabled';
+
 @Resolver(() => WalletType)
 export class WalletResolver {
   constructor(
     private readonly walletService: WalletService,
     private readonly paymentGateway: PaymentGatewayService,
+    @InjectRepository(AppConfigEntity)
+    private readonly appConfigRepo: Repository<AppConfigEntity>,
   ) {}
+
+  /** يقرأ مفتاح تفعيل الدفع بالبطاقة من إعدادات التطبيق (admin-controlled). */
+  private async isCardPaymentsEnabled(): Promise<boolean> {
+    const cfg = await this.appConfigRepo.find({ take: 1 });
+    const flags = cfg[0]?.featureFlags as Record<string, unknown> | undefined;
+    return flags?.[CARD_PAYMENTS_FLAG] === true;
+  }
 
   // ─────────────────────────────────────────────────────────────────────────
   // Queries
@@ -108,6 +123,30 @@ export class WalletResolver {
       user.riderId,
     );
 
+    // الدفع بالبطاقة معطّل (لا توجد بيانات تاجر HyperPay بعد) →
+    // نشحن المحفظة فوراً كمحاكاة لتمكين الاختبار والدفع من الرصيد.
+    const cardEnabled = await this.isCardPaymentsEnabled();
+    if (!cardEnabled) {
+      const sim = await this.walletService.credit({
+        ownerType: WalletOwnerType.Rider,
+        ownerId: user.riderId,
+        type: WalletTransactionType.Recharge,
+        amount,
+        currency,
+        status: WalletTransactionStatus.Completed,
+        description: `Wallet recharge (simulated — card payments disabled)`,
+      });
+      return {
+        transactionId: sim.transactionId,
+        gatewayRef: 'SIMULATED',
+        gateway,
+        amount,
+        currency,
+        simulated: true,
+      };
+    }
+
+    // مسار البطاقة الحقيقي (HyperPay/Moyasar/Stripe) — يُفعَّل عند توفّر التاجر
     const pending = await this.walletService.credit({
       ownerType: WalletOwnerType.Rider,
       ownerId: user.riderId,
@@ -139,6 +178,7 @@ export class WalletResolver {
       gateway: checkout.gateway,
       amount,
       currency,
+      simulated: false,
     };
   }
 

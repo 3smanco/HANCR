@@ -92,6 +92,9 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   bool _couponLoading = false;
   String? _couponError;
 
+  // طريقة الدفع (Cash / Wallet)
+  String _paymentMode = 'Cash';
+
   bool get _isDelivery => _selectedService?.serviceType == 'PackageDelivery';
   bool get _isHourly => _selectedService?.serviceType == 'HourlyChauffeur';
 
@@ -338,6 +341,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           receiverPhone: _isDelivery ? _receiverPhoneCtrl.text.trim() : null,
           bookedHours: _isHourly ? _bookedHours : null,
           couponCode: _appliedCoupon,
+          paymentMode: _paymentMode,
         ));
   }
 
@@ -885,6 +889,32 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           ],
           ], // نهاية قسم المشاوير فقط
 
+          // ─── طريقة الدفع ───
+          if (!_bidMode) ...[
+            const SizedBox(height: AuroraSpacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: _payChip(
+                    icon: Icons.payments_outlined,
+                    label: tr('cash'),
+                    selected: _paymentMode == 'Cash',
+                    onTap: () => setState(() => _paymentMode = 'Cash'),
+                  ),
+                ),
+                const SizedBox(width: AuroraSpacing.sm),
+                Expanded(
+                  child: _payChip(
+                    icon: Icons.account_balance_wallet_outlined,
+                    label: tr('wallet'),
+                    selected: _paymentMode == 'Wallet',
+                    onTap: () => setState(() => _paymentMode = 'Wallet'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+
           // ─── كود الخصم ───
           if (!_bidMode) ...[
             const SizedBox(height: AuroraSpacing.md),
@@ -1085,6 +1115,15 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         ),
       ),
     );
+  }
+
+  Widget _payChip({
+    required IconData icon,
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return _prefChip(icon, label, selected, onTap);
   }
 
   Widget _errorBox(String msg) {

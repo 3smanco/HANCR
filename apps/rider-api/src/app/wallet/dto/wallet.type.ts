@@ -85,4 +85,11 @@ export class RechargeCheckoutType {
 
   @Field()
   currency!: string;
+
+  @Field({
+    nullable: true,
+    description:
+      'إذا true: شُحنت المحفظة فوراً (محاكاة) لأن الدفع بالبطاقة معطّل بعد',
+  })
+  simulated?: boolean;
 }

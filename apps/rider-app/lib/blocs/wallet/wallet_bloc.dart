@@ -105,10 +105,15 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
       final checkout = RechargeCheckoutModel.fromJson(
         result.data!['startWalletRecharge'] as Map<String, dynamic>,
       );
+      // محاكاة: الرصيد أُضيف فوراً (الدفع بالبطاقة معطّل) → أعد تحميل المحفظة فقط
+      if (checkout.simulated) {
+        add(const WalletLoadRequested());
+        return;
+      }
       if (current is WalletLoaded) {
         emit(current.copyWith(activeCheckout: checkout));
       } else {
-        // إن لم تكن المحفظة محمَّلة بعد، حمِّلها أولاً ثم أَضِف الـ checkout.
+        // إن لم تكن المحفظة محمَّلة بعد, حمِّلها أولاً ثم أَضِف الـ checkout.
         add(const WalletLoadRequested());
       }
     } catch (e) {
