@@ -192,6 +192,14 @@ const Map<String, Map<String, String>> _t = {
   // ─── Payment method ───
   'cash': {'ar': 'نقداً', 'en': 'Cash', 'ur': 'نقد', 'hi': 'नकद', 'bn': 'নগদ', 'fil': 'Cash', 'fr': 'Espèces', 'tr': 'Nakit'},
 
+  // ─── Call & external navigation ───
+  'noPhoneAvailable': {'ar': 'لا يوجد رقم متاح', 'en': 'No phone available', 'ur': 'کوئی نمبر دستیاب نہیں', 'hi': 'कोई फ़ोन उपलब्ध नहीं', 'bn': 'কোনো ফোন নেই', 'fil': 'Walang telepono', 'fr': 'Aucun numéro disponible', 'tr': 'Telefon yok'},
+  'cannotCall': {'ar': 'تعذّر إجراء الاتصال', 'en': 'Cannot place call', 'ur': 'کال نہیں ہو سکی', 'hi': 'कॉल नहीं हो सका', 'bn': 'কল করা যায়নি', 'fil': 'Hindi makatawag', 'fr': 'Appel impossible', 'tr': 'Arama yapılamadı'},
+  'navigateWith': {'ar': 'الملاحة عبر', 'en': 'Navigate with', 'ur': 'کے ذریعے راستہ', 'hi': 'के साथ नेविगेट करें', 'bn': 'দিয়ে নেভিগেট করুন', 'fil': 'Mag-navigate gamit ang', 'fr': 'Naviguer avec', 'tr': 'İle yön bul'},
+  'googleMaps': {'ar': 'خرائط جوجل', 'en': 'Google Maps', 'ur': 'گوگل میپس', 'hi': 'गूगल मैप्स', 'bn': 'গুগল ম্যাপস', 'fil': 'Google Maps', 'fr': 'Google Maps', 'tr': 'Google Haritalar'},
+  'waze': {'ar': 'ويز', 'en': 'Waze', 'ur': 'ویز', 'hi': 'वेज़', 'bn': 'ওয়েজ', 'fil': 'Waze', 'fr': 'Waze', 'tr': 'Waze'},
+  'cannotOpenMaps': {'ar': 'تعذّر فتح تطبيق الخرائط', 'en': 'Cannot open maps app', 'ur': 'میپس ایپ نہیں کھل سکی', 'hi': 'मैप्स ऐप नहीं खुला', 'bn': 'ম্যাপস খোলা যায়নি', 'fil': 'Hindi mabuksan ang maps', 'fr': 'Impossible d\'ouvrir les cartes', 'tr': 'Harita açılamadı'},
+
   // ─── Chat ───
   'chatWithDriver': {'ar': 'الدردشة مع السائق', 'en': 'Chat with driver', 'ur': 'ڈرائیور سے بات کریں', 'hi': 'ड्राइवर से चैट करें', 'bn': 'চালকের সাথে চ্যাট', 'fil': 'Makipag-chat sa drayber', 'fr': 'Discuter avec le chauffeur', 'tr': 'Sürücüyle sohbet'},
   'noMessagesYet': {'ar': 'لا رسائل بعد — ابدأ المحادثة', 'en': 'No messages yet — say hello', 'ur': 'ابھی کوئی پیغام نہیں', 'hi': 'अभी कोई संदेश नहीं', 'bn': 'এখনও কোনো বার্তা নেই', 'fil': 'Wala pang mensahe', 'fr': 'Aucun message — dites bonjour', 'tr': 'Henüz mesaj yok'},
