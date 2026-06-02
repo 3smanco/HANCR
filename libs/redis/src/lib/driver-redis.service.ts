@@ -131,10 +131,13 @@ export class DriverRedisService {
       // فلترة: يجب أن يكون Online
       if (status !== 'Online') continue;
 
-      // فلترة: يجب أن يقدم الخدمة المطلوبة
+      // فلترة: يجب أن يقدم الخدمة المطلوبة.
+      // قائمة فارغة = بلا قيد (يخدم كل الخدمات) — الافتراضي للسائقين.
       if (servicesStr) {
         const driverServices: number[] = JSON.parse(servicesStr);
-        if (!driverServices.includes(serviceId)) continue;
+        if (driverServices.length > 0 && !driverServices.includes(serviceId)) {
+          continue;
+        }
       }
 
       nearby.push({
