@@ -39,6 +39,7 @@ const String startWalletRechargeMutation = r'''
       gateway
       amount
       currency
+      simulated
     }
   }
 ''';

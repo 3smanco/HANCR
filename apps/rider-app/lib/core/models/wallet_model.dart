@@ -285,6 +285,7 @@ class RechargeCheckoutModel extends Equatable {
   final PaymentGateway gateway;
   final double amount;
   final String currency;
+  final bool simulated;
 
   const RechargeCheckoutModel({
     required this.transactionId,
@@ -294,6 +295,7 @@ class RechargeCheckoutModel extends Equatable {
     required this.gateway,
     required this.amount,
     required this.currency,
+    this.simulated = false,
   });
 
   factory RechargeCheckoutModel.fromJson(Map<String, dynamic> json) =>
@@ -305,6 +307,7 @@ class RechargeCheckoutModel extends Equatable {
         gateway: PaymentGatewayX.fromString(json['gateway'] as String),
         amount: (json['amount'] as num).toDouble(),
         currency: json['currency'] as String,
+        simulated: json['simulated'] as bool? ?? false,
       );
 
   @override
@@ -316,5 +319,6 @@ class RechargeCheckoutModel extends Equatable {
         gateway,
         amount,
         currency,
+        simulated,
       ];
 }

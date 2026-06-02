@@ -85,6 +85,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
                 'scheduledAt': event.scheduledAt!.toUtc().toIso8601String(),
               if (event.couponCode != null && event.couponCode!.isNotEmpty)
                 'couponCode': event.couponCode,
+              if (event.paymentMode != null) 'paymentMode': event.paymentMode,
             },
           },
         ),

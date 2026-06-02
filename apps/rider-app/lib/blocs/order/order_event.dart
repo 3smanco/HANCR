@@ -27,6 +27,7 @@ class OrderCreateRequested extends OrderEvent {
   final int? bookedHours;
   final DateTime? scheduledAt;
   final String? couponCode;
+  final String? paymentMode;
 
   const OrderCreateRequested({
     required this.origin,
@@ -43,6 +44,7 @@ class OrderCreateRequested extends OrderEvent {
     this.bookedHours,
     this.scheduledAt,
     this.couponCode,
+    this.paymentMode,
   });
 
   @override
