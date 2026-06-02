@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import '../../core/graphql/graphql_client.dart';
+import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/models/order_model.dart';
 import '../../core/widgets/aurora/aurora.dart';
@@ -22,6 +25,29 @@ class AuroraHomeTab extends StatefulWidget {
 
 class _AuroraHomeTabState extends State<AuroraHomeTab> {
   int _tabIndex = 0;
+  List<Map<String, dynamic>> _banners = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBanners();
+  }
+
+  Future<void> _loadBanners() async {
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(appConfigQuery),
+        fetchPolicy: FetchPolicy.cacheAndNetwork,
+      ));
+      final list = (res.data?['appConfig']?['banners'] as List<dynamic>?) ?? [];
+      if (!mounted) return;
+      setState(() =>
+          _banners = list.map((e) => (e as Map<String, dynamic>)).toList());
+    } catch (_) {
+      // تجاهل بصمت — البانرات اختيارية
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -193,6 +219,21 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
             // ─── Schedule card (يشبه "Ride on your schedule") ───
             _scheduleCta(),
 
+            // ─── Promo banners (SDUI من app-config) ───
+            if (_banners.isNotEmpty) ...[
+              const SizedBox(height: AuroraSpacing.lg),
+              SizedBox(
+                height: 150,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _banners.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(width: AuroraSpacing.md),
+                  itemBuilder: (_, i) => _bannerCard(_banners[i]),
+                ),
+              ),
+            ],
+
             const SizedBox(height: AuroraSpacing.xl),
 
             // ─── Offers section ───
@@ -218,6 +259,73 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
             // مساحة سفلية تكفي لتجاوز شريط التنقل العائم
             const SizedBox(height: 120),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _bannerCard(Map<String, dynamic> b) {
+    final imageUrl = b['imageUrl'] as String? ?? '';
+    final title = b['title'] as String?;
+    final subtitle = b['subtitle'] as String?;
+    return GestureDetector(
+      onTap: () {
+        final link = b['link'] as String?;
+        if (link != null && link.startsWith('/')) {
+          context.push(link);
+        }
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AuroraRadius.lg),
+        child: SizedBox(
+          width: 300,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: AuroraColors.coal,
+                  child: const Icon(Icons.image_outlined,
+                      color: AuroraColors.textSecondary, size: 32),
+                ),
+                loadingBuilder: (ctx, child, p) => p == null
+                    ? child
+                    : Container(color: AuroraColors.coal),
+              ),
+              if (title != null || subtitle != null)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(AuroraSpacing.md),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Colors.black87],
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (title != null)
+                          Text(title,
+                              style: AuroraText.titleSmall
+                                  .copyWith(color: AuroraColors.pearl)),
+                        if (subtitle != null)
+                          Text(subtitle,
+                              style: AuroraText.bodySmall
+                                  .copyWith(color: AuroraColors.pearl)),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

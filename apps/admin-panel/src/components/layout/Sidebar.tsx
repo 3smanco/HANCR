@@ -16,6 +16,7 @@ import {
   Bell,
   ShieldAlert,
   Ticket,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth';
@@ -36,6 +37,7 @@ export function Sidebar() {
     { key: 'nav.sos',           icon: ShieldAlert,     href: '/sos' },
     { key: 'nav.services',      icon: Settings,        href: '/services' },
     { key: 'nav.coupons',       icon: Ticket,          href: '/coupons' },
+    { key: 'nav.banners',       icon: ImageIcon,       href: '/banners' },
     { key: 'nav.regions',       icon: MapPin,          href: '/regions' },
     { key: 'nav.features',      icon: Zap,             href: '/features' },
     { key: 'nav.analytics',     icon: BarChart2,       href: '/analytics' },
