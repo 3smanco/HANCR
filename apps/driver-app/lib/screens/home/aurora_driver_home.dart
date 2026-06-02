@@ -6,6 +6,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
 import '../bids/driver_bids_screen.dart';
 import '../chat/driver_chat_screen.dart';
+import '../../core/utils/external_launch.dart';
 import '../../blocs/location/location_bloc.dart';
 import '../../blocs/location/location_event.dart';
 import '../../blocs/location/location_state.dart';
@@ -575,6 +576,31 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
             ],
           ),
 
+          // اتصال + ملاحة (للوصول للراكب)
+          const SizedBox(height: AuroraSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: _miniAction(
+                  icon: Icons.phone,
+                  label: tr('callRider'),
+                  onTap: () => launchPhoneCall(context, order.riderPhone),
+                ),
+              ),
+              const SizedBox(width: AuroraSpacing.sm),
+              Expanded(
+                child: _miniAction(
+                  icon: Icons.navigation,
+                  label: tr('navigate'),
+                  onTap: () {
+                    final p = order.points.isNotEmpty ? order.points.first : null;
+                    if (p != null) openExternalNav(context, p.lat, p.lng);
+                  },
+                ),
+              ),
+            ],
+          ),
+
           const SizedBox(height: AuroraSpacing.lg),
           _buildAction(),
 
@@ -630,6 +656,33 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  Widget _miniAction({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: AuroraColors.ash,
+          borderRadius: BorderRadius.circular(AuroraRadius.md),
+          border: Border.all(color: AuroraColors.border),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: AuroraColors.ember),
+            const SizedBox(width: 6),
+            Text(label,
+                style: AuroraText.bodySmall.copyWith(color: AuroraColors.pearl)),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _openOtpDialog() async {

@@ -96,6 +96,16 @@ const Map<String, Map<String, String>> _t = {
   'offered': {'ar': 'تم العرض', 'en': 'Offered', 'ur': 'پیشکش کر دی', 'hi': 'ऑफ़र किया', 'bn': 'অফার করা হয়েছে', 'fil': 'Inalok na', 'fr': 'Offert', 'tr': 'Teklif verildi'},
   'send': {'ar': 'إرسال', 'en': 'Send', 'ur': 'بھیجیں', 'hi': 'भेजें', 'bn': 'পাঠান', 'fil': 'Ipadala', 'fr': 'Envoyer', 'tr': 'Gönder'},
 
+  // ─── Call & external navigation ───
+  'callRider': {'ar': 'اتصال بالراكب', 'en': 'Call rider', 'ur': 'سواری کو کال کریں', 'hi': 'राइडर को कॉल करें', 'bn': 'যাত্রীকে কল করুন', 'fil': 'Tawagan ang pasahero', 'fr': 'Appeler le passager', 'tr': 'Yolcuyu ara'},
+  'navigate': {'ar': 'الملاحة', 'en': 'Navigate', 'ur': 'راستہ', 'hi': 'नेविगेट', 'bn': 'নেভিগেট', 'fil': 'Mag-navigate', 'fr': 'Naviguer', 'tr': 'Yön bul'},
+  'noPhoneAvailable': {'ar': 'لا يوجد رقم متاح', 'en': 'No phone available', 'ur': 'کوئی نمبر دستیاب نہیں', 'hi': 'कोई फ़ोन उपलब्ध नहीं', 'bn': 'কোনো ফোন নেই', 'fil': 'Walang telepono', 'fr': 'Aucun numéro disponible', 'tr': 'Telefon yok'},
+  'cannotCall': {'ar': 'تعذّر إجراء الاتصال', 'en': 'Cannot place call', 'ur': 'کال نہیں ہو سکی', 'hi': 'कॉल नहीं हो सका', 'bn': 'কল করা যায়নি', 'fil': 'Hindi makatawag', 'fr': 'Appel impossible', 'tr': 'Arama yapılamadı'},
+  'navigateWith': {'ar': 'الملاحة عبر', 'en': 'Navigate with', 'ur': 'کے ذریعے راستہ', 'hi': 'के साथ नेविगेट करें', 'bn': 'দিয়ে নেভিগেট করুন', 'fil': 'Mag-navigate gamit ang', 'fr': 'Naviguer avec', 'tr': 'İle yön bul'},
+  'googleMaps': {'ar': 'خرائط جوجل', 'en': 'Google Maps', 'ur': 'گوگل میپس', 'hi': 'गूगल मैप्स', 'bn': 'গুগল ম্যাপস', 'fil': 'Google Maps', 'fr': 'Google Maps', 'tr': 'Google Haritalar'},
+  'waze': {'ar': 'ويز', 'en': 'Waze', 'ur': 'ویز', 'hi': 'वेज़', 'bn': 'ওয়েজ', 'fil': 'Waze', 'fr': 'Waze', 'tr': 'Waze'},
+  'cannotOpenMaps': {'ar': 'تعذّر فتح تطبيق الخرائط', 'en': 'Cannot open maps app', 'ur': 'میپس ایپ نہیں کھل سکی', 'hi': 'मैप्स ऐप नहीं खुला', 'bn': 'ম্যাপস খোলা যায়নি', 'fil': 'Hindi mabuksan ang maps', 'fr': 'Impossible d\'ouvrir les cartes', 'tr': 'Harita açılamadı'},
+
   // ─── Chat ───
   'chatWithRider': {'ar': 'الدردشة مع الراكب', 'en': 'Chat with rider', 'ur': 'سواری سے بات کریں', 'hi': 'राइडर से चैट करें', 'bn': 'যাত্রীর সাথে চ্যাট', 'fil': 'Makipag-chat sa pasahero', 'fr': 'Discuter avec le passager', 'tr': 'Yolcuyla sohbet'},
   'noMessagesYet': {'ar': 'لا رسائل بعد — ابدأ المحادثة', 'en': 'No messages yet', 'ur': 'ابھی کوئی پیغام نہیں', 'hi': 'अभी कोई संदेश नहीं', 'bn': 'এখনও কোনো বার্তা নেই', 'fil': 'Wala pang mensahe', 'fr': 'Aucun message', 'tr': 'Henüz mesaj yok'},

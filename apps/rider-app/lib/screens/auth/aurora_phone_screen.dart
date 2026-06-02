@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../core/i18n/app_localization.dart';
+import '../../core/utils/country_detect.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
 /// AuroraPhoneScreen — شاشة تسجيل الدخول بالنمط الجديد.
@@ -37,6 +39,37 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
     (code: '+968', flag: '🇴🇲', name: 'Oman'),
     (code: '+20', flag: '🇪🇬', name: 'Egypt'),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _detectCountry();
+  }
+
+  /// كشف رمز الدولة من موقع الجهاز (GPS) مع احتياط إعداد المنطقة.
+  Future<void> _detectCountry() async {
+    // احتياط فوري من إعداد منطقة الجهاز قبل انتظار الـ GPS
+    final localeDial = dialCodeFromLocale();
+    if (localeDial != null && mounted) {
+      setState(() => _dialCode = localeDial);
+    }
+    try {
+      final perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        await Geolocator.requestPermission();
+      }
+      final p = await Geolocator.getLastKnownPosition() ??
+          await Geolocator.getCurrentPosition(
+            timeLimit: const Duration(seconds: 5),
+          );
+      final dial = dialCodeFromCoords(p.latitude, p.longitude);
+      if (dial != null && mounted) {
+        setState(() => _dialCode = dial);
+      }
+    } catch (_) {
+      // يبقى احتياط الـ locale أو القيمة الافتراضية
+    }
+  }
 
   @override
   void dispose() {

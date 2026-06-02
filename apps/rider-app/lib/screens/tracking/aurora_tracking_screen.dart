@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -12,6 +14,7 @@ import '../../blocs/tracking/tracking_bloc.dart';
 import '../../core/models/order_model.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/utils/external_launch.dart';
 import '../sos/aurora_sos_button.dart';
 import '../chat/aurora_chat_screen.dart';
 
@@ -43,6 +46,75 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
   {"featureType":"transit","elementType":"labels","stylers":[{"visibility":"off"}]}
 ]
 ''';
+
+  GoogleMapController? _mapCtrl;
+  BitmapDescriptor? _carIcon;
+  DriverLocation? _lastDriverLoc;
+  OrderModel? _lastOrder;
+
+  @override
+  void initState() {
+    super.initState();
+    _buildCarIcon();
+  }
+
+  /// يولّد علامة سيارة (سهم اتجاه) برمجياً — بلا أصول فنية.
+  Future<void> _buildCarIcon() async {
+    const s = 96.0;
+    final rec = ui.PictureRecorder();
+    final canvas = Canvas(rec);
+    final c = Offset(s / 2, s / 2);
+    canvas.drawCircle(c, s * 0.42, Paint()..color = const Color(0xFFFF7A1A));
+    canvas.drawCircle(
+        c,
+        s * 0.42,
+        Paint()
+          ..color = const Color(0x66000000)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3);
+    final arrow = Path()
+      ..moveTo(c.dx, c.dy - 24)
+      ..lineTo(c.dx - 15, c.dy + 18)
+      ..lineTo(c.dx, c.dy + 7)
+      ..lineTo(c.dx + 15, c.dy + 18)
+      ..close();
+    canvas.drawPath(arrow, Paint()..color = Colors.white);
+    final img = await rec.endRecording().toImage(s.toInt(), s.toInt());
+    final bytes = await img.toByteData(format: ui.ImageByteFormat.png);
+    if (bytes != null && mounted) {
+      setState(() =>
+          _carIcon = BitmapDescriptor.bytes(bytes.buffer.asUint8List()));
+    }
+  }
+
+  /// يضبط الكاميرا لتضمّ الانطلاق والوجهة وموقع السائق.
+  Future<void> _fitBounds() async {
+    final order = _lastOrder;
+    if (order == null || _mapCtrl == null) return;
+    final pts = <LatLng>[
+      for (final p in order.points) LatLng(p.lat, p.lng),
+      if (_lastDriverLoc != null)
+        LatLng(_lastDriverLoc!.lat, _lastDriverLoc!.lng),
+    ];
+    if (pts.isEmpty) return;
+    var minLat = pts.first.latitude, maxLat = pts.first.latitude;
+    var minLng = pts.first.longitude, maxLng = pts.first.longitude;
+    for (final p in pts) {
+      minLat = math.min(minLat, p.latitude);
+      maxLat = math.max(maxLat, p.latitude);
+      minLng = math.min(minLng, p.longitude);
+      maxLng = math.max(maxLng, p.longitude);
+    }
+    try {
+      await _mapCtrl!.animateCamera(CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
+        ),
+        70,
+      ));
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,6 +196,19 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
                 child: _buildTopBar(ctx, order),
               ),
 
+              // ─── Recenter (fit bounds) ───
+              Positioned(
+                right: AuroraSpacing.lg,
+                bottom: 300,
+                child: FloatingActionButton.small(
+                  heroTag: 'recenter',
+                  backgroundColor: AuroraColors.coal,
+                  onPressed: _fitBounds,
+                  child: const Icon(Icons.center_focus_strong,
+                      color: AuroraColors.ember),
+                ),
+              ),
+
               // ─── Bottom tracking card ───
               Positioned(
                 bottom: 0,
@@ -150,6 +235,8 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
   }
 
   Widget _buildMapWithDriver(OrderModel order, DriverLocation? driverLoc) {
+    _lastOrder = order;
+    _lastDriverLoc = driverLoc;
     final markers = <Marker>{};
 
     if (order.points.isNotEmpty) {
@@ -173,7 +260,8 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
         rotation: driverLoc.heading.toDouble(),
         anchor: const Offset(0.5, 0.5),
         flat: true,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+        icon: _carIcon ??
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
         infoWindow: InfoWindow(title: tr('driver')),
       ));
     }
@@ -185,6 +273,11 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
 
     return GoogleMap(
       style: _darkMapStyle,
+      onMapCreated: (c) {
+        _mapCtrl = c;
+        WidgetsBinding.instance
+            .addPostFrameCallback((_) => _fitBounds());
+      },
       initialCameraPosition: CameraPosition(
         target: LatLng(centerLat, centerLng),
         zoom: 14,
@@ -366,8 +459,8 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
                       child: _action(
                         icon: Icons.phone,
                         label: tr('call'),
-                        onTap: () => AuroraToast.comingSoon(rowCtx,
-                            feature: tr('callDriver')),
+                        onTap: () =>
+                            launchPhoneCall(rowCtx, order.driverPhone),
                       ),
                     ),
                     const SizedBox(width: AuroraSpacing.sm),
