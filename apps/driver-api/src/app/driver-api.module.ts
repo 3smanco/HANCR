@@ -46,6 +46,7 @@ import { StarsModule } from './stars/stars.module';
 import { BidModule } from './bid/bid.module';
 import { WalletModule } from './wallet/wallet.module';
 import { SosModule } from './sos/sos.module';
+import { ChatModule } from './chat/chat.module';
 
 // PubSub
 import { pubSubProvider } from './pubsub.provider';
@@ -103,6 +104,7 @@ import { pubSubProvider } from './pubsub.provider';
     BidModule,
     WalletModule,
     SosModule,
+    ChatModule,
   ],
   providers: [pubSubProvider],
   exports: [pubSubProvider],

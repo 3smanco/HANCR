@@ -13,6 +13,7 @@ import '../../core/models/order_model.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../sos/aurora_sos_button.dart';
+import '../chat/aurora_chat_screen.dart';
 
 /// AuroraTrackingScreen — تتبُّع الرحلة بنمط Aurora.
 ///
@@ -374,8 +375,14 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
                       child: _action(
                         icon: Icons.chat_bubble_outline,
                         label: tr('message'),
-                        onTap: () => AuroraToast.comingSoon(rowCtx,
-                            feature: tr('chat')),
+                        onTap: () => Navigator.of(rowCtx).push(
+                          MaterialPageRoute(
+                            builder: (_) => AuroraChatScreen(
+                              orderId: order.id,
+                              driverName: order.driverName,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: AuroraSpacing.sm),
