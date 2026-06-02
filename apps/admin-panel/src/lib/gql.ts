@@ -299,6 +299,18 @@ export const DELETE_COUPON = gql`
   }
 `;
 
+// ─── BROADCAST NOTIFICATIONS (Phase 3.1) ──────────────────────────────────
+
+export const BROADCAST_NOTIFICATION = gql`
+  mutation BroadcastNotification($title: String!, $body: String!, $target: BroadcastTarget!) {
+    broadcastNotification(title: $title, body: $body, target: $target) {
+      totalTokens
+      sent
+      failed
+    }
+  }
+`;
+
 // ─── APP CONFIG (Feature Flags + Theme + SDUI) ─────────────────────────────
 
 export const GET_APP_CONFIG = gql`

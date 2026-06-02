@@ -1,30 +1,49 @@
 'use client';
 
 import { useState } from 'react';
+import { useMutation } from '@apollo/client';
 import { Bell, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { BROADCAST_NOTIFICATION } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { useT } from '@/i18n/LocaleProvider';
+
+const TARGET_GQL: Record<'all' | 'riders' | 'drivers', string> = {
+  all: 'All',
+  riders: 'Riders',
+  drivers: 'Drivers',
+};
 
 export default function SettingsPage() {
   const t = useT();
   const [title,   setTitle]   = useState('');
   const [message, setMessage] = useState('');
   const [target,  setTarget]  = useState<'all' | 'riders' | 'drivers'>('all');
-  const [sending, setSending] = useState(false);
 
-  const handleSend = async () => {
+  const [broadcast, { loading: sending }] = useMutation(BROADCAST_NOTIFICATION, {
+    onCompleted: (data) => {
+      const r = data?.broadcastNotification;
+      toast.success(
+        `${t('settings.sentToast')} — ${r?.sent ?? 0}/${r?.totalTokens ?? 0}`,
+      );
+      setTitle('');
+      setMessage('');
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const handleSend = () => {
     if (!title.trim() || !message.trim()) {
       toast.error(t('common.requiredField'));
       return;
     }
-    setSending(true);
-    // Simulate API call (real implementation would use admin-api mutation)
-    await new Promise((r) => setTimeout(r, 1000));
-    setSending(false);
-    toast.success(t('settings.sentToast'));
-    setTitle('');
-    setMessage('');
+    broadcast({
+      variables: {
+        title: title.trim(),
+        body: message.trim(),
+        target: TARGET_GQL[target],
+      },
+    });
   };
 
   return (
