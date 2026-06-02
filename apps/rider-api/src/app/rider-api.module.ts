@@ -56,6 +56,7 @@ import { WalletModule } from './wallet/wallet.module';
 import { SosModule } from './sos/sos.module';
 import { TrackingModule } from './tracking/tracking.module';
 import { RiderAppConfigModule } from './app-config/app-config.module';
+import { ChatModule } from './chat/chat.module';
 
 // PubSub
 import { pubSubProvider } from './pubsub.provider';
@@ -157,6 +158,7 @@ import { pubSubProvider } from './pubsub.provider';
     SosModule,
     TrackingModule,
     RiderAppConfigModule,
+    ChatModule,
   ],
   providers: [pubSubProvider],
   exports: [pubSubProvider],

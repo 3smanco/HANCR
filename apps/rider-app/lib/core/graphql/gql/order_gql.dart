@@ -27,6 +27,31 @@ const String createOrderMutation = r'''
   }
 ''';
 
+// ─── Chat (rider ↔ driver) ───
+const String orderMessagesQuery = r'''
+  query OrderMessages($orderId: Int!) {
+    orderMessages(orderId: $orderId) {
+      id orderId message senderType senderId isRead sentAt
+    }
+  }
+''';
+
+const String sendOrderMessageMutation = r'''
+  mutation SendOrderMessage($orderId: Int!, $message: String!) {
+    sendOrderMessage(orderId: $orderId, message: $message) {
+      id orderId message senderType senderId isRead sentAt
+    }
+  }
+''';
+
+const String orderMessageAddedSubscription = r'''
+  subscription OrderMessageAdded($orderId: Int!) {
+    orderMessageAdded(orderId: $orderId) {
+      id orderId message senderType senderId isRead sentAt
+    }
+  }
+''';
+
 const String cancelOrderMutation = r'''
   mutation CancelOrder($orderId: Int!) {
     cancelOrder(orderId: $orderId) {

@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
 import '../bids/driver_bids_screen.dart';
+import '../chat/driver_chat_screen.dart';
 import '../../blocs/location/location_bloc.dart';
 import '../../blocs/location/location_event.dart';
 import '../../blocs/location/location_state.dart';
@@ -521,6 +522,19 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
                       ),
                     ),
                   ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.chat_bubble_outline,
+                    color: AuroraColors.ember),
+                tooltip: tr('chatWithRider'),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => DriverChatScreen(
+                      orderId: order.id,
+                      riderName: order.riderName,
+                    ),
+                  ),
                 ),
               ),
               _StatusChip(status: order.status),

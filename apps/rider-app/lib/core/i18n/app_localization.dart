@@ -192,6 +192,11 @@ const Map<String, Map<String, String>> _t = {
   // ─── Payment method ───
   'cash': {'ar': 'نقداً', 'en': 'Cash', 'ur': 'نقد', 'hi': 'नकद', 'bn': 'নগদ', 'fil': 'Cash', 'fr': 'Espèces', 'tr': 'Nakit'},
 
+  // ─── Chat ───
+  'chatWithDriver': {'ar': 'الدردشة مع السائق', 'en': 'Chat with driver', 'ur': 'ڈرائیور سے بات کریں', 'hi': 'ड्राइवर से चैट करें', 'bn': 'চালকের সাথে চ্যাট', 'fil': 'Makipag-chat sa drayber', 'fr': 'Discuter avec le chauffeur', 'tr': 'Sürücüyle sohbet'},
+  'noMessagesYet': {'ar': 'لا رسائل بعد — ابدأ المحادثة', 'en': 'No messages yet — say hello', 'ur': 'ابھی کوئی پیغام نہیں', 'hi': 'अभी कोई संदेश नहीं', 'bn': 'এখনও কোনো বার্তা নেই', 'fil': 'Wala pang mensahe', 'fr': 'Aucun message — dites bonjour', 'tr': 'Henüz mesaj yok'},
+  'typeMessage': {'ar': 'اكتب رسالة…', 'en': 'Type a message…', 'ur': 'پیغام لکھیں…', 'hi': 'संदेश लिखें…', 'bn': 'বার্তা লিখুন…', 'fil': 'Mag-type ng mensahe…', 'fr': 'Écrivez un message…', 'tr': 'Mesaj yazın…'},
+
   // ─── Referral ───
   'inviteDesc': {'ar': 'يحصل صديقك على مكافأة عند أول رحلة، وتحصل أنت على رصيد محفظة أيضاً.', 'en': 'Your friend gets a bonus on their first ride, and you get wallet credit too.', 'ur': 'آپ کے دوست کو پہلی سواری پر انعام ملے گا، اور آپ کو بھی والیٹ کریڈٹ۔', 'hi': 'आपके मित्र को पहली राइड पर बोनस मिलेगा, और आपको भी वॉलेट क्रेडिट।', 'bn': 'আপনার বন্ধু প্রথম রাইডে বোনাস পাবে, আপনিও ওয়ালেট ক্রেডিট পাবেন।', 'fil': 'May bonus ang kaibigan mo sa unang biyahe, at may wallet credit ka rin.', 'fr': 'Votre ami reçoit un bonus à sa première course, et vous obtenez aussi du crédit.', 'tr': 'Arkadaşınız ilk yolculuğunda bonus alır, siz de cüzdan kredisi kazanırsınız.'},
   'friendsInvited': {'ar': 'أصدقاء انضمّوا بكودك', 'en': 'Friends joined with your code', 'ur': 'آپ کے کوڈ سے شامل دوست', 'hi': 'आपके कोड से जुड़े मित्र', 'bn': 'আপনার কোডে যোগ দেওয়া বন্ধু', 'fil': 'Mga kaibigang sumali sa code mo', 'fr': 'Amis inscrits avec votre code', 'tr': 'Kodunuzla katılan arkadaşlar'},

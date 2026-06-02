@@ -96,6 +96,11 @@ const Map<String, Map<String, String>> _t = {
   'offered': {'ar': 'تم العرض', 'en': 'Offered', 'ur': 'پیشکش کر دی', 'hi': 'ऑफ़र किया', 'bn': 'অফার করা হয়েছে', 'fil': 'Inalok na', 'fr': 'Offert', 'tr': 'Teklif verildi'},
   'send': {'ar': 'إرسال', 'en': 'Send', 'ur': 'بھیجیں', 'hi': 'भेजें', 'bn': 'পাঠান', 'fil': 'Ipadala', 'fr': 'Envoyer', 'tr': 'Gönder'},
 
+  // ─── Chat ───
+  'chatWithRider': {'ar': 'الدردشة مع الراكب', 'en': 'Chat with rider', 'ur': 'سواری سے بات کریں', 'hi': 'राइडर से चैट करें', 'bn': 'যাত্রীর সাথে চ্যাট', 'fil': 'Makipag-chat sa pasahero', 'fr': 'Discuter avec le passager', 'tr': 'Yolcuyla sohbet'},
+  'noMessagesYet': {'ar': 'لا رسائل بعد — ابدأ المحادثة', 'en': 'No messages yet', 'ur': 'ابھی کوئی پیغام نہیں', 'hi': 'अभी कोई संदेश नहीं', 'bn': 'এখনও কোনো বার্তা নেই', 'fil': 'Wala pang mensahe', 'fr': 'Aucun message', 'tr': 'Henüz mesaj yok'},
+  'typeMessage': {'ar': 'اكتب رسالة…', 'en': 'Type a message…', 'ur': 'پیغام لکھیں…', 'hi': 'संदेश लिखें…', 'bn': 'বার্তা লিখুন…', 'fil': 'Mag-type ng mensahe…', 'fr': 'Écrivez un message…', 'tr': 'Mesaj yazın…'},
+
   // ─── Active ride actions & Parcel delivery ───
   'parcelDelivery': {'ar': 'توصيل أمانة', 'en': 'Parcel delivery', 'ur': 'پارسل ڈیلیوری', 'hi': 'पार्सल डिलीवरी', 'bn': 'পার্সেল ডেলিভারি', 'fil': 'Paghahatid ng parsela', 'fr': 'Livraison de colis', 'tr': 'Koli teslimatı'},
   'cancelRide': {'ar': 'إلغاء الرحلة', 'en': 'Cancel ride', 'ur': 'سواری منسوخ کریں', 'hi': 'राइड रद्द करें', 'bn': 'রাইড বাতিল করুন', 'fil': 'Kanselahin ang biyahe', 'fr': 'Annuler la course', 'tr': 'Yolculuğu iptal et'},
