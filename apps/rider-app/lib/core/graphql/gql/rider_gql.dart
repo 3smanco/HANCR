@@ -73,6 +73,22 @@ const String routePreviewQuery = r'''
   }
 ''';
 
+// ─── App config (banners / SDUI) ───
+const String appConfigQuery = r'''
+  query AppConfig {
+    appConfig {
+      banners {
+        id
+        imageUrl
+        title
+        subtitle
+        link
+        order
+      }
+    }
+  }
+''';
+
 // ─── Coupons ───
 const String validateCouponQuery = r'''
   query ValidateCoupon($code: String!, $fare: Int!, $regionId: Int!) {

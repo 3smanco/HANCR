@@ -353,6 +353,18 @@ export const UPDATE_FEATURE_FLAGS = gql`
   }
 `;
 
+// ─── BANNERS (Phase 3.3 — SDUI via app-config) ────────────────────────────
+
+export const UPDATE_APP_CONFIG = gql`
+  mutation UpdateAppConfigHome($configKey: String!, $input: UpdateAppConfigInput!) {
+    updateAppConfig(configKey: $configKey, input: $input) {
+      id
+      homeScreenConfig
+      updatedAt
+    }
+  }
+`;
+
 // ─── SOS / Safety ──────────────────────────────────────────────────────────
 
 export const SOS_INCIDENTS = gql`

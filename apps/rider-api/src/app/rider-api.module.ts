@@ -55,6 +55,7 @@ import { PoolModule } from './pool/pool.module';
 import { WalletModule } from './wallet/wallet.module';
 import { SosModule } from './sos/sos.module';
 import { TrackingModule } from './tracking/tracking.module';
+import { RiderAppConfigModule } from './app-config/app-config.module';
 
 // PubSub
 import { pubSubProvider } from './pubsub.provider';
@@ -155,6 +156,7 @@ import { pubSubProvider } from './pubsub.provider';
     WalletModule,
     SosModule,
     TrackingModule,
+    RiderAppConfigModule,
   ],
   providers: [pubSubProvider],
   exports: [pubSubProvider],
