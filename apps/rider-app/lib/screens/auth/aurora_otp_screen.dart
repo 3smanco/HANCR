@@ -25,6 +25,7 @@ class AuroraOtpScreen extends StatefulWidget {
 
 class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
   final _otpCtrl = TextEditingController();
+  final _referralCtrl = TextEditingController();
   int _resendIn = 30;
 
   @override
@@ -49,7 +50,13 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
   void _verify(String otp) {
     if (otp.length < 4) return;
     context.read<AuthBloc>().add(
-          AuthVerifyOtpRequested(phone: widget.phone, otp: otp),
+          AuthVerifyOtpRequested(
+            phone: widget.phone,
+            otp: otp,
+            referralCode: _referralCtrl.text.trim().isEmpty
+                ? null
+                : _referralCtrl.text.trim().toUpperCase(),
+          ),
         );
   }
 
@@ -63,6 +70,7 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
   @override
   void dispose() {
     _otpCtrl.dispose();
+    _referralCtrl.dispose();
     super.dispose();
   }
 
@@ -187,6 +195,36 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                       ),
                       onCompleted: _verify,
                       onChanged: (_) {},
+                    ),
+
+                    const SizedBox(height: AuroraSpacing.lg),
+
+                    // ─── كود إحالة اختياري (للمستخدمين الجدد) ───
+                    TextField(
+                      controller: _referralCtrl,
+                      textCapitalization: TextCapitalization.characters,
+                      textAlign: TextAlign.center,
+                      style: AuroraText.bodyMedium
+                          .copyWith(color: AuroraColors.pearl, letterSpacing: 2),
+                      decoration: InputDecoration(
+                        hintText: tr('referralCodeOptional'),
+                        hintStyle: AuroraText.bodySmall
+                            .copyWith(color: AuroraColors.textSecondary),
+                        prefixIcon: const Icon(Icons.card_giftcard,
+                            color: AuroraColors.ember, size: 20),
+                        filled: true,
+                        fillColor: AuroraColors.ash,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AuroraRadius.md),
+                          borderSide:
+                              const BorderSide(color: AuroraColors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AuroraRadius.md),
+                          borderSide: const BorderSide(
+                              color: AuroraColors.ember, width: 1.5),
+                        ),
+                      ),
                     ),
 
                     const SizedBox(height: AuroraSpacing.xl),

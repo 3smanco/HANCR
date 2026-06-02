@@ -11,8 +11,8 @@ const String sendOtpMutation = r'''
 ''';
 
 const String verifyOtpMutation = r'''
-  mutation VerifyOtp($phone: String!, $code: String!) {
-    verifyOtp(input: { phone: $phone, code: $code }) {
+  mutation VerifyOtp($phone: String!, $code: String!, $referralCode: String) {
+    verifyOtp(input: { phone: $phone, code: $code, referralCode: $referralCode }) {
       accessToken
       isNewUser
       rider {
@@ -30,6 +30,16 @@ const String verifyOtpMutation = r'''
         banned
         active
       }
+    }
+  }
+''';
+
+const String myReferralQuery = r'''
+  query MyReferral {
+    myReferral {
+      code
+      referredCount
+      rewardedCount
     }
   }
 ''';

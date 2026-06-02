@@ -36,6 +36,22 @@ export class RiderService {
     return this.toType(rider);
   }
 
+  /** بيانات إحالة الراكب: كوده + عدد من أحالهم وكم منهم كوفئ */
+  async getReferral(riderId: number): Promise<{
+    code?: string;
+    referredCount: number;
+    rewardedCount: number;
+  }> {
+    const rider = await this.findById(riderId);
+    const referredCount = await this.riderRepo.count({
+      where: { referredBy: riderId },
+    });
+    const rewardedCount = await this.riderRepo.count({
+      where: { referredBy: riderId, referralRewarded: true },
+    });
+    return { code: rider.referralCode, referredCount, rewardedCount };
+  }
+
   /**
    * Update only the FCM token (called from mobile app on login/token refresh)
    */

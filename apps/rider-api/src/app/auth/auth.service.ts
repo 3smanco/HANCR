@@ -136,6 +136,16 @@ export class AuthService {
     const isNewUser = !rider;
 
     if (!rider) {
+      // التقاط المُحيل من كود الإحالة (إن وُجد وصالح ولا يحيل نفسه لاحقاً)
+      let referredBy: number | undefined;
+      if (input.referralCode && input.referralCode.trim()) {
+        const referrer = await this.riderRepo.findOne({
+          where: { referralCode: input.referralCode.trim().toUpperCase() },
+          select: ['id'],
+        });
+        if (referrer) referredBy = referrer.id;
+      }
+
       rider = this.riderRepo.create({
         phoneNumber: phone,
         countryCode,
@@ -145,9 +155,15 @@ export class AuthService {
         currency: this.getDefaultCurrency(countryCode),
         rating: 5.0,
         totalRides: 0,
+        referralCode: await this.generateReferralCode(),
+        referredBy,
+        referralRewarded: false,
       });
       rider = await this.riderRepo.save(rider);
-      this.logger.log(`New rider registered: ${phone} (ID: ${rider.id})`);
+      this.logger.log(
+        `New rider registered: ${phone} (ID: ${rider.id})` +
+          (referredBy ? ` referred by #${referredBy}` : ''),
+      );
     } else {
       // تحديث آخر دخول
       await this.riderRepo.update(rider.id, { lastLoginAt: new Date() });
@@ -190,6 +206,24 @@ export class AuthService {
       type: 'rider',
     };
     return this.jwtService.sign(payload);
+  }
+
+  /** يولّد كود إحالة فريداً من 6 محارف (أحرف كبيرة + أرقام) */
+  private async generateReferralCode(): Promise<string> {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // بلا أحرف ملتبسة
+    for (let attempt = 0; attempt < 8; attempt++) {
+      let code = '';
+      for (let i = 0; i < 6; i++) {
+        code += alphabet[Math.floor(Math.random() * alphabet.length)];
+      }
+      const exists = await this.riderRepo.findOne({
+        where: { referralCode: code },
+        select: ['id'],
+      });
+      if (!exists) return code;
+    }
+    // احتياط: استخدم الطابع الزمني لضمان التفرّد
+    return `R${Date.now().toString(36).toUpperCase().slice(-7)}`;
   }
 
   private extractCountryCode(phone: string): string {

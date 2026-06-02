@@ -2,6 +2,7 @@ import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { RiderService } from './rider.service';
 import { RiderType } from './dto/rider.type';
+import { ReferralType } from './dto/referral.type';
 import { UpdateRiderInput } from './dto/update-rider.input';
 import { JwtAuthGuard, CurrentUser } from '../auth/jwt-auth.guard';
 import { AuthUser } from '../auth/jwt.strategy';
@@ -18,6 +19,13 @@ export class RiderResolver {
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: AuthUser): Promise<RiderType> {
     return this.riderService.getMe(user.riderId);
+  }
+
+  /** بيانات الإحالة (الكود + عدد المُحالين) */
+  @Query(() => ReferralType, { description: 'بيانات إحالة الراكب' })
+  @UseGuards(JwtAuthGuard)
+  myReferral(@CurrentUser() user: AuthUser): Promise<ReferralType> {
+    return this.riderService.getReferral(user.riderId);
   }
 
   /**

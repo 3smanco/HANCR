@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import '../../blocs/rider/rider_bloc.dart';
 import '../../blocs/rider/rider_event.dart';
 import '../../blocs/rider/rider_state.dart';
+import '../../core/graphql/graphql_client.dart';
+import '../../core/graphql/gql/auth_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
@@ -215,85 +218,132 @@ class HelpCenterScreen extends StatelessWidget {
 // ════════════════════════════════════════════════════════════════
 // 3) ادعُ أصدقاءك — كود إحالة
 // ════════════════════════════════════════════════════════════════
-class InviteFriendsScreen extends StatelessWidget {
+class InviteFriendsScreen extends StatefulWidget {
   const InviteFriendsScreen({super.key});
 
   @override
+  State<InviteFriendsScreen> createState() => _InviteFriendsScreenState();
+}
+
+class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
+  String? _code;
+  int _referredCount = 0;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(myReferralQuery),
+        fetchPolicy: FetchPolicy.networkOnly,
+      ));
+      final d = res.data?['myReferral'] as Map<String, dynamic>?;
+      if (!mounted) return;
+      setState(() {
+        _code = d?['code'] as String?;
+        _referredCount = (d?['referredCount'] as int?) ?? 0;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    }
+  }
+
+  void _copy() {
+    if (_code == null) return;
+    Clipboard.setData(ClipboardData(text: _code!));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(tr('codeCopied')),
+        backgroundColor: AuroraColors.success,
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    const code = 'HANCR-7BICII';
     return _AuroraPage(
       title: tr('inviteFriends'),
-      child: ListView(
-        padding: const EdgeInsets.all(AuroraSpacing.lg),
-        children: [
-          const SizedBox(height: AuroraSpacing.lg),
-          Center(
-            child: Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                gradient: AuroraColors.emberGradient,
-                shape: BoxShape.circle,
-                boxShadow: AuroraShadows.emberGlow,
+      child: _loading
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.all(AuroraSpacing.xxl),
+                child: CircularProgressIndicator(color: AuroraColors.ember),
               ),
-              child: const Icon(Icons.card_giftcard,
-                  color: AuroraColors.pearl, size: 44),
-            ),
-          ),
-          const SizedBox(height: AuroraSpacing.lg),
-          Text(tr('inviteHeadline'),
-              textAlign: TextAlign.center, style: AuroraText.titleMedium),
-          const SizedBox(height: 6),
-          Text(
-            'يحصل صديقك على خصم 50٪ على أول رحلتين، وتحصل أنت على رصيد 20 ر.س عند أول رحلة له.',
-            textAlign: TextAlign.center,
-            style: AuroraText.bodySmall,
-          ),
-          const SizedBox(height: AuroraSpacing.xl),
-          Container(
-            padding: const EdgeInsets.all(AuroraSpacing.lg),
-            decoration: BoxDecoration(
-              color: AuroraColors.ash,
-              borderRadius: BorderRadius.circular(AuroraRadius.md),
-              border: Border.all(color: AuroraColors.ember),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            )
+          : ListView(
+              padding: const EdgeInsets.all(AuroraSpacing.lg),
               children: [
-                Text(code,
-                    style: AuroraText.titleMedium
-                        .copyWith(color: AuroraColors.ember)),
-                GestureDetector(
-                  onTap: () {
-                    Clipboard.setData(const ClipboardData(text: code));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(tr('codeCopied')),
-                        backgroundColor: AuroraColors.success,
+                const SizedBox(height: AuroraSpacing.lg),
+                Center(
+                  child: Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      gradient: AuroraColors.emberGradient,
+                      shape: BoxShape.circle,
+                      boxShadow: AuroraShadows.emberGlow,
+                    ),
+                    child: const Icon(Icons.card_giftcard,
+                        color: AuroraColors.pearl, size: 44),
+                  ),
+                ),
+                const SizedBox(height: AuroraSpacing.lg),
+                Text(tr('inviteHeadline'),
+                    textAlign: TextAlign.center,
+                    style: AuroraText.titleMedium),
+                const SizedBox(height: 6),
+                Text(
+                  tr('inviteDesc'),
+                  textAlign: TextAlign.center,
+                  style: AuroraText.bodySmall,
+                ),
+                const SizedBox(height: AuroraSpacing.xl),
+                Container(
+                  padding: const EdgeInsets.all(AuroraSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: AuroraColors.ash,
+                    borderRadius: BorderRadius.circular(AuroraRadius.md),
+                    border: Border.all(color: AuroraColors.ember),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(_code ?? '—',
+                          style: AuroraText.titleMedium.copyWith(
+                              color: AuroraColors.ember, letterSpacing: 2)),
+                      GestureDetector(
+                        onTap: _copy,
+                        child:
+                            const Icon(Icons.copy, color: AuroraColors.pearl),
                       ),
-                    );
-                  },
-                  child: const Icon(Icons.copy, color: AuroraColors.pearl),
+                    ],
+                  ),
+                ),
+                if (_referredCount > 0) ...[
+                  const SizedBox(height: AuroraSpacing.md),
+                  Text(
+                    '${tr('friendsInvited')}: $_referredCount',
+                    textAlign: TextAlign.center,
+                    style: AuroraText.bodySmall
+                        .copyWith(color: AuroraColors.textSecondary),
+                  ),
+                ],
+                const SizedBox(height: AuroraSpacing.xl),
+                AuroraButton.primary(
+                  label: tr('shareCode'),
+                  icon: Icons.share,
+                  onPressed: _copy,
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: AuroraSpacing.xl),
-          AuroraButton.primary(
-            label: tr('shareCode'),
-            icon: Icons.share,
-            onPressed: () {
-              Clipboard.setData(const ClipboardData(text: code));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('تم نسخ الكود — شاركه مع أصدقائك ✓'),
-                  backgroundColor: AuroraColors.success,
-                ),
-              );
-            },
-          ),
-        ],
-      ),
     );
   }
 }
