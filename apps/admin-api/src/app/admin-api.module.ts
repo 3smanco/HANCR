@@ -37,6 +37,8 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { OrdersModule } from './orders/orders.module';
 import { SosAdminModule } from './sos/sos-admin.module';
 import { CouponsModule } from './coupons/coupons.module';
+import { AdminNotificationsModule } from './notifications/notifications.module';
+import { NotificationsModule } from '@hancr/notifications';
 
 // Observability
 import { ObservabilityModule } from '@hancr/observability';
@@ -117,6 +119,8 @@ import { ObservabilityModule } from '@hancr/observability';
     OrdersModule,
     SosAdminModule,
     CouponsModule,
+    NotificationsModule,
+    AdminNotificationsModule,
     ObservabilityModule,
   ],
 })
