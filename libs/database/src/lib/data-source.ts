@@ -25,6 +25,7 @@ import { EmergencyContactEntity } from './entities/emergency-contact.entity';
 import { SosIncidentEntity } from './entities/sos-incident.entity';
 import { CouponEntity } from './entities/coupon.entity';
 import { SavedPlaceEntity } from './entities/saved-place.entity';
+import { CommuterSubscriptionEntity } from './entities/commuter-subscription.entity';
 
 /**
  * قائمة كاملة بجميع Entities في HANCR
@@ -50,6 +51,7 @@ export const HANCR_ENTITIES = [
   SosIncidentEntity,
   CouponEntity,
   SavedPlaceEntity,
+  CommuterSubscriptionEntity,
 ];
 
 /**

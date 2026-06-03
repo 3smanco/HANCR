@@ -28,6 +28,7 @@ import {
   SosIncidentEntity,
   CouponEntity,
   SavedPlaceEntity,
+  CommuterSubscriptionEntity,
 } from '@hancr/database';
 
 // Redis
@@ -59,6 +60,7 @@ import { TrackingModule } from './tracking/tracking.module';
 import { RiderAppConfigModule } from './app-config/app-config.module';
 import { ChatModule } from './chat/chat.module';
 import { SavedPlaceModule } from './saved-place/saved-place.module';
+import { CommuterModule } from './commuter/commuter.module';
 
 // PubSub
 import { pubSubProvider } from './pubsub.provider';
@@ -106,6 +108,7 @@ import { pubSubProvider } from './pubsub.provider';
           SosIncidentEntity,
           CouponEntity,
           SavedPlaceEntity,
+          CommuterSubscriptionEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
@@ -163,6 +166,7 @@ import { pubSubProvider } from './pubsub.provider';
     RiderAppConfigModule,
     ChatModule,
     SavedPlaceModule,
+    CommuterModule,
   ],
   providers: [pubSubProvider],
   exports: [pubSubProvider],
