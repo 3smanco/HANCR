@@ -192,6 +192,12 @@ const Map<String, Map<String, String>> _t = {
   // ─── Payment method ───
   'cash': {'ar': 'نقداً', 'en': 'Cash', 'ur': 'نقد', 'hi': 'नकद', 'bn': 'নগদ', 'fil': 'Cash', 'fr': 'Espèces', 'tr': 'Nakit'},
 
+  // ─── Trip share ───
+  'shareRideTitle': {'ar': 'رحلتي على HANCR', 'en': 'My HANCR trip', 'ur': 'میری HANCR سواری', 'hi': 'मेरी HANCR यात्रा', 'bn': 'আমার HANCR যাত্রা', 'fil': 'Aking biyahe sa HANCR', 'fr': 'Mon trajet HANCR', 'tr': 'HANCR yolculuğum'},
+  'car': {'ar': 'السيارة', 'en': 'Car', 'ur': 'گاڑی', 'hi': 'गाड़ी', 'bn': 'গাড়ি', 'fil': 'Sasakyan', 'fr': 'Voiture', 'tr': 'Araç'},
+  'to': {'ar': 'إلى', 'en': 'To', 'ur': 'تک', 'hi': 'तक', 'bn': 'যাচ্ছি', 'fil': 'Patungo', 'fr': 'Vers', 'tr': 'Hedef'},
+  'liveLocation': {'ar': 'الموقع المباشر', 'en': 'Live location', 'ur': 'لائیو لوکیشن', 'hi': 'लाइव लोकेशन', 'bn': 'লাইভ অবস্থান', 'fil': 'Live na lokasyon', 'fr': 'Position en direct', 'tr': 'Canlı konum'},
+
   // ─── Saved places ───
   'addSavedPlace': {'ar': 'أضف مكاناً مفضّلاً', 'en': 'Add a saved place', 'ur': 'پسندیدہ جگہ شامل کریں', 'hi': 'पसंदीदा स्थान जोड़ें', 'bn': 'প্রিয় স্থান যোগ করুন', 'fil': 'Magdagdag ng lugar', 'fr': 'Ajouter un lieu favori', 'tr': 'Favori yer ekle'},
   'savedPlacesHint': {'ar': 'احفظ المنزل والعمل للحجز السريع', 'en': 'Save home & work for quick booking', 'ur': 'گھر اور کام محفوظ کریں', 'hi': 'घर और काम सहेजें', 'bn': 'বাড়ি ও কর্মস্থল সংরক্ষণ করুন', 'fil': 'I-save ang bahay at trabaho', 'fr': 'Enregistrez domicile et travail', 'tr': 'Ev ve işi kaydedin'},
