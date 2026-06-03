@@ -194,7 +194,6 @@ const Map<String, Map<String, String>> _t = {
 
   // ─── Trip share ───
   'shareRideTitle': {'ar': 'رحلتي على HANCR', 'en': 'My HANCR trip', 'ur': 'میری HANCR سواری', 'hi': 'मेरी HANCR यात्रा', 'bn': 'আমার HANCR যাত্রা', 'fil': 'Aking biyahe sa HANCR', 'fr': 'Mon trajet HANCR', 'tr': 'HANCR yolculuğum'},
-  'car': {'ar': 'السيارة', 'en': 'Car', 'ur': 'گاڑی', 'hi': 'गाड़ी', 'bn': 'গাড়ি', 'fil': 'Sasakyan', 'fr': 'Voiture', 'tr': 'Araç'},
   'to': {'ar': 'إلى', 'en': 'To', 'ur': 'تک', 'hi': 'तक', 'bn': 'যাচ্ছি', 'fil': 'Patungo', 'fr': 'Vers', 'tr': 'Hedef'},
   'liveLocation': {'ar': 'الموقع المباشر', 'en': 'Live location', 'ur': 'لائیو لوکیشن', 'hi': 'लाइव लोकेशन', 'bn': 'লাইভ অবস্থান', 'fil': 'Live na lokasyon', 'fr': 'Position en direct', 'tr': 'Canlı konum'},
 
