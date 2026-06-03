@@ -105,7 +105,12 @@ export class OrderService {
     // حساب مسافة الطريق الفعلية ومدتها عبر Google Directions (مع احتياط haversine)
     const originPoint = input.points[0];
     const destPoint = input.points[input.points.length - 1];
-    const route = await this.directionsService.getRoute(originPoint, destPoint);
+    const waypoints = input.points.slice(1, -1);
+    const route = await this.directionsService.getRoute(
+      originPoint,
+      destPoint,
+      waypoints,
+    );
     const distanceMeters = route.distanceMeters;
     const durationSeconds = route.durationSeconds;
 

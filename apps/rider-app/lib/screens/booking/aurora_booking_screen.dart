@@ -95,6 +95,9 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   // طريقة الدفع (Cash / Wallet)
   String _paymentMode = 'Cash';
 
+  // محطات وسيطة (Multi-stop) — قائمة نقاط بين الانطلاق والوجهة
+  final List<({GeoPoint point, String label})> _stops = [];
+
   bool get _isDelivery => _selectedService?.serviceType == 'PackageDelivery';
   bool get _isHourly => _selectedService?.serviceType == 'HourlyChauffeur';
 
@@ -421,7 +424,20 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           bookedHours: _isHourly ? _bookedHours : null,
           couponCode: _appliedCoupon,
           paymentMode: _paymentMode,
+          stops: _stops.map((s) => s.point).toList(),
+          stopAddresses: _stops.map((s) => s.label).toList(),
         ));
+  }
+
+  /// يضيف محطة وسيطة من مركز الخريطة الحالي.
+  void _addStopAtCurrentMap() {
+    if (_stops.length >= 3) return;
+    setState(() {
+      _stops.add((point: _destination, label: _destinationLabel));
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(tr('stopAdded'))),
+    );
   }
 
   Future<void> _pickSchedule() async {
@@ -722,6 +738,27 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _routeRow(Icons.my_location, AuroraColors.success, _originLabel),
+          // محطات وسيطة
+          for (var i = 0; i < _stops.length; i++) ...[
+            const Divider(color: AuroraColors.border, height: AuroraSpacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: _routeRow(
+                      Icons.flag_outlined,
+                      AuroraColors.info,
+                      _stops[i].label.isEmpty
+                          ? '${tr('stop')} ${i + 1}'
+                          : _stops[i].label),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close,
+                      color: AuroraColors.textSecondary, size: 18),
+                  onPressed: () => setState(() => _stops.removeAt(i)),
+                ),
+              ],
+            ),
+          ],
           const Divider(color: AuroraColors.border, height: AuroraSpacing.lg),
           Row(
             children: [
@@ -737,7 +774,16 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               ),
             ],
           ),
-          const SizedBox(height: AuroraSpacing.lg),
+          if (_stops.length < 3)
+            TextButton.icon(
+              onPressed: _addStopAtCurrentMap,
+              icon: const Icon(Icons.add_location_alt_outlined,
+                  color: AuroraColors.ember, size: 18),
+              label: Text(tr('addStop'),
+                  style: AuroraText.bodySmall
+                      .copyWith(color: AuroraColors.ember)),
+            ),
+          const SizedBox(height: AuroraSpacing.sm),
           AuroraButton.primary(
             label: tr('confirmDestination'),
             icon: Icons.check,
