@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../blocs/order/order_bloc.dart';
 import '../../blocs/order/order_event.dart';
 import '../../blocs/order/order_state.dart';
@@ -85,6 +86,30 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
       setState(() =>
           _carIcon = BitmapDescriptor.bytes(bytes.buffer.asUint8List()));
     }
+  }
+
+  /// يفتح ورقة مشاركة بنص يصف الرحلة الحيّة (سائق، سيارة، ETA، وجهة).
+  Future<void> _shareTrip(OrderModel order) async {
+    final lines = <String>[
+      tr('shareRideTitle'),
+    ];
+    if ((order.driverName ?? '').isNotEmpty) {
+      lines.add('${tr('driver')}: ${order.driverName}');
+    }
+    final car = [order.carBrand, order.carModel].where((s) => (s ?? '').isNotEmpty).join(' ');
+    if (car.isNotEmpty || (order.plateNumber ?? '').isNotEmpty) {
+      lines.add('${tr('car')}: $car'
+          '${(order.plateNumber ?? '').isNotEmpty ? ' • ${order.plateNumber}' : ''}');
+    }
+    if (order.addresses.length > 1) {
+      lines.add('${tr('to')}: ${order.addresses.last}');
+    }
+    if (_lastDriverLoc != null) {
+      lines.add('${tr('liveLocation')}: '
+          'https://www.google.com/maps/search/?api=1&query=${_lastDriverLoc!.lat},${_lastDriverLoc!.lng}');
+    }
+    await Share.share(lines.join('\n'),
+        subject: tr('shareRideTitle'));
   }
 
   /// يضبط الكاميرا لتضمّ الانطلاق والوجهة وموقع السائق.
@@ -483,8 +508,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
                       child: _action(
                         icon: Icons.share_outlined,
                         label: tr('share'),
-                        onTap: () => AuroraToast.comingSoon(rowCtx,
-                            feature: tr('shareRide')),
+                        onTap: () => _shareTrip(order),
                       ),
                     ),
                   ],
