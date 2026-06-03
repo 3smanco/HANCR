@@ -1,5 +1,6 @@
 import { Field, Float, InputType, Int, ObjectType } from '@nestjs/graphql';
 import {
+  IsInt,
   IsLatitude,
   IsLongitude,
   IsString,
@@ -52,8 +53,10 @@ export class FlightTrackingInput {
   pickupLng!: number;
 
   @Field(() => Int)
+  @IsInt()
   serviceId!: number;
 
   @Field(() => Int)
+  @IsInt()
   regionId!: number;
 }
