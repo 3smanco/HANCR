@@ -162,6 +162,14 @@ export class OrderEntity {
   @Column({ default: false, name: 'number_masked' })
   numberMasked!: boolean;
 
+  /** وضع العائلة — يفضّل سائقات وسلوكاً مناسباً للعائلة */
+  @Column({ default: false, name: 'family_mode' })
+  familyMode!: boolean;
+
+  /** تفضيل صريح لسائقة (يمكن استخدامه حتى بدون وضع العائلة) */
+  @Column({ default: false, name: 'prefer_female_driver' })
+  preferFemaleDriver!: boolean;
+
   /** ===== ميزة OTP للتسليم الآمن ===== */
 
   /** رمز OTP المولّد (4 أرقام) */

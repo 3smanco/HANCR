@@ -192,6 +192,9 @@ const Map<String, Map<String, String>> _t = {
   // ─── Payment method ───
   'cash': {'ar': 'نقداً', 'en': 'Cash', 'ur': 'نقد', 'hi': 'नकद', 'bn': 'নগদ', 'fil': 'Cash', 'fr': 'Espèces', 'tr': 'Nakit'},
 
+  // ─── Family mode ───
+  'familyMode': {'ar': 'وضع العائلة', 'en': 'Family mode', 'ur': 'فیملی موڈ', 'hi': 'फ़ैमिली मोड', 'bn': 'পরিবার মোড', 'fil': 'Family mode', 'fr': 'Mode famille', 'tr': 'Aile modu'},
+
   // ─── Multi-stop ───
   'stop': {'ar': 'محطة', 'en': 'Stop', 'ur': 'اسٹاپ', 'hi': 'पड़ाव', 'bn': 'স্টপ', 'fil': 'Hintuan', 'fr': 'Arrêt', 'tr': 'Durak'},
   'addStop': {'ar': 'أضف محطة', 'en': 'Add stop', 'ur': 'اسٹاپ شامل کریں', 'hi': 'पड़ाव जोड़ें', 'bn': 'স্টপ যোগ করুন', 'fil': 'Magdagdag ng hintuan', 'fr': 'Ajouter un arrêt', 'tr': 'Durak ekle'},

@@ -101,6 +101,16 @@ export class CreateOrderInput {
   @Max(12)
   bookedHours?: number;
 
+  /** وضع العائلة — يُفضّل سائقة وسلوكاً عائلياً */
+  @Field({ nullable: true })
+  @IsOptional()
+  familyMode?: boolean;
+
+  /** تفضيل صريح لسائقة (مستقل عن وضع العائلة) */
+  @Field({ nullable: true })
+  @IsOptional()
+  preferFemaleDriver?: boolean;
+
   // ===== الدفع =====
 
   /** طريقة الدفع: Cash | SavedPaymentMethod | PaymentGateway | Wallet */

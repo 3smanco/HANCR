@@ -35,6 +35,7 @@ export class DriverOrderType {
   @Field(() => Int, { nullable: true }) requestedTemperature?: number;
   @Field() audioOff!: boolean;
   @Field() numberMasked!: boolean;
+  @Field({ nullable: true }) familyMode?: boolean;
 
   /** OTP */
   @Field({ nullable: true }) otpCode?: string;

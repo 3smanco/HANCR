@@ -31,6 +31,8 @@ class OrderCreateRequested extends OrderEvent {
   /// محطات وسيطة بين الانطلاق والوجهة (Multi-stop)
   final List<GeoPoint> stops;
   final List<String> stopAddresses;
+  /// وضع العائلة — يفضّل سائقة وسلوكاً عائلياً
+  final bool familyMode;
 
   const OrderCreateRequested({
     required this.origin,
@@ -50,6 +52,7 @@ class OrderCreateRequested extends OrderEvent {
     this.paymentMode,
     this.stops = const [],
     this.stopAddresses = const [],
+    this.familyMode = false,
   });
 
   @override
