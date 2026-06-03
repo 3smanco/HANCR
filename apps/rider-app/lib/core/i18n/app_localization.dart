@@ -192,6 +192,11 @@ const Map<String, Map<String, String>> _t = {
   // ─── Payment method ───
   'cash': {'ar': 'نقداً', 'en': 'Cash', 'ur': 'نقد', 'hi': 'नकद', 'bn': 'নগদ', 'fil': 'Cash', 'fr': 'Espèces', 'tr': 'Nakit'},
 
+  // ─── Multi-stop ───
+  'stop': {'ar': 'محطة', 'en': 'Stop', 'ur': 'اسٹاپ', 'hi': 'पड़ाव', 'bn': 'স্টপ', 'fil': 'Hintuan', 'fr': 'Arrêt', 'tr': 'Durak'},
+  'addStop': {'ar': 'أضف محطة', 'en': 'Add stop', 'ur': 'اسٹاپ شامل کریں', 'hi': 'पड़ाव जोड़ें', 'bn': 'স্টপ যোগ করুন', 'fil': 'Magdagdag ng hintuan', 'fr': 'Ajouter un arrêt', 'tr': 'Durak ekle'},
+  'stopAdded': {'ar': 'تمت إضافة المحطة', 'en': 'Stop added', 'ur': 'اسٹاپ شامل ہو گیا', 'hi': 'पड़ाव जोड़ा गया', 'bn': 'স্টপ যোগ হয়েছে', 'fil': 'Naidagdag ang hintuan', 'fr': 'Arrêt ajouté', 'tr': 'Durak eklendi'},
+
   // ─── Trip share ───
   'shareRideTitle': {'ar': 'رحلتي على HANCR', 'en': 'My HANCR trip', 'ur': 'میری HANCR سواری', 'hi': 'मेरी HANCR यात्रा', 'bn': 'আমার HANCR যাত্রা', 'fil': 'Aking biyahe sa HANCR', 'fr': 'Mon trajet HANCR', 'tr': 'HANCR yolculuğum'},
   'to': {'ar': 'إلى', 'en': 'To', 'ur': 'تک', 'hi': 'तक', 'bn': 'যাচ্ছি', 'fil': 'Patungo', 'fr': 'Vers', 'tr': 'Hedef'},

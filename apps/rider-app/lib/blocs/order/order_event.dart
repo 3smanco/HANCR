@@ -28,6 +28,9 @@ class OrderCreateRequested extends OrderEvent {
   final DateTime? scheduledAt;
   final String? couponCode;
   final String? paymentMode;
+  /// محطات وسيطة بين الانطلاق والوجهة (Multi-stop)
+  final List<GeoPoint> stops;
+  final List<String> stopAddresses;
 
   const OrderCreateRequested({
     required this.origin,
@@ -45,6 +48,8 @@ class OrderCreateRequested extends OrderEvent {
     this.scheduledAt,
     this.couponCode,
     this.paymentMode,
+    this.stops = const [],
+    this.stopAddresses = const [],
   });
 
   @override

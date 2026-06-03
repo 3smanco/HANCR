@@ -29,13 +29,19 @@ export class DirectionsService {
   async getRoute(
     origin: { lat: number; lng: number },
     destination: { lat: number; lng: number },
+    waypoints: Array<{ lat: number; lng: number }> = [],
   ): Promise<RouteResult> {
     if (this.apiKey) {
       try {
+        const wp =
+          waypoints.length > 0
+            ? `&waypoints=${waypoints.map((p) => `${p.lat},${p.lng}`).join('|')}`
+            : '';
         const url =
           `https://maps.googleapis.com/maps/api/directions/json` +
           `?origin=${origin.lat},${origin.lng}` +
           `&destination=${destination.lat},${destination.lng}` +
+          wp +
           `&mode=driving&key=${this.apiKey}`;
 
         const controller = new AbortController();
@@ -55,11 +61,19 @@ export class DirectionsService {
         };
 
         if (data.status === 'OK' && data.routes && data.routes.length > 0) {
-          const leg = data.routes[0].legs?.[0];
-          if (leg?.distance && leg?.duration) {
+          const legs = data.routes[0].legs ?? [];
+          if (legs.length > 0 && legs.every((l) => l.distance && l.duration)) {
+            const distanceMeters = legs.reduce(
+              (s, l) => s + (l.distance?.value ?? 0),
+              0,
+            );
+            const durationSeconds = legs.reduce(
+              (s, l) => s + (l.duration?.value ?? 0),
+              0,
+            );
             return {
-              distanceMeters: leg.distance.value,
-              durationSeconds: leg.duration.value,
+              distanceMeters,
+              durationSeconds,
               polyline: data.routes[0].overview_polyline?.points,
               fromApi: true,
             };
@@ -75,9 +89,12 @@ export class DirectionsService {
       }
     }
 
-    // ── Fallback: haversine × معامل التواء الطرق ──
-    const straight = this.haversine(origin, destination);
-    const distanceMeters = Math.round(straight * 1.3);
+    // ── Fallback: haversine × معامل التواء الطرق على المراحل ──
+    const seq = [origin, ...waypoints, destination];
+    let distanceMeters = 0;
+    for (let i = 0; i < seq.length - 1; i++) {
+      distanceMeters += Math.round(this.haversine(seq[i], seq[i + 1]) * 1.3);
+    }
     const durationSeconds = Math.ceil(distanceMeters / 8); // ~30 كم/س
     return { distanceMeters, durationSeconds, fromApi: false };
   }

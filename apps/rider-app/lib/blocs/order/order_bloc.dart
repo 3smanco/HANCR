@@ -66,10 +66,12 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
             'input': {
               'points': [
                 event.origin.toJson(),
+                ...event.stops.map((s) => s.toJson()),
                 event.destination.toJson(),
               ],
               'addresses': [
                 event.originAddress,
+                ...event.stopAddresses,
                 event.destinationAddress,
               ],
               'serviceId': event.service.id,
