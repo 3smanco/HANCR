@@ -5,6 +5,8 @@ import '../../core/widgets/aurora/aurora.dart';
 import '../home/aurora_home_tab.dart';
 import '../rides/rides_tab.dart';
 import '../profile/aurora_profile_tab.dart';
+import '../commuter/aurora_commuter_screen.dart';
+import '../airport/aurora_airport_screen.dart';
 
 /// AuroraMainScreen — Bottom navigation الجديد بنمط Aurora:
 /// Home / Services / [Center FAB] / Activity / Account
@@ -91,14 +93,10 @@ class _ServicesTab extends StatelessWidget {
             const SizedBox(height: AuroraSpacing.md),
             _grid(context, [
               _ServiceItem(icon: Icons.local_taxi, label: tr('ride'), isRide: true),
-              _ServiceItem(icon: Icons.electric_scooter, label: tr('bike')),
-              _ServiceItem(
-                  icon: Icons.car_rental, label: tr('rental'), badge: 'Promo'),
               _ServiceItem(
                   icon: Icons.schedule,
                   label: tr('scheduledRide'),
                   bookServiceType: ''),
-              _ServiceItem(icon: Icons.groups, label: tr('groupRide')),
               _ServiceItem(
                   icon: Icons.av_timer,
                   label: tr('hourly'),
@@ -107,25 +105,26 @@ class _ServicesTab extends StatelessWidget {
                   icon: Icons.inventory_2_outlined,
                   label: tr('parcel'),
                   bookServiceType: 'PackageDelivery'),
-              _ServiceItem(icon: Icons.school, label: tr('students')),
-              _ServiceItem(icon: Icons.airline_seat_recline_normal, label: tr('premiumCat')),
-            ]),
-
-            const SizedBox(height: AuroraSpacing.xxl),
-
-            _section(tr('deliverAnything')),
-            const SizedBox(height: AuroraSpacing.md),
-            _grid(context, [
               _ServiceItem(
-                  icon: Icons.restaurant, label: tr('food'), badge: 'Promo'),
+                  icon: Icons.school,
+                  label: tr('subType_school'),
+                  customRoute: 'school'),
               _ServiceItem(
-                  icon: Icons.shopping_basket, label: tr('grocery'), badge: 'Promo'),
-              _ServiceItem(icon: Icons.medication, label: tr('medicine')),
-              _ServiceItem(icon: Icons.local_florist, label: tr('gifts')),
-              _ServiceItem(icon: Icons.local_grocery_store, label: tr('supplies')),
-              _ServiceItem(icon: Icons.baby_changing_station, label: tr('kids')),
-              _ServiceItem(icon: Icons.spa, label: tr('care')),
-              _ServiceItem(icon: Icons.coffee, label: tr('coffee')),
+                  icon: Icons.medication,
+                  label: tr('subType_medical'),
+                  customRoute: 'medical'),
+              _ServiceItem(
+                  icon: Icons.airline_seat_recline_normal,
+                  label: tr('subType_vip'),
+                  customRoute: 'vip'),
+              _ServiceItem(
+                  icon: Icons.flight,
+                  label: tr('airportPickup'),
+                  customRoute: 'airport'),
+              _ServiceItem(
+                  icon: Icons.commute,
+                  label: tr('subType_commuter'),
+                  customRoute: 'commuter'),
             ]),
 
             const SizedBox(height: AuroraSpacing.huge),
@@ -156,6 +155,23 @@ class _ServicesTab extends StatelessWidget {
         size: 80,
         onTap: () {
           final item = items[i];
+          if (item.customRoute != null) {
+            final route = item.customRoute!;
+            if (route == 'airport') {
+              Navigator.of(ctx).push(MaterialPageRoute(
+                builder: (_) => const AuroraAirportScreen(),
+              ));
+            } else if (route == 'vip') {
+              // VIP = حجز فوري بخدمة VIP مع إمكانية تفضيل سائق
+              ctx.push('/book', extra: {'preferServiceType': 'RideSharing', 'vip': true});
+            } else {
+              // commuter | school | medical → AuroraCommuterScreen
+              Navigator.of(ctx).push(MaterialPageRoute(
+                builder: (_) => AuroraCommuterScreen(subscriptionType: route),
+              ));
+            }
+            return;
+          }
           if (item.isRide || item.bookServiceType == '') {
             ctx.push('/book');
           } else if (item.bookServiceType != null) {
@@ -177,10 +193,13 @@ class _ServiceItem {
   final bool isRide;
   /// إن لم يكن null، يفتح شاشة الحجز بنوع خدمة مُفضَّل (أو رحلة عادية عند '').
   final String? bookServiceType;
+  /// مسار شاشة مخصّصة: 'school' | 'medical' | 'vip' | 'airport' | 'commuter'
+  final String? customRoute;
   const _ServiceItem(
       {required this.icon,
       required this.label,
       this.badge,
       this.isRide = false,
+      this.customRoute,
       this.bookServiceType});
 }

@@ -61,6 +61,14 @@ export class CommuterService {
         regionId: input.regionId,
         leadMinutes: input.leadMinutes ?? 10,
         active: true,
+        subscriptionType: input.subscriptionType ?? 'commuter',
+        childName: input.childName,
+        parentPhone: input.parentPhone,
+        medicalNotes: input.medicalNotes,
+        wheelchairNeeded: input.wheelchairNeeded ?? false,
+        recurrence: input.recurrence ?? 'daily',
+        preferredDriverId: input.preferredDriverId,
+        nightShift: input.nightShift ?? false,
       }),
     );
     return this.toType(saved);
@@ -104,6 +112,8 @@ export class CommuterService {
 
       for (const sub of subs) {
         if (!sub.daysOfWeek.includes(dow)) continue;
+        // فلتر التكرار (daily | weekly | biweekly | monthly)
+        if (!this.shouldRunOnDate(sub, now)) continue;
 
         // ذهاب
         if (sub.outboundTime && sub.lastOutboundDate !== today) {
@@ -129,6 +139,28 @@ export class CommuterService {
         `autoBookDueSubscriptions failed: ${(e as Error).message}`,
       );
     }
+  }
+
+  /**
+   * يحدّد إن كان اليوم الحالي يطابق نمط التكرار.
+   * daily: دائماً صحيح.
+   * weekly/biweekly: نقيس الأيام منذ آخر تشغيل (outbound أو return أيهما أحدث) ونقارن بالفاصل المطلوب.
+   * monthly: اشتغل آخر مرة في نفس يوم الشهر منذ ≥28 يوماً.
+   */
+  private shouldRunOnDate(
+    sub: CommuterSubscriptionEntity,
+    now: Date,
+  ): boolean {
+    const r = (sub.recurrence ?? 'daily').toLowerCase();
+    if (r === 'daily' || !r) return true;
+    const lastIso = sub.lastOutboundDate ?? sub.lastReturnDate;
+    if (!lastIso) return true; // أول تشغيل دائماً مسموح
+    const lastMs = Date.parse(lastIso);
+    const daysSince = Math.floor((now.getTime() - lastMs) / 86_400_000);
+    if (r === 'weekly') return daysSince >= 7;
+    if (r === 'biweekly') return daysSince >= 14;
+    if (r === 'monthly') return daysSince >= 28;
+    return true;
   }
 
   private parseHHmm(s: string): number {
@@ -201,6 +233,14 @@ export class CommuterService {
       regionId: r.regionId,
       leadMinutes: r.leadMinutes,
       createdAt: r.createdAt,
+      subscriptionType: r.subscriptionType ?? 'commuter',
+      childName: r.childName,
+      parentPhone: r.parentPhone,
+      medicalNotes: r.medicalNotes,
+      wheelchairNeeded: r.wheelchairNeeded ?? false,
+      recurrence: r.recurrence ?? 'daily',
+      preferredDriverId: r.preferredDriverId,
+      nightShift: r.nightShift ?? false,
     };
   }
 }

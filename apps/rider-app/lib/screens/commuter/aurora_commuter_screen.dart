@@ -8,7 +8,9 @@ import 'aurora_commuter_setup_screen.dart';
 
 /// شاشة اشتراكات Commuter — قائمة الاشتراكات النشطة + زر إضافة.
 class AuroraCommuterScreen extends StatefulWidget {
-  const AuroraCommuterScreen({super.key});
+  /// 'commuter' (default) | 'school' | 'campus' | 'medical' — يُفلتر القائمة ويوجّه الإنشاء
+  final String subscriptionType;
+  const AuroraCommuterScreen({super.key, this.subscriptionType = 'commuter'});
 
   @override
   State<AuroraCommuterScreen> createState() => _AuroraCommuterScreenState();
@@ -35,8 +37,13 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
       final list =
           (res.data?['commuterSubscriptions'] as List<dynamic>?) ?? [];
       if (!mounted) return;
+      final all = list.map((e) => e as Map<String, dynamic>).toList();
       setState(() {
-        _subs = list.map((e) => e as Map<String, dynamic>).toList();
+        _subs = all
+            .where((s) =>
+                (s['subscriptionType'] as String? ?? 'commuter') ==
+                widget.subscriptionType)
+            .toList();
         _loading = false;
       });
     } catch (_) {
@@ -68,7 +75,9 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
 
   Future<void> _openSetup() async {
     final created = await Navigator.of(context).push<bool>(MaterialPageRoute(
-      builder: (_) => const AuroraCommuterSetupScreen(),
+      builder: (_) => AuroraCommuterSetupScreen(
+        subscriptionType: widget.subscriptionType,
+      ),
     ));
     if (created == true) _load();
   }
@@ -79,7 +88,8 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
       backgroundColor: AuroraColors.obsidian,
       appBar: AppBar(
         backgroundColor: AuroraColors.coal,
-        title: Text(tr('commuter'), style: AuroraText.titleSmall),
+        title: Text(tr('subType_${widget.subscriptionType}'),
+            style: AuroraText.titleSmall),
         actions: [
           IconButton(
             icon: const Icon(Icons.add, color: AuroraColors.ember),

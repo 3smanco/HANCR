@@ -43,6 +43,10 @@ export class DriverEntity {
   @Column({ length: 1, nullable: true })
   gender?: string;
 
+  /** سائق معتمَد للنقل المدرسي (بعد فحص أمني/سجل عدلي) */
+  @Column({ default: false, name: 'kids_approved' })
+  kidsApproved!: boolean;
+
   /** حالة السائق — تُحدَّث في Redis للمطابقة الفورية */
   @Column({ type: 'enum', enum: DriverStatus, default: DriverStatus.Offline })
   status!: DriverStatus;
