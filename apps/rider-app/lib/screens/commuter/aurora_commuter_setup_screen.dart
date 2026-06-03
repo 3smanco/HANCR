@@ -10,7 +10,12 @@ import '../../core/widgets/aurora/aurora.dart';
 
 /// شاشة إنشاء اشتراك Commuter — تختار المنزل والعمل والتوقيتات والأيام.
 class AuroraCommuterSetupScreen extends StatefulWidget {
-  const AuroraCommuterSetupScreen({super.key});
+  /// 'commuter' (default) | 'school' | 'campus' | 'medical'
+  final String subscriptionType;
+  const AuroraCommuterSetupScreen({
+    super.key,
+    this.subscriptionType = 'commuter',
+  });
 
   @override
   State<AuroraCommuterSetupScreen> createState() =>
@@ -37,13 +42,29 @@ class _AuroraCommuterSetupScreenState
   String _plan = 'daily';
   int? _serviceId; // أول خدمة RideSharing
   bool _saving = false;
+
+  // الحقول الخاصة بالأنواع (School / Medical)
+  final _childNameCtrl = TextEditingController();
+  final _parentPhoneCtrl = TextEditingController();
+  final _medicalNotesCtrl = TextEditingController();
+  bool _wheelchair = false;
+  String _recurrence = 'daily'; // daily | weekly | biweekly | monthly
   bool _loadingPlaces = true;
   List<Map<String, dynamic>> _savedPlaces = [];
 
   @override
   void initState() {
     super.initState();
+    _recurrence = widget.subscriptionType == 'medical' ? 'weekly' : 'daily';
     _bootstrap();
+  }
+
+  @override
+  void dispose() {
+    _childNameCtrl.dispose();
+    _parentPhoneCtrl.dispose();
+    _medicalNotesCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _bootstrap() async {
@@ -199,6 +220,20 @@ class _AuroraCommuterSetupScreenState
             'serviceId': _serviceId,
             'regionId': AppConfig.defaultRegionId,
             'leadMinutes': 10,
+            'subscriptionType': widget.subscriptionType,
+            if (widget.subscriptionType == 'school' ||
+                widget.subscriptionType == 'campus') ...{
+              if (_childNameCtrl.text.trim().isNotEmpty)
+                'childName': _childNameCtrl.text.trim(),
+              if (_parentPhoneCtrl.text.trim().isNotEmpty)
+                'parentPhone': _parentPhoneCtrl.text.trim(),
+            },
+            if (widget.subscriptionType == 'medical') ...{
+              if (_medicalNotesCtrl.text.trim().isNotEmpty)
+                'medicalNotes': _medicalNotesCtrl.text.trim(),
+              'wheelchairNeeded': _wheelchair,
+              'recurrence': _recurrence,
+            },
           },
         },
       ));
@@ -248,6 +283,91 @@ class _AuroraCommuterSetupScreenState
                   () => _pickPlace(false),
                 ),
                 const SizedBox(height: AuroraSpacing.lg),
+
+                // حقول خاصة بنوع الاشتراك
+                if (widget.subscriptionType == 'school' ||
+                    widget.subscriptionType == 'campus') ...[
+                  Text(tr('childInfo'), style: AuroraText.titleSmall),
+                  const SizedBox(height: AuroraSpacing.sm),
+                  TextField(
+                    controller: _childNameCtrl,
+                    style: AuroraText.bodyMedium
+                        .copyWith(color: AuroraColors.pearl),
+                    decoration: InputDecoration(
+                      hintText: tr('childName'),
+                      filled: true,
+                      fillColor: AuroraColors.coal,
+                      border: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AuroraRadius.md),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AuroraSpacing.sm),
+                  TextField(
+                    controller: _parentPhoneCtrl,
+                    keyboardType: TextInputType.phone,
+                    style: AuroraText.bodyMedium
+                        .copyWith(color: AuroraColors.pearl),
+                    decoration: InputDecoration(
+                      hintText: tr('parentPhone'),
+                      filled: true,
+                      fillColor: AuroraColors.coal,
+                      border: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AuroraRadius.md),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AuroraSpacing.lg),
+                ],
+
+                if (widget.subscriptionType == 'medical') ...[
+                  Text(tr('medicalInfo'), style: AuroraText.titleSmall),
+                  const SizedBox(height: AuroraSpacing.sm),
+                  TextField(
+                    controller: _medicalNotesCtrl,
+                    maxLines: 3,
+                    style: AuroraText.bodyMedium
+                        .copyWith(color: AuroraColors.pearl),
+                    decoration: InputDecoration(
+                      hintText: tr('medicalNotesHint'),
+                      filled: true,
+                      fillColor: AuroraColors.coal,
+                      border: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AuroraRadius.md),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AuroraSpacing.sm),
+                  SwitchListTile(
+                    value: _wheelchair,
+                    onChanged: (v) => setState(() => _wheelchair = v),
+                    activeColor: AuroraColors.ember,
+                    title: Text(tr('wheelchairNeeded'),
+                        style: AuroraText.bodyMedium
+                            .copyWith(color: AuroraColors.pearl)),
+                  ),
+                  const SizedBox(height: AuroraSpacing.sm),
+                  Text(tr('recurrence'), style: AuroraText.bodySmall),
+                  const SizedBox(height: AuroraSpacing.xs),
+                  Wrap(
+                    spacing: 6,
+                    children: const ['daily', 'weekly', 'biweekly', 'monthly']
+                        .map((r) => ChoiceChip(
+                              label: Text(tr('recur_$r')),
+                              selected: _recurrence == r,
+                              onSelected: (_) =>
+                                  setState(() => _recurrence = r),
+                            ))
+                        .toList(),
+                  ),
+                  const SizedBox(height: AuroraSpacing.lg),
+                ],
 
                 Text(tr('legsAndTimes'), style: AuroraText.titleSmall),
                 const SizedBox(height: AuroraSpacing.sm),

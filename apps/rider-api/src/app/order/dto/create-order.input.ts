@@ -111,6 +111,11 @@ export class CreateOrderInput {
   @IsOptional()
   preferFemaleDriver?: boolean;
 
+  /** سائق مفضّل (VIP / اشتراك) — لو متاح وقريب يحجز له مباشرة */
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  preferredDriverId?: number;
+
   // ===== الدفع =====
 
   /** طريقة الدفع: Cash | SavedPaymentMethod | PaymentGateway | Wallet */

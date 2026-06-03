@@ -89,6 +89,8 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
                 'couponCode': event.couponCode,
               if (event.paymentMode != null) 'paymentMode': event.paymentMode,
               if (event.familyMode) 'familyMode': true,
+              if (event.preferredDriverId != null)
+                'preferredDriverId': event.preferredDriverId,
             },
           },
         ),

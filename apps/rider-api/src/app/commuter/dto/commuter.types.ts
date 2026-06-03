@@ -32,6 +32,16 @@ export class CommuterSubscriptionType {
   @Field(() => Int) regionId!: number;
   @Field(() => Int) leadMinutes!: number;
   @Field() createdAt!: Date;
+  /** commuter | school | campus | medical */
+  @Field() subscriptionType!: string;
+  @Field({ nullable: true }) childName?: string;
+  @Field({ nullable: true }) parentPhone?: string;
+  @Field({ nullable: true }) medicalNotes?: string;
+  @Field() wheelchairNeeded!: boolean;
+  /** daily | weekly | biweekly | monthly */
+  @Field() recurrence!: string;
+  @Field(() => Int, { nullable: true }) preferredDriverId?: number;
+  @Field() nightShift!: boolean;
 }
 
 @InputType()
@@ -97,6 +107,46 @@ export class CommuterSubscriptionInput {
   @Min(5)
   @Max(60)
   leadMinutes?: number;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsIn(['commuter', 'school', 'campus', 'medical'])
+  subscriptionType?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  childName?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  parentPhone?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  medicalNotes?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  wheelchairNeeded?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsIn(['daily', 'weekly', 'biweekly', 'monthly'])
+  recurrence?: string;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  preferredDriverId?: number;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  nightShift?: boolean;
 }
 
 @InputType()

@@ -7,6 +7,7 @@ import '../../core/i18n/app_localization.dart';
 import '../../core/models/order_model.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../commuter/aurora_commuter_screen.dart';
+import '../airport/aurora_airport_screen.dart';
 import 'home_extras.dart';
 
 /// AuroraHomeTab — شاشة الراكب الرئيسية بالـ Aurora design.
@@ -199,9 +200,13 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                   ),
                   const SizedBox(width: AuroraSpacing.sm),
                   AuroraIconTile(
-                    icon: Icons.electric_scooter,
-                    label: tr('bike'),
-                    onTap: () => AuroraToast.comingSoon(context, feature: tr('bike')),
+                    icon: Icons.flight,
+                    label: tr('airportPickup'),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const AuroraAirportScreen(),
+                      ),
+                    ),
                   ),
                   const SizedBox(width: AuroraSpacing.sm),
                   AuroraIconTile(
@@ -213,9 +218,14 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                   ),
                   const SizedBox(width: AuroraSpacing.sm),
                   AuroraIconTile(
-                    icon: Icons.car_rental,
-                    label: tr('rental'),
-                    onTap: () => AuroraToast.comingSoon(context, feature: tr('rental')),
+                    icon: Icons.school,
+                    label: tr('subType_school'),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const AuroraCommuterScreen(
+                            subscriptionType: 'school'),
+                      ),
+                    ),
                   ),
                 ],
               ),

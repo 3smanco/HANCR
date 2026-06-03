@@ -6,6 +6,9 @@ const String _commuterFields = r'''
   daysOfWeek planType active
   serviceId regionId leadMinutes
   createdAt
+  subscriptionType childName parentPhone
+  medicalNotes wheelchairNeeded recurrence
+  preferredDriverId nightShift
 ''';
 
 final String commuterSubscriptionsQuery = '''

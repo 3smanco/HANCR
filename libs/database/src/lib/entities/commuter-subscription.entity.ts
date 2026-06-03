@@ -57,6 +57,38 @@ export class CommuterSubscriptionEntity {
   @Column({ length: 10, default: 'daily', name: 'plan_type' })
   planType!: string;
 
+  /** نوع الاشتراك: commuter | school | campus | medical */
+  @Column({ length: 20, default: 'commuter', name: 'subscription_type' })
+  subscriptionType!: string;
+
+  /** اسم الطفل (للنقل المدرسي) */
+  @Column({ length: 100, nullable: true, name: 'child_name' })
+  childName?: string;
+
+  /** هاتف ولي الأمر الاحتياطي */
+  @Column({ length: 20, nullable: true, name: 'parent_phone' })
+  parentPhone?: string;
+
+  /** ملاحظات طبية (للنقل الطبي) */
+  @Column({ type: 'text', nullable: true, name: 'medical_notes' })
+  medicalNotes?: string;
+
+  /** يحتاج كرسي متحرك / مقعد فسيح */
+  @Column({ default: false, name: 'wheelchair_needed' })
+  wheelchairNeeded!: boolean;
+
+  /** تكرار التشغيل: daily | weekly | biweekly | monthly */
+  @Column({ length: 20, default: 'daily' })
+  recurrence!: string;
+
+  /** السائق المفضّل (VIP / اشتراك مع نفس السائق) */
+  @Column({ type: 'int', nullable: true, name: 'preferred_driver_id' })
+  preferredDriverId?: number;
+
+  /** وضع ليلي: سعر ثابت + مشاركة موقع للطوارئ */
+  @Column({ default: false, name: 'night_shift' })
+  nightShift!: boolean;
+
   /** مفعّل / موقوف مؤقتاً */
   @Column({ default: true })
   active!: boolean;

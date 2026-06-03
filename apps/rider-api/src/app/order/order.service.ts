@@ -184,6 +184,7 @@ export class OrderService {
         familyMode: input.familyMode ?? false,
         preferFemaleDriver:
           (input.preferFemaleDriver ?? false) || (input.familyMode ?? false),
+        preferredDriverId: input.preferredDriverId,
         // OTP — لتوصيل الأمانات: نولّد الكود عند الإنشاء ليعرضه الراكب للمستلم،
         // والسائق يُدخله عند التسليم لإثبات الاستلام (confirmDelivery)
         receiverPhone: input.receiverPhone,

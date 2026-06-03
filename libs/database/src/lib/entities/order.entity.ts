@@ -166,6 +166,10 @@ export class OrderEntity {
   @Column({ default: false, name: 'family_mode' })
   familyMode!: boolean;
 
+  /** سائق مفضّل (VIP / اشتراك) — لو متاح وقريب يحجز له مباشرة */
+  @Column({ type: 'int', nullable: true, name: 'preferred_driver_id' })
+  preferredDriverId?: number;
+
   /** تفضيل صريح لسائقة (يمكن استخدامه حتى بدون وضع العائلة) */
   @Column({ default: false, name: 'prefer_female_driver' })
   preferFemaleDriver!: boolean;
