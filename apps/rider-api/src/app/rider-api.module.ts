@@ -30,6 +30,8 @@ import {
   SavedPlaceEntity,
   CommuterSubscriptionEntity,
   FlightTrackingEntity,
+  CarpoolRequestEntity,
+  CarpoolMatchEntity,
 } from '@hancr/database';
 
 // Redis
@@ -63,6 +65,7 @@ import { ChatModule } from './chat/chat.module';
 import { SavedPlaceModule } from './saved-place/saved-place.module';
 import { CommuterModule } from './commuter/commuter.module';
 import { FlightModule } from './flight/flight.module';
+import { CarpoolModule } from './carpool/carpool.module';
 
 // PubSub
 import { pubSubProvider } from './pubsub.provider';
@@ -112,6 +115,8 @@ import { pubSubProvider } from './pubsub.provider';
           SavedPlaceEntity,
           CommuterSubscriptionEntity,
           FlightTrackingEntity,
+          CarpoolRequestEntity,
+          CarpoolMatchEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
@@ -171,6 +176,7 @@ import { pubSubProvider } from './pubsub.provider';
     SavedPlaceModule,
     CommuterModule,
     FlightModule,
+    CarpoolModule,
   ],
   providers: [pubSubProvider],
   exports: [pubSubProvider],

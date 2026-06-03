@@ -86,6 +86,10 @@ export class RiderEntity {
   @Column({ type: 'decimal', precision: 3, scale: 2, default: 5.0 })
   rating!: number;
 
+  /** الجنس — لتفعيل وضع women_only في Carpool والتفضيلات */
+  @Column({ length: 1, nullable: true })
+  gender?: string;
+
   /** عدد الرحلات المكتملة */
   @Column({ default: 0, name: 'total_rides' })
   totalRides!: number;
