@@ -75,6 +75,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   // التفضيلات
   bool _quietRide = false;
   bool _audioOff = false;
+  bool _familyMode = false;
   bool _bidMode = false;
   final TextEditingController _bidPriceCtrl = TextEditingController();
   bool _sendingBid = false;
@@ -426,6 +427,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           paymentMode: _paymentMode,
           stops: _stops.map((s) => s.point).toList(),
           stopAddresses: _stops.map((s) => s.label).toList(),
+          familyMode: _familyMode,
         ));
   }
 
@@ -935,6 +937,16 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                     () => setState(() => _audioOff = !_audioOff)),
               ),
             ],
+          ),
+
+          const SizedBox(height: AuroraSpacing.sm),
+
+          // وضع العائلة (يفضّل سائقة)
+          _prefChip(
+            Icons.family_restroom,
+            tr('familyMode'),
+            _familyMode,
+            () => setState(() => _familyMode = !_familyMode),
           ),
 
           const SizedBox(height: AuroraSpacing.sm),

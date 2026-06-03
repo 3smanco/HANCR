@@ -601,6 +601,7 @@ export class OrderService {
       requestedTemperature: order.requestedTemperature,
       audioOff: order.audioOff,
       numberMasked: order.numberMasked,
+      familyMode: order.familyMode,
       // ملاحظة أمنية: لا نُرسل otpCode للسائق في توصيل الأمانات —
       // المستلم يعرضه والسائق يُدخله عبر confirmDelivery لإثبات التسليم.
       otpCode: order.type === OrderType.ParcelDelivery ? undefined : order.otpCode,

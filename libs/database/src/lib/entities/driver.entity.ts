@@ -39,6 +39,10 @@ export class DriverEntity {
   @Column({ nullable: true, name: 'avatar_url' })
   avatarUrl?: string;
 
+  /** الجنس — يُستخدم لفلترة "وضع العائلة" / تفضيل السائقات */
+  @Column({ length: 1, nullable: true })
+  gender?: string;
+
   /** حالة السائق — تُحدَّث في Redis للمطابقة الفورية */
   @Column({ type: 'enum', enum: DriverStatus, default: DriverStatus.Offline })
   status!: DriverStatus;
