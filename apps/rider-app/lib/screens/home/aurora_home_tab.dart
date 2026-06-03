@@ -6,6 +6,7 @@ import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/models/order_model.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../commuter/aurora_commuter_screen.dart';
 import 'home_extras.dart';
 
 /// AuroraHomeTab — شاشة الراكب الرئيسية بالـ Aurora design.
@@ -245,10 +246,14 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                 const SizedBox(width: AuroraSpacing.md),
                 Expanded(
                   child: AuroraPromoCard(
-                    title: tr('electric'),
-                    subtitle: tr('electricSub'),
-                    icon: Icons.electric_car_outlined,
-                    onTap: () => context.push('/book'),
+                    title: tr('commuter'),
+                    subtitle: tr('commuterSub'),
+                    icon: Icons.commute,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const AuroraCommuterScreen(),
+                      ),
+                    ),
                     gradientColors: [
                       AuroraColors.info.withValues(alpha: 0.3),
                       AuroraColors.coal,

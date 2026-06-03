@@ -23,6 +23,7 @@ export { EmergencyContactEntity } from './lib/entities/emergency-contact.entity'
 export { SosIncidentEntity } from './lib/entities/sos-incident.entity';
 export { CouponEntity } from './lib/entities/coupon.entity';
 export { SavedPlaceEntity } from './lib/entities/saved-place.entity';
+export { CommuterSubscriptionEntity } from './lib/entities/commuter-subscription.entity';
 
 // Enums
 export { CouponType } from './lib/enums/coupon-type.enum';
