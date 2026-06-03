@@ -612,6 +612,8 @@ export class OrderService {
       startTimestamp: order.startTimestamp,
       finishTimestamp: order.finishTimestamp,
       createdOn: order.createdOn,
+      shoppingList: order.shoppingList,
+      budget: order.budget != null ? Number(order.budget) : undefined,
     };
   }
 }

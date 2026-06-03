@@ -49,4 +49,23 @@ export class DriverOrderType {
   @Field({ nullable: true }) startTimestamp?: Date;
   @Field({ nullable: true }) finishTimestamp?: Date;
   @Field() createdOn!: Date;
+
+  // ===== Grocery Run =====
+  @Field(() => [DriverShoppingItemType], { nullable: true })
+  shoppingList?: DriverShoppingItemType[];
+
+  @Field(() => Float, { nullable: true })
+  budget?: number;
+}
+
+@ObjectType()
+export class DriverShoppingItemType {
+  @Field()
+  name!: string;
+
+  @Field(() => Int)
+  qty!: number;
+
+  @Field({ nullable: true })
+  note?: string;
 }

@@ -196,6 +196,19 @@ export class OrderEntity {
   @Column({ nullable: true, name: 'receiver_name' })
   receiverName?: string;
 
+  /** ===== Grocery Run ===== */
+
+  /**
+   * قائمة المشتريات (JSONB) لطلبات Grocery Run.
+   * صيغة العنصر: { name: string, qty: number, note?: string }
+   */
+  @Column({ type: 'jsonb', nullable: true, name: 'shopping_list' })
+  shoppingList?: Array<{ name: string; qty: number; note?: string }>;
+
+  /** ميزانية حدّ أقصى للمشتريات (السائق لا يتجاوزها) */
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  budget?: number;
+
   /** ===== Bid Mode ===== */
 
   /** هل هذا الطلب عبر Bid Mode */

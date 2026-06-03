@@ -149,4 +149,41 @@ export class CreateOrderInput {
   @IsOptional()
   @IsString()
   couponCode?: string;
+
+  // ===== Grocery Run =====
+
+  /** قائمة المشتريات (Grocery Run) */
+  @Field(() => [ShoppingListItemInput], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ShoppingListItemInput)
+  @ArrayMaxSize(50)
+  shoppingList?: ShoppingListItemInput[];
+
+  /** ميزانية الشراء (الحد الأقصى) */
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  budget?: number;
+}
+
+@InputType()
+export class ShoppingListItemInput {
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @Field(() => Int)
+  @IsNumber()
+  @Min(1)
+  @Max(99)
+  qty!: number;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  note?: string;
 }
