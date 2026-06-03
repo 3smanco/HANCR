@@ -25,6 +25,8 @@ export { CouponEntity } from './lib/entities/coupon.entity';
 export { SavedPlaceEntity } from './lib/entities/saved-place.entity';
 export { CommuterSubscriptionEntity } from './lib/entities/commuter-subscription.entity';
 export { FlightTrackingEntity } from './lib/entities/flight-tracking.entity';
+export { CarpoolRequestEntity } from './lib/entities/carpool-request.entity';
+export { CarpoolMatchEntity } from './lib/entities/carpool-match.entity';
 
 // Enums
 export { CouponType } from './lib/enums/coupon-type.enum';

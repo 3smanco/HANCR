@@ -7,6 +7,7 @@ import '../rides/rides_tab.dart';
 import '../profile/aurora_profile_tab.dart';
 import '../commuter/aurora_commuter_screen.dart';
 import '../airport/aurora_airport_screen.dart';
+import '../carpool/aurora_carpool_screen.dart';
 
 /// AuroraMainScreen — Bottom navigation الجديد بنمط Aurora:
 /// Home / Services / [Center FAB] / Activity / Account
@@ -125,6 +126,10 @@ class _ServicesTab extends StatelessWidget {
                   icon: Icons.commute,
                   label: tr('subType_commuter'),
                   customRoute: 'commuter'),
+              _ServiceItem(
+                  icon: Icons.groups,
+                  label: tr('carpool'),
+                  customRoute: 'carpool'),
             ]),
 
             const SizedBox(height: AuroraSpacing.huge),
@@ -160,6 +165,10 @@ class _ServicesTab extends StatelessWidget {
             if (route == 'airport') {
               Navigator.of(ctx).push(MaterialPageRoute(
                 builder: (_) => const AuroraAirportScreen(),
+              ));
+            } else if (route == 'carpool') {
+              Navigator.of(ctx).push(MaterialPageRoute(
+                builder: (_) => const AuroraCarpoolScreen(),
               ));
             } else if (route == 'vip') {
               // VIP = حجز فوري بخدمة VIP مع إمكانية تفضيل سائق
