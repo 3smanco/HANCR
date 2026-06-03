@@ -132,4 +132,23 @@ export class OrderType {
 
   @Field()
   updatedAt!: Date;
+
+  // ===== Grocery Run =====
+  @Field(() => [ShoppingListItemType], { nullable: true })
+  shoppingList?: ShoppingListItemType[];
+
+  @Field(() => Float, { nullable: true })
+  budget?: number;
+}
+
+@ObjectType()
+export class ShoppingListItemType {
+  @Field()
+  name!: string;
+
+  @Field(() => Int)
+  qty!: number;
+
+  @Field({ nullable: true })
+  note?: string;
 }

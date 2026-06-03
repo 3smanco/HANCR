@@ -185,6 +185,9 @@ export class OrderService {
         preferFemaleDriver:
           (input.preferFemaleDriver ?? false) || (input.familyMode ?? false),
         preferredDriverId: input.preferredDriverId,
+        // Grocery Run
+        shoppingList: input.shoppingList,
+        budget: input.budget,
         // OTP — لتوصيل الأمانات: نولّد الكود عند الإنشاء ليعرضه الراكب للمستلم،
         // والسائق يُدخله عند التسليم لإثبات الاستلام (confirmDelivery)
         receiverPhone: input.receiverPhone,
@@ -805,6 +808,8 @@ export class OrderService {
       expectedTimestamp: order.expectedTimestamp,
       createdOn: order.createdOn,
       updatedAt: order.updatedAt,
+      shoppingList: order.shoppingList,
+      budget: order.budget != null ? Number(order.budget) : undefined,
     };
   }
 
