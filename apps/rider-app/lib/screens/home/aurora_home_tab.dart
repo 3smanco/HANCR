@@ -26,11 +26,40 @@ class AuroraHomeTab extends StatefulWidget {
 class _AuroraHomeTabState extends State<AuroraHomeTab> {
   int _tabIndex = 0;
   List<Map<String, dynamic>> _banners = [];
+  List<Map<String, dynamic>> _savedPlaces = [];
 
   @override
   void initState() {
     super.initState();
     _loadBanners();
+    _loadSavedPlaces();
+  }
+
+  Future<void> _loadSavedPlaces() async {
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(savedPlacesQuery),
+        fetchPolicy: FetchPolicy.networkOnly,
+      ));
+      final list = (res.data?['savedPlaces'] as List<dynamic>?) ?? [];
+      if (!mounted) return;
+      setState(() =>
+          _savedPlaces = list.map((e) => (e as Map<String, dynamic>)).toList());
+    } catch (_) {
+      // اختياري
+    }
+  }
+
+  IconData _placeIcon(String type) {
+    switch (type) {
+      case 'home':
+        return Icons.home_outlined;
+      case 'work':
+        return Icons.work_outline;
+      default:
+        return Icons.place_outlined;
+    }
   }
 
   Future<void> _loadBanners() async {
@@ -125,16 +154,31 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
 
             const SizedBox(height: AuroraSpacing.md),
 
-            // ─── Saved place shortcut ───
-            _savedPlaceRow(
-              icon: Icons.home_outlined,
-              title: tr('homePlace'),
-              subtitle: 'حي العليا، الرياض',
-              onTap: () => context.push('/book', extra: {
-                'destination': const GeoPoint(lat: 24.6911, lng: 46.6850),
-                'label': 'المنزل — حي العليا، الرياض',
-              }),
-            ),
+            // ─── Saved places shortcuts (dynamic) ───
+            if (_savedPlaces.isEmpty)
+              _savedPlaceRow(
+                icon: Icons.add_location_alt_outlined,
+                title: tr('addSavedPlace'),
+                subtitle: tr('savedPlacesHint'),
+                onTap: () => context.push('/book'),
+              )
+            else
+              ..._savedPlaces.map((p) => Padding(
+                    padding: const EdgeInsets.only(bottom: AuroraSpacing.sm),
+                    child: _savedPlaceRow(
+                      icon: _placeIcon(p['type'] as String? ?? 'other'),
+                      title: p['label'] as String? ?? '',
+                      subtitle: p['address'] as String? ?? '',
+                      onTap: () => context.push('/book', extra: {
+                        'destination': GeoPoint(
+                          lat: (p['lat'] as num).toDouble(),
+                          lng: (p['lng'] as num).toDouble(),
+                        ),
+                        'label': p['label'] as String? ?? '',
+                      }),
+                      onDelete: () => _deleteSavedPlace(p['id'] as int),
+                    ),
+                  )),
 
             const SizedBox(height: AuroraSpacing.xl),
 
@@ -414,6 +458,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    VoidCallback? onDelete,
   }) {
     return AuroraCard(
       padding: const EdgeInsets.symmetric(
@@ -438,13 +483,33 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
               children: [
                 Text(title, style: AuroraText.titleSmall),
                 const SizedBox(height: 2),
-                Text(subtitle, style: AuroraText.bodySmall),
+                Text(subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AuroraText.bodySmall),
               ],
             ),
           ),
+          if (onDelete != null)
+            IconButton(
+              icon: const Icon(Icons.delete_outline,
+                  color: AuroraColors.textSecondary, size: 20),
+              onPressed: onDelete,
+            ),
         ],
       ),
     );
+  }
+
+  Future<void> _deleteSavedPlace(int id) async {
+    try {
+      final client = await GraphQLClientManager.get();
+      await client.mutate(MutationOptions(
+        document: gql(deleteSavedPlaceMutation),
+        variables: {'id': id},
+      ));
+      _loadSavedPlaces();
+    } catch (_) {}
   }
 
   Widget _scheduleCta() {

@@ -73,6 +73,25 @@ const String routePreviewQuery = r'''
   }
 ''';
 
+// ─── Saved places (favorites) ───
+const String savedPlacesQuery = r'''
+  query SavedPlaces {
+    savedPlaces { id label address lat lng type }
+  }
+''';
+
+const String addSavedPlaceMutation = r'''
+  mutation AddSavedPlace($input: SavedPlaceInput!) {
+    addSavedPlace(input: $input) { id label address lat lng type }
+  }
+''';
+
+const String deleteSavedPlaceMutation = r'''
+  mutation DeleteSavedPlace($id: Int!) {
+    deleteSavedPlace(id: $id)
+  }
+''';
+
 // ─── App config (banners / SDUI) ───
 const String appConfigQuery = r'''
   query AppConfig {

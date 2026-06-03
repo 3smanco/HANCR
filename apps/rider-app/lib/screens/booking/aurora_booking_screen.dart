@@ -204,6 +204,85 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     }
   }
 
+  Future<void> _saveCurrentPlace() async {
+    final labelCtrl = TextEditingController();
+    String type = 'other';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        backgroundColor: AuroraColors.coal,
+        title: Text(tr('savePlace'), style: AuroraText.titleSmall),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: labelCtrl,
+              style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
+              decoration: _fieldDecoration(tr('placeLabel'), Icons.label_outline),
+            ),
+            const SizedBox(height: AuroraSpacing.sm),
+            StatefulBuilder(
+              builder: (_, setSt) => Row(
+                children: [
+                  for (final t in const ['home', 'work', 'other'])
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: ChoiceChip(
+                        label: Text(tr('place_$t')),
+                        selected: type == t,
+                        onSelected: (_) => setSt(() => type = t),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dctx, false),
+              child: Text(tr('cancel'))),
+          TextButton(
+              onPressed: () => Navigator.pop(dctx, true),
+              child: Text(tr('save'))),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final label = labelCtrl.text.trim().isEmpty
+        ? _destinationLabel
+        : labelCtrl.text.trim();
+    try {
+      final client = await GraphQLClientManager.get();
+      await client.mutate(MutationOptions(
+        document: gql(addSavedPlaceMutation),
+        variables: {
+          'input': {
+            'label': label,
+            'address': _destinationLabel,
+            'lat': _destination.lat,
+            'lng': _destination.lng,
+            'type': type,
+          },
+        },
+      ));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(tr('placeSaved')),
+            backgroundColor: AuroraColors.success,
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr('saveFailed'))),
+        );
+      }
+    }
+  }
+
   void _confirmDestination() {
     setState(() => _step = _BookingStep.pickService);
     if (_services.isEmpty) {
@@ -644,7 +723,20 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         children: [
           _routeRow(Icons.my_location, AuroraColors.success, _originLabel),
           const Divider(color: AuroraColors.border, height: AuroraSpacing.lg),
-          _routeRow(Icons.location_on, AuroraColors.ember, _destinationLabel),
+          Row(
+            children: [
+              Expanded(
+                child: _routeRow(
+                    Icons.location_on, AuroraColors.ember, _destinationLabel),
+              ),
+              IconButton(
+                icon: const Icon(Icons.bookmark_add_outlined,
+                    color: AuroraColors.ember),
+                tooltip: tr('savePlace'),
+                onPressed: _saveCurrentPlace,
+              ),
+            ],
+          ),
           const SizedBox(height: AuroraSpacing.lg),
           AuroraButton.primary(
             label: tr('confirmDestination'),
