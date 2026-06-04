@@ -34,6 +34,9 @@ dependencies:
   geolocator: ^13.0.2
   url_launcher: ^6.3.0
 
+  # Image upload (driver documents)
+  image_picker: ^1.1.2
+
   # UI
   google_fonts: ^6.2.1
   shimmer: ^3.0.0

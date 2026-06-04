@@ -13,6 +13,7 @@ import {
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 import {
   LIST_DRIVERS,
   APPROVE_DRIVER,
@@ -151,9 +152,12 @@ export default function DriversPage() {
                         {(fullName[0] ?? '?').toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <div className="font-bold text-gray-900 truncate">
+                        <Link
+                          href={`/users/drivers/${d.id as number}`}
+                          className="font-bold text-gray-900 truncate hover:text-hancr-violet"
+                        >
                           {fullName || '—'}
-                        </div>
+                        </Link>
                         <div className="flex items-center gap-1 mt-0.5">
                           {!(d.active as boolean) && (
                             <span className="badge badge-yellow">{t('common.pending')}</span>

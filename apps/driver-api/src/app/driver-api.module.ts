@@ -26,6 +26,7 @@ import {
   WalletTransactionEntity,
   EmergencyContactEntity,
   SosIncidentEntity,
+  DriverDocumentEntity,
 } from '@hancr/database';
 
 // Redis
@@ -70,6 +71,7 @@ import { pubSubProvider } from './pubsub.provider';
           BidOfferEntity, PoolEntity, PoolMemberEntity, AppConfigEntity,
           ConfigAuditLogEntity, RequestActivityEntity, OrderMessageEntity,
           WalletTransactionEntity, EmergencyContactEntity, SosIncidentEntity,
+          DriverDocumentEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',

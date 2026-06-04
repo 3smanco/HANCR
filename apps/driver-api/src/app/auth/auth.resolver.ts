@@ -40,6 +40,8 @@ function toDriverType(d: DriverEntity): DriverType {
     gender: d.gender,
     kidsApproved: d.kidsApproved ?? false,
     nightApproved: d.nightApproved ?? false,
+    approvalStatus: d.approvalStatus ?? 'pending_docs',
+    rejectionReason: d.rejectionReason,
   };
 }
 

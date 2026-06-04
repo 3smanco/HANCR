@@ -3,6 +3,10 @@ import { UseGuards } from '@nestjs/common';
 import { DriverService } from './driver.service';
 import { DriverType } from './dto/driver.type';
 import { UpdateDriverInput } from './dto/update-driver.input';
+import {
+  DriverDocumentType,
+  UploadDocumentInput,
+} from './dto/driver-document.type';
 import { JwtAuthGuard, CurrentDriver } from '../auth/jwt-auth.guard';
 import { AuthDriver } from '../auth/jwt.strategy';
 
@@ -40,5 +44,26 @@ export class DriverResolver {
   @UseGuards(JwtAuthGuard)
   clearDriverFcmToken(@CurrentDriver() driver: AuthDriver): Promise<boolean> {
     return this.driverService.clearFcmToken(driver.driverId);
+  }
+
+  // ─── I1 — Documents ──────────────────────────────────────────────────────
+
+  @Query(() => [DriverDocumentType], { description: 'وثائق السائق' })
+  @UseGuards(JwtAuthGuard)
+  myDocuments(
+    @CurrentDriver() driver: AuthDriver,
+  ): Promise<DriverDocumentType[]> {
+    return this.driverService.listDocuments(driver.driverId);
+  }
+
+  @Mutation(() => DriverDocumentType, {
+    description: 'رفع/استبدال وثيقة (تعود إلى pending)',
+  })
+  @UseGuards(JwtAuthGuard)
+  uploadDriverDocument(
+    @CurrentDriver() driver: AuthDriver,
+    @Args('input') input: UploadDocumentInput,
+  ): Promise<DriverDocumentType> {
+    return this.driverService.uploadDocument(driver.driverId, input);
   }
 }

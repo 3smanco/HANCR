@@ -51,6 +51,20 @@ export class DriverEntity {
   @Column({ default: false, name: 'night_approved' })
   nightApproved!: boolean;
 
+  /**
+   * I1 — حالة الاعتماد:
+   *   pending_docs    — لم يرفع وثائق بعد
+   *   docs_uploaded   — رفع الكل وينتظر مراجعة الإدارة
+   *   approved        — معتمد ويمكنه العمل
+   *   soft_reject     — رُفض مؤقّتاً، يستطيع تعديل الوثائق
+   *   hard_reject     — رُفض نهائياً، لا يمكنه التسجيل ثانية
+   */
+  @Column({ length: 30, default: 'pending_docs', name: 'approval_status' })
+  approvalStatus!: string;
+
+  @Column({ type: 'text', nullable: true, name: 'rejection_reason' })
+  rejectionReason?: string;
+
   /** حالة السائق — تُحدَّث في Redis للمطابقة الفورية */
   @Column({ type: 'enum', enum: DriverStatus, default: DriverStatus.Offline })
   status!: DriverStatus;

@@ -12,6 +12,7 @@ import '../../core/graphql/gql/driver_gql.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../sos/driver_emergency_contacts_screen.dart';
 import '../wallet/aurora_driver_wallet_screen.dart';
+import 'aurora_driver_documents_screen.dart';
 import 'language_screen.dart';
 
 void _soon(BuildContext c) => ScaffoldMessenger.of(c).showSnackBar(
@@ -112,10 +113,19 @@ class AuroraDriverProfileTab extends StatelessWidget {
                         const Divider(height: 1, color: AuroraColors.divider),
                         _menuItem(
                           icon: Icons.badge_outlined,
-                          label: tr('licenseData'),
-                          subtitle: tr('verified'),
-                          onTap: () => _soon(context),
-                          subtitleColor: AuroraColors.success,
+                          label: tr('myDocuments'),
+                          subtitle: state is DriverLoaded
+                              ? _approvalLabel(state.driver.approvalStatus)
+                              : '—',
+                          subtitleColor: state is DriverLoaded
+                              ? _approvalColor(state.driver.approvalStatus)
+                              : AuroraColors.textSecondary,
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const AuroraDriverDocumentsScreen(),
+                            ),
+                          ),
                         ),
                         const Divider(height: 1, color: AuroraColors.divider),
                         _menuItem(
@@ -409,6 +419,35 @@ class AuroraDriverProfileTab extends StatelessWidget {
         const Icon(Icons.verified, color: AuroraColors.success, size: 18),
       ],
     );
+  }
+
+  String _approvalLabel(String s) {
+    switch (s) {
+      case 'approved':
+        return tr('approval_approved');
+      case 'docs_uploaded':
+        return tr('approval_docs_uploaded');
+      case 'soft_reject':
+        return tr('approval_soft_reject');
+      case 'hard_reject':
+        return tr('approval_hard_reject');
+      default:
+        return tr('approval_pending_docs');
+    }
+  }
+
+  Color _approvalColor(String s) {
+    switch (s) {
+      case 'approved':
+        return AuroraColors.success;
+      case 'soft_reject':
+      case 'hard_reject':
+        return AuroraColors.danger;
+      case 'docs_uploaded':
+        return AuroraColors.info;
+      default:
+        return AuroraColors.warning;
+    }
   }
 
   Widget _circleBtn({required IconData icon, required VoidCallback onTap}) {

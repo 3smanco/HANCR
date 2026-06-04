@@ -24,6 +24,8 @@ class DriverModel {
   final String? gender;
   final bool kidsApproved;
   final bool nightApproved;
+  final String approvalStatus;
+  final String? rejectionReason;
 
   const DriverModel({
     required this.id,
@@ -50,6 +52,8 @@ class DriverModel {
     this.gender,
     this.kidsApproved = false,
     this.nightApproved = false,
+    this.approvalStatus = 'pending_docs',
+    this.rejectionReason,
   });
 
   factory DriverModel.fromJson(Map<String, dynamic> json) => DriverModel(
@@ -79,6 +83,9 @@ class DriverModel {
         gender: json['gender'] as String?,
         kidsApproved: json['kidsApproved'] as bool? ?? false,
         nightApproved: json['nightApproved'] as bool? ?? false,
+        approvalStatus:
+            json['approvalStatus'] as String? ?? 'pending_docs',
+        rejectionReason: json['rejectionReason'] as String?,
       );
 
   String get displayName {
@@ -132,5 +139,7 @@ class DriverModel {
         gender: gender ?? this.gender,
         kidsApproved: kidsApproved,
         nightApproved: nightApproved,
+        approvalStatus: approvalStatus,
+        rejectionReason: rejectionReason,
       );
 }

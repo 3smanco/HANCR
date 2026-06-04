@@ -60,6 +60,9 @@ export class AdminDriverType {
   @Field({ nullable: true }) gender?: string;
   @Field() kidsApproved!: boolean;
   @Field() nightApproved!: boolean;
+  /** I1 — multi-status approval */
+  @Field() approvalStatus!: string;
+  @Field({ nullable: true }) rejectionReason?: string;
 }
 
 @ObjectType()

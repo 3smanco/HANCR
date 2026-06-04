@@ -117,10 +117,53 @@ export const LIST_DRIVERS = gql`
         gender
         kidsApproved
         nightApproved
+        approvalStatus
+        rejectionReason
       }
       total
       page
       limit
+    }
+  }
+`;
+
+// ─── DRIVER DETAIL (Phase I1) ──────────────────────────────────────────────
+
+export const DRIVER_DETAIL = gql`
+  query AdminDriverDetail($id: Int!) {
+    adminDriverDetail(id: $id) {
+      id firstName lastName phoneNumber avatarUrl status
+      active banned rating ratingCount
+      carBrand carModel carColor plateNumber carYear
+      balance currency gender
+      kidsApproved nightApproved approvalStatus rejectionReason
+      createdAt
+      documents {
+        id type url expiresAt status rejectedReason
+        uploadedAt reviewedAt reviewedBy
+      }
+      recentOrders { id type status cost currency createdOn }
+      recentTransactions {
+        id type direction amount balanceAfter currency status
+        description createdAt
+      }
+      reviews { id orderId rating comment createdAt }
+    }
+  }
+`;
+
+export const SET_DRIVER_STATUS = gql`
+  mutation SetDriverStatus($input: SetDriverStatusInput!) {
+    setDriverStatus(input: $input) {
+      id approvalStatus rejectionReason active
+    }
+  }
+`;
+
+export const REVIEW_DRIVER_DOCUMENT = gql`
+  mutation ReviewDriverDocument($input: ReviewDocumentInput!) {
+    reviewDriverDocument(input: $input) {
+      id status rejectedReason reviewedAt
     }
   }
 `;
