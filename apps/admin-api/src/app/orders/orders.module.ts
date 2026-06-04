@@ -1,12 +1,33 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { OrderEntity } from '@hancr/database';
+import {
+  DriverEntity,
+  OrderEntity,
+  OrderMessageEntity,
+  RequestActivityEntity,
+} from '@hancr/database';
+import { HancrRedisModule } from '@hancr/redis';
 import { OrdersService } from './orders.service';
 import { OrdersResolver } from './orders.resolver';
+import { OrderDetailService } from './order-detail.service';
+import { OrderDetailResolver } from './order-detail.resolver';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([OrderEntity])],
-  providers: [OrdersService, OrdersResolver],
-  exports: [OrdersService],
+  imports: [
+    TypeOrmModule.forFeature([
+      OrderEntity,
+      RequestActivityEntity,
+      OrderMessageEntity,
+      DriverEntity,
+    ]),
+    HancrRedisModule,
+  ],
+  providers: [
+    OrdersService,
+    OrdersResolver,
+    OrderDetailService,
+    OrderDetailResolver,
+  ],
+  exports: [OrdersService, OrderDetailService],
 })
 export class OrdersModule {}
