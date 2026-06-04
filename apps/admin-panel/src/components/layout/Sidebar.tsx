@@ -20,6 +20,7 @@ import {
   Package,
   Building2,
   Wallet,
+  AlertOctagon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth';
@@ -38,6 +39,7 @@ export function Sidebar() {
     { key: 'nav.riders',        icon: Users,           href: '/users/riders' },
     { key: 'nav.orders',        icon: ShoppingBag,     href: '/orders' },
     { key: 'nav.sos',           icon: ShieldAlert,     href: '/sos' },
+    { key: 'nav.complaints',    icon: AlertOctagon,    href: '/complaints' },
     { key: 'nav.services',      icon: Settings,        href: '/services' },
     { key: 'nav.coupons',       icon: Ticket,          href: '/coupons' },
     { key: 'nav.bundles',       icon: Package,         href: '/bundles' },

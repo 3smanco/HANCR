@@ -260,6 +260,51 @@ export const ADJUST_WALLET = gql`
   }
 `;
 
+// ─── COMPLAINTS INBOX (Phase I9) ───────────────────────────────────────────
+
+export const LIST_COMPLAINTS = gql`
+  query AdminComplaints($page: Int!, $limit: Int!, $status: String) {
+    adminComplaints(page: $page, limit: $limit, status: $status) {
+      items {
+        id orderId reportedByType reportedById reporterName
+        category description status resolutionNote
+        createdAt resolvedAt
+      }
+      total page limit submittedCount underReviewCount
+    }
+  }
+`;
+
+export const COMPLAINT_DETAIL = gql`
+  query AdminComplaintDetail($id: Int!) {
+    adminComplaintDetail(id: $id) {
+      id orderId reportedByType reportedById reporterName
+      category description status resolutionNote
+      createdAt resolvedAt
+      activities {
+        id actorType actorId type note createdAt
+      }
+    }
+  }
+`;
+
+export const UPDATE_COMPLAINT_STATUS = gql`
+  mutation UpdateComplaintStatus($input: UpdateComplaintStatusInput!) {
+    updateComplaintStatus(input: $input) {
+      id status resolutionNote resolvedAt
+      activities { id actorType type note createdAt }
+    }
+  }
+`;
+
+export const ADD_COMPLAINT_NOTE = gql`
+  mutation AddComplaintNote($input: AddComplaintNoteInput!) {
+    addComplaintNote(input: $input) {
+      id activities { id actorType type note createdAt }
+    }
+  }
+`;
+
 export const SET_DRIVER_APPROVAL = gql`
   mutation SetDriverApproval(
     $driverId: Int!
