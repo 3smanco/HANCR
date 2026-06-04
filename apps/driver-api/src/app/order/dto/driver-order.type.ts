@@ -36,6 +36,20 @@ export class DriverOrderType {
   @Field() audioOff!: boolean;
   @Field() numberMasked!: boolean;
   @Field({ nullable: true }) familyMode?: boolean;
+  @Field({ nullable: true }) preferFemaleDriver?: boolean;
+
+  /** D3 — VIP (preferred driver) */
+  @Field(() => Int, { nullable: true }) preferredDriverId?: number;
+
+  /** F1 — Bundles / F2 — Corporate (prepaid) */
+  @Field(() => Int, { nullable: true }) entitlementId?: number;
+  @Field(() => Int, { nullable: true }) companyId?: number;
+
+  /** Hourly Chauffeur */
+  @Field(() => Int, { nullable: true }) bookedHours?: number;
+
+  /** G1 — Night Shift */
+  @Field({ nullable: true }) nightShift?: boolean;
 
   /** OTP */
   @Field({ nullable: true }) otpCode?: string;

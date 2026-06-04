@@ -62,6 +62,29 @@ String tr(String key) {
 
 // ════════════════════════════════════════════════════════════════
 const Map<String, Map<String, String>> _t = {
+  // ─── Phase H — Service tags (incoming order) ───
+  'tag_vip': {'ar': 'VIP', 'en': 'VIP', 'ur': 'VIP', 'hi': 'VIP', 'bn': 'VIP', 'fil': 'VIP', 'fr': 'VIP', 'tr': 'VIP'},
+  'tag_night': {'ar': 'وضع الليل', 'en': 'Night', 'ur': 'رات', 'hi': 'रात', 'bn': 'রাত', 'fil': 'Gabi', 'fr': 'Nuit', 'tr': 'Gece'},
+  'tag_family': {'ar': 'عائلة', 'en': 'Family', 'ur': 'فیملی', 'hi': 'परिवार', 'bn': 'পরিবার', 'fil': 'Pamilya', 'fr': 'Famille', 'tr': 'Aile'},
+  'tag_school': {'ar': 'مدرسة', 'en': 'School', 'ur': 'اسکول', 'hi': 'स्कूल', 'bn': 'স্কুল', 'fil': 'Paaralan', 'fr': 'École', 'tr': 'Okul'},
+  'tag_hourly': {'ar': 'بالساعة', 'en': 'Hourly', 'ur': 'گھنٹے میں', 'hi': 'घंटे से', 'bn': 'ঘণ্টা ভিত্তিক', 'fil': 'Per oras', 'fr': 'Horaire', 'tr': 'Saatlik'},
+  'tag_grocery': {'ar': 'بقالة', 'en': 'Grocery', 'ur': 'گروسری', 'hi': 'किराना', 'bn': 'মুদি', 'fil': 'Grocery', 'fr': 'Courses', 'tr': 'Market'},
+  'tag_paid_bundle': {'ar': 'مدفوع · حزمة', 'en': 'Paid · bundle', 'ur': 'ادا شدہ · پیکیج', 'hi': 'भुगतान · बंडल', 'bn': 'পরিশোধিত · বান্ডল', 'fil': 'Bayad · package', 'fr': 'Payé · forfait', 'tr': 'Ödenmiş · paket'},
+  'tag_paid_company': {'ar': 'مدفوع · شركة', 'en': 'Paid · company', 'ur': 'ادا شدہ · کمپنی', 'hi': 'भुगतान · कंपनी', 'bn': 'পরিশোধিত · কোম্পানি', 'fil': 'Bayad · kumpanya', 'fr': 'Payé · entreprise', 'tr': 'Ödenmiş · şirket'},
+  'view_shopping_list': {'ar': 'عرض قائمة المشتريات', 'en': 'View shopping list', 'ur': 'خریداری کی فہرست دیکھیں', 'hi': 'खरीदारी सूची देखें', 'bn': 'কেনাকাটার তালিকা দেখুন', 'fil': 'Tingnan ang listahan', 'fr': 'Voir la liste de courses', 'tr': 'Alışveriş listesini gör'},
+  'shopping_list_title': {'ar': 'قائمة المشتريات', 'en': 'Shopping list', 'ur': 'خریداری کی فہرست', 'hi': 'खरीदारी सूची', 'bn': 'কেনাকাটার তালিকা', 'fil': 'Listahan ng pamimili', 'fr': 'Liste de courses', 'tr': 'Alışveriş listesi'},
+  'shopping_budget_label': {'ar': 'الميزانية', 'en': 'Budget', 'ur': 'بجٹ', 'hi': 'बजट', 'bn': 'বাজেট', 'fil': 'Budget', 'fr': 'Budget', 'tr': 'Bütçe'},
+  'hourly_remaining': {'ar': 'متبقي من الحجز', 'en': 'Remaining from booking', 'ur': 'بکنگ سے باقی', 'hi': 'बुकिंग से बचा', 'bn': 'বুকিং থেকে অবশিষ্ট', 'fil': 'Natitira sa booking', 'fr': 'Restant de la réservation', 'tr': 'Rezervasyondan kalan'},
+  'prepaid_ride': {'ar': 'هذا الطلب مدفوع مسبقاً', 'en': 'This ride is prepaid', 'ur': 'یہ سواری پیشگی ادا شدہ ہے', 'hi': 'यह राइड पूर्व भुगतान', 'bn': 'এই রাইডটি পূর্ব-পরিশোধিত', 'fil': 'Naprepaid na ang sakay na ito', 'fr': 'Ce trajet est prépayé', 'tr': 'Bu yolculuk önceden ödendi'},
+
+  // ─── H3 — Driver profile (gender + approvals) ───
+  'gender_label': {'ar': 'الجنس', 'en': 'Gender', 'ur': 'جنس', 'hi': 'लिंग', 'bn': 'লিঙ্গ', 'fil': 'Kasarian', 'fr': 'Genre', 'tr': 'Cinsiyet'},
+  'gender_male': {'ar': 'ذكر', 'en': 'Male', 'ur': 'مرد', 'hi': 'पुरुष', 'bn': 'পুরুষ', 'fil': 'Lalaki', 'fr': 'Homme', 'tr': 'Erkek'},
+  'gender_female': {'ar': 'أنثى', 'en': 'Female', 'ur': 'عورت', 'hi': 'महिला', 'bn': 'মহিলা', 'fil': 'Babae', 'fr': 'Femme', 'tr': 'Kadın'},
+  'verified_kids': {'ar': 'معتمد لرحلات المدارس', 'en': 'Approved for school rides', 'ur': 'اسکول سواریوں کے لیے منظور', 'hi': 'स्कूल राइड के लिए स्वीकृत', 'bn': 'স্কুল রাইডের জন্য অনুমোদিত', 'fil': 'Aprubado para sa school rides', 'fr': 'Approuvé pour trajets scolaires', 'tr': 'Okul yolculukları için onaylı'},
+  'verified_night': {'ar': 'معتمد للعمل الليلي', 'en': 'Approved for night shifts', 'ur': 'رات کی شفٹ کے لیے منظور', 'hi': 'नाइट शिफ्ट के लिए स्वीकृत', 'bn': 'রাতের শিফটের জন্য অনুমোদিত', 'fil': 'Aprubado para sa night shift', 'fr': 'Approuvé pour les nuits', 'tr': 'Gece vardiyaları için onaylı'},
+  'saved': {'ar': 'تم الحفظ', 'en': 'Saved', 'ur': 'محفوظ ہو گیا', 'hi': 'सहेजा गया', 'bn': 'সংরক্ষিত', 'fil': 'Na-save', 'fr': 'Enregistré', 'tr': 'Kaydedildi'},
+
   // ─── Common ───
   'confirm': {'ar': 'تأكيد', 'en': 'Confirm', 'ur': 'تصدیق کریں', 'hi': 'पुष्टि करें', 'bn': 'নিশ্চিত করুন', 'fil': 'Kumpirmahin', 'fr': 'Confirmer', 'tr': 'Onayla'},
   'cancel': {'ar': 'إلغاء', 'en': 'Cancel', 'ur': 'منسوخ', 'hi': 'रद्द करें', 'bn': 'বাতিল', 'fil': 'Kanselahin', 'fr': 'Annuler', 'tr': 'İptal'},

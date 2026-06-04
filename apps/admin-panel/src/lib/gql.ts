@@ -114,10 +114,31 @@ export const LIST_DRIVERS = gql`
         carColor
         plateNumber
         createdAt
+        gender
+        kidsApproved
+        nightApproved
       }
       total
       page
       limit
+    }
+  }
+`;
+
+export const SET_DRIVER_APPROVAL = gql`
+  mutation SetDriverApproval(
+    $driverId: Int!
+    $kidsApproved: Boolean
+    $nightApproved: Boolean
+  ) {
+    setDriverApproval(
+      driverId: $driverId
+      kidsApproved: $kidsApproved
+      nightApproved: $nightApproved
+    ) {
+      id
+      kidsApproved
+      nightApproved
     }
   }
 `;

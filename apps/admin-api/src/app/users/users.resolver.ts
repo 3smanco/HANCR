@@ -92,4 +92,20 @@ export class UsersResolver {
   ): Promise<AdminDriverType> {
     return this.usersService.unbanDriver(id);
   }
+
+  /** H3 — اعتماد السائق للنقل المدرسي و/أو العمل الليلي */
+  @Mutation(() => AdminDriverType, {
+    description: 'تعيين اعتمادات السائق (مدارس / ليلي)',
+  })
+  @UseGuards(AdminJwtGuard)
+  setDriverApproval(
+    @Args('driverId', { type: () => Int }) driverId: number,
+    @Args('kidsApproved', { nullable: true }) kidsApproved?: boolean,
+    @Args('nightApproved', { nullable: true }) nightApproved?: boolean,
+  ): Promise<AdminDriverType> {
+    return this.usersService.setApprovals(driverId, {
+      kidsApproved,
+      nightApproved,
+    });
+  }
 }

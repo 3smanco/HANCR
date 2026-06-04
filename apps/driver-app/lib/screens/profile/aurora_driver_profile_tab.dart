@@ -1,10 +1,14 @@
 import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/driver/driver_bloc.dart';
+import '../../blocs/driver/driver_event.dart';
 import '../../blocs/driver/driver_state.dart';
+import '../../core/graphql/graphql_client.dart';
+import '../../core/graphql/gql/driver_gql.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../sos/driver_emergency_contacts_screen.dart';
 import '../wallet/aurora_driver_wallet_screen.dart';
@@ -85,6 +89,11 @@ class AuroraDriverProfileTab extends StatelessWidget {
                       )),
                     ],
                   ),
+
+                  const SizedBox(height: AuroraSpacing.lg),
+
+                  // H3 — Driver flags (gender + verified badges)
+                  if (state is DriverLoaded) _flagsSection(context, state),
 
                   const SizedBox(height: AuroraSpacing.lg),
 
@@ -283,6 +292,122 @@ class AuroraDriverProfileTab extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _flagsSection(BuildContext context, DriverLoaded state) {
+    final gender = state.driver.gender;
+    return AuroraCard(
+      padding: const EdgeInsets.all(AuroraSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Gender selector
+          Text(tr('gender_label'), style: AuroraText.titleSmall),
+          const SizedBox(height: AuroraSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: _genderChip(context, 'M',
+                    tr('gender_male'), Icons.male, gender == 'M'),
+              ),
+              const SizedBox(width: AuroraSpacing.sm),
+              Expanded(
+                child: _genderChip(context, 'F',
+                    tr('gender_female'), Icons.female, gender == 'F'),
+              ),
+            ],
+          ),
+
+          // Verified badges
+          if (state.driver.kidsApproved || state.driver.nightApproved) ...[
+            const SizedBox(height: AuroraSpacing.md),
+            const Divider(height: 1, color: AuroraColors.divider),
+            const SizedBox(height: AuroraSpacing.md),
+            if (state.driver.kidsApproved)
+              _verifiedBadge(Icons.school, tr('verified_kids')),
+            if (state.driver.kidsApproved && state.driver.nightApproved)
+              const SizedBox(height: AuroraSpacing.xs),
+            if (state.driver.nightApproved)
+              _verifiedBadge(
+                  Icons.nightlight_round, tr('verified_night')),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _genderChip(BuildContext ctx, String value, String label,
+      IconData icon, bool selected) {
+    return InkWell(
+      onTap: () => _saveGender(ctx, value),
+      borderRadius: BorderRadius.circular(AuroraRadius.md),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: selected ? AuroraColors.ember.withValues(alpha: 0.12) : AuroraColors.ash,
+          borderRadius: BorderRadius.circular(AuroraRadius.md),
+          border: Border.all(
+              color: selected ? AuroraColors.ember : AuroraColors.border),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon,
+                size: 18,
+                color: selected ? AuroraColors.ember : AuroraColors.pearl),
+            const SizedBox(width: 6),
+            Text(label,
+                style: AuroraText.bodyMedium.copyWith(
+                  color: selected ? AuroraColors.ember : AuroraColors.pearl,
+                  fontWeight: FontWeight.w700,
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _saveGender(BuildContext ctx, String value) async {
+    try {
+      final client = await GraphQLClientManager.get();
+      await client.mutate(MutationOptions(
+        document: gql(updateDriverProfileMutation),
+        variables: {
+          'input': {'gender': value},
+        },
+      ));
+      if (!ctx.mounted) return;
+      ctx.read<DriverBloc>().add(const DriverLoadRequested());
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text(tr('saved')), backgroundColor: AuroraColors.success),
+      );
+    } catch (e) {
+      if (!ctx.mounted) return;
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+
+  Widget _verifiedBadge(IconData icon, String label) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: AuroraColors.successBg,
+            borderRadius: BorderRadius.circular(AuroraRadius.sm),
+          ),
+          child:
+              Icon(icon, size: 14, color: AuroraColors.success),
+        ),
+        const SizedBox(width: AuroraSpacing.sm),
+        Expanded(
+          child: Text(label, style: AuroraText.bodyMedium),
+        ),
+        const Icon(Icons.verified, color: AuroraColors.success, size: 18),
+      ],
     );
   }
 

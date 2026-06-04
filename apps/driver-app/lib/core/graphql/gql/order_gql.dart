@@ -27,6 +27,15 @@ const String _orderFragment = r'''
     startTimestamp
     finishTimestamp
     createdOn
+    familyMode
+    preferFemaleDriver
+    preferredDriverId
+    entitlementId
+    companyId
+    bookedHours
+    nightShift
+    shoppingList { name qty note }
+    budget
   }
 ''';
 

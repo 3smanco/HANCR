@@ -22,6 +22,9 @@ const String driverMeQuery = r'''
       currency
       regionId
       createdAt
+      gender
+      kidsApproved
+      nightApproved
     }
   }
 ''';
@@ -38,6 +41,9 @@ const String updateDriverProfileMutation = r'''
       carColor
       plateNumber
       carYear
+      gender
+      kidsApproved
+      nightApproved
     }
   }
 ''';

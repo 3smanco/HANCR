@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../blocs/order/order_bloc.dart';
 import '../../../blocs/order/order_event.dart';
+import '../../../blocs/auth/auth_bloc.dart';
+import '../../../blocs/auth/auth_state.dart';
 import '../../../blocs/order/order_state.dart';
+import '../../../core/i18n/app_localization.dart';
 import '../../../core/models/order_model.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -108,6 +111,9 @@ class _IncomingOrderSheetState extends State<IncomingOrderSheet> {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 16),
+
+            // Phase H — service tags (VIP / Night / Family / Hourly / Grocery / Prepaid)
+            _ServiceTagsRow(order: widget.order),
 
             // Trip info
             _TripRow(
@@ -306,6 +312,122 @@ class _InfoChip extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// صفّ شارات الخدمات الخاصة (VIP/Night/Family/Hourly/Grocery/Prepaid)
+/// — يظهر فقط عند توفّر إشارة واحدة على الأقل.
+class _ServiceTagsRow extends StatelessWidget {
+  final DriverOrderModel order;
+  const _ServiceTagsRow({required this.order});
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.read<AuthBloc>().state;
+    final currentDriverId =
+        auth is AuthAuthenticated ? auth.driverId : null;
+
+    final tags = <_ServiceTag>[];
+
+    if (order.preferredDriverId != null &&
+        order.preferredDriverId == currentDriverId) {
+      tags.add(_ServiceTag(
+        icon: Icons.workspace_premium,
+        label: tr('tag_vip'),
+        color: const Color(0xFFFFB547), // gold
+      ));
+    }
+    if (order.nightShift) {
+      tags.add(_ServiceTag(
+        icon: Icons.nightlight_round,
+        label: tr('tag_night'),
+        color: const Color(0xFF6366F1), // indigo
+      ));
+    }
+    if (order.familyMode || order.preferFemaleDriver) {
+      tags.add(_ServiceTag(
+        icon: Icons.family_restroom,
+        label: tr('tag_family'),
+        color: const Color(0xFFEC4899), // pink
+      ));
+    }
+    if (order.isHourly) {
+      tags.add(_ServiceTag(
+        icon: Icons.av_timer,
+        label: '${tr('tag_hourly')} · ${order.bookedHours}h',
+        color: HancrColors.primary,
+      ));
+    }
+    if (order.isGrocery) {
+      tags.add(_ServiceTag(
+        icon: Icons.shopping_basket,
+        label:
+            '${tr('tag_grocery')} · ${order.budget?.toStringAsFixed(0) ?? '—'} ${order.currency}',
+        color: const Color(0xFF10B981), // green
+      ));
+    }
+    if (order.entitlementId != null) {
+      tags.add(_ServiceTag(
+        icon: Icons.confirmation_number_outlined,
+        label: tr('tag_paid_bundle'),
+        color: const Color(0xFF8B5CF6), // violet
+      ));
+    }
+    if (order.companyId != null) {
+      tags.add(_ServiceTag(
+        icon: Icons.business_outlined,
+        label: tr('tag_paid_company'),
+        color: HancrColors.textSecondary,
+      ));
+    }
+
+    if (tags.isEmpty) return const SizedBox(height: 4);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12, top: 4),
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        alignment: WrapAlignment.center,
+        children: tags,
+      ),
+    );
+  }
+}
+
+class _ServiceTag extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  const _ServiceTag({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
+          Text(label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: color,
+              )),
         ],
       ),
     );

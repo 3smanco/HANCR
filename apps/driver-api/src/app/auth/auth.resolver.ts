@@ -37,6 +37,9 @@ function toDriverType(d: DriverEntity): DriverType {
     fcmToken: d.fcmToken,
     regionId: d.regionId,
     createdAt: d.createdAt,
+    gender: d.gender,
+    kidsApproved: d.kidsApproved ?? false,
+    nightApproved: d.nightApproved ?? false,
   };
 }
 

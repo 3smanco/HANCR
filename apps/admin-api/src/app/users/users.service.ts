@@ -109,6 +109,23 @@ export class UsersService {
     return this.toDriverType(saved);
   }
 
+  /** H3 — set school/night approvals (either or both) */
+  async setApprovals(
+    id: number,
+    input: { kidsApproved?: boolean; nightApproved?: boolean },
+  ): Promise<AdminDriverType> {
+    const driver = await this.driverRepo.findOne({ where: { id } });
+    if (!driver) throw new NotFoundException(`Driver #${id} not found`);
+    if (input.kidsApproved !== undefined) {
+      driver.kidsApproved = input.kidsApproved;
+    }
+    if (input.nightApproved !== undefined) {
+      driver.nightApproved = input.nightApproved;
+    }
+    const saved = await this.driverRepo.save(driver);
+    return this.toDriverType(saved);
+  }
+
   // ─── Mappers ───────────────────────────────────────────────────────────────
 
   private toRiderType(e: RiderEntity): AdminRiderType {
@@ -157,6 +174,9 @@ export class UsersService {
     t.regionId = e.regionId;
     t.createdAt = e.createdAt;
     t.updatedAt = e.updatedAt;
+    t.gender = e.gender;
+    t.kidsApproved = e.kidsApproved ?? false;
+    t.nightApproved = e.nightApproved ?? false;
     return t;
   }
 }

@@ -163,6 +163,7 @@ const ar = {
       rating: 'التقييم',
       ratingCount: 'عدد التقييمات',
       joinedAt: 'تاريخ الانضمام',
+      approvals: 'الاعتمادات',
       actions: 'الإجراءات',
     },
     status: {
@@ -177,6 +178,10 @@ const ar = {
       ban: 'حظر',
       pendingApprovalOnly: 'بانتظار الموافقة فقط',
     },
+    approvals: {
+      kids: 'نقل مدرسي',
+      night: 'عمل ليلي',
+    },
     banModal: {
       title: 'حظر السائق',
       reason: 'سبب الحظر',
@@ -188,6 +193,7 @@ const ar = {
       approved: 'تم اعتماد السائق ✓',
       banned: 'تم حظر السائق',
       unbanned: 'تم إلغاء حظر السائق',
+      approvalUpdated: 'تم تحديث اعتمادات السائق',
     },
     empty: 'لا يوجد سائقون',
   },
@@ -526,6 +532,7 @@ const en: typeof ar = {
       rating: 'Rating',
       ratingCount: 'Reviews',
       joinedAt: 'Joined',
+      approvals: 'Approvals',
       actions: 'Actions',
     },
     status: {
@@ -540,6 +547,10 @@ const en: typeof ar = {
       ban: 'Ban',
       pendingApprovalOnly: 'Pending approval only',
     },
+    approvals: {
+      kids: 'School ride',
+      night: 'Night shift',
+    },
     banModal: {
       title: 'Ban Driver',
       reason: 'Ban reason',
@@ -551,6 +562,7 @@ const en: typeof ar = {
       approved: 'Driver approved ✓',
       banned: 'Driver banned',
       unbanned: 'Driver unbanned',
+      approvalUpdated: 'Driver approvals updated',
     },
     empty: 'No drivers found',
   },
