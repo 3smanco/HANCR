@@ -11,6 +11,21 @@ export interface MatchResult {
 }
 
 /**
+ * فلاتر اختيارية للمطابقة — تُطبَّق بعد جلب السائقين القريبين.
+ * كل قيمة undefined تعني "لا تطبّق هذا الفلتر".
+ */
+export interface MatchingFilters {
+  /** يتطلّب gender='F' (وضع العائلة أو preferFemaleDriver) */
+  requireFemale?: boolean;
+  /** يتطلّب kidsApproved=true (School/Campus subscription) */
+  requireKidsApproved?: boolean;
+  /** يتطلّب nightApproved=true (Night Shift) */
+  requireNightApproved?: boolean;
+  /** VIP soft-target: ادعم سائقاً معيناً فقط (الباقي يُستبعد) */
+  onlyDriverId?: number;
+}
+
+/**
  * MatchingService — محرك المطابقة بين الراكب والسائقين القريبين
  * يعتمد على Redis GEO لإيجاد أقرب السائقين في ثوانٍ
  */
@@ -37,6 +52,7 @@ export class MatchingService {
     lng: number,
     serviceId: number,
     radiusKm = 5,
+    filters?: MatchingFilters,
   ): Promise<MatchResult[]> {
     // تحويل إلى أمتار كما تتوقعه DriverRedisService
     const radiusMeters = radiusKm * 1000;
@@ -65,6 +81,13 @@ export class MatchingService {
     for (const nearbyDriver of nearby) {
       const driver = driverMap.get(nearbyDriver.driverId);
       if (!driver || !driver.active || driver.banned) continue;
+
+      // فلاتر Phase H — تُطبَّق فقط إن تم تمريرها
+      if (filters?.onlyDriverId !== undefined &&
+          driver.id !== filters.onlyDriverId) continue;
+      if (filters?.requireFemale && driver.gender !== 'F') continue;
+      if (filters?.requireKidsApproved && !driver.kidsApproved) continue;
+      if (filters?.requireNightApproved && !driver.nightApproved) continue;
 
       // حساب الوقت المتوقع للوصول (ETA) — تقدير: 1.5 دقيقة لكل كيلومتر
       const distanceKm = nearbyDriver.distanceMeters / 1000;

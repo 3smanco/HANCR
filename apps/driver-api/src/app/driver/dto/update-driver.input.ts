@@ -1,5 +1,5 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { IsOptional, IsString, IsNumber, MaxLength, Min, Max } from 'class-validator';
+import { IsIn, IsOptional, IsString, IsNumber, MaxLength, Min, Max } from 'class-validator';
 
 @InputType()
 export class UpdateDriverInput {
@@ -14,4 +14,11 @@ export class UpdateDriverInput {
   @Field({ nullable: true }) @IsOptional() avatarUrl?: string;
   @Field({ nullable: true }) @IsOptional() fcmToken?: string;
   @Field(() => [Int], { nullable: true }) @IsOptional() serviceIds?: number[];
+
+  /** H3 — الجنس "M" / "F" — يفعّل تصفية وضع العائلة وتفضيل سائقة */
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @IsIn(['M', 'F'])
+  gender?: string;
 }

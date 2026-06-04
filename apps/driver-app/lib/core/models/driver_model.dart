@@ -20,6 +20,10 @@ class DriverModel {
   final String currency;
   final int? regionId;
   final DateTime createdAt;
+  // Phase H — driver flags
+  final String? gender;
+  final bool kidsApproved;
+  final bool nightApproved;
 
   const DriverModel({
     required this.id,
@@ -43,6 +47,9 @@ class DriverModel {
     required this.currency,
     this.regionId,
     required this.createdAt,
+    this.gender,
+    this.kidsApproved = false,
+    this.nightApproved = false,
   });
 
   factory DriverModel.fromJson(Map<String, dynamic> json) => DriverModel(
@@ -69,6 +76,9 @@ class DriverModel {
         createdAt: json['createdAt'] != null
             ? DateTime.parse(json['createdAt'] as String)
             : DateTime.now(),
+        gender: json['gender'] as String?,
+        kidsApproved: json['kidsApproved'] as bool? ?? false,
+        nightApproved: json['nightApproved'] as bool? ?? false,
       );
 
   String get displayName {
@@ -95,6 +105,7 @@ class DriverModel {
     String? plateNumber,
     int? carYear,
     bool? active,
+    String? gender,
   }) =>
       DriverModel(
         id: id,
@@ -118,5 +129,8 @@ class DriverModel {
         currency: currency,
         regionId: regionId,
         createdAt: createdAt,
+        gender: gender ?? this.gender,
+        kidsApproved: kidsApproved,
+        nightApproved: nightApproved,
       );
 }

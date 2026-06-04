@@ -7,7 +7,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, LessThanOrEqual } from 'typeorm';
+import { Repository, DataSource, LessThanOrEqual, LessThan, Not, IsNull } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import {
@@ -360,10 +360,24 @@ export class OrderService {
       // ============================================================
       // Matching Engine — البحث عن السائقين القريبين
       // ============================================================
+      // Phase H — فلترة حسب خصائص الطلب:
+      //   - nightShift → سائق night_approved
+      //   - familyMode/preferFemale → سائقة (gender='F')
+      //   - preferredDriverId (VIP) → استهداف ناعم: 60s حصرياً للسائق المفضّل
+      const filters: import('./matching.service').MatchingFilters = {
+        requireFemale:
+          (input.familyMode ?? false) || (input.preferFemaleDriver ?? false),
+        requireNightApproved: input.nightShift ?? false,
+      };
+      if (input.preferredDriverId) {
+        filters.onlyDriverId = input.preferredDriverId;
+      }
       const matches = await this.matchingService.findNearbyDrivers(
         originPoint.lat,
         originPoint.lng,
         input.serviceId,
+        5,
+        filters,
       );
 
       let finalOrder: OrderEntity;
@@ -982,6 +996,13 @@ export class OrderService {
       origin.lat,
       origin.lng,
       order.serviceId,
+      5,
+      {
+        requireFemale:
+          (order.familyMode ?? false) || (order.preferFemaleDriver ?? false),
+        requireNightApproved: order.nightShift ?? false,
+        onlyDriverId: order.preferredDriverId,
+      },
     );
 
     if (matches.length > 0) {
@@ -1037,6 +1058,61 @@ export class OrderService {
         } as OrderEntity),
       });
       this.logger.warn(`Scheduled order #${order.id} activated → NotFound`);
+    }
+  }
+
+  // =============================================
+  // H4 — كرون VIP: توسيع طلبات VIP غير المقبولة بعد 60 ثانية
+  // =============================================
+  /**
+   * VIP soft-target — لو السائق المفضّل لم يقبل خلال 60 ثانية،
+   * نُعيد المطابقة بدون فلتر onlyDriverId (لجميع السائقين القريبين).
+   * يعمل كل دقيقة (الثانية 45 لتجنّب التصادم مع كرون الحجوزات).
+   */
+  @Cron('45 * * * * *')
+  async expandUnacceptedVipOrders(): Promise<void> {
+    const cutoff = new Date(Date.now() - 60_000);
+    const candidates = await this.orderRepo.find({
+      where: {
+        status: OrderStatus.Found,
+        preferredDriverId: Not(IsNull()),
+        createdOn: LessThan(cutoff),
+      },
+      take: 10,
+    });
+    for (const order of candidates) {
+      try {
+        const origin = order.points?.[0];
+        if (!origin) continue;
+        // إعادة المطابقة بدون onlyDriverId (نُلغي قيد VIP)
+        const matches = await this.matchingService.findNearbyDrivers(
+          origin.lat,
+          origin.lng,
+          order.serviceId,
+          5,
+          {
+            requireFemale:
+              (order.familyMode ?? false) ||
+              (order.preferFemaleDriver ?? false),
+            requireNightApproved: order.nightShift ?? false,
+            // ملاحظة: لا نُمرّر onlyDriverId — هذا هو التوسيع
+          },
+        );
+        if (matches.length === 0) continue;
+        // إعادة بثّ subscription للسائقين الجدد
+        await this.pubSub.publish(NEW_ORDER_AVAILABLE, {
+          newOrderAvailable: this.toGqlType(order),
+        });
+        // نُعلِّم الطلب كي لا يُعاد توسيعه (نمسح preferredDriverId)
+        await this.orderRepo.update(order.id, { preferredDriverId: undefined });
+        this.logger.log(
+          `VIP order #${order.id} expanded to ${matches.length} drivers after 60s timeout`,
+        );
+      } catch (e) {
+        this.logger.warn(
+          `Failed to expand VIP order #${order.id}: ${(e as Error).message}`,
+        );
+      }
     }
   }
 }

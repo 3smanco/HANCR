@@ -47,6 +47,7 @@ export class DriverService {
       ...(input.avatarUrl && { avatarUrl: input.avatarUrl }),
       ...(input.fcmToken && { fcmToken: input.fcmToken }),
       ...(input.serviceIds && { serviceIds: input.serviceIds }),
+      ...(input.gender && { gender: input.gender }),
     });
     return this.getMe(driverId);
   }
@@ -75,6 +76,9 @@ export class DriverService {
       fcmToken: d.fcmToken,
       regionId: d.regionId,
       createdAt: d.createdAt,
+      gender: d.gender,
+      kidsApproved: d.kidsApproved ?? false,
+      nightApproved: d.nightApproved ?? false,
     };
   }
 }

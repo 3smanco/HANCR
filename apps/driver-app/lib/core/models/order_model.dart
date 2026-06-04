@@ -9,6 +9,20 @@ class GeoPoint {
       );
 }
 
+/// عنصر في قائمة المشتريات (Grocery Run)
+class ShoppingItem {
+  final String name;
+  final int qty;
+  final String? note;
+  const ShoppingItem({required this.name, required this.qty, this.note});
+
+  factory ShoppingItem.fromJson(Map<String, dynamic> json) => ShoppingItem(
+        name: json['name'] as String? ?? '',
+        qty: json['qty'] as int? ?? 1,
+        note: json['note'] as String?,
+      );
+}
+
 enum OrderStatus {
   requested,
   notFound,
@@ -102,6 +116,17 @@ class DriverOrderModel {
   final DateTime? finishTimestamp;
   final DateTime createdOn;
 
+  // Phase H — driver-side awareness of new services
+  final bool familyMode;
+  final bool preferFemaleDriver;
+  final int? preferredDriverId;
+  final int? entitlementId;
+  final int? companyId;
+  final int? bookedHours;
+  final bool nightShift;
+  final List<ShoppingItem>? shoppingList;
+  final double? budget;
+
   const DriverOrderModel({
     required this.id,
     required this.type,
@@ -130,6 +155,15 @@ class DriverOrderModel {
     this.startTimestamp,
     this.finishTimestamp,
     required this.createdOn,
+    this.familyMode = false,
+    this.preferFemaleDriver = false,
+    this.preferredDriverId,
+    this.entitlementId,
+    this.companyId,
+    this.bookedHours,
+    this.nightShift = false,
+    this.shoppingList,
+    this.budget,
   });
 
   factory DriverOrderModel.fromJson(Map<String, dynamic> json) {
@@ -174,6 +208,17 @@ class DriverOrderModel {
       createdOn: json['createdOn'] != null
           ? DateTime.parse(json['createdOn'] as String)
           : DateTime.now(),
+      familyMode: json['familyMode'] as bool? ?? false,
+      preferFemaleDriver: json['preferFemaleDriver'] as bool? ?? false,
+      preferredDriverId: json['preferredDriverId'] as int?,
+      entitlementId: json['entitlementId'] as int?,
+      companyId: json['companyId'] as int?,
+      bookedHours: json['bookedHours'] as int?,
+      nightShift: json['nightShift'] as bool? ?? false,
+      shoppingList: (json['shoppingList'] as List<dynamic>?)
+          ?.map((e) => ShoppingItem.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      budget: (json['budget'] as num?)?.toDouble(),
     );
   }
 
@@ -221,5 +266,19 @@ class DriverOrderModel {
         startTimestamp: startTimestamp,
         finishTimestamp: finishTimestamp,
         createdOn: createdOn,
+        familyMode: familyMode,
+        preferFemaleDriver: preferFemaleDriver,
+        preferredDriverId: preferredDriverId,
+        entitlementId: entitlementId,
+        companyId: companyId,
+        bookedHours: bookedHours,
+        nightShift: nightShift,
+        shoppingList: shoppingList,
+        budget: budget,
       );
+
+  /// نوع رئيسي للعرض في الشاشات
+  bool get isGrocery => shoppingList != null && shoppingList!.isNotEmpty;
+  bool get isHourly => bookedHours != null && bookedHours! > 0;
+  bool get isPrepaid => entitlementId != null || companyId != null;
 }

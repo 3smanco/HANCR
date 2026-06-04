@@ -13,7 +13,13 @@ import {
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { LIST_DRIVERS, APPROVE_DRIVER, BAN_DRIVER, UNBAN_DRIVER } from '@/lib/gql';
+import {
+  LIST_DRIVERS,
+  APPROVE_DRIVER,
+  BAN_DRIVER,
+  UNBAN_DRIVER,
+  SET_DRIVER_APPROVAL,
+} from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { formatDate } from '@/lib/utils';
 import { statusBadgeClass } from '@/lib/design-tokens';
@@ -62,6 +68,14 @@ export default function DriversPage() {
     onError: (e) => toast.error(e.message),
   });
 
+  const [setApproval] = useMutation(SET_DRIVER_APPROVAL, {
+    onCompleted: () => {
+      toast.success(t('drivers.toasts.approvalUpdated'));
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
   const drivers = data?.adminListDrivers?.items ?? [];
   const total = data?.adminListDrivers?.total ?? 0;
   const pages = Math.max(1, Math.ceil(total / limit));
@@ -104,6 +118,7 @@ export default function DriversPage() {
                 <th>{t('drivers.columns.rating')}</th>
                 <th>{t('drivers.columns.ratingCount')}</th>
                 <th>{t('drivers.columns.joinedAt')}</th>
+                <th>{t('drivers.columns.approvals')}</th>
                 <th className="text-end">{t('drivers.columns.actions')}</th>
               </tr>
             </thead>
@@ -175,6 +190,40 @@ export default function DriversPage() {
                   </td>
                   <td className="text-gray-400 text-xs">
                     {formatDate(d.createdAt as string)}
+                  </td>
+                  <td>
+                    <div className="flex flex-col gap-1">
+                      <label className="inline-flex items-center gap-2 text-xs cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={d.kidsApproved as boolean}
+                          onChange={(e) =>
+                            setApproval({
+                              variables: {
+                                driverId: d.id,
+                                kidsApproved: e.target.checked,
+                              },
+                            })
+                          }
+                        />
+                        <span>{t('drivers.approvals.kids')}</span>
+                      </label>
+                      <label className="inline-flex items-center gap-2 text-xs cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={d.nightApproved as boolean}
+                          onChange={(e) =>
+                            setApproval({
+                              variables: {
+                                driverId: d.id,
+                                nightApproved: e.target.checked,
+                              },
+                            })
+                          }
+                        />
+                        <span>{t('drivers.approvals.night')}</span>
+                      </label>
+                    </div>
                   </td>
                   <td>
                     <div className="flex items-center justify-end gap-1.5">

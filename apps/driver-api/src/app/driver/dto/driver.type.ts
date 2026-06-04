@@ -67,4 +67,14 @@ export class DriverType {
 
   @Field()
   createdAt!: Date;
+
+  /** H3 — flags */
+  @Field({ nullable: true })
+  gender?: string;
+
+  @Field()
+  kidsApproved!: boolean;
+
+  @Field()
+  nightApproved!: boolean;
 }

@@ -56,6 +56,10 @@ export class AdminDriverType {
   @Field({ nullable: true }) regionId?: number;
   @Field() createdAt!: Date;
   @Field() updatedAt!: Date;
+  /** H3 — approvals */
+  @Field({ nullable: true }) gender?: string;
+  @Field() kidsApproved!: boolean;
+  @Field() nightApproved!: boolean;
 }
 
 @ObjectType()
