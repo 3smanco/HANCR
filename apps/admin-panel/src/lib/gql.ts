@@ -299,6 +299,43 @@ export const DELETE_COUPON = gql`
   }
 `;
 
+// ─── RIDE BUNDLES (Phase F1) ────────────────────────────────────────────────
+
+const BUNDLE_FIELDS = `
+  id name ridesCount price currency
+  validityDays maxDistanceKm regionId active createdAt
+`;
+
+export const LIST_BUNDLES = gql`
+  query AdminBundles {
+    adminBundles { ${BUNDLE_FIELDS} }
+  }
+`;
+
+export const CREATE_BUNDLE = gql`
+  mutation CreateBundle($input: CreateBundleInput!) {
+    createBundle(input: $input) { ${BUNDLE_FIELDS} }
+  }
+`;
+
+export const UPDATE_BUNDLE = gql`
+  mutation UpdateBundle($id: Int!, $input: UpdateBundleInput!) {
+    updateBundle(id: $id, input: $input) { ${BUNDLE_FIELDS} }
+  }
+`;
+
+export const TOGGLE_BUNDLE_ACTIVE = gql`
+  mutation ToggleBundleActive($id: Int!) {
+    toggleBundleActive(id: $id) { id active }
+  }
+`;
+
+export const DELETE_BUNDLE = gql`
+  mutation DeleteBundle($id: Int!) {
+    deleteBundle(id: $id)
+  }
+`;
+
 // ─── BROADCAST NOTIFICATIONS (Phase 3.1) ──────────────────────────────────
 
 export const BROADCAST_NOTIFICATION = gql`
