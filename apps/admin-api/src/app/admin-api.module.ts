@@ -45,6 +45,7 @@ import { CouponsModule } from './coupons/coupons.module';
 import { BundlesModule } from './bundles/bundles.module';
 import { CompaniesModule } from './companies/companies.module';
 import { DriversModule } from './drivers/drivers.module';
+import { AdminWalletsModule } from './wallets/wallets.module';
 import { AdminNotificationsModule } from './notifications/notifications.module';
 import { NotificationsModule } from '@hancr/notifications';
 
@@ -135,6 +136,7 @@ import { ObservabilityModule } from '@hancr/observability';
     BundlesModule,
     CompaniesModule,
     DriversModule,
+    AdminWalletsModule,
     NotificationsModule,
     AdminNotificationsModule,
     ObservabilityModule,

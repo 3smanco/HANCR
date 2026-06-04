@@ -19,6 +19,7 @@ import {
   Image as ImageIcon,
   Package,
   Building2,
+  Wallet,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth';
@@ -41,6 +42,7 @@ export function Sidebar() {
     { key: 'nav.coupons',       icon: Ticket,          href: '/coupons' },
     { key: 'nav.bundles',       icon: Package,         href: '/bundles' },
     { key: 'nav.companies',     icon: Building2,       href: '/companies' },
+    { key: 'nav.wallets',       icon: Wallet,          href: '/wallets/riders' },
     { key: 'nav.banners',       icon: ImageIcon,       href: '/banners' },
     { key: 'nav.regions',       icon: MapPin,          href: '/regions' },
     { key: 'nav.features',      icon: Zap,             href: '/features' },

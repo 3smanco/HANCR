@@ -206,6 +206,60 @@ export const ASSIGN_DRIVER = gql`
   }
 `;
 
+// ─── WALLETS DASHBOARD (Phase I3) ──────────────────────────────────────────
+
+export const WALLET_BALANCES = gql`
+  query AdminWalletBalances(
+    $ownerType: WalletOwnerType!
+    $page: Int!
+    $limit: Int!
+    $search: String
+  ) {
+    adminWalletBalances(
+      ownerType: $ownerType
+      page: $page
+      limit: $limit
+      search: $search
+    ) {
+      items {
+        ownerId ownerType name phone balance currency status
+      }
+      total page limit
+    }
+  }
+`;
+
+export const WALLET_TRANSACTIONS = gql`
+  query AdminWalletTransactions(
+    $ownerType: WalletOwnerType!
+    $ownerId: Int!
+    $limit: Int!
+    $offset: Int!
+  ) {
+    adminWalletTransactions(
+      ownerType: $ownerType
+      ownerId: $ownerId
+      limit: $limit
+      offset: $offset
+    ) {
+      items {
+        id type direction amount balanceAfter currency status
+        gateway orderId description createdAt completedAt
+      }
+      total totalCredits totalDebits
+    }
+  }
+`;
+
+export const ADJUST_WALLET = gql`
+  mutation AdminAdjustWallet($input: AdjustWalletInput!) {
+    adminAdjustWallet(input: $input) {
+      id type direction amount balanceAfter currency status
+      description createdAt
+    }
+  }
+`;
+
 export const SET_DRIVER_APPROVAL = gql`
   mutation SetDriverApproval(
     $driverId: Int!
