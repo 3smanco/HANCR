@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useQuery, useMutation } from '@apollo/client';
 import {
   XCircle,
@@ -153,7 +154,14 @@ export default function OrdersPage() {
                 const isActive = ACTIVE_STATUSES.includes(status);
                 return (
                   <tr key={o.id as number}>
-                    <td className="font-mono text-gray-400 font-bold">#{o.id as number}</td>
+                    <td className="font-mono text-gray-400 font-bold">
+                      <Link
+                        href={`/orders/${o.id as number}`}
+                        className="hover:text-hancr-violet"
+                      >
+                        #{o.id as number}
+                      </Link>
+                    </td>
                     <td>
                       <span className={STATUS_CLASS[status] ?? 'badge badge-gray'}>
                         {t(`orders.statuses.${status}`)}

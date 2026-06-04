@@ -168,6 +168,44 @@ export const REVIEW_DRIVER_DOCUMENT = gql`
   }
 `;
 
+// ─── ORDER DETAIL (Phase I2) ───────────────────────────────────────────────
+
+export const ORDER_DETAIL = gql`
+  query AdminOrderDetail($id: Int!) {
+    adminOrderDetail(id: $id) {
+      id type status currency
+      riderId riderName riderPhone
+      driverId driverName driverPhone
+      serviceId serviceName regionId
+      points { lat lng }
+      addresses distanceBest durationBest
+      costBest costAfterCoupon paidAmount providerShare discountAmount
+      couponCode paymentMode
+      familyMode preferFemaleDriver nightShift
+      preferredDriverId bookedHours entitlementId companyId
+      startTimestamp finishTimestamp etaPickup createdOn
+      activities { id type createdAt }
+      messages { id senderType senderId message sentAt }
+    }
+  }
+`;
+
+export const ORDER_CANDIDATES = gql`
+  query AdminOrderCandidates($orderId: Int!) {
+    adminOrderCandidates(orderId: $orderId) {
+      driverId driverName driverPhone distanceMeters etaMinutes status
+    }
+  }
+`;
+
+export const ASSIGN_DRIVER = gql`
+  mutation AdminAssignDriver($orderId: Int!, $driverId: Int!) {
+    adminAssignDriver(orderId: $orderId, driverId: $driverId) {
+      id status driverId driverName
+    }
+  }
+`;
+
 export const SET_DRIVER_APPROVAL = gql`
   mutation SetDriverApproval(
     $driverId: Int!
