@@ -30,6 +30,8 @@ import {
   CompanyEntity,
   CompanyEmployeeEntity,
   DriverDocumentEntity,
+  ComplaintEntity,
+  ComplaintActivityEntity,
 } from '@hancr/database';
 
 // Feature Modules
@@ -46,6 +48,7 @@ import { BundlesModule } from './bundles/bundles.module';
 import { CompaniesModule } from './companies/companies.module';
 import { DriversModule } from './drivers/drivers.module';
 import { AdminWalletsModule } from './wallets/wallets.module';
+import { ComplaintsModule } from './complaints/complaints.module';
 import { AdminNotificationsModule } from './notifications/notifications.module';
 import { NotificationsModule } from '@hancr/notifications';
 
@@ -98,6 +101,8 @@ import { ObservabilityModule } from '@hancr/observability';
           CompanyEntity,
           CompanyEmployeeEntity,
           DriverDocumentEntity,
+          ComplaintEntity,
+          ComplaintActivityEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
@@ -137,6 +142,7 @@ import { ObservabilityModule } from '@hancr/observability';
     CompaniesModule,
     DriversModule,
     AdminWalletsModule,
+    ComplaintsModule,
     NotificationsModule,
     AdminNotificationsModule,
     ObservabilityModule,

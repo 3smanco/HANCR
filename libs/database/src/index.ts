@@ -32,6 +32,8 @@ export { RiderEntitlementEntity } from './lib/entities/rider-entitlement.entity'
 export { CompanyEntity } from './lib/entities/company.entity';
 export { CompanyEmployeeEntity } from './lib/entities/company-employee.entity';
 export { DriverDocumentEntity } from './lib/entities/driver-document.entity';
+export { ComplaintEntity } from './lib/entities/complaint.entity';
+export { ComplaintActivityEntity } from './lib/entities/complaint-activity.entity';
 
 // Enums
 export { CouponType } from './lib/enums/coupon-type.enum';

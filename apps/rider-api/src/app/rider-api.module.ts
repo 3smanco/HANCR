@@ -37,6 +37,8 @@ import {
   CompanyEntity,
   CompanyEmployeeEntity,
   DriverDocumentEntity,
+  ComplaintEntity,
+  ComplaintActivityEntity,
 } from '@hancr/database';
 
 // Redis
@@ -73,6 +75,7 @@ import { FlightModule } from './flight/flight.module';
 import { CarpoolModule } from './carpool/carpool.module';
 import { BundleModule } from './bundle/bundle.module';
 import { CompanyModule } from './company/company.module';
+import { ComplaintModule } from './complaint/complaint.module';
 
 // PubSub
 import { pubSubProvider } from './pubsub.provider';
@@ -129,6 +132,8 @@ import { pubSubProvider } from './pubsub.provider';
           CompanyEntity,
           CompanyEmployeeEntity,
           DriverDocumentEntity,
+          ComplaintEntity,
+          ComplaintActivityEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
@@ -191,6 +196,7 @@ import { pubSubProvider } from './pubsub.provider';
     CarpoolModule,
     BundleModule,
     CompanyModule,
+    ComplaintModule,
   ],
   providers: [pubSubProvider],
   exports: [pubSubProvider],
