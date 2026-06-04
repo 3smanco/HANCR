@@ -116,6 +116,19 @@ export class CreateOrderInput {
   @IsOptional()
   preferredDriverId?: number;
 
+  // ===== G1 — وضع الليل =====
+
+  /**
+   * عند true:
+   *  - لا surge (سعر ثابت)
+   *  - مشاركة موقع تلقائية مع جهات الطوارئ
+   *  - تفضيل السائقين night_approved (لاحقاً)
+   */
+  @Field({ nullable: true, defaultValue: false })
+  @IsOptional()
+  @IsBoolean()
+  nightShift?: boolean;
+
   // ===== الدفع =====
 
   /** طريقة الدفع: Cash | SavedPaymentMethod | PaymentGateway | Wallet */

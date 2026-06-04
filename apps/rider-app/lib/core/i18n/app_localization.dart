@@ -256,6 +256,10 @@ const Map<String, Map<String, String>> _t = {
   'companyMonthlyRemaining': {'ar': 'المتاح هذا الشهر', 'en': 'Remaining this month', 'ur': 'اس مہینے باقی', 'hi': 'इस माह शेष', 'bn': 'এই মাসে অবশিষ্ট', 'fil': 'Natitira ngayong buwan', 'fr': 'Restant ce mois-ci', 'tr': 'Bu ay kalan'},
   'companyAccountInactive': {'ar': 'حساب الشركة معطّل', 'en': 'Company account inactive', 'ur': 'کمپنی اکاؤنٹ غیر فعال', 'hi': 'कंपनी खाता निष्क्रिय', 'bn': 'কোম্পানি অ্যাকাউন্ট নিষ্ক্রিয়', 'fil': 'Hindi aktibo ang account', 'fr': 'Compte entreprise inactif', 'tr': 'Şirket hesabı pasif'},
 
+  // ─── G1 — Night Shift Mode ───
+  'nightShift': {'ar': 'وضع الليل', 'en': 'Night shift', 'ur': 'نائٹ شفٹ', 'hi': 'नाइट शिफ्ट', 'bn': 'রাতের শিফট', 'fil': 'Night shift', 'fr': 'Mode nuit', 'tr': 'Gece modu'},
+  'nightShiftHint': {'ar': 'سعر ثابت بلا surge، ومشاركة موقعك تلقائياً مع جهات الطوارئ', 'en': 'Fixed fare (no surge), and auto-shares your location with emergency contacts', 'ur': 'مقررہ کرایہ، اور آپ کا مقام ایمرجنسی رابطوں کے ساتھ خودکار شیئر', 'hi': 'फिक्स्ड किराया + आपातकालीन संपर्कों के साथ स्वचालित स्थान साझाकरण', 'bn': 'নির্দিষ্ট ভাড়া + জরুরি পরিচিতদের সঙ্গে স্বয়ংক্রিয় লোকেশন শেয়ার', 'fil': 'Pixed na bayad + auto-share ng lokasyon sa emergency contacts', 'fr': 'Tarif fixe (sans majoration) + partage auto avec contacts d\'urgence', 'tr': 'Sabit ücret (artırım yok) + acil kişilerle otomatik konum paylaşımı'},
+
   // ─── Auth ───
   'continueWith': {'ar': 'تابع باستخدام:', 'en': 'Continue with:', 'ur': 'اس کے ساتھ جاری رکھیں:', 'hi': 'इसके साथ जारी रखें:', 'bn': 'চালিয়ে যান:', 'fil': 'Magpatuloy gamit ang:', 'fr': 'Continuer avec :', 'tr': 'Şununla devam et:'},
   'enterPhoneFirst': {'ar': 'أدخل رقم هاتفك للمتابعة', 'en': 'Enter your phone number to continue', 'ur': 'جاری رکھنے کے لیے فون نمبر درج کریں', 'hi': 'जारी रखने के लिए फ़ोन नंबर दर्ज करें', 'bn': 'চালিয়ে যেতে ফোন নম্বর দিন', 'fil': 'Ilagay ang phone number para magpatuloy', 'fr': 'Entrez votre numéro pour continuer', 'tr': 'Devam etmek için telefon numaranızı girin'},

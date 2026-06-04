@@ -77,6 +77,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   bool _quietRide = false;
   bool _audioOff = false;
   bool _familyMode = false;
+  bool _nightShift = false;
   bool _bidMode = false;
   final TextEditingController _bidPriceCtrl = TextEditingController();
   bool _sendingBid = false;
@@ -446,6 +447,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           stops: _stops.map((s) => s.point).toList(),
           stopAddresses: _stops.map((s) => s.label).toList(),
           familyMode: _familyMode,
+          nightShift: _nightShift,
         ));
   }
 
@@ -966,6 +968,25 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
             _familyMode,
             () => setState(() => _familyMode = !_familyMode),
           ),
+
+          const SizedBox(height: AuroraSpacing.sm),
+
+          // G1 — وضع الليل (سعر ثابت + مشاركة موقع مع جهات الطوارئ)
+          _prefChip(
+            Icons.nightlight_round,
+            tr('nightShift'),
+            _nightShift,
+            () => setState(() => _nightShift = !_nightShift),
+          ),
+          if (_nightShift)
+            Padding(
+              padding: const EdgeInsets.only(top: AuroraSpacing.xs),
+              child: Text(
+                tr('nightShiftHint'),
+                style: AuroraText.bodySmall
+                    .copyWith(color: AuroraColors.textSecondary),
+              ),
+            ),
 
           const SizedBox(height: AuroraSpacing.sm),
 

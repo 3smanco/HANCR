@@ -33,6 +33,8 @@ class OrderCreateRequested extends OrderEvent {
   final List<String> stopAddresses;
   /// وضع العائلة — يفضّل سائقة وسلوكاً عائلياً
   final bool familyMode;
+  /// G1 — وضع الليل: سعر ثابت + مشاركة موقع مع جهات الطوارئ
+  final bool nightShift;
   /// سائق مفضّل (VIP) — لو متاح وقريب يحجز له مباشرة
   final int? preferredDriverId;
 
@@ -55,6 +57,7 @@ class OrderCreateRequested extends OrderEvent {
     this.stops = const [],
     this.stopAddresses = const [],
     this.familyMode = false,
+    this.nightShift = false,
     this.preferredDriverId,
   });
 

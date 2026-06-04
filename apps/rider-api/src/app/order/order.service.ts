@@ -27,6 +27,7 @@ import {
 import { OrderRedisService } from '@hancr/redis';
 import { PushNotificationService } from '@hancr/notifications';
 import { WalletService } from '@hancr/wallet';
+import { SosService } from '@hancr/sos';
 import { PUB_SUB } from '../pubsub.provider';
 import { CreateOrderInput } from './dto/create-order.input';
 import { RateDriverInput } from './dto/rate-driver.input';
@@ -70,6 +71,7 @@ export class OrderService {
     private readonly bundleService: BundleService,
     private readonly companyService: CompanyService,
     private readonly walletService: WalletService,
+    private readonly sosService: SosService,
     private readonly dataSource: DataSource,
     private readonly pushNotifications: PushNotificationService,
 
@@ -243,6 +245,8 @@ export class OrderService {
         entitlementId: usedEntitlementId,
         // F2 Corporate
         companyId,
+        // G1 Night Shift
+        nightShift: input.nightShift ?? false,
         // OTP — لتوصيل الأمانات: نولّد الكود عند الإنشاء ليعرضه الراكب للمستلم،
         // والسائق يُدخله عند التسليم لإثبات الاستلام (confirmDelivery)
         receiverPhone: input.receiverPhone,
@@ -305,6 +309,26 @@ export class OrderService {
           );
           throw e;
         }
+      }
+
+      // G1 — وضع الليل: مشاركة موقع تلقائية مع جهات الطوارئ
+      // (نطلق وراء fire-and-forget — لا تُعطّل إنشاء الطلب لو فشل SMS)
+      if (input.nightShift && destPoint) {
+        this.sosService
+          .shareTripWithContacts({
+            ownerType: 'Rider',
+            ownerId: riderId,
+            orderId: savedOrder.id,
+            destinationLat: destPoint.lat,
+            destinationLng: destPoint.lng,
+          })
+          .catch((e) =>
+            this.logger.warn(
+              `Night-shift trip share failed for order #${savedOrder.id}: ${
+                (e as Error).message
+              }`,
+            ),
+          );
       }
 
       // حجز مسبق مستقبلي: لا مطابقة الآن — يُفعَّل لاحقاً عبر الكرون (status=Booked)
