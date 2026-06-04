@@ -47,6 +47,10 @@ export class DriverEntity {
   @Column({ default: false, name: 'kids_approved' })
   kidsApproved!: boolean;
 
+  /** G1 — سائق معتمَد للعمل الليلي (وضع الليل) */
+  @Column({ default: false, name: 'night_approved' })
+  nightApproved!: boolean;
+
   /** حالة السائق — تُحدَّث في Redis للمطابقة الفورية */
   @Column({ type: 'enum', enum: DriverStatus, default: DriverStatus.Offline })
   status!: DriverStatus;

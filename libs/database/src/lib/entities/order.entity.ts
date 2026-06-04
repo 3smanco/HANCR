@@ -223,6 +223,15 @@ export class OrderEntity {
   @Column({ nullable: true, name: 'company_id' })
   companyId?: number;
 
+  /**
+   * G1 — وضع الليل: عند true:
+   *  - يتم تخطّي surge multiplier (سعر ثابت)
+   *  - يُشارك الموقع تلقائياً مع جهات الطوارئ
+   *  - تُفضَّل السائقين المعتمدين ليلاً (DriverEntity.nightApproved)
+   */
+  @Column({ default: false, name: 'night_shift' })
+  nightShift!: boolean;
+
   /** ===== Bid Mode ===== */
 
   /** هل هذا الطلب عبر Bid Mode */
