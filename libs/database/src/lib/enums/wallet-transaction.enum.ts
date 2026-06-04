@@ -61,6 +61,8 @@ export enum WalletTransactionStatus {
 export enum WalletOwnerType {
   Rider = 'Rider',
   Driver = 'Driver',
+  /** F2 — حسابات الشركات (B2B) */
+  Company = 'Company',
 }
 
 /** بوابات الدفع المدعومة */

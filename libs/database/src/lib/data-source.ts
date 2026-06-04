@@ -31,6 +31,8 @@ import { CarpoolRequestEntity } from './entities/carpool-request.entity';
 import { CarpoolMatchEntity } from './entities/carpool-match.entity';
 import { RideBundleEntity } from './entities/ride-bundle.entity';
 import { RiderEntitlementEntity } from './entities/rider-entitlement.entity';
+import { CompanyEntity } from './entities/company.entity';
+import { CompanyEmployeeEntity } from './entities/company-employee.entity';
 
 /**
  * قائمة كاملة بجميع Entities في HANCR
@@ -62,6 +64,8 @@ export const HANCR_ENTITIES = [
   CarpoolMatchEntity,
   RideBundleEntity,
   RiderEntitlementEntity,
+  CompanyEntity,
+  CompanyEmployeeEntity,
 ];
 
 /**

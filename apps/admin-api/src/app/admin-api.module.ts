@@ -27,6 +27,8 @@ import {
   CouponEntity,
   RideBundleEntity,
   RiderEntitlementEntity,
+  CompanyEntity,
+  CompanyEmployeeEntity,
 } from '@hancr/database';
 
 // Feature Modules
@@ -40,6 +42,7 @@ import { OrdersModule } from './orders/orders.module';
 import { SosAdminModule } from './sos/sos-admin.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { BundlesModule } from './bundles/bundles.module';
+import { CompaniesModule } from './companies/companies.module';
 import { AdminNotificationsModule } from './notifications/notifications.module';
 import { NotificationsModule } from '@hancr/notifications';
 
@@ -89,6 +92,8 @@ import { ObservabilityModule } from '@hancr/observability';
           CouponEntity,
           RideBundleEntity,
           RiderEntitlementEntity,
+          CompanyEntity,
+          CompanyEmployeeEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
@@ -125,6 +130,7 @@ import { ObservabilityModule } from '@hancr/observability';
     SosAdminModule,
     CouponsModule,
     BundlesModule,
+    CompaniesModule,
     NotificationsModule,
     AdminNotificationsModule,
     ObservabilityModule,

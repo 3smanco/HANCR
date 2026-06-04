@@ -336,6 +336,72 @@ export const DELETE_BUNDLE = gql`
   }
 `;
 
+// ─── CORPORATE ACCOUNTS (Phase F2) ──────────────────────────────────────────
+
+const COMPANY_FIELDS = `
+  id name contactEmail contactPhone balance currency
+  monthlyCapPerEmployee status createdAt employeeCount
+`;
+
+const EMPLOYEE_FIELDS = `
+  id companyId riderId riderName riderPhone monthlySpent
+  monthlyPeriod status createdAt
+`;
+
+export const LIST_COMPANIES = gql`
+  query AdminCompanies {
+    adminCompanies { ${COMPANY_FIELDS} }
+  }
+`;
+
+export const LIST_COMPANY_EMPLOYEES = gql`
+  query CompanyEmployees($companyId: Int!) {
+    companyEmployees(companyId: $companyId) { ${EMPLOYEE_FIELDS} }
+  }
+`;
+
+export const COMPANY_ORDERS_CSV = gql`
+  query CompanyOrdersCsv($companyId: Int!, $from: String, $to: String) {
+    companyOrdersCsv(companyId: $companyId, from: $from, to: $to)
+  }
+`;
+
+export const CREATE_COMPANY = gql`
+  mutation CreateCompany($input: CreateCompanyInput!) {
+    createCompany(input: $input) { ${COMPANY_FIELDS} }
+  }
+`;
+
+export const UPDATE_COMPANY = gql`
+  mutation UpdateCompany($id: Int!, $input: UpdateCompanyInput!) {
+    updateCompany(id: $id, input: $input) { ${COMPANY_FIELDS} }
+  }
+`;
+
+export const TOP_UP_COMPANY = gql`
+  mutation TopUpCompany($input: TopUpCompanyInput!) {
+    topUpCompany(input: $input) { ${COMPANY_FIELDS} }
+  }
+`;
+
+export const DELETE_COMPANY = gql`
+  mutation DeleteCompany($id: Int!) {
+    deleteCompany(id: $id)
+  }
+`;
+
+export const ADD_COMPANY_EMPLOYEE = gql`
+  mutation AddCompanyEmployee($input: AddEmployeeInput!) {
+    addCompanyEmployee(input: $input) { ${EMPLOYEE_FIELDS} }
+  }
+`;
+
+export const REVOKE_COMPANY_EMPLOYEE = gql`
+  mutation RevokeCompanyEmployee($id: Int!) {
+    revokeCompanyEmployee(id: $id)
+  }
+`;
+
 // ─── BROADCAST NOTIFICATIONS (Phase 3.1) ──────────────────────────────────
 
 export const BROADCAST_NOTIFICATION = gql`
