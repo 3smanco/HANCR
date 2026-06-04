@@ -35,6 +35,7 @@ import { MatchingService } from './matching.service';
 import { DirectionsService } from './directions.service';
 import { CouponService } from './coupon.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
+import { BundleService } from '../bundle/bundle.service';
 
 // GraphQL Subscription events
 export const ORDER_UPDATED = 'ORDER_UPDATED';
@@ -65,6 +66,7 @@ export class OrderService {
     private readonly directionsService: DirectionsService,
     private readonly couponService: CouponService,
     private readonly loyaltyService: LoyaltyService,
+    private readonly bundleService: BundleService,
     private readonly walletService: WalletService,
     private readonly dataSource: DataSource,
     private readonly pushNotifications: PushNotificationService,
@@ -146,6 +148,35 @@ export class OrderService {
       appliedCouponCode = applied.coupon.code;
     }
 
+    // F1 — Ride Bundles: محاولة استخدام حزمة رحلات مدفوعة مسبقاً
+    //
+    // الشروط: رحلة عادية فقط (لا Bid / لا HourlyChauffeur / لا ParcelDelivery)،
+    // ولديه entitlement فعّال يغطّي المسافة. عند التطبيق:
+    //   - cost = 0
+    //   - paymentMode = Entitlement
+    //   - entitlementId يُحفظ على الطلب
+    let usedEntitlementId: number | undefined;
+    const isRegularRide =
+      !input.isBidOrder &&
+      !input.bookedHours &&
+      !input.receiverPhone &&
+      !input.scheduledAt;
+    if (isRegularRide) {
+      const ent = await this.bundleService.findUsableEntitlement(
+        riderId,
+        distanceMeters,
+      );
+      if (ent) {
+        usedEntitlementId = ent.id;
+        costAfterCoupon = 0;
+        // نُلغي أي كوبون لو طُبّق — الحزمة أقوى
+        appliedCouponId = undefined;
+        appliedCouponCode = undefined;
+        discountAmount = 0;
+        input.paymentMode = PaymentMode.Entitlement;
+      }
+    }
+
     // استخدام Transaction لضمان الاتساق
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -188,6 +219,8 @@ export class OrderService {
         // Grocery Run
         shoppingList: input.shoppingList,
         budget: input.budget,
+        // F1 Ride Bundles
+        entitlementId: usedEntitlementId,
         // OTP — لتوصيل الأمانات: نولّد الكود عند الإنشاء ليعرضه الراكب للمستلم،
         // والسائق يُدخله عند التسليم لإثبات الاستلام (confirmDelivery)
         receiverPhone: input.receiverPhone,
@@ -217,6 +250,19 @@ export class OrderService {
       // زيادة عدّاد استخدام الكوبون بعد نجاح الإنشاء
       if (appliedCouponId) {
         await this.couponService.incrementUsage(appliedCouponId);
+      }
+
+      // F1 — خصم رحلة من الحزمة بعد نجاح الإنشاء
+      if (usedEntitlementId) {
+        try {
+          await this.bundleService.decrementUsage(usedEntitlementId);
+        } catch (e) {
+          this.logger.warn(
+            `Failed to decrement entitlement #${usedEntitlementId}: ${
+              (e as Error).message
+            }`,
+          );
+        }
       }
 
       // حجز مسبق مستقبلي: لا مطابقة الآن — يُفعَّل لاحقاً عبر الكرون (status=Booked)

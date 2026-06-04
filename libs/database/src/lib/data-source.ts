@@ -29,6 +29,8 @@ import { CommuterSubscriptionEntity } from './entities/commuter-subscription.ent
 import { FlightTrackingEntity } from './entities/flight-tracking.entity';
 import { CarpoolRequestEntity } from './entities/carpool-request.entity';
 import { CarpoolMatchEntity } from './entities/carpool-match.entity';
+import { RideBundleEntity } from './entities/ride-bundle.entity';
+import { RiderEntitlementEntity } from './entities/rider-entitlement.entity';
 
 /**
  * قائمة كاملة بجميع Entities في HANCR
@@ -58,6 +60,8 @@ export const HANCR_ENTITIES = [
   FlightTrackingEntity,
   CarpoolRequestEntity,
   CarpoolMatchEntity,
+  RideBundleEntity,
+  RiderEntitlementEntity,
 ];
 
 /**

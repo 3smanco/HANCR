@@ -10,4 +10,6 @@ export enum PaymentMode {
   PaymentGateway = 'PaymentGateway',
   /** محفظة HANCR الرقمية */
   Wallet = 'Wallet',
+  /** حزمة رحلات مدفوعة مسبقاً (RiderEntitlement) */
+  Entitlement = 'Entitlement',
 }

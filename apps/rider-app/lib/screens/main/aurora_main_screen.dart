@@ -7,6 +7,7 @@ import '../rides/rides_tab.dart';
 import '../profile/aurora_profile_tab.dart';
 import '../commuter/aurora_commuter_screen.dart';
 import '../airport/aurora_airport_screen.dart';
+import '../bundles/aurora_bundles_screen.dart';
 import '../carpool/aurora_carpool_screen.dart';
 import '../grocery/aurora_grocery_screen.dart';
 
@@ -135,6 +136,10 @@ class _ServicesTab extends StatelessWidget {
                   icon: Icons.shopping_basket,
                   label: tr('groceryRun'),
                   customRoute: 'grocery'),
+              _ServiceItem(
+                  icon: Icons.confirmation_number_outlined,
+                  label: tr('rideBundles'),
+                  customRoute: 'bundles'),
             ]),
 
             const SizedBox(height: AuroraSpacing.huge),
@@ -178,6 +183,10 @@ class _ServicesTab extends StatelessWidget {
             } else if (route == 'grocery') {
               Navigator.of(ctx).push(MaterialPageRoute(
                 builder: (_) => const AuroraGroceryScreen(),
+              ));
+            } else if (route == 'bundles') {
+              Navigator.of(ctx).push(MaterialPageRoute(
+                builder: (_) => const AuroraBundlesScreen(),
               ));
             } else if (route == 'vip') {
               // VIP = حجز فوري بخدمة VIP مع إمكانية تفضيل سائق

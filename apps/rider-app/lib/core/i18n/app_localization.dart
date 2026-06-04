@@ -228,6 +228,28 @@ const Map<String, Map<String, String>> _t = {
   'care': {'ar': 'العناية', 'en': 'Care', 'ur': 'نگہداشت', 'hi': 'देखभाल', 'bn': 'যত্ন', 'fil': 'Pangangalaga', 'fr': 'Soins', 'tr': 'Bakım'},
   'coffee': {'ar': 'قهوة', 'en': 'Coffee', 'ur': 'کافی', 'hi': 'कॉफ़ी', 'bn': 'কফি', 'fil': 'Kape', 'fr': 'Café', 'tr': 'Kahve'},
 
+  // ─── F1 — Ride Bundles ───
+  'rideBundles': {'ar': 'حزم الرحلات', 'en': 'Ride Bundles', 'ur': 'رائیڈ پیکیجز', 'hi': 'राइड बंडल', 'bn': 'রাইড বান্ডল', 'fil': 'Mga ride package', 'fr': 'Forfaits trajets', 'tr': 'Yolculuk paketleri'},
+  'bundlesHint': {'ar': 'ادفع مرة واحدة واحجز رحلاتك دون فاتورة', 'en': 'Pay once, ride without invoices', 'ur': 'ایک بار ادائیگی، بل کے بغیر سواری', 'hi': 'एक बार भुगतान, बिना बिल यात्रा', 'bn': 'একবার পেমেন্ট, বিল ছাড়া রাইড', 'fil': 'Bayad isang beses', 'fr': 'Payez une fois, voyagez sans facture', 'tr': 'Bir kez öde, faturasız yolculuk yap'},
+  'availableBundles': {'ar': 'الحزم المتاحة', 'en': 'Available bundles', 'ur': 'دستیاب پیکیجز', 'hi': 'उपलब्ध बंडल', 'bn': 'উপলব্ধ বান্ডল', 'fil': 'Mga available na package', 'fr': 'Forfaits disponibles', 'tr': 'Mevcut paketler'},
+  'myBundles': {'ar': 'حِزَمي', 'en': 'My bundles', 'ur': 'میرے پیکیجز', 'hi': 'मेरे बंडल', 'bn': 'আমার বান্ডল', 'fil': 'Aking mga package', 'fr': 'Mes forfaits', 'tr': 'Paketlerim'},
+  'bundleRidesCount': {'ar': 'عدد الرحلات', 'en': 'Rides', 'ur': 'سواریاں', 'hi': 'राइड्स', 'bn': 'রাইড', 'fil': 'Mga ride', 'fr': 'Trajets', 'tr': 'Yolculuk'},
+  'bundleValidityDays': {'ar': 'مدة الصلاحية (يوم)', 'en': 'Validity (days)', 'ur': 'مدت (دن)', 'hi': 'वैधता (दिन)', 'bn': 'বৈধতা (দিন)', 'fil': 'Bisa (araw)', 'fr': 'Validité (jours)', 'tr': 'Geçerlilik (gün)'},
+  'bundleMaxDistance': {'ar': 'أقصى مسافة لكل رحلة (كم)', 'en': 'Max distance per ride (km)', 'ur': 'فی سواری زیادہ سے زیادہ فاصلہ (کلومیٹر)', 'hi': 'अधिकतम दूरी (किमी)', 'bn': 'সর্বোচ্চ দূরত্ব (কিমি)', 'fil': 'Pinakamalayong distansya (km)', 'fr': 'Distance max par trajet (km)', 'tr': 'Yolculuk başına maks. mesafe (km)'},
+  'bundleUnlimited': {'ar': 'بلا حدود', 'en': 'Unlimited', 'ur': 'لامحدود', 'hi': 'असीमित', 'bn': 'সীমাহীন', 'fil': 'Walang limit', 'fr': 'Illimité', 'tr': 'Sınırsız'},
+  'bundleRidesRemaining': {'ar': 'رحلات متبقية', 'en': 'Rides left', 'ur': 'باقی سواریاں', 'hi': 'बची राइड्स', 'bn': 'বাকি রাইড', 'fil': 'Natitirang ride', 'fr': 'Trajets restants', 'tr': 'Kalan yolculuk'},
+  'bundleExpiresOn': {'ar': 'تنتهي بتاريخ', 'en': 'Expires on', 'ur': 'ختم ہونے کی تاریخ', 'hi': 'समाप्ति तिथि', 'bn': 'মেয়াদ শেষ', 'fil': 'Mag-e-expire sa', 'fr': 'Expire le', 'tr': 'Bitiş'},
+  'buyBundle': {'ar': 'اشترِ الحزمة', 'en': 'Buy bundle', 'ur': 'پیکیج خریدیں', 'hi': 'बंडल खरीदें', 'bn': 'বান্ডল কিনুন', 'fil': 'Bumili ng package', 'fr': 'Acheter', 'tr': 'Paketi satın al'},
+  'bundlePurchased': {'ar': 'تم شراء الحزمة بنجاح', 'en': 'Bundle purchased successfully', 'ur': 'پیکیج کامیابی سے خرید لیا', 'hi': 'बंडल खरीदा गया', 'bn': 'বান্ডল কেনা হয়েছে', 'fil': 'Nabili ang package', 'fr': 'Forfait acheté', 'tr': 'Paket alındı'},
+  'bundleConfirmTitle': {'ar': 'تأكيد الشراء', 'en': 'Confirm purchase', 'ur': 'خریداری کی تصدیق', 'hi': 'खरीदारी की पुष्टि', 'bn': 'কেনাকাটা নিশ্চিত করুন', 'fil': 'Kumpirmahin ang pagbili', 'fr': 'Confirmer l\'achat', 'tr': 'Satın almayı onayla'},
+  'bundleConfirmBody': {'ar': 'سنخصم المبلغ من محفظتك', 'en': 'The amount will be debited from your wallet', 'ur': 'رقم آپ کے والیٹ سے کاٹی جائے گی', 'hi': 'राशि वॉलेट से कटेगी', 'bn': 'অর্থ ওয়ালেট থেকে কাটা হবে', 'fil': 'Ibabawas sa wallet', 'fr': 'Le montant sera débité de votre portefeuille', 'tr': 'Tutar cüzdanınızdan düşülecek'},
+  'bundleStatusActive': {'ar': 'نشطة', 'en': 'Active', 'ur': 'فعال', 'hi': 'सक्रिय', 'bn': 'সক্রিয়', 'fil': 'Aktibo', 'fr': 'Active', 'tr': 'Aktif'},
+  'bundleStatusExhausted': {'ar': 'منتهية', 'en': 'Used up', 'ur': 'ختم', 'hi': 'समाप्त', 'bn': 'শেষ', 'fil': 'Naubos', 'fr': 'Épuisé', 'tr': 'Bitti'},
+  'bundleStatusExpired': {'ar': 'منتهية الصلاحية', 'en': 'Expired', 'ur': 'مدت ختم', 'hi': 'समाप्त', 'bn': 'মেয়াদ শেষ', 'fil': 'Lipas', 'fr': 'Expiré', 'tr': 'Süresi doldu'},
+  'noBundlesYet': {'ar': 'لا توجد حزم متاحة حالياً', 'en': 'No bundles available', 'ur': 'کوئی پیکیج دستیاب نہیں', 'hi': 'कोई बंडल नहीं', 'bn': 'কোনো বান্ডল নেই', 'fil': 'Walang package', 'fr': 'Aucun forfait', 'tr': 'Paket yok'},
+  'insufficientWallet': {'ar': 'الرصيد غير كافٍ', 'en': 'Insufficient wallet balance', 'ur': 'بیلنس ناکافی', 'hi': 'अपर्याप्त बैलेंस', 'bn': 'অপর্যাপ্ত ব্যালেন্স', 'fil': 'Kulang ang balanse', 'fr': 'Solde insuffisant', 'tr': 'Bakiye yetersiz'},
+  'day': {'ar': 'يوم', 'en': 'days', 'ur': 'دن', 'hi': 'दिन', 'bn': 'দিন', 'fil': 'araw', 'fr': 'jours', 'tr': 'gün'},
+
   // ─── Auth ───
   'continueWith': {'ar': 'تابع باستخدام:', 'en': 'Continue with:', 'ur': 'اس کے ساتھ جاری رکھیں:', 'hi': 'इसके साथ जारी रखें:', 'bn': 'চালিয়ে যান:', 'fil': 'Magpatuloy gamit ang:', 'fr': 'Continuer avec :', 'tr': 'Şununla devam et:'},
   'enterPhoneFirst': {'ar': 'أدخل رقم هاتفك للمتابعة', 'en': 'Enter your phone number to continue', 'ur': 'جاری رکھنے کے لیے فون نمبر درج کریں', 'hi': 'जारी रखने के लिए फ़ोन नंबर दर्ज करें', 'bn': 'চালিয়ে যেতে ফোন নম্বর দিন', 'fil': 'Ilagay ang phone number para magpatuloy', 'fr': 'Entrez votre numéro pour continuer', 'tr': 'Devam etmek için telefon numaranızı girin'},
