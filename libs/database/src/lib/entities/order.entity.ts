@@ -209,6 +209,13 @@ export class OrderEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   budget?: number;
 
+  /**
+   * إذا دفع الراكب الطلب من حزمة رحلات (RiderEntitlement)، نسجّل المعرّف هنا
+   * — لاسترداد رحلة عند الإلغاء.
+   */
+  @Column({ nullable: true, name: 'entitlement_id' })
+  entitlementId?: number;
+
   /** ===== Bid Mode ===== */
 
   /** هل هذا الطلب عبر Bid Mode */

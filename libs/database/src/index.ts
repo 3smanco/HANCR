@@ -27,6 +27,8 @@ export { CommuterSubscriptionEntity } from './lib/entities/commuter-subscription
 export { FlightTrackingEntity } from './lib/entities/flight-tracking.entity';
 export { CarpoolRequestEntity } from './lib/entities/carpool-request.entity';
 export { CarpoolMatchEntity } from './lib/entities/carpool-match.entity';
+export { RideBundleEntity } from './lib/entities/ride-bundle.entity';
+export { RiderEntitlementEntity } from './lib/entities/rider-entitlement.entity';
 
 // Enums
 export { CouponType } from './lib/enums/coupon-type.enum';
