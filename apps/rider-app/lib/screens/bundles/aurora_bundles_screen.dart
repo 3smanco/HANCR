@@ -152,7 +152,7 @@ class _AuroraBundlesScreenState extends State<AuroraBundlesScreen> {
                 children: [
                   Text(tr('bundlesHint'),
                       style: AuroraText.bodySmall
-                          .copyWith(color: AuroraColors.mist)),
+                          .copyWith(color: AuroraColors.textSecondary)),
                   const SizedBox(height: AuroraSpacing.lg),
                   if (_mine.isNotEmpty) ...[
                     Text(tr('myBundles'), style: AuroraText.titleSmall),
@@ -215,11 +215,11 @@ class _AuroraBundlesScreenState extends State<AuroraBundlesScreen> {
           const SizedBox(height: AuroraSpacing.xs),
           Text(
             '${b['ridesCount']} ${tr('bundleRidesCount')} · ${b['validityDays']} ${tr('day')}',
-            style: AuroraText.bodySmall.copyWith(color: AuroraColors.mist),
+            style: AuroraText.bodySmall.copyWith(color: AuroraColors.textSecondary),
           ),
           Text(
             '${tr('bundleMaxDistance')}: ${maxKm == 0 ? tr('bundleUnlimited') : '$maxKm km'}',
-            style: AuroraText.bodySmall.copyWith(color: AuroraColors.mist),
+            style: AuroraText.bodySmall.copyWith(color: AuroraColors.textSecondary),
           ),
           const SizedBox(height: AuroraSpacing.sm),
           SizedBox(
@@ -279,12 +279,12 @@ class _AuroraBundlesScreenState extends State<AuroraBundlesScreen> {
           ),
           Text(
             '${tr('bundleMaxDistance')}: ${maxKm == 0 ? tr('bundleUnlimited') : '$maxKm km'}',
-            style: AuroraText.bodySmall.copyWith(color: AuroraColors.mist),
+            style: AuroraText.bodySmall.copyWith(color: AuroraColors.textSecondary),
           ),
           if (exp != null)
             Text(
               '${tr('bundleExpiresOn')}: ${_fmtDate(exp)}',
-              style: AuroraText.bodySmall.copyWith(color: AuroraColors.mist),
+              style: AuroraText.bodySmall.copyWith(color: AuroraColors.textSecondary),
             ),
         ],
       ),
