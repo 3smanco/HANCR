@@ -85,6 +85,28 @@ const Map<String, Map<String, String>> _t = {
   'verified_night': {'ar': 'معتمد للعمل الليلي', 'en': 'Approved for night shifts', 'ur': 'رات کی شفٹ کے لیے منظور', 'hi': 'नाइट शिफ्ट के लिए स्वीकृत', 'bn': 'রাতের শিফটের জন্য অনুমোদিত', 'fil': 'Aprubado para sa night shift', 'fr': 'Approuvé pour les nuits', 'tr': 'Gece vardiyaları için onaylı'},
   'saved': {'ar': 'تم الحفظ', 'en': 'Saved', 'ur': 'محفوظ ہو گیا', 'hi': 'सहेजा गया', 'bn': 'সংরক্ষিত', 'fil': 'Na-save', 'fr': 'Enregistré', 'tr': 'Kaydedildi'},
 
+  // ─── I1 — Driver documents ───
+  'myDocuments': {'ar': 'وثائقي', 'en': 'My documents', 'ur': 'میرے دستاویزات', 'hi': 'मेरे दस्तावेज़', 'bn': 'আমার নথিপত্র', 'fil': 'Aking mga dokumento', 'fr': 'Mes documents', 'tr': 'Belgelerim'},
+  'documentsHint': {'ar': 'ارفع هذه الوثائق لاكتمال الاعتماد ولتفعيل العمل', 'en': 'Upload these documents to complete approval and start working', 'ur': 'منظوری مکمل کرنے اور کام شروع کرنے کے لیے یہ دستاویزات اپلوڈ کریں', 'hi': 'अनुमोदन के लिए ये दस्तावेज़ अपलोड करें', 'bn': 'অনুমোদনের জন্য এই নথিগুলি আপলোড করুন', 'fil': 'I-upload upang makapagsimula', 'fr': 'Téléchargez ces documents pour valider votre compte', 'tr': 'Onay için bu belgeleri yükleyin'},
+  'doc_national_id': {'ar': 'الهوية الوطنية', 'en': 'National ID', 'ur': 'قومی شناختی کارڈ', 'hi': 'राष्ट्रीय पहचान पत्र', 'bn': 'জাতীয় পরিচয়পত্র', 'fil': 'National ID', 'fr': 'Carte d\'identité', 'tr': 'Kimlik'},
+  'doc_license': {'ar': 'رخصة القيادة', 'en': 'Driving license', 'ur': 'ڈرائیونگ لائسنس', 'hi': 'ड्राइविंग लाइसेंस', 'bn': 'ড্রাইভিং লাইসেন্স', 'fil': 'Lisensya sa pagmamaneho', 'fr': 'Permis de conduire', 'tr': 'Ehliyet'},
+  'doc_vehicle_registration': {'ar': 'استمارة المركبة', 'en': 'Vehicle registration', 'ur': 'گاڑی کی رجسٹریشن', 'hi': 'वाहन पंजीकरण', 'bn': 'যান নিবন্ধন', 'fil': 'Rehistro ng sasakyan', 'fr': 'Carte grise', 'tr': 'Araç ruhsatı'},
+  'doc_insurance': {'ar': 'بوليصة التأمين', 'en': 'Insurance policy', 'ur': 'انشورنس پالیسی', 'hi': 'बीमा पॉलिसी', 'bn': 'বীমা পলিসি', 'fil': 'Polisa ng seguro', 'fr': 'Police d\'assurance', 'tr': 'Sigorta poliçesi'},
+  'doc_criminal_record': {'ar': 'شهادة عدلية', 'en': 'Criminal record', 'ur': 'کرمنل ریکارڈ', 'hi': 'पुलिस सत्यापन', 'bn': 'অপরাধমূলক রেকর্ড', 'fil': 'Police clearance', 'fr': 'Extrait de casier', 'tr': 'Sabıka kaydı'},
+  'uploadDocument': {'ar': 'ارفع الوثيقة', 'en': 'Upload', 'ur': 'اپلوڈ کریں', 'hi': 'अपलोड', 'bn': 'আপলোড', 'fil': 'I-upload', 'fr': 'Télécharger', 'tr': 'Yükle'},
+  'replaceDocument': {'ar': 'استبدل', 'en': 'Replace', 'ur': 'تبدیل کریں', 'hi': 'बदलें', 'bn': 'প্রতিস্থাপন', 'fil': 'Palitan', 'fr': 'Remplacer', 'tr': 'Değiştir'},
+  'uploading': {'ar': 'جارٍ الرفع...', 'en': 'Uploading...', 'ur': 'اپلوڈ ہو رہا ہے...', 'hi': 'अपलोड हो रहा है...', 'bn': 'আপলোড হচ্ছে...', 'fil': 'Ina-upload...', 'fr': 'Téléchargement...', 'tr': 'Yükleniyor...'},
+  'doc_uploaded': {'ar': 'تم رفع الوثيقة', 'en': 'Document uploaded', 'ur': 'دستاویز اپلوڈ ہو گئی', 'hi': 'दस्तावेज़ अपलोड हुआ', 'bn': 'নথি আপলোড হয়েছে', 'fil': 'Na-upload na', 'fr': 'Document téléchargé', 'tr': 'Belge yüklendi'},
+  'doc_status_pending': {'ar': 'قيد المراجعة', 'en': 'Under review', 'ur': 'زیر جائزہ', 'hi': 'समीक्षा में', 'bn': 'পর্যালোচনাধীন', 'fil': 'Sinusuri', 'fr': 'En cours d\'examen', 'tr': 'İnceleniyor'},
+  'doc_status_approved': {'ar': 'معتمدة', 'en': 'Approved', 'ur': 'منظور شدہ', 'hi': 'स्वीकृत', 'bn': 'অনুমোদিত', 'fil': 'Aprubado', 'fr': 'Approuvé', 'tr': 'Onaylı'},
+  'doc_status_rejected': {'ar': 'مرفوضة', 'en': 'Rejected', 'ur': 'مسترد', 'hi': 'अस्वीकृत', 'bn': 'প্রত্যাখ্যাত', 'fil': 'Tinanggihan', 'fr': 'Refusé', 'tr': 'Reddedildi'},
+  'doc_status_missing': {'ar': 'لم تُرفع بعد', 'en': 'Not uploaded yet', 'ur': 'ابھی اپلوڈ نہیں', 'hi': 'अभी अपलोड नहीं', 'bn': 'এখনো আপলোড নয়', 'fil': 'Hindi pa upload', 'fr': 'Pas encore téléchargé', 'tr': 'Henüz yüklenmedi'},
+  'approval_pending_docs': {'ar': 'بانتظار رفع الوثائق', 'en': 'Awaiting documents', 'ur': 'دستاویزات کا انتظار', 'hi': 'दस्तावेज़ की प्रतीक्षा', 'bn': 'নথির অপেক্ষায়', 'fil': 'Naghihintay sa dokumento', 'fr': 'En attente de documents', 'tr': 'Belgeler bekleniyor'},
+  'approval_docs_uploaded': {'ar': 'قيد مراجعة الإدارة', 'en': 'Under admin review', 'ur': 'ایڈمن کے زیر جائزہ', 'hi': 'प्रशासन समीक्षा में', 'bn': 'প্রশাসনিক পর্যালোচনায়', 'fil': 'Sinusuri ng admin', 'fr': 'En cours d\'examen', 'tr': 'İnceleme aşamasında'},
+  'approval_approved': {'ar': 'معتمد ✓', 'en': 'Approved ✓', 'ur': 'منظور ✓', 'hi': 'स्वीकृत ✓', 'bn': 'অনুমোদিত ✓', 'fil': 'Aprubado ✓', 'fr': 'Approuvé ✓', 'tr': 'Onaylı ✓'},
+  'approval_soft_reject': {'ar': 'رفض مؤقّت', 'en': 'Temporarily rejected', 'ur': 'عارضی طور پر مسترد', 'hi': 'अस्थायी अस्वीकृति', 'bn': 'অস্থায়ী প্রত্যাখ্যান', 'fil': 'Pansamantalang tinanggihan', 'fr': 'Refus temporaire', 'tr': 'Geçici red'},
+  'approval_hard_reject': {'ar': 'رفض نهائي', 'en': 'Permanently rejected', 'ur': 'مستقل طور پر مسترد', 'hi': 'स्थायी अस्वीकृति', 'bn': 'স্থায়ী প্রত্যাখ্যান', 'fil': 'Permanenteng tinanggihan', 'fr': 'Refus définitif', 'tr': 'Kalıcı red'},
+
   // ─── Common ───
   'confirm': {'ar': 'تأكيد', 'en': 'Confirm', 'ur': 'تصدیق کریں', 'hi': 'पुष्टि करें', 'bn': 'নিশ্চিত করুন', 'fil': 'Kumpirmahin', 'fr': 'Confirmer', 'tr': 'Onayla'},
   'cancel': {'ar': 'إلغاء', 'en': 'Cancel', 'ur': 'منسوخ', 'hi': 'रद्द करें', 'bn': 'বাতিল', 'fil': 'Kanselahin', 'fr': 'Annuler', 'tr': 'İptal'},

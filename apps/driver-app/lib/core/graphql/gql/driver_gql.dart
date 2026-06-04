@@ -25,6 +25,8 @@ const String driverMeQuery = r'''
       gender
       kidsApproved
       nightApproved
+      approvalStatus
+      rejectionReason
     }
   }
 ''';

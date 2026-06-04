@@ -77,4 +77,11 @@ export class DriverType {
 
   @Field()
   nightApproved!: boolean;
+
+  /** I1 — pending_docs | docs_uploaded | approved | soft_reject | hard_reject */
+  @Field()
+  approvalStatus!: string;
+
+  @Field({ nullable: true })
+  rejectionReason?: string;
 }

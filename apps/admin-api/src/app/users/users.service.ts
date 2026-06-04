@@ -177,6 +177,8 @@ export class UsersService {
     t.gender = e.gender;
     t.kidsApproved = e.kidsApproved ?? false;
     t.nightApproved = e.nightApproved ?? false;
+    t.approvalStatus = e.approvalStatus ?? 'pending_docs';
+    t.rejectionReason = e.rejectionReason;
     return t;
   }
 }

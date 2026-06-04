@@ -33,6 +33,7 @@ import { RideBundleEntity } from './entities/ride-bundle.entity';
 import { RiderEntitlementEntity } from './entities/rider-entitlement.entity';
 import { CompanyEntity } from './entities/company.entity';
 import { CompanyEmployeeEntity } from './entities/company-employee.entity';
+import { DriverDocumentEntity } from './entities/driver-document.entity';
 
 /**
  * قائمة كاملة بجميع Entities في HANCR
@@ -66,6 +67,7 @@ export const HANCR_ENTITIES = [
   RiderEntitlementEntity,
   CompanyEntity,
   CompanyEmployeeEntity,
+  DriverDocumentEntity,
 ];
 
 /**

@@ -36,6 +36,7 @@ import {
   RiderEntitlementEntity,
   CompanyEntity,
   CompanyEmployeeEntity,
+  DriverDocumentEntity,
 } from '@hancr/database';
 
 // Redis
@@ -127,6 +128,7 @@ import { pubSubProvider } from './pubsub.provider';
           RiderEntitlementEntity,
           CompanyEntity,
           CompanyEmployeeEntity,
+          DriverDocumentEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
