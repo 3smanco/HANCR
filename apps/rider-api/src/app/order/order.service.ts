@@ -36,6 +36,7 @@ import { DirectionsService } from './directions.service';
 import { CouponService } from './coupon.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { BundleService } from '../bundle/bundle.service';
+import { CompanyService } from '../company/company.service';
 
 // GraphQL Subscription events
 export const ORDER_UPDATED = 'ORDER_UPDATED';
@@ -67,6 +68,7 @@ export class OrderService {
     private readonly couponService: CouponService,
     private readonly loyaltyService: LoyaltyService,
     private readonly bundleService: BundleService,
+    private readonly companyService: CompanyService,
     private readonly walletService: WalletService,
     private readonly dataSource: DataSource,
     private readonly pushNotifications: PushNotificationService,
@@ -177,6 +179,24 @@ export class OrderService {
       }
     }
 
+    // F2 — Corporate Accounts: لو الراكب اختار "حساب الشركة"
+    //   نتحقّق أنه موظف نشط في شركة فعالة، ونحفظ companyId على الطلب.
+    //   الخصم الفعلي يقع بعد commit (chargeForOrder).
+    let companyId: number | undefined;
+    if (
+      input.paymentMode === PaymentMode.Company &&
+      !usedEntitlementId &&
+      costAfterCoupon > 0
+    ) {
+      const link = await this.companyService.findActiveLink(riderId);
+      if (!link) {
+        throw new BadRequestException(
+          'You are not linked to an active company account',
+        );
+      }
+      companyId = link.company.id;
+    }
+
     // استخدام Transaction لضمان الاتساق
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -221,6 +241,8 @@ export class OrderService {
         budget: input.budget,
         // F1 Ride Bundles
         entitlementId: usedEntitlementId,
+        // F2 Corporate
+        companyId,
         // OTP — لتوصيل الأمانات: نولّد الكود عند الإنشاء ليعرضه الراكب للمستلم،
         // والسائق يُدخله عند التسليم لإثبات الاستلام (confirmDelivery)
         receiverPhone: input.receiverPhone,
@@ -262,6 +284,26 @@ export class OrderService {
               (e as Error).message
             }`,
           );
+        }
+      }
+
+      // F2 — خصم الأجرة من رصيد الشركة بعد نجاح الإنشاء.
+      // ملاحظة: لو فشل (cap/balance) نُلغي الطلب الذي أُنشئ للتو حفاظاً على
+      // الاتساق — لأن العميل لا يجب أن يحصل على رحلة لم تُدفع.
+      if (companyId && costAfterCoupon > 0) {
+        try {
+          await this.companyService.chargeForOrder(
+            riderId,
+            costAfterCoupon,
+            rider.currency,
+            savedOrder.id,
+          );
+        } catch (e) {
+          await this.orderRepo.update(
+            { id: savedOrder.id },
+            { status: OrderStatus.RiderCanceled },
+          );
+          throw e;
         }
       }
 

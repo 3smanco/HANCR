@@ -12,4 +12,6 @@ export enum PaymentMode {
   Wallet = 'Wallet',
   /** حزمة رحلات مدفوعة مسبقاً (RiderEntitlement) */
   Entitlement = 'Entitlement',
+  /** F2 — حساب الشركة (Corporate) */
+  Company = 'Company',
 }

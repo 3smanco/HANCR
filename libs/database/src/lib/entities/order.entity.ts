@@ -216,6 +216,13 @@ export class OrderEntity {
   @Column({ nullable: true, name: 'entitlement_id' })
   entitlementId?: number;
 
+  /**
+   * F2 — معرّف الشركة الدافعة للطلب (إن كان paymentMode = Company).
+   * يُتيح التقارير الشهرية لكل شركة.
+   */
+  @Column({ nullable: true, name: 'company_id' })
+  companyId?: number;
+
   /** ===== Bid Mode ===== */
 
   /** هل هذا الطلب عبر Bid Mode */

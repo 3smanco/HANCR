@@ -250,6 +250,12 @@ const Map<String, Map<String, String>> _t = {
   'insufficientWallet': {'ar': 'الرصيد غير كافٍ', 'en': 'Insufficient wallet balance', 'ur': 'بیلنس ناکافی', 'hi': 'अपर्याप्त बैलेंस', 'bn': 'অপর্যাপ্ত ব্যালেন্স', 'fil': 'Kulang ang balanse', 'fr': 'Solde insuffisant', 'tr': 'Bakiye yetersiz'},
   'day': {'ar': 'يوم', 'en': 'days', 'ur': 'دن', 'hi': 'दिन', 'bn': 'দিন', 'fil': 'araw', 'fr': 'jours', 'tr': 'gün'},
 
+  // ─── F2 — Corporate Accounts ───
+  'payWithCompany': {'ar': 'ادفع من حساب الشركة', 'en': 'Pay with company account', 'ur': 'کمپنی اکاؤنٹ سے ادائیگی', 'hi': 'कंपनी खाते से भुगतान', 'bn': 'কোম্পানি অ্যাকাউন্ট থেকে পরিশোধ', 'fil': 'Bayaran gamit ang kumpanya', 'fr': 'Payer avec compte entreprise', 'tr': 'Şirket hesabıyla öde'},
+  'companyMonthlyCap': {'ar': 'السقف الشهري', 'en': 'Monthly cap', 'ur': 'ماہانہ حد', 'hi': 'मासिक सीमा', 'bn': 'মাসিক সীমা', 'fil': 'Buwanang limit', 'fr': 'Plafond mensuel', 'tr': 'Aylık limit'},
+  'companyMonthlyRemaining': {'ar': 'المتاح هذا الشهر', 'en': 'Remaining this month', 'ur': 'اس مہینے باقی', 'hi': 'इस माह शेष', 'bn': 'এই মাসে অবশিষ্ট', 'fil': 'Natitira ngayong buwan', 'fr': 'Restant ce mois-ci', 'tr': 'Bu ay kalan'},
+  'companyAccountInactive': {'ar': 'حساب الشركة معطّل', 'en': 'Company account inactive', 'ur': 'کمپنی اکاؤنٹ غیر فعال', 'hi': 'कंपनी खाता निष्क्रिय', 'bn': 'কোম্পানি অ্যাকাউন্ট নিষ্ক্রিয়', 'fil': 'Hindi aktibo ang account', 'fr': 'Compte entreprise inactif', 'tr': 'Şirket hesabı pasif'},
+
   // ─── Auth ───
   'continueWith': {'ar': 'تابع باستخدام:', 'en': 'Continue with:', 'ur': 'اس کے ساتھ جاری رکھیں:', 'hi': 'इसके साथ जारी रखें:', 'bn': 'চালিয়ে যান:', 'fil': 'Magpatuloy gamit ang:', 'fr': 'Continuer avec :', 'tr': 'Şununla devam et:'},
   'enterPhoneFirst': {'ar': 'أدخل رقم هاتفك للمتابعة', 'en': 'Enter your phone number to continue', 'ur': 'جاری رکھنے کے لیے فون نمبر درج کریں', 'hi': 'जारी रखने के लिए फ़ोन नंबर दर्ज करें', 'bn': 'চালিয়ে যেতে ফোন নম্বর দিন', 'fil': 'Ilagay ang phone number para magpatuloy', 'fr': 'Entrez votre numéro pour continuer', 'tr': 'Devam etmek için telefon numaranızı girin'},

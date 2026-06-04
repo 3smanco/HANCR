@@ -12,6 +12,7 @@ import '../../blocs/order/order_state.dart';
 import '../../core/config/app_config.dart';
 import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
+import '../../core/graphql/gql/company_gql.dart';
 import '../../core/models/order_model.dart';
 import '../../core/models/service_model.dart';
 import '../../core/i18n/app_localization.dart';
@@ -93,8 +94,11 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   bool _couponLoading = false;
   String? _couponError;
 
-  // طريقة الدفع (Cash / Wallet)
+  // طريقة الدفع (Cash / Wallet / Company)
   String _paymentMode = 'Cash';
+
+  // F2 — إذا كان الراكب موظفاً في شركة فعّالة، نعرض خيار "ادفع من حساب الشركة"
+  Map<String, dynamic>? _myCompany;
 
   // محطات وسيطة (Multi-stop) — قائمة نقاط بين الانطلاق والوجهة
   final List<({GeoPoint point, String label})> _stops = [];
@@ -130,6 +134,20 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
       _destinationLabel = widget.presetDestinationLabel ?? 'الوجهة المحددة';
     }
     _initLocation();
+    _loadMyCompany();
+  }
+
+  Future<void> _loadMyCompany() async {
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(myCompanyQuery),
+        fetchPolicy: FetchPolicy.networkOnly,
+      ));
+      if (!mounted) return;
+      final data = res.data?['myCompany'] as Map<String, dynamic>?;
+      if (data != null) setState(() => _myCompany = data);
+    } catch (_) {}
   }
 
   Future<void> _initLocation() async {
@@ -1063,6 +1081,16 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                 ),
               ],
             ),
+            if (_myCompany != null) ...[
+              const SizedBox(height: AuroraSpacing.sm),
+              _payChip(
+                icon: Icons.business_outlined,
+                label:
+                    '${tr('payWithCompany')} · ${_myCompany!['companyName']}',
+                selected: _paymentMode == 'Company',
+                onTap: () => setState(() => _paymentMode = 'Company'),
+              ),
+            ],
           ],
 
           // ─── كود الخصم ───
