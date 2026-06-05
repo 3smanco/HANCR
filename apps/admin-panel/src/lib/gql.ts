@@ -46,6 +46,77 @@ export const DELETE_OPERATOR = gql`
   }
 `;
 
+// ─── MARKETING (Phase I6) ──────────────────────────────────────────────────
+
+// Announcements
+export const LIST_ANNOUNCEMENTS = gql`
+  query AdminAnnouncements {
+    adminAnnouncements {
+      id title body target url startsAt endsAt active createdAt
+    }
+  }
+`;
+
+export const CREATE_ANNOUNCEMENT = gql`
+  mutation CreateAnnouncement($input: CreateAnnouncementInput!) {
+    createAnnouncement(input: $input) {
+      id title target active startsAt endsAt
+    }
+  }
+`;
+
+export const UPDATE_ANNOUNCEMENT = gql`
+  mutation UpdateAnnouncement($input: UpdateAnnouncementInput!) {
+    updateAnnouncement(input: $input) {
+      id title body target url startsAt endsAt active
+    }
+  }
+`;
+
+export const DELETE_ANNOUNCEMENT = gql`
+  mutation DeleteAnnouncement($id: Int!) {
+    deleteAnnouncement(id: $id)
+  }
+`;
+
+// Gift batches
+export const LIST_GIFT_BATCHES = gql`
+  query AdminGiftBatches {
+    adminGiftBatches {
+      id name amount currency totalCount claimedCount expiresAt createdAt
+    }
+  }
+`;
+
+export const CREATE_GIFT_BATCH = gql`
+  mutation CreateGiftBatch($input: CreateGiftBatchInput!) {
+    createGiftBatch(input: $input) {
+      batch {
+        id name amount currency totalCount claimedCount expiresAt createdAt
+      }
+      codes
+    }
+  }
+`;
+
+export const GIFT_BATCH_CODES = gql`
+  query GiftBatchCodes($batchId: Int!) {
+    giftBatchCodes(batchId: $batchId)
+  }
+`;
+
+// Referrals
+export const REFERRAL_STATS = gql`
+  query AdminReferralStats {
+    adminReferralStats {
+      totalInvited
+      topReferrers {
+        riderId name phone referralCode invitedCount
+      }
+    }
+  }
+`;
+
 export const ADMIN_LOGIN = gql`
   mutation AdminLogin($email: String!, $password: String!) {
     adminLogin(email: $email, password: $password) {
