@@ -102,6 +102,16 @@ export class WalletService {
         currency: row[0].currency,
       };
     }
+    if (ownerType === WalletOwnerType.Fleet) {
+      const row = await this.dataSource.query<
+        Array<{ balance: string; currency: string }>
+      >(`SELECT balance, currency FROM hancr_fleet WHERE id = $1`, [ownerId]);
+      if (row.length === 0) throw new Error(`Fleet #${ownerId} not found`);
+      return {
+        balance: Number(row[0].balance),
+        currency: row[0].currency,
+      };
+    }
     const driver = await this.driverRepo.findOne({
       where: { id: ownerId },
       select: ['balance', 'currency'],
@@ -209,6 +219,8 @@ export class WalletService {
           ? 'hancr_rider'
           : input.ownerType === WalletOwnerType.Company
           ? 'hancr_company'
+          : input.ownerType === WalletOwnerType.Fleet
+          ? 'hancr_fleet'
           : 'hancr_driver';
 
       const ownerRow = await em.query<

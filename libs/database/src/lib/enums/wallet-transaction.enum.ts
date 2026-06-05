@@ -63,6 +63,8 @@ export enum WalletOwnerType {
   Driver = 'Driver',
   /** F2 — حسابات الشركات (B2B) */
   Company = 'Company',
+  /** I10 — أسطول تاكسي تابع */
+  Fleet = 'Fleet',
 }
 
 /** بوابات الدفع المدعومة */

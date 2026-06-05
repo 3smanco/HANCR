@@ -23,6 +23,8 @@ export interface MatchingFilters {
   requireNightApproved?: boolean;
   /** VIP soft-target: ادعم سائقاً معيناً فقط (الباقي يُستبعد) */
   onlyDriverId?: number;
+  /** I10 — معرّفات الأساطيل التي لها حصرية في منطقة الطلب */
+  exclusiveFleetIds?: number[];
 }
 
 /**
@@ -88,6 +90,16 @@ export class MatchingService {
       if (filters?.requireFemale && driver.gender !== 'F') continue;
       if (filters?.requireKidsApproved && !driver.kidsApproved) continue;
       if (filters?.requireNightApproved && !driver.nightApproved) continue;
+
+      // I10 — لو في أسطول حصري نشط في المنطقة، نستبعد من ليس منتمياً
+      if (
+        filters?.exclusiveFleetIds &&
+        filters.exclusiveFleetIds.length > 0 &&
+        (driver.fleetId == null ||
+          !filters.exclusiveFleetIds.includes(driver.fleetId))
+      ) {
+        continue;
+      }
 
       // حساب الوقت المتوقع للوصول (ETA) — تقدير: 1.5 دقيقة لكل كيلومتر
       const distanceKm = nearbyDriver.distanceMeters / 1000;

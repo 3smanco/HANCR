@@ -217,6 +217,70 @@ export const DELETE_REVIEW_PARAMETER = gql`
   }
 `;
 
+// ─── FLEETS (Phase I10) ────────────────────────────────────────────────────
+
+export const LIST_FLEETS = gql`
+  query AdminFleets {
+    adminFleets {
+      id name ownerName contactPhone contactEmail
+      balance currency commissionPercent exclusivityRegionIds
+      active driverCount createdAt
+    }
+  }
+`;
+
+export const FLEET_DRIVERS = gql`
+  query FleetDrivers($fleetId: Int!) {
+    fleetDrivers(fleetId: $fleetId) {
+      driverId driverName phoneNumber plateNumber approvalStatus
+    }
+  }
+`;
+
+export const CREATE_FLEET = gql`
+  mutation CreateFleet($input: CreateFleetInput!) {
+    createFleet(input: $input) {
+      id name balance currency commissionPercent active
+    }
+  }
+`;
+
+export const UPDATE_FLEET = gql`
+  mutation UpdateFleet($input: UpdateFleetInput!) {
+    updateFleet(input: $input) {
+      id name commissionPercent exclusivityRegionIds active
+    }
+  }
+`;
+
+export const TOP_UP_FLEET = gql`
+  mutation TopUpFleet($input: TopUpFleetInput!) {
+    topUpFleet(input: $input) {
+      id balance currency
+    }
+  }
+`;
+
+export const DELETE_FLEET = gql`
+  mutation DeleteFleet($id: Int!) {
+    deleteFleet(id: $id)
+  }
+`;
+
+export const ASSIGN_DRIVER_TO_FLEET = gql`
+  mutation AssignDriverToFleet($input: AssignDriverToFleetInput!) {
+    assignDriverToFleet(input: $input) {
+      driverId driverName phoneNumber approvalStatus
+    }
+  }
+`;
+
+export const UNASSIGN_DRIVER_FROM_FLEET = gql`
+  mutation UnassignDriverFromFleet($driverId: Int!) {
+    unassignDriverFromFleet(driverId: $driverId)
+  }
+`;
+
 // Referrals
 export const REFERRAL_STATS = gql`
   query AdminReferralStats {

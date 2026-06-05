@@ -43,6 +43,7 @@ export { PayoutSessionEntity } from './lib/entities/payout-session.entity';
 export { PayoutEntryEntity } from './lib/entities/payout-entry.entity';
 export { CancelReasonEntity } from './lib/entities/cancel-reason.entity';
 export { ReviewParameterEntity } from './lib/entities/review-parameter.entity';
+export { FleetEntity } from './lib/entities/fleet.entity';
 
 // Enums
 export { CouponType } from './lib/enums/coupon-type.enum';
