@@ -5,9 +5,25 @@
 @tailwind utilities;
 
 html { scroll-behavior: smooth; }
-body { font-family: 'Cairo', sans-serif; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: 'Cairo', 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-[dir='ltr'] body { font-family: 'Inter', sans-serif; }
+[dir='ltr'] body { font-family: 'Inter', 'Cairo', system-ui, sans-serif; }
+
+/* Focus ring uses ember to match brand */
+*:focus-visible {
+  outline: 2px solid #FF7A1A;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background-color: rgba(255, 122, 26, 0.35);
+  color: #FFF5EE;
+}
 
 @keyframes glow {
   0%, 100% { opacity: 0.5; }

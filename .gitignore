@@ -43,3 +43,7 @@ deliverables/
 
 # TypeScript incremental build artifacts
 *.tsbuildinfo
+
+# Next.js build outputs
+**/.next/
+**/out/
