@@ -45,6 +45,7 @@ import {
   CancelReasonEntity,
   ReviewParameterEntity,
   FleetEntity,
+  PricingZoneEntity,
 } from '@hancr/database';
 
 // Redis
@@ -147,6 +148,7 @@ import { pubSubProvider } from './pubsub.provider';
           CancelReasonEntity,
           ReviewParameterEntity,
           FleetEntity,
+          PricingZoneEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',

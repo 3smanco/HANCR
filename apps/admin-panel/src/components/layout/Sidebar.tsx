@@ -26,6 +26,7 @@ import {
   Banknote,
   Activity,
   Bus,
+  DollarSign,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth';
@@ -56,6 +57,7 @@ export function Sidebar() {
     { key: 'nav.banners',       icon: ImageIcon,       href: '/banners' },
     { key: 'nav.marketing',     icon: Megaphone,       href: '/marketing/announcements' },
     { key: 'nav.regions',       icon: MapPin,          href: '/regions' },
+    { key: 'nav.pricingZones',  icon: DollarSign,      href: '/pricing-zones' },
     { key: 'nav.features',      icon: Zap,             href: '/features' },
     { key: 'nav.analytics',     icon: BarChart2,       href: '/analytics' },
     { key: 'nav.notifications', icon: Bell,            href: '/settings' },
