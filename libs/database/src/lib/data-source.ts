@@ -47,6 +47,7 @@ import { CancelReasonEntity } from './entities/cancel-reason.entity';
 import { ReviewParameterEntity } from './entities/review-parameter.entity';
 import { FleetEntity } from './entities/fleet.entity';
 import { PricingZoneEntity } from './entities/pricing-zone.entity';
+import { LeadEntity } from './entities/lead.entity';
 
 /**
  * قائمة كاملة بجميع Entities في HANCR
@@ -94,6 +95,7 @@ export const HANCR_ENTITIES = [
   ReviewParameterEntity,
   FleetEntity,
   PricingZoneEntity,
+  LeadEntity,
 ];
 
 /**
