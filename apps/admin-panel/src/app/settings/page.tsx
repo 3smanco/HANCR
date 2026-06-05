@@ -6,6 +6,7 @@ import { Bell, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { BROADCAST_NOTIFICATION } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
+import { SettingsTabs } from './_SettingsTabs';
 import { useT } from '@/i18n/LocaleProvider';
 
 const TARGET_GQL: Record<'all' | 'riders' | 'drivers', string> = {
@@ -49,6 +50,10 @@ export default function SettingsPage() {
   return (
     <div>
       <Topbar title={t('settings.title')} subtitle={t('settings.subtitle')} />
+
+      <div className="p-6 space-y-5">
+        <SettingsTabs />
+      </div>
 
       <div className="p-6 max-w-2xl">
         <div className="card p-6">

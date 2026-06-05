@@ -41,6 +41,8 @@ export { GiftCodeEntity } from './lib/entities/gift-code.entity';
 export { PayoutMethodEntity } from './lib/entities/payout-method.entity';
 export { PayoutSessionEntity } from './lib/entities/payout-session.entity';
 export { PayoutEntryEntity } from './lib/entities/payout-entry.entity';
+export { CancelReasonEntity } from './lib/entities/cancel-reason.entity';
+export { ReviewParameterEntity } from './lib/entities/review-parameter.entity';
 
 // Enums
 export { CouponType } from './lib/enums/coupon-type.enum';

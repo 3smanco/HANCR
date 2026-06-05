@@ -171,6 +171,52 @@ export const LIVE_DRIVERS = gql`
   }
 `;
 
+// ─── SYSTEM SETTINGS (Phase I7) ────────────────────────────────────────────
+
+export const CANCEL_REASONS = gql`
+  query CancelReasons {
+    cancelReasons {
+      id code labelAr labelEn appliesTo sortOrder active createdAt
+    }
+  }
+`;
+
+export const UPSERT_CANCEL_REASON = gql`
+  mutation UpsertCancelReason($input: UpsertCancelReasonInput!) {
+    upsertCancelReason(input: $input) {
+      id code labelAr labelEn appliesTo sortOrder active
+    }
+  }
+`;
+
+export const DELETE_CANCEL_REASON = gql`
+  mutation DeleteCancelReason($id: Int!) {
+    deleteCancelReason(id: $id)
+  }
+`;
+
+export const REVIEW_PARAMETERS = gql`
+  query ReviewParameters {
+    reviewParameters {
+      id code labelAr labelEn target sortOrder active createdAt
+    }
+  }
+`;
+
+export const UPSERT_REVIEW_PARAMETER = gql`
+  mutation UpsertReviewParameter($input: UpsertReviewParameterInput!) {
+    upsertReviewParameter(input: $input) {
+      id code labelAr labelEn target sortOrder active
+    }
+  }
+`;
+
+export const DELETE_REVIEW_PARAMETER = gql`
+  mutation DeleteReviewParameter($id: Int!) {
+    deleteReviewParameter(id: $id)
+  }
+`;
+
 // Referrals
 export const REFERRAL_STATS = gql`
   query AdminReferralStats {
