@@ -21,6 +21,7 @@ import {
   Building2,
   Wallet,
   AlertOctagon,
+  Users2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth';
@@ -50,6 +51,7 @@ export function Sidebar() {
     { key: 'nav.features',      icon: Zap,             href: '/features' },
     { key: 'nav.analytics',     icon: BarChart2,       href: '/analytics' },
     { key: 'nav.notifications', icon: Bell,            href: '/settings' },
+    { key: 'nav.operators',     icon: Users2,          href: '/operators' },
   ] as const;
 
   const handleLogout = () => {

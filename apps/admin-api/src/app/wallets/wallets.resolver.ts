@@ -9,6 +9,8 @@ import {
   WalletTransactionsResult,
 } from './dto/wallet.types';
 import { AdminJwtGuard } from '../auth/admin-jwt.guard';
+import { AdminRolesGuard } from '../auth/admin-roles.guard';
+import { RequireRole } from '../auth/roles.decorator';
 
 @Resolver(() => WalletBalanceListResult)
 export class WalletsResolver {
@@ -45,7 +47,8 @@ export class WalletsResolver {
   @Mutation(() => AdminWalletTransactionType, {
     description: 'تعديل يدوي للمحفظة (موجب=إضافة، سالب=خصم)',
   })
-  @UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('finance')
   adminAdjustWallet(
     @Args('input') input: AdjustWalletInput,
   ): Promise<AdminWalletTransactionType> {

@@ -3,6 +3,8 @@ import { BadRequestException, UseGuards } from '@nestjs/common';
 import { BroadcastService } from './broadcast.service';
 import { BroadcastResultType, BroadcastTarget } from './dto/broadcast.types';
 import { AdminJwtGuard } from '../auth/admin-jwt.guard';
+import { AdminRolesGuard } from '../auth/admin-roles.guard';
+import { RequireRole } from '../auth/roles.decorator';
 
 @Resolver()
 export class NotificationsResolver {
@@ -11,7 +13,8 @@ export class NotificationsResolver {
   @Mutation(() => BroadcastResultType, {
     description: 'إرسال إشعار جماعي عبر FCM',
   })
-  @UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('marketing')
   broadcastNotification(
     @Args('title') title: string,
     @Args('body') body: string,
