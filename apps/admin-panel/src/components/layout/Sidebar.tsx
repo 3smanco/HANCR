@@ -24,6 +24,7 @@ import {
   Users2,
   Megaphone,
   Banknote,
+  Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth';
@@ -38,6 +39,7 @@ export function Sidebar() {
 
   const NAV_ITEMS = [
     { key: 'nav.dashboard',     icon: LayoutDashboard, href: '/dashboard' },
+    { key: 'nav.live',          icon: Activity,        href: '/live' },
     { key: 'nav.drivers',       icon: Car,             href: '/users/drivers' },
     { key: 'nav.riders',        icon: Users,           href: '/users/riders' },
     { key: 'nav.orders',        icon: ShoppingBag,     href: '/orders' },

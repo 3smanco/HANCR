@@ -59,6 +59,7 @@ import { ComplaintsModule } from './complaints/complaints.module';
 import { OperatorsModule } from './operators/operators.module';
 import { MarketingModule } from './marketing/marketing.module';
 import { AdminPayoutsModule } from './payouts/payouts.module';
+import { LiveModule } from './live/live.module';
 import { AdminNotificationsModule } from './notifications/notifications.module';
 import { NotificationsModule } from '@hancr/notifications';
 
@@ -163,6 +164,7 @@ import { ObservabilityModule } from '@hancr/observability';
     OperatorsModule,
     MarketingModule,
     AdminPayoutsModule,
+    LiveModule,
     NotificationsModule,
     AdminNotificationsModule,
     ObservabilityModule,

@@ -93,6 +93,7 @@ const ar = {
   nav: {
     dashboard: 'الرئيسية',
     drivers: 'السائقون',
+    live: 'الخريطة الحية',
     riders: 'الركاب',
     orders: 'الطلبات',
     sos: 'الطوارئ',
@@ -469,6 +470,7 @@ const en: typeof ar = {
   nav: {
     dashboard: 'Dashboard',
     drivers: 'Drivers',
+    live: 'Live map',
     riders: 'Riders',
     orders: 'Orders',
     sos: 'Emergency',
