@@ -43,6 +43,8 @@ import { GiftCodeEntity } from './entities/gift-code.entity';
 import { PayoutMethodEntity } from './entities/payout-method.entity';
 import { PayoutSessionEntity } from './entities/payout-session.entity';
 import { PayoutEntryEntity } from './entities/payout-entry.entity';
+import { CancelReasonEntity } from './entities/cancel-reason.entity';
+import { ReviewParameterEntity } from './entities/review-parameter.entity';
 
 /**
  * قائمة كاملة بجميع Entities في HANCR
@@ -86,6 +88,8 @@ export const HANCR_ENTITIES = [
   PayoutMethodEntity,
   PayoutSessionEntity,
   PayoutEntryEntity,
+  CancelReasonEntity,
+  ReviewParameterEntity,
 ];
 
 /**
