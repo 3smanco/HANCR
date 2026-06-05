@@ -105,6 +105,58 @@ export const GIFT_BATCH_CODES = gql`
   }
 `;
 
+// ─── PAYOUTS (Phase I4) ────────────────────────────────────────────────────
+
+export const ELIGIBLE_DRIVERS = gql`
+  query EligibleDrivers {
+    eligibleDrivers {
+      driverId driverName phoneNumber balance currency
+      defaultPayoutMethodId defaultMethodSummary
+    }
+  }
+`;
+
+export const LIST_PAYOUT_SESSIONS = gql`
+  query PayoutSessions {
+    payoutSessions {
+      id initiatedBy totalAmount currency driverCount mode status
+      note createdAt completedAt
+    }
+  }
+`;
+
+export const PAYOUT_SESSION_DETAIL = gql`
+  query PayoutSession($id: Int!) {
+    payoutSession(id: $id) {
+      id initiatedBy totalAmount currency driverCount mode status
+      note createdAt completedAt
+      entries {
+        id sessionId driverId driverName driverPhone amount
+        payoutMethodId methodSummary status gatewayRef errorMessage
+        createdAt completedAt
+      }
+    }
+  }
+`;
+
+export const CREATE_PAYOUT_SESSION = gql`
+  mutation CreatePayoutSession($input: CreatePayoutSessionInput!) {
+    createPayoutSession(input: $input) {
+      id totalAmount currency driverCount status
+      entries { id driverId amount status }
+    }
+  }
+`;
+
+export const PROCESS_PAYOUT_SESSION = gql`
+  mutation ProcessPayoutSession($id: Int!) {
+    processPayoutSession(id: $id) {
+      id status completedAt
+      entries { id status errorMessage completedAt }
+    }
+  }
+`;
+
 // Referrals
 export const REFERRAL_STATS = gql`
   query AdminReferralStats {

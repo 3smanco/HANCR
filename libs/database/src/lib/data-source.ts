@@ -40,6 +40,9 @@ import { AdminUserEntity } from './entities/admin-user.entity';
 import { AnnouncementEntity } from './entities/announcement.entity';
 import { GiftBatchEntity } from './entities/gift-batch.entity';
 import { GiftCodeEntity } from './entities/gift-code.entity';
+import { PayoutMethodEntity } from './entities/payout-method.entity';
+import { PayoutSessionEntity } from './entities/payout-session.entity';
+import { PayoutEntryEntity } from './entities/payout-entry.entity';
 
 /**
  * قائمة كاملة بجميع Entities في HANCR
@@ -80,6 +83,9 @@ export const HANCR_ENTITIES = [
   AnnouncementEntity,
   GiftBatchEntity,
   GiftCodeEntity,
+  PayoutMethodEntity,
+  PayoutSessionEntity,
+  PayoutEntryEntity,
 ];
 
 /**
