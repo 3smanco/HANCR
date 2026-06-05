@@ -281,6 +281,33 @@ export const UNASSIGN_DRIVER_FROM_FLEET = gql`
   }
 `;
 
+// ─── PRICING ZONES (Phase I11) ─────────────────────────────────────────────
+
+export const PRICING_ZONES = gql`
+  query PricingZones {
+    pricingZones {
+      id name regionId serviceId fleetId
+      baseFare perKm perMinute multiplier
+      startsAt endsAt active createdAt
+    }
+  }
+`;
+
+export const UPSERT_PRICING_ZONE = gql`
+  mutation UpsertPricingZone($input: UpsertPricingZoneInput!) {
+    upsertPricingZone(input: $input) {
+      id name regionId serviceId fleetId
+      baseFare perKm perMinute multiplier active
+    }
+  }
+`;
+
+export const DELETE_PRICING_ZONE = gql`
+  mutation DeletePricingZone($id: Int!) {
+    deletePricingZone(id: $id)
+  }
+`;
+
 // Referrals
 export const REFERRAL_STATS = gql`
   query AdminReferralStats {

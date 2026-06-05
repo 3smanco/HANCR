@@ -120,14 +120,45 @@ export class OrderService {
     const distanceMeters = route.distanceMeters;
     const durationSeconds = route.durationSeconds;
 
-    // حساب السعر (baseFare + perHundredMeters→perKm + perMinuteDrive)
+    // I11 — Zone pricing overrides defaults. Look up active zone for this
+    // (region, service); fleet-specific zone wins over general.
+    const zoneRow = await this.dataSource.query<
+      Array<{
+        base_fare: string;
+        per_km: string;
+        per_minute: string;
+        multiplier: string;
+      }>
+    >(
+      `SELECT base_fare, per_km, per_minute, multiplier
+       FROM hancr_pricing_zone
+       WHERE region_id = $1 AND service_id = $2 AND active = true
+         AND (starts_at IS NULL OR starts_at <= NOW())
+         AND (ends_at   IS NULL OR ends_at   >= NOW())
+       ORDER BY (fleet_id IS NOT NULL) DESC, id DESC
+       LIMIT 1`,
+      [input.regionId, input.serviceId],
+    );
+
+    const zone = zoneRow[0];
+    const baseFare = zone ? Number(zone.base_fare) : Number(service.baseFare);
+    const perKm = zone
+      ? Number(zone.per_km)
+      : Number(service.perHundredMeters) * 10;
+    const perMin = zone
+      ? Number(zone.per_minute)
+      : Number(service.perMinuteDrive);
+    const multiplier = zone ? Number(zone.multiplier) : 1;
+
+    // حساب السعر (baseFare + perKm + perMinute) × multiplier
     let costBest = this.matchingService.estimateFare(
       distanceMeters,
       durationSeconds,
-      Number(service.baseFare),
-      Number(service.perHundredMeters) * 10,
-      Number(service.perMinuteDrive),
+      baseFare,
+      perKm,
+      perMin,
     );
+    if (multiplier !== 1) costBest = Math.round(costBest * multiplier * 100) / 100;
 
     // السائق بالساعة: السعر = hourlyRate × عدد الساعات
     if (input.bookedHours && service.hourlyRate) {

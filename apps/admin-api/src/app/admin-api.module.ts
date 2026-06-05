@@ -42,6 +42,7 @@ import {
   CancelReasonEntity,
   ReviewParameterEntity,
   FleetEntity,
+  PricingZoneEntity,
 } from '@hancr/database';
 
 // Feature Modules
@@ -65,6 +66,7 @@ import { AdminPayoutsModule } from './payouts/payouts.module';
 import { LiveModule } from './live/live.module';
 import { SettingsModule } from './settings/settings.module';
 import { FleetsModule } from './fleets/fleets.module';
+import { PricingZonesModule } from './pricing-zones/pricing-zones.module';
 import { AdminNotificationsModule } from './notifications/notifications.module';
 import { NotificationsModule } from '@hancr/notifications';
 
@@ -129,6 +131,7 @@ import { ObservabilityModule } from '@hancr/observability';
           CancelReasonEntity,
           ReviewParameterEntity,
           FleetEntity,
+          PricingZoneEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
@@ -175,6 +178,7 @@ import { ObservabilityModule } from '@hancr/observability';
     LiveModule,
     SettingsModule,
     FleetsModule,
+    PricingZonesModule,
     NotificationsModule,
     AdminNotificationsModule,
     ObservabilityModule,
