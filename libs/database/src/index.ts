@@ -38,6 +38,9 @@ export { AdminUserEntity } from './lib/entities/admin-user.entity';
 export { AnnouncementEntity } from './lib/entities/announcement.entity';
 export { GiftBatchEntity } from './lib/entities/gift-batch.entity';
 export { GiftCodeEntity } from './lib/entities/gift-code.entity';
+export { PayoutMethodEntity } from './lib/entities/payout-method.entity';
+export { PayoutSessionEntity } from './lib/entities/payout-session.entity';
+export { PayoutEntryEntity } from './lib/entities/payout-entry.entity';
 
 // Enums
 export { CouponType } from './lib/enums/coupon-type.enum';

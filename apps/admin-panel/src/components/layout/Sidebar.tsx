@@ -23,6 +23,7 @@ import {
   AlertOctagon,
   Users2,
   Megaphone,
+  Banknote,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth';
@@ -47,6 +48,7 @@ export function Sidebar() {
     { key: 'nav.bundles',       icon: Package,         href: '/bundles' },
     { key: 'nav.companies',     icon: Building2,       href: '/companies' },
     { key: 'nav.wallets',       icon: Wallet,          href: '/wallets/riders' },
+    { key: 'nav.payouts',       icon: Banknote,        href: '/payouts' },
     { key: 'nav.banners',       icon: ImageIcon,       href: '/banners' },
     { key: 'nav.marketing',     icon: Megaphone,       href: '/marketing/announcements' },
     { key: 'nav.regions',       icon: MapPin,          href: '/regions' },

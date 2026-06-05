@@ -36,6 +36,9 @@ import {
   AnnouncementEntity,
   GiftBatchEntity,
   GiftCodeEntity,
+  PayoutMethodEntity,
+  PayoutSessionEntity,
+  PayoutEntryEntity,
 } from '@hancr/database';
 
 // Feature Modules
@@ -55,6 +58,7 @@ import { AdminWalletsModule } from './wallets/wallets.module';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { OperatorsModule } from './operators/operators.module';
 import { MarketingModule } from './marketing/marketing.module';
+import { AdminPayoutsModule } from './payouts/payouts.module';
 import { AdminNotificationsModule } from './notifications/notifications.module';
 import { NotificationsModule } from '@hancr/notifications';
 
@@ -113,6 +117,9 @@ import { ObservabilityModule } from '@hancr/observability';
           AnnouncementEntity,
           GiftBatchEntity,
           GiftCodeEntity,
+          PayoutMethodEntity,
+          PayoutSessionEntity,
+          PayoutEntryEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
@@ -155,6 +162,7 @@ import { ObservabilityModule } from '@hancr/observability';
     ComplaintsModule,
     OperatorsModule,
     MarketingModule,
+    AdminPayoutsModule,
     NotificationsModule,
     AdminNotificationsModule,
     ObservabilityModule,

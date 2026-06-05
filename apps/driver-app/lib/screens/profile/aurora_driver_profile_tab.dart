@@ -12,6 +12,7 @@ import '../../core/graphql/gql/driver_gql.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../sos/driver_emergency_contacts_screen.dart';
 import '../wallet/aurora_driver_wallet_screen.dart';
+import '../wallet/aurora_payout_methods_screen.dart';
 import 'aurora_driver_documents_screen.dart';
 import 'language_screen.dart';
 
@@ -124,6 +125,17 @@ class AuroraDriverProfileTab extends StatelessWidget {
                             MaterialPageRoute(
                               builder: (_) =>
                                   const AuroraDriverDocumentsScreen(),
+                            ),
+                          ),
+                        ),
+                        const Divider(height: 1, color: AuroraColors.divider),
+                        _menuItem(
+                          icon: Icons.account_balance,
+                          label: tr('payout_methods'),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const AuroraPayoutMethodsScreen(),
                             ),
                           ),
                         ),

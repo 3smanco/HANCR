@@ -30,6 +30,8 @@ import {
   ComplaintEntity,
   ComplaintActivityEntity,
   AnnouncementEntity,
+  PayoutMethodEntity,
+  PayoutEntryEntity,
 } from '@hancr/database';
 
 // Redis
@@ -44,6 +46,7 @@ import { ObservabilityModule } from '@hancr/observability';
 // Feature Modules
 import { AuthModule } from './auth/auth.module';
 import { DriverModule } from './driver/driver.module';
+import { PayoutsModule } from './payouts/payouts.module';
 import { LocationModule } from './location/location.module';
 import { OrderModule } from './order/order.module';
 import { StarsModule } from './stars/stars.module';
@@ -78,6 +81,8 @@ import { pubSubProvider } from './pubsub.provider';
           ComplaintEntity,
           ComplaintActivityEntity,
           AnnouncementEntity,
+          PayoutMethodEntity,
+          PayoutEntryEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
@@ -113,6 +118,7 @@ import { pubSubProvider } from './pubsub.provider';
     WalletModule,
     SosModule,
     ChatModule,
+    PayoutsModule,
   ],
   providers: [pubSubProvider],
   exports: [pubSubProvider],

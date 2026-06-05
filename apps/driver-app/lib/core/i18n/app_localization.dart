@@ -107,6 +107,24 @@ const Map<String, Map<String, String>> _t = {
   'approval_soft_reject': {'ar': 'رفض مؤقّت', 'en': 'Temporarily rejected', 'ur': 'عارضی طور پر مسترد', 'hi': 'अस्थायी अस्वीकृति', 'bn': 'অস্থায়ী প্রত্যাখ্যান', 'fil': 'Pansamantalang tinanggihan', 'fr': 'Refus temporaire', 'tr': 'Geçici red'},
   'approval_hard_reject': {'ar': 'رفض نهائي', 'en': 'Permanently rejected', 'ur': 'مستقل طور پر مسترد', 'hi': 'स्थायी अस्वीकृति', 'bn': 'স্থায়ী প্রত্যাখ্যান', 'fil': 'Permanenteng tinanggihan', 'fr': 'Refus définitif', 'tr': 'Kalıcı red'},
 
+  // ─── I4 — Driver Payouts ───
+  'payout_methods': {'ar': 'طرق سحب الأرباح', 'en': 'Payout methods', 'ur': 'منافع نکالنے کے طریقے', 'hi': 'भुगतान विधियाँ', 'bn': 'পেআউট পদ্ধতি', 'fil': 'Mga paraan ng payout', 'fr': 'Méthodes de retrait', 'tr': 'Çekim yöntemleri'},
+  'payout_methods_hint': {'ar': 'أضف حساباً بنكياً أو STC Pay لتلقي أرباحك', 'en': 'Add a bank account or STC Pay to receive your earnings', 'ur': 'منافع وصول کرنے کے لیے بینک یا STC Pay شامل کریں', 'hi': 'कमाई पाने के लिए बैंक या STC Pay जोड़ें', 'bn': 'উপার্জন গ্রহণ করতে ব্যাংক বা STC Pay যোগ করুন', 'fil': 'Magdagdag ng bank o STC Pay', 'fr': 'Ajoutez un compte bancaire ou STC Pay', 'tr': 'Banka veya STC Pay ekleyin'},
+  'add_payout_method': {'ar': 'إضافة طريقة سحب', 'en': 'Add payout method', 'ur': 'طریقہ شامل کریں', 'hi': 'विधि जोड़ें', 'bn': 'পদ্ধতি যোগ করুন', 'fil': 'Magdagdag', 'fr': 'Ajouter', 'tr': 'Ekle'},
+  'payout_default': {'ar': 'افتراضي', 'en': 'Default', 'ur': 'بنیادی', 'hi': 'डिफ़ॉल्ट', 'bn': 'ডিফল্ট', 'fil': 'Default', 'fr': 'Par défaut', 'tr': 'Varsayılan'},
+  'payout_make_default': {'ar': 'جعلها افتراضية', 'en': 'Make default', 'ur': 'بنیادی بنائیں', 'hi': 'डिफ़ॉल्ट बनाएँ', 'bn': 'ডিফল্ট করুন', 'fil': 'Gawing default', 'fr': 'Définir par défaut', 'tr': 'Varsayılan yap'},
+  'payout_set_default_ok': {'ar': 'تم التعيين كافتراضية', 'en': 'Set as default', 'ur': 'بنیادی مقرر ہوگئی', 'hi': 'डिफ़ॉल्ट सेट', 'bn': 'ডিফল্ট সেট', 'fil': 'Naka-default na', 'fr': 'Définie par défaut', 'tr': 'Varsayılan ayarlandı'},
+  'payout_removed': {'ar': 'تمت الإزالة', 'en': 'Removed', 'ur': 'ہٹا دیا گیا', 'hi': 'हटाया गया', 'bn': 'সরানো হয়েছে', 'fil': 'Tinanggal', 'fr': 'Supprimé', 'tr': 'Kaldırıldı'},
+  'remove': {'ar': 'حذف', 'en': 'Remove', 'ur': 'ہٹائیں', 'hi': 'हटाएँ', 'bn': 'সরান', 'fil': 'Tanggalin', 'fr': 'Supprimer', 'tr': 'Kaldır'},
+  'remove_payout_method_q': {'ar': 'حذف طريقة السحب؟', 'en': 'Remove payout method?', 'ur': 'طریقہ ہٹائیں؟', 'hi': 'विधि हटाएँ?', 'bn': 'পদ্ধতি সরান?', 'fil': 'Tanggalin?', 'fr': 'Supprimer ?', 'tr': 'Kaldırılsın mı?'},
+  'payout_type_bank': {'ar': 'بنك', 'en': 'Bank', 'ur': 'بینک', 'hi': 'बैंक', 'bn': 'ব্যাংক', 'fil': 'Bangko', 'fr': 'Banque', 'tr': 'Banka'},
+  'payout_type_mada': {'ar': 'مدى', 'en': 'Mada', 'ur': 'مدى', 'hi': 'मदा', 'bn': 'মাদা', 'fil': 'Mada', 'fr': 'Mada', 'tr': 'Mada'},
+  'payout_type_stcpay': {'ar': 'STC Pay', 'en': 'STC Pay', 'ur': 'STC Pay', 'hi': 'STC Pay', 'bn': 'STC Pay', 'fil': 'STC Pay', 'fr': 'STC Pay', 'tr': 'STC Pay'},
+  'account_name': {'ar': 'اسم صاحب الحساب', 'en': 'Account name', 'ur': 'اکاؤنٹ کا نام', 'hi': 'खाता नाम', 'bn': 'অ্যাকাউন্ট নাম', 'fil': 'Pangalan', 'fr': 'Nom du titulaire', 'tr': 'Hesap sahibi'},
+  'bank_name': {'ar': 'اسم البنك', 'en': 'Bank name', 'ur': 'بینک کا نام', 'hi': 'बैंक नाम', 'bn': 'ব্যাংকের নাম', 'fil': 'Pangalan ng bangko', 'fr': 'Nom de la banque', 'tr': 'Banka adı'},
+  'phone_number': {'ar': 'رقم الجوال', 'en': 'Phone number', 'ur': 'فون نمبر', 'hi': 'फ़ोन नंबर', 'bn': 'ফোন নম্বর', 'fil': 'Phone number', 'fr': 'Numéro de téléphone', 'tr': 'Telefon numarası'},
+  'saving': {'ar': 'جارٍ الحفظ...', 'en': 'Saving...', 'ur': 'محفوظ ہو رہا ہے...', 'hi': 'सहेजा जा रहा है...', 'bn': 'সংরক্ষণ হচ্ছে...', 'fil': 'Sine-save...', 'fr': 'Enregistrement...', 'tr': 'Kaydediliyor...'},
+
   // ─── Common ───
   'confirm': {'ar': 'تأكيد', 'en': 'Confirm', 'ur': 'تصدیق کریں', 'hi': 'पुष्टि करें', 'bn': 'নিশ্চিত করুন', 'fil': 'Kumpirmahin', 'fr': 'Confirmer', 'tr': 'Onayla'},
   'cancel': {'ar': 'إلغاء', 'en': 'Cancel', 'ur': 'منسوخ', 'hi': 'रद्द करें', 'bn': 'বাতিল', 'fil': 'Kanselahin', 'fr': 'Annuler', 'tr': 'İptal'},
