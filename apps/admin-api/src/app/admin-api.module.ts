@@ -41,6 +41,7 @@ import {
   PayoutEntryEntity,
   CancelReasonEntity,
   ReviewParameterEntity,
+  FleetEntity,
 } from '@hancr/database';
 
 // Feature Modules
@@ -63,6 +64,7 @@ import { MarketingModule } from './marketing/marketing.module';
 import { AdminPayoutsModule } from './payouts/payouts.module';
 import { LiveModule } from './live/live.module';
 import { SettingsModule } from './settings/settings.module';
+import { FleetsModule } from './fleets/fleets.module';
 import { AdminNotificationsModule } from './notifications/notifications.module';
 import { NotificationsModule } from '@hancr/notifications';
 
@@ -126,6 +128,7 @@ import { ObservabilityModule } from '@hancr/observability';
           PayoutEntryEntity,
           CancelReasonEntity,
           ReviewParameterEntity,
+          FleetEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
@@ -171,6 +174,7 @@ import { ObservabilityModule } from '@hancr/observability';
     AdminPayoutsModule,
     LiveModule,
     SettingsModule,
+    FleetsModule,
     NotificationsModule,
     AdminNotificationsModule,
     ObservabilityModule,

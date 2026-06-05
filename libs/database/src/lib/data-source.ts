@@ -45,6 +45,7 @@ import { PayoutSessionEntity } from './entities/payout-session.entity';
 import { PayoutEntryEntity } from './entities/payout-entry.entity';
 import { CancelReasonEntity } from './entities/cancel-reason.entity';
 import { ReviewParameterEntity } from './entities/review-parameter.entity';
+import { FleetEntity } from './entities/fleet.entity';
 
 /**
  * قائمة كاملة بجميع Entities في HANCR
@@ -90,6 +91,7 @@ export const HANCR_ENTITIES = [
   PayoutEntryEntity,
   CancelReasonEntity,
   ReviewParameterEntity,
+  FleetEntity,
 ];
 
 /**

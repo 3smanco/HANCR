@@ -372,6 +372,16 @@ export class OrderService {
       if (input.preferredDriverId) {
         filters.onlyDriverId = input.preferredDriverId;
       }
+      // I10 — استبعاد غير المنتمين للأساطيل النشطة الحصرية في هذه المنطقة
+      const exclusiveFleets = await this.dataSource.query<
+        Array<{ id: number }>
+      >(
+        `SELECT id FROM hancr_fleet WHERE active = true AND $1 = ANY(exclusivity_region_ids)`,
+        [input.regionId],
+      );
+      if (exclusiveFleets.length > 0) {
+        filters.exclusiveFleetIds = exclusiveFleets.map((r) => r.id);
+      }
       const matches = await this.matchingService.findNearbyDrivers(
         originPoint.lat,
         originPoint.lng,
