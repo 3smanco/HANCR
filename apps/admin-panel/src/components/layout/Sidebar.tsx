@@ -22,6 +22,7 @@ import {
   Wallet,
   AlertOctagon,
   Users2,
+  Megaphone,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth';
@@ -47,6 +48,7 @@ export function Sidebar() {
     { key: 'nav.companies',     icon: Building2,       href: '/companies' },
     { key: 'nav.wallets',       icon: Wallet,          href: '/wallets/riders' },
     { key: 'nav.banners',       icon: ImageIcon,       href: '/banners' },
+    { key: 'nav.marketing',     icon: Megaphone,       href: '/marketing/announcements' },
     { key: 'nav.regions',       icon: MapPin,          href: '/regions' },
     { key: 'nav.features',      icon: Zap,             href: '/features' },
     { key: 'nav.analytics',     icon: BarChart2,       href: '/analytics' },

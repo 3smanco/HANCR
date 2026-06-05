@@ -29,6 +29,7 @@ import {
   DriverDocumentEntity,
   ComplaintEntity,
   ComplaintActivityEntity,
+  AnnouncementEntity,
 } from '@hancr/database';
 
 // Redis
@@ -76,6 +77,7 @@ import { pubSubProvider } from './pubsub.provider';
           DriverDocumentEntity,
           ComplaintEntity,
           ComplaintActivityEntity,
+          AnnouncementEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
