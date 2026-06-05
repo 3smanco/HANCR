@@ -157,6 +157,20 @@ export const PROCESS_PAYOUT_SESSION = gql`
   }
 `;
 
+// ─── LIVE MAP (Phase I8) ───────────────────────────────────────────────────
+
+export const LIVE_DRIVERS = gql`
+  query LiveDrivers {
+    liveDrivers {
+      total idle inRide
+      drivers {
+        driverId driverName driverPhone plateNumber carBrand carModel
+        lat lng heading status currentOrderId
+      }
+    }
+  }
+`;
+
 // Referrals
 export const REFERRAL_STATS = gql`
   query AdminReferralStats {

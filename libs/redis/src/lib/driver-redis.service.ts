@@ -155,6 +155,43 @@ export class DriverRedisService {
   }
 
   /**
+   * I8 — جلب كل السائقين Online مع مواقعهم (لخريطة حية).
+   * Bounded by `limit` لتجنب overload (افتراضياً 500).
+   */
+  async getAllOnlineDrivers(limit = 500): Promise<NearbyDriver[]> {
+    // جلب كل السائقين الذين لديهم status='Online'
+    const statusMap = await this.redis.hgetall(RedisKeys.DriverStatus);
+    const onlineIds: string[] = [];
+    for (const [id, status] of Object.entries(statusMap)) {
+      if (status === 'Online') {
+        onlineIds.push(id);
+        if (onlineIds.length >= limit) break;
+      }
+    }
+    if (onlineIds.length === 0) return [];
+
+    // جلب المواقع + الاتجاهات دفعة واحدة
+    const [positions, headings] = await Promise.all([
+      this.redis.geopos(RedisKeys.DriverGeo, ...onlineIds),
+      this.redis.hmget(RedisKeys.DriverHeading, ...onlineIds),
+    ]);
+
+    const result: NearbyDriver[] = [];
+    for (let i = 0; i < onlineIds.length; i++) {
+      const pos = positions[i] as [string, string] | null;
+      if (!pos) continue;
+      result.push({
+        driverId: parseInt(onlineIds[i]),
+        distanceMeters: 0,
+        lat: parseFloat(pos[1]),
+        lng: parseFloat(pos[0]),
+        heading: headings[i] ? parseFloat(headings[i] as string) : 0,
+      });
+    }
+    return result;
+  }
+
+  /**
    * جلب موقع سائق واحد
    */
   async getDriverLocation(
