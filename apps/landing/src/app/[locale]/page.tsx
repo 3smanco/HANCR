@@ -1,5 +1,16 @@
 import Link from 'next/link';
-import { Car, Download, Shield, Smartphone, Sparkles } from 'lucide-react';
+import {
+  Car,
+  Bike,
+  Building2,
+  Briefcase,
+  Shield,
+  Zap,
+  MapPin,
+  Star,
+  Smartphone,
+  Clock,
+} from 'lucide-react';
 import {
   DEFAULT_LOCALE,
   SUPPORTED_LOCALES,
@@ -7,6 +18,9 @@ import {
   translator,
 } from '@/i18n/messages';
 import { localizedHref } from '@/lib/locale';
+import { Hero } from '@/components/Hero';
+import { ValuePropsGrid } from '@/components/ValuePropsGrid';
+import { AppDownloadCTA } from '@/components/AppDownloadCTA';
 
 export default function HomePage({ params }: { params: { locale: string } }) {
   const locale = (SUPPORTED_LOCALES as readonly string[]).includes(params.locale)
@@ -18,107 +32,142 @@ export default function HomePage({ params }: { params: { locale: string } }) {
   return (
     <>
       {/* ── Hero ── */}
-      <section className="relative pt-24 pb-20 px-6 overflow-hidden">
-        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-ember/15 rounded-full blur-[140px] animate-glow pointer-events-none" />
-        <div className="relative max-w-6xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-ember/10 border border-ember/30 text-sm mb-8">
-            <Sparkles className="w-4 h-4 text-ember" />
-            <span className="text-pearl/90">{tt('meta.tagline')}</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6 text-pearl">
-            {isAr ? (
-              <>
-                تنقَّل بذكاء.
-                <br />
-                <span className="bg-gradient-to-r from-ember via-ember-light to-ember bg-clip-text text-transparent">
-                  وصِّل بأمان.
-                </span>
-              </>
-            ) : (
-              <>
-                Move smart.
-                <br />
-                <span className="bg-gradient-to-r from-ember via-ember-light to-ember bg-clip-text text-transparent">
-                  Deliver safely.
-                </span>
-              </>
-            )}
-          </h1>
-          <p className="text-xl text-muted max-w-2xl mx-auto mb-10">
-            {isAr
-              ? 'منصة التنقل الذكي الأولى في الخليج. رحلات، توصيل بضائع، ومشاركة سيارات — في تطبيق واحد آمن وسهل.'
-              : 'The Gulf\'s leading smart mobility platform. Rides, delivery, and carpooling — in one safe and easy app.'}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href={localizedHref(locale, '/ride')}
-              className="inline-flex items-center justify-center gap-2 bg-ember hover:bg-ember-deep transition px-8 py-4 rounded-xl font-bold text-lg text-pearl shadow-ember-lg"
-            >
-              <Smartphone className="w-5 h-5" />
-              {tt('cta.bookRide')}
-            </Link>
-            <Link
-              href={localizedHref(locale, '/drive')}
-              className="inline-flex items-center justify-center gap-2 border-2 border-stone hover:border-ember hover:bg-ember/10 transition px-8 py-4 rounded-xl font-bold text-lg text-pearl"
-            >
-              <Car className="w-5 h-5" />
-              {tt('cta.signUpDriver')}
-            </Link>
-          </div>
-        </div>
-      </section>
+      <Hero
+        eyebrow={isAr ? 'منصة التنقل الذكي' : 'Smart mobility platform'}
+        title={
+          isAr ? (
+            <>
+              تنقَّل بذكاء.
+              <br />
+              <span className="bg-gradient-to-r from-ember via-ember-light to-ember bg-clip-text text-transparent">
+                وصِّل بأمان.
+              </span>
+            </>
+          ) : (
+            <>
+              Move smart.
+              <br />
+              <span className="bg-gradient-to-r from-ember via-ember-light to-ember bg-clip-text text-transparent">
+                Deliver safely.
+              </span>
+            </>
+          )
+        }
+        subtitle={
+          isAr
+            ? 'منصة التنقل الذكي الأولى في الخليج. رحلات، توصيل، ومشاركة سيارات — في تطبيق واحد آمن وسهل.'
+            : "The Gulf's leading smart mobility platform. Rides, delivery, and carpooling — in one safe and easy app."
+        }
+        primaryCta={{
+          href: localizedHref(locale, '/ride'),
+          label: tt('cta.bookRide'),
+        }}
+        secondaryCta={{
+          href: localizedHref(locale, '/drive'),
+          label: tt('cta.signUpDriver'),
+        }}
+        align="center"
+      />
 
-      {/* ── Service cards ── */}
-      <section className="py-20 px-6 bg-coal/50 border-y border-stone/40">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* ── Four services ── */}
+      <section className="px-6 -mt-4">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { icon: Smartphone, href: '/ride', label: tt('nav.ride') },
-            { icon: Car, href: '/drive', label: tt('nav.drive') },
-            { icon: Download, href: '/deliver', label: tt('nav.deliver') },
-            { icon: Shield, href: '/business', label: tt('nav.business') },
-          ].map(({ icon: Icon, href, label }) => (
+            {
+              icon: Car,
+              href: '/ride',
+              title: tt('nav.ride'),
+              copy: isAr ? 'اطلب رحلة الآن' : 'Request a ride',
+            },
+            {
+              icon: Briefcase,
+              href: '/drive',
+              title: tt('nav.drive'),
+              copy: isAr ? 'انضم سائقاً' : 'Become a driver',
+            },
+            {
+              icon: Bike,
+              href: '/deliver',
+              title: tt('nav.deliver'),
+              copy: isAr ? 'وصِّل وكَسِّب' : 'Deliver and earn',
+            },
+            {
+              icon: Building2,
+              href: '/business',
+              title: tt('nav.business'),
+              copy: isAr ? 'حلول الشركات' : 'Business solutions',
+            },
+          ].map(({ icon: Icon, href, title, copy }) => (
             <Link
               key={href}
               href={localizedHref(locale, href)}
-              className="group bg-ash/60 hover:bg-ash border border-stone/60 hover:border-ember/50 rounded-2xl p-6 transition shadow-card hover:shadow-ember"
+              className="group bg-ash/60 hover:bg-ash border border-stone/60 hover:border-ember/50 rounded-2xl p-5 transition shadow-card hover:shadow-ember"
             >
-              <div className="w-12 h-12 rounded-xl bg-ember/15 group-hover:bg-ember/25 transition flex items-center justify-center mb-4">
-                <Icon className="w-6 h-6 text-ember" />
+              <div className="w-11 h-11 rounded-xl bg-ember/15 group-hover:bg-ember/25 transition flex items-center justify-center mb-3">
+                <Icon className="w-5 h-5 text-ember" />
               </div>
-              <h3 className="text-lg font-bold text-pearl mb-1">{label}</h3>
-              <p className="text-sm text-muted">{tt('cta.learnMore')} →</p>
+              <h3 className="text-base font-bold text-pearl mb-0.5">{title}</h3>
+              <p className="text-xs text-muted">{copy}</p>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* ── Apps download ── */}
-      <section className="py-24 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-pearl">
-            {tt('cta.download')}
-          </h2>
-          <p className="text-muted mb-10">{tt('common.comingSoon')} — iOS</p>
-          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-            <a
-              href="/downloads/hancr-rider.apk"
-              download
-              className="bg-ember hover:bg-ember-deep transition px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-3 shadow-ember"
-            >
-              <Download className="w-5 h-5" />
-              {tt('cta.downloadRider')}
-            </a>
-            <a
-              href="/downloads/hancr-driver.apk"
-              download
-              className="bg-ash border-2 border-stone hover:border-ember transition px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-3"
-            >
-              <Download className="w-5 h-5" />
-              {tt('cta.downloadDriver')}
-            </a>
-          </div>
-        </div>
-      </section>
+      {/* ── Value props ── */}
+      <ValuePropsGrid
+        heading={isAr ? 'لماذا HANCR؟' : 'Why HANCR?'}
+        subheading={
+          isAr
+            ? 'صُمِّمت لتُلبّي احتياجات الخليج، بمعايير عالمية.'
+            : 'Designed for the Gulf, built to world-class standards.'
+        }
+        items={[
+          {
+            icon: Shield,
+            title: isAr ? 'نظام طوارئ مدمج' : 'Built-in SOS',
+            description: isAr
+              ? 'زر SOS في كل رحلة يُرسل موقعك لجهات الطوارئ + فريق HANCR فوراً.'
+              : 'In-ride SOS sends your live location to your trusted contacts and HANCR support immediately.',
+          },
+          {
+            icon: Zap,
+            title: isAr ? 'مطابقة فورية' : 'Instant matching',
+            description: isAr
+              ? 'محرك ذكي يربطك بأقرب سائق في ثوانٍ — أسرع 73% من المنافسين.'
+              : 'Smart engine pairs you with the nearest driver in seconds — 73% faster than rivals.',
+          },
+          {
+            icon: Star,
+            title: isAr ? 'برنامج HANCR Miles' : 'HANCR Miles program',
+            description: isAr
+              ? 'أربع مستويات (برونزي إلى بلاتيني). كلما زادت رحلاتك زادت مكافآتك.'
+              : 'Four tiers (Bronze to Platinum). The more you ride, the more you earn.',
+          },
+          {
+            icon: MapPin,
+            title: isAr ? 'تتبُّع حيّ' : 'Live tracking',
+            description: isAr
+              ? 'شارك مسار رحلتك تلقائياً مع جهاتك الموثوقة.'
+              : 'Share your live trip path with your trusted contacts automatically.',
+          },
+          {
+            icon: Smartphone,
+            title: isAr ? 'تطبيقات أصلية' : 'Native apps',
+            description: isAr
+              ? 'تجربة استخدام سلسة على iOS و Android مع دعم RTL كامل.'
+              : 'Smooth UX on iOS and Android with full RTL support.',
+          },
+          {
+            icon: Clock,
+            title: isAr ? 'دعم 24/7' : '24/7 support',
+            description: isAr
+              ? 'فريق دعم بشري متاح طوال الوقت — بالعربية والإنجليزية.'
+              : 'Human support team always available — in Arabic and English.',
+          },
+        ]}
+      />
+
+      <AppDownloadCTA locale={locale} />
     </>
   );
 }
