@@ -6,6 +6,8 @@ import {
   AdminOrderDetailType,
 } from './dto/order-detail.types';
 import { AdminJwtGuard } from '../auth/admin-jwt.guard';
+import { AdminRolesGuard } from '../auth/admin-roles.guard';
+import { RequireRole } from '../auth/roles.decorator';
 
 @Resolver(() => AdminOrderDetailType)
 export class OrderDetailResolver {
@@ -34,7 +36,8 @@ export class OrderDetailResolver {
   @Mutation(() => AdminOrderDetailType, {
     description: 'تعيين سائق محدد قسراً (Admin override)',
   })
-  @UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('ops')
   adminAssignDriver(
     @Args('orderId', { type: () => Int }) orderId: number,
     @Args('driverId', { type: () => Int }) driverId: number,

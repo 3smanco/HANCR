@@ -108,6 +108,7 @@ const ar = {
     analytics: 'التحليلات',
     notifications: 'الإشعارات',
     settings: 'الإعدادات',
+    operators: 'المشرفون',
   },
 
   // ── Dashboard ──
@@ -481,6 +482,7 @@ const en: typeof ar = {
     analytics: 'Analytics',
     notifications: 'Notifications',
     settings: 'Settings',
+    operators: 'Operators',
   },
 
   dashboard: {

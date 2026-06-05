@@ -10,6 +10,8 @@ import {
   UpdateCompanyInput,
 } from './dto/company.types';
 import { AdminJwtGuard } from '../auth/admin-jwt.guard';
+import { AdminRolesGuard } from '../auth/admin-roles.guard';
+import { RequireRole } from '../auth/roles.decorator';
 
 @Resolver(() => AdminCompanyType)
 export class CompaniesResolver {
@@ -57,7 +59,8 @@ export class CompaniesResolver {
   }
 
   @Mutation(() => AdminCompanyType, { description: 'شحن رصيد الشركة' })
-  @UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('finance')
   topUpCompany(
     @Args('input') input: TopUpCompanyInput,
   ): Promise<AdminCompanyType> {

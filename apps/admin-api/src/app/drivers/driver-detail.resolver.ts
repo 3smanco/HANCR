@@ -8,6 +8,8 @@ import {
   SetDriverStatusInput,
 } from './dto/driver-detail.types';
 import { AdminJwtGuard } from '../auth/admin-jwt.guard';
+import { AdminRolesGuard } from '../auth/admin-roles.guard';
+import { RequireRole } from '../auth/roles.decorator';
 
 @Resolver(() => AdminDriverDetailType)
 export class DriverDetailResolver {
@@ -26,7 +28,8 @@ export class DriverDetailResolver {
   @Mutation(() => AdminDriverDetailType, {
     description: 'تعيين حالة اعتماد السائق',
   })
-  @UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('ops')
   setDriverStatus(
     @Args('input') input: SetDriverStatusInput,
   ): Promise<AdminDriverDetailType> {
@@ -36,7 +39,8 @@ export class DriverDetailResolver {
   @Mutation(() => AdminDriverDocumentType, {
     description: 'مراجعة وثيقة سائق (موافقة/رفض)',
   })
-  @UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('ops')
   reviewDriverDocument(
     @Args('input') input: ReviewDocumentInput,
   ): Promise<AdminDriverDocumentType> {

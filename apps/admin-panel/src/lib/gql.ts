@@ -8,12 +8,51 @@ import { gql } from '@apollo/client';
 
 // ─── AUTH ──────────────────────────────────────────────────────────────────
 
+// ─── OPERATORS / RBAC (Phase I5) ──────────────────────────────────────────
+
+export const LIST_OPERATORS = gql`
+  query AdminOperators {
+    adminOperators {
+      id email fullName role active lastLoginAt createdAt
+    }
+  }
+`;
+
+export const CREATE_OPERATOR = gql`
+  mutation CreateOperator($input: CreateOperatorInput!) {
+    createOperator(input: $input) {
+      id email fullName role active createdAt
+    }
+  }
+`;
+
+export const UPDATE_OPERATOR = gql`
+  mutation UpdateOperator($input: UpdateOperatorInput!) {
+    updateOperator(input: $input) {
+      id email fullName role active
+    }
+  }
+`;
+
+export const RESET_OPERATOR_PASSWORD = gql`
+  mutation ResetOperatorPassword($input: ResetOperatorPasswordInput!) {
+    resetOperatorPassword(input: $input) { id email }
+  }
+`;
+
+export const DELETE_OPERATOR = gql`
+  mutation DeleteOperator($id: Int!) {
+    deleteOperator(id: $id)
+  }
+`;
+
 export const ADMIN_LOGIN = gql`
   mutation AdminLogin($email: String!, $password: String!) {
     adminLogin(email: $email, password: $password) {
       accessToken
       email
       role
+      fullName
     }
   }
 `;

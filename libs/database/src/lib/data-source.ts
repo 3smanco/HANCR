@@ -36,6 +36,7 @@ import { CompanyEmployeeEntity } from './entities/company-employee.entity';
 import { DriverDocumentEntity } from './entities/driver-document.entity';
 import { ComplaintEntity } from './entities/complaint.entity';
 import { ComplaintActivityEntity } from './entities/complaint-activity.entity';
+import { AdminUserEntity } from './entities/admin-user.entity';
 
 /**
  * قائمة كاملة بجميع Entities في HANCR
@@ -72,6 +73,7 @@ export const HANCR_ENTITIES = [
   DriverDocumentEntity,
   ComplaintEntity,
   ComplaintActivityEntity,
+  AdminUserEntity,
 ];
 
 /**
