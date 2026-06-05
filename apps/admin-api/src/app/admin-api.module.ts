@@ -43,6 +43,7 @@ import {
   ReviewParameterEntity,
   FleetEntity,
   PricingZoneEntity,
+  LeadEntity,
 } from '@hancr/database';
 
 // Feature Modules
@@ -67,6 +68,7 @@ import { LiveModule } from './live/live.module';
 import { SettingsModule } from './settings/settings.module';
 import { FleetsModule } from './fleets/fleets.module';
 import { PricingZonesModule } from './pricing-zones/pricing-zones.module';
+import { LeadsModule } from './leads/leads.module';
 import { AdminNotificationsModule } from './notifications/notifications.module';
 import { NotificationsModule } from '@hancr/notifications';
 
@@ -132,6 +134,7 @@ import { ObservabilityModule } from '@hancr/observability';
           ReviewParameterEntity,
           FleetEntity,
           PricingZoneEntity,
+          LeadEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
@@ -179,6 +182,7 @@ import { ObservabilityModule } from '@hancr/observability';
     SettingsModule,
     FleetsModule,
     PricingZonesModule,
+    LeadsModule,
     NotificationsModule,
     AdminNotificationsModule,
     ObservabilityModule,

@@ -1027,3 +1027,38 @@ export const ESCALATE_SOS = gql`
     }
   }
 `;
+
+// ─── J2 — Marketing leads ──────────────────────────────────────────────────
+
+export const LIST_LEADS = gql`
+  query ListLeads($page: Int, $limit: Int, $type: String, $status: String) {
+    adminLeads(page: $page, limit: $limit, type: $type, status: $status) {
+      items {
+        id
+        type
+        name
+        email
+        phone
+        company
+        city
+        message
+        status
+        createdAt
+      }
+      total
+      page
+      limit
+      newCount
+      contactedCount
+    }
+  }
+`;
+
+export const UPDATE_LEAD_STATUS = gql`
+  mutation UpdateLeadStatus($input: UpdateLeadStatusInput!) {
+    updateLeadStatus(input: $input) {
+      id
+      status
+    }
+  }
+`;
