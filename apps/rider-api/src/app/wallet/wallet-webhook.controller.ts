@@ -18,6 +18,7 @@ import {
   PaymentGateway,
   WalletTransactionType,
   WalletTransactionStatus,
+  WalletOwnerType,
 } from '@hancr/database';
 
 /**
@@ -93,23 +94,64 @@ export class WalletWebhookController {
     }
 
     if (event.status === 'success') {
-      // ننشئ Completed Credit للرصيد الفعلي
-      await this.walletService.credit({
-        ownerType: allTxs.ownerType,
-        ownerId: allTxs.ownerId,
-        type: WalletTransactionType.Recharge,
-        amount: Number(allTxs.amount),
-        currency: allTxs.currency,
-        gateway: allTxs.gateway,
-        gatewayRef: event.gatewayRef,
-        description: `Recharge confirmed via webhook (orig tx #${transactionId})`,
-        status: WalletTransactionStatus.Completed,
-      });
-      // نُحدِّث الـ Pending → Completed
+      const isRecharge = allTxs.type === WalletTransactionType.Recharge;
+      const isTripPayment = allTxs.type === WalletTransactionType.TripPayment;
+
+      if (isRecharge) {
+        // Existing flow: create a Completed credit + promote pending to Completed.
+        await this.walletService.credit({
+          ownerType: allTxs.ownerType,
+          ownerId: allTxs.ownerId,
+          type: WalletTransactionType.Recharge,
+          amount: Number(allTxs.amount),
+          currency: allTxs.currency,
+          gateway: allTxs.gateway,
+          gatewayRef: event.gatewayRef,
+          description: `Recharge confirmed via webhook (orig tx #${transactionId})`,
+          status: WalletTransactionStatus.Completed,
+        });
+      } else if (isTripPayment) {
+        // L2 — Gateway-funded trip payment. The pending Debit on the rider
+        // becomes Completed and the driver gets their earnings credited now.
+        const metadata = (allTxs.metadata ?? {}) as Record<string, unknown>;
+        const driverId =
+          typeof metadata.driverId === 'number'
+            ? (metadata.driverId as number)
+            : Number(metadata.driverId);
+        const driverNet =
+          typeof metadata.driverNet === 'number'
+            ? (metadata.driverNet as number)
+            : Number(metadata.driverNet);
+        const commission =
+          typeof metadata.commission === 'number'
+            ? (metadata.commission as number)
+            : Number(metadata.commission);
+        if (driverId && driverNet > 0) {
+          await this.walletService.credit({
+            ownerType: WalletOwnerType.Driver,
+            ownerId: driverId,
+            type: WalletTransactionType.DriverEarnings,
+            amount: driverNet,
+            currency: allTxs.currency,
+            orderId: allTxs.orderId ?? undefined,
+            description: `Driver earnings — order #${allTxs.orderId} (commission: ${commission})`,
+            metadata: { commission, total: Number(allTxs.amount), gateway: allTxs.gateway },
+          });
+        } else {
+          this.logger.warn(
+            `TripPayment tx #${transactionId} missing driverId/driverNet in metadata — driver not credited`,
+          );
+        }
+      } else {
+        this.logger.warn(
+          `Webhook success for unsupported tx type ${allTxs.type} (tx #${transactionId}) — promoting only`,
+        );
+      }
+
       await this.walletService.updateTransactionStatus(
         transactionId,
         WalletTransactionStatus.Completed,
-        { webhookReceivedAt: new Date().toISOString() },
+        { webhookReceivedAt: new Date().toISOString(), gatewayRef: event.gatewayRef },
       );
       return { received: true, status: 'completed' };
     }
