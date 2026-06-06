@@ -96,6 +96,32 @@ export class AppConfigEntity {
   @Column({ type: 'jsonb', default: '{}', name: 'gateway_config' })
   gatewayConfig!: Record<string, unknown>;
 
+  /**
+   * N1 — إعدادات تشغيلية (كانت مبرمجة في الكود)
+   * {
+   *   otpTtlSeconds: 300,
+   *   maxOtpAttempts: 5,
+   *   otpResendCooldownSeconds: 60,
+   *   searchRadiusKm: 5,
+   *   etaMinutesPerKm: 1.5,
+   *   matchingTimeoutSeconds: 60
+   * }
+   */
+  @Column({ type: 'jsonb', default: '{}', name: 'operations_config' })
+  operationsConfig!: Record<string, unknown>;
+
+  /**
+   * N1 — قواعد التسعير والإلغاء + surge الديناميكي
+   * {
+   *   cancellationFee: 0,
+   *   cancellationGraceSeconds: 120,
+   *   cancellableStatuses: ['Requested','NotFound','Found','DriverAccepted','Booked'],
+   *   surge: [{ regionId, dayOfWeek, fromHour, toHour, multiplier }]
+   * }
+   */
+  @Column({ type: 'jsonb', default: '{}', name: 'pricing_rules_config' })
+  pricingRulesConfig!: Record<string, unknown>;
+
   /** الإصدار — للـ force update */
   @Column({ default: '1.0.0' })
   version!: string;

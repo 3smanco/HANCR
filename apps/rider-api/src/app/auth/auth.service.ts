@@ -16,9 +16,11 @@ import { VerifyOtpInput } from './dto/verify-otp.input';
 import { SendOtpResponse } from './dto/send-otp-response.type';
 import { AuthPayload } from './dto/auth-payload.type';
 import { JwtPayload } from './jwt.strategy';
+import { AppConfigReader } from '../app-config/app-config-reader.service';
 
-const OTP_TTL_SECONDS = 300; // 5 دقائق
-const MAX_OTP_ATTEMPTS = 5;
+// N1 — defaults preserved as fallback; live values come from AppConfigReader.
+const DEFAULT_OTP_TTL_SECONDS = 300; // 5 دقائق
+const DEFAULT_MAX_OTP_ATTEMPTS = 5;
 
 @Injectable()
 export class AuthService {
@@ -31,6 +33,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly smsService: SmsService,
+    private readonly appConfig: AppConfigReader,
 
     @InjectRedis()
     private readonly redis: Redis,
@@ -57,10 +60,14 @@ export class AuthService {
       : Math.floor(100000 + Math.random() * 900000).toString();
     const isDev = this.configService.get<string>('NODE_ENV') === 'development';
 
-    // تخزين OTP في Redis مع TTL = 5 دقائق
+    // N1 — TTL يأتي من لوحة التحكم (operationsConfig.otpTtlSeconds)
+    const ops = await this.appConfig.getOperations();
+    const otpTtl = ops.otpTtlSeconds ?? DEFAULT_OTP_TTL_SECONDS;
+
+    // تخزين OTP في Redis مع TTL القابل للتحكم من اللوحة
     await this.redis.setex(
       key,
-      OTP_TTL_SECONDS,
+      otpTtl,
       JSON.stringify({ code, attempts: 0 }),
     );
     this.logger.log(`OTP for ${phone}: ${code}`);
@@ -104,8 +111,13 @@ export class AuthService {
 
     const stored = JSON.parse(raw) as { code: string; attempts: number };
 
+    // N1 — الحدود تأتي من لوحة التحكم (operationsConfig)
+    const ops = await this.appConfig.getOperations();
+    const maxAttempts = ops.maxOtpAttempts ?? DEFAULT_MAX_OTP_ATTEMPTS;
+    const otpTtl = ops.otpTtlSeconds ?? DEFAULT_OTP_TTL_SECONDS;
+
     // تحقق من عدد المحاولات
-    if (stored.attempts >= MAX_OTP_ATTEMPTS) {
+    if (stored.attempts >= maxAttempts) {
       await this.redis.del(key);
       throw new UnauthorizedException(
         'Too many failed attempts. Request a new OTP.',
@@ -117,11 +129,11 @@ export class AuthService {
       stored.attempts += 1;
       await this.redis.setex(
         key,
-        OTP_TTL_SECONDS,
+        otpTtl,
         JSON.stringify(stored),
       );
       throw new UnauthorizedException(
-        `Invalid OTP. ${MAX_OTP_ATTEMPTS - stored.attempts} attempts remaining.`,
+        `Invalid OTP. ${maxAttempts - stored.attempts} attempts remaining.`,
       );
     }
 

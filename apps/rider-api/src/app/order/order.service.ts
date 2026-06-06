@@ -38,6 +38,7 @@ import { CouponService } from './coupon.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { BundleService } from '../bundle/bundle.service';
 import { CompanyService } from '../company/company.service';
+import { AppConfigReader } from '../app-config/app-config-reader.service';
 
 // GraphQL Subscription events
 export const ORDER_UPDATED = 'ORDER_UPDATED';
@@ -74,6 +75,7 @@ export class OrderService {
     private readonly sosService: SosService,
     private readonly dataSource: DataSource,
     private readonly pushNotifications: PushNotificationService,
+    private readonly appConfig: AppConfigReader,
 
     @Inject(PUB_SUB)
     private readonly pubSub: RedisPubSub,
@@ -609,7 +611,9 @@ export class OrderService {
   async cancelOrder(riderId: number, orderId: number): Promise<OrderGqlType> {
     const order = await this.findOrderForRider(riderId, orderId);
 
-    const cancellableStatuses: OrderStatus[] = [
+    // N1 — الحالات القابلة للإلغاء من لوحة التحكم (pricingRulesConfig)
+    const rules = await this.appConfig.getPricingRules();
+    const cancellableStatuses: string[] = rules.cancellableStatuses ?? [
       OrderStatus.Requested,
       OrderStatus.NotFound,
       OrderStatus.Found,
@@ -897,7 +901,9 @@ export class OrderService {
    * يُنفَّذ مرة واحدة فقط (referralRewarded).
    */
   private async grantReferralRewardIfEligible(riderId: number): Promise<void> {
-    const REFERRAL_BONUS = 15; // مكافأة لكل طرف بعملته
+    // N1 — مكافأة الإحالة من لوحة التحكم (loyaltyConfig.referralBonus)
+    const loyaltyCfg = await this.appConfig.getLoyalty();
+    const REFERRAL_BONUS = loyaltyCfg.referralBonus ?? 15; // لكل طرف بعملته
     const rider = await this.riderRepo.findOne({
       where: { id: riderId },
       select: ['id', 'referredBy', 'referralRewarded', 'currency'],

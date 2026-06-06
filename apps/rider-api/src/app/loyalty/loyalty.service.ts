@@ -16,18 +16,16 @@ import {
 import { WalletService } from '@hancr/wallet';
 import { LoyaltyType } from './dto/loyalty.type';
 import { RedeemResultType } from './dto/redeem-result.type';
+import { AppConfigReader } from '../app-config/app-config-reader.service';
 
-const TIER_THRESHOLDS: Record<LoyaltyTier, number> = {
+// N1 — defaults preserved as fallback; live values come from AppConfigReader
+// (loyaltyConfig). Admin can retune thresholds / cashback / redeem step live.
+const DEFAULT_TIER_THRESHOLDS: Record<LoyaltyTier, number> = {
   [LoyaltyTier.Bronze]: 0,
   [LoyaltyTier.Silver]: 500,
   [LoyaltyTier.Gold]: 2000,
   [LoyaltyTier.Platinum]: 5000,
 };
-
-const MILES_PER_QAR = 1; // 1 نقطة لكل ريال مدفوع
-const MILES_TO_CURRENCY = 0.05; // 20 نقطة = 1 من العملة (≈5% كاش باك)
-const MIN_REDEEM = 100; // أقل عدد نقاط للاستبدال
-const REDEEM_STEP = 50; // مضاعفات الاستبدال
 
 @Injectable()
 export class LoyaltyService {
@@ -37,6 +35,7 @@ export class LoyaltyService {
     @InjectRepository(LoyaltyEntity)
     private readonly loyaltyRepo: Repository<LoyaltyEntity>,
     private readonly walletService: WalletService,
+    private readonly appConfig: AppConfigReader,
   ) {}
 
   /**
@@ -82,13 +81,14 @@ export class LoyaltyService {
       );
     }
 
-    const milesEarned = Math.floor(amountPaid * MILES_PER_QAR);
+    const cfg = await this.appConfig.getLoyalty();
+    const milesEarned = Math.floor(amountPaid * (cfg.milesPerCurrency ?? 1));
     const newTotal = Number(loyalty.totalMiles) + milesEarned;
     const newAvailable = Number(loyalty.availableMiles) + milesEarned;
     const newLifetime = Number(loyalty.lifetimeMiles) + milesEarned;
 
-    // تحديد المستوى الجديد
-    const newTier = this.calculateTier(newLifetime);
+    // تحديد المستوى الجديد (العتبات من لوحة التحكم)
+    const newTier = this.calculateTier(newLifetime, cfg.tierThresholds);
 
     // مزايا الترقية إلى Gold
     let surgeImmunityUntil = loyalty.surgeImmunityUntil;
@@ -160,9 +160,12 @@ export class LoyaltyService {
    * يخصم النقاط ثم يضيف ما يعادلها للمحفظة كـ LoyaltyRedemption.
    */
   async redeemReward(riderId: number, miles: number): Promise<RedeemResultType> {
-    if (miles < MIN_REDEEM || miles % REDEEM_STEP !== 0) {
+    const cfg = await this.appConfig.getLoyalty();
+    const minRedeem = cfg.minRedeem ?? 100;
+    const redeemStep = cfg.redeemStep ?? 50;
+    if (miles < minRedeem || miles % redeemStep !== 0) {
       throw new BadRequestException(
-        `الحد الأدنى للاستبدال ${MIN_REDEEM} نقطة بمضاعفات ${REDEEM_STEP}`,
+        `الحد الأدنى للاستبدال ${minRedeem} نقطة بمضاعفات ${redeemStep}`,
       );
     }
 
@@ -178,7 +181,8 @@ export class LoyaltyService {
       );
     }
 
-    const creditedAmount = Math.round(miles * MILES_TO_CURRENCY * 100) / 100;
+    const creditedAmount =
+      Math.round(miles * (cfg.milesToCurrency ?? 0.05) * 100) / 100;
 
     try {
       await this.walletService.credit({
@@ -222,13 +226,17 @@ export class LoyaltyService {
     });
   }
 
-  private calculateTier(lifetimeMiles: number): LoyaltyTier {
-    if (lifetimeMiles >= TIER_THRESHOLDS[LoyaltyTier.Platinum])
-      return LoyaltyTier.Platinum;
-    if (lifetimeMiles >= TIER_THRESHOLDS[LoyaltyTier.Gold])
-      return LoyaltyTier.Gold;
-    if (lifetimeMiles >= TIER_THRESHOLDS[LoyaltyTier.Silver])
-      return LoyaltyTier.Silver;
+  private calculateTier(
+    lifetimeMiles: number,
+    thresholds?: Record<string, number>,
+  ): LoyaltyTier {
+    const t = {
+      ...DEFAULT_TIER_THRESHOLDS,
+      ...(thresholds ?? {}),
+    } as Record<string, number>;
+    if (lifetimeMiles >= t[LoyaltyTier.Platinum]) return LoyaltyTier.Platinum;
+    if (lifetimeMiles >= t[LoyaltyTier.Gold]) return LoyaltyTier.Gold;
+    if (lifetimeMiles >= t[LoyaltyTier.Silver]) return LoyaltyTier.Silver;
     return LoyaltyTier.Bronze;
   }
 
