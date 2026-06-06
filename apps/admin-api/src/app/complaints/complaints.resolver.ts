@@ -9,6 +9,8 @@ import {
   UpdateComplaintStatusInput,
 } from './dto/complaint.types';
 import { AdminJwtGuard } from '../auth/admin-jwt.guard';
+import { CurrentAdmin } from '../auth/current-admin.decorator';
+import type { AdminUser } from '../auth/admin-jwt.strategy';
 
 @Resolver(() => AdminComplaintType)
 export class ComplaintsResolver {
@@ -40,9 +42,9 @@ export class ComplaintsResolver {
   @UseGuards(AdminJwtGuard)
   updateComplaintStatus(
     @Args('input') input: UpdateComplaintStatusInput,
+    @CurrentAdmin() admin: AdminUser,
   ): Promise<AdminComplaintDetailType> {
-    // TODO: actor id from JWT (I5)
-    return this.service.updateStatus(input, 0);
+    return this.service.updateStatus(input, admin.adminId);
   }
 
   @Mutation(() => AdminComplaintDetailType, {
@@ -51,7 +53,8 @@ export class ComplaintsResolver {
   @UseGuards(AdminJwtGuard)
   addComplaintNote(
     @Args('input') input: AddComplaintNoteInput,
+    @CurrentAdmin() admin: AdminUser,
   ): Promise<AdminComplaintDetailType> {
-    return this.service.addNote(input, 0);
+    return this.service.addNote(input, admin.adminId);
   }
 }
