@@ -25,7 +25,9 @@ import { PushNotificationService } from '@hancr/notifications';
 import {
   WalletService,
   InsufficientBalanceError,
+  PaymentGatewayService,
 } from '@hancr/wallet';
+import { PaymentGateway, WalletTransactionStatus } from '@hancr/database';
 import { SosService } from '@hancr/sos';
 import {
   WalletOwnerType,
@@ -58,6 +60,7 @@ export class OrderService {
     private readonly orderRedis: OrderRedisService,
     private readonly pushNotifications: PushNotificationService,
     private readonly walletService: WalletService,
+    private readonly paymentGatewayService: PaymentGatewayService,
     private readonly sosService: SosService,
 
     @Inject(PUB_SUB)
@@ -325,7 +328,8 @@ export class OrderService {
     // ─── Auto-settle payment ───
     // - Wallet mode: debit rider's wallet + credit driver's earnings (minus commission)
     // - Cash mode: only credit driver's earnings (rider pays driver directly)
-    // - PaymentGateway: TODO — trigger gateway charge via webhook
+    // - PaymentGateway: open a Pending charge with the gateway; driver earnings
+    //   are credited later by the webhook once the gateway confirms.
     try {
       await this._settlePayment(order);
     } catch (e) {
@@ -526,15 +530,72 @@ export class OrderService {
       }
     }
 
-    // 2) Credit driver earnings (works for Wallet + Cash + Gateway modes)
-    // Cash: السائق استلم النقد من الراكب مباشرة، ندوّن الأرباح للسجل لكن لا نضيف للمحفظة
-    // Wallet/Gateway: السائق يستحق المبلغ في محفظته
-    const isWalletOrGateway =
-      mode === PaymentMode.Wallet ||
+    // 2) Gateway modes: open a Pending charge against the rider's card and
+    //    let the webhook (rider-api /wallet/webhook/:gateway) credit the
+    //    driver once the gateway confirms.
+    const isGatewayMode =
       mode === PaymentMode.PaymentGateway ||
       mode === PaymentMode.SavedPaymentMethod;
 
-    if (isWalletOrGateway) {
+    if (isGatewayMode) {
+      // Default to HyperPay for SA — the AppConfig.gatewayConfig picker can
+      // later route per region/method, but the choice doesn't change the
+      // ledger flow (everything funnels through the same webhook).
+      const gateway = PaymentGateway.HyperPay;
+      const pending = await this.walletService.debit({
+        ownerType: WalletOwnerType.Rider,
+        ownerId: order.riderId,
+        type: WalletTransactionType.TripPayment,
+        amount: total,
+        currency: order.currency,
+        orderId: order.id,
+        gateway,
+        status: WalletTransactionStatus.Pending,
+        description: `Trip payment via ${gateway} — order #${order.id}`,
+        metadata: {
+          driverId: order.driverId,
+          driverNet,
+          commission: platformCommission,
+        },
+      });
+
+      try {
+        const checkout = await this.paymentGatewayService.createCheckout(
+          gateway,
+          {
+            amount: total,
+            currency: order.currency,
+            internalRef: String(pending.transactionId),
+          },
+        );
+        await this.walletService.updateTransactionStatus(
+          pending.transactionId,
+          WalletTransactionStatus.Pending,
+          {
+            gatewayRef: checkout.gatewayRef,
+            redirectUrl: checkout.redirectUrl,
+          },
+        );
+        this.logger.log(
+          `Gateway charge opened for order #${order.id} (tx #${pending.transactionId}, gw ref=${checkout.gatewayRef})`,
+        );
+      } catch (e) {
+        // Mark the pending transaction failed so the webhook doesn't double-
+        // charge if the gateway eventually replies anyway.
+        await this.walletService.updateTransactionStatus(
+          pending.transactionId,
+          WalletTransactionStatus.Failed,
+          { failureReason: (e as Error).message },
+        );
+        throw e;
+      }
+      return; // Driver is credited by the webhook on success.
+    }
+
+    // 3) Wallet + Cash: credit driver earnings now.
+    // - Cash: السائق استلم النقد من الراكب مباشرة، ندوّن الأرباح للسجل فقط
+    // - Wallet: السائق يستحق المبلغ في محفظته
+    if (mode === PaymentMode.Wallet) {
       await this.walletService.credit({
         ownerType: WalletOwnerType.Driver,
         ownerId: order.driverId,
