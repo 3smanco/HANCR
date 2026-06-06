@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { DollarSign, Plus, Edit3, Trash2, X } from 'lucide-react';
+import { DollarSign, Plus, Edit3, Trash2, X, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   PRICING_ZONES,
@@ -73,10 +73,11 @@ export default function PricingZonesPage() {
                   <th>المنطقة</th>
                   <th>الخدمة</th>
                   <th>الأسطول</th>
-                  <th>الأجرة الأساسية</th>
-                  <th>per km</th>
-                  <th>per min</th>
+                  <th>Base</th>
+                  <th>/km</th>
+                  <th>/min</th>
                   <th>×</th>
+                  <th>الجدولة</th>
                   <th>الحالة</th>
                   <th className="text-end">الإجراء</th>
                 </tr>
@@ -110,11 +111,14 @@ export default function PricingZonesPage() {
                       <td className="font-bold text-hancr-violet">
                         {Number(z.multiplier).toFixed(2)}
                       </td>
+                      <td className="text-xs text-gray-500">
+                        {scheduleLabel(z)}
+                      </td>
                       <td>
                         <span
-                          className={`badge ${active ? 'badge-green' : 'badge-gray'}`}
+                          className={`badge ${scheduleBadgeClass(active as boolean, z)}`}
                         >
-                          {active ? 'نشطة' : 'موقوفة'}
+                          {scheduleLiveLabel(active as boolean, z)}
                         </span>
                       </td>
                       <td className="text-end">
@@ -192,6 +196,8 @@ function UpsertModal({
     String((initial?.multiplier as number) ?? 1.0),
   );
   const [active, setActive] = useState((initial?.active as boolean) ?? true);
+  const [startsAt, setStartsAt] = useState(toLocalInput(initial?.startsAt));
+  const [endsAt, setEndsAt] = useState(toLocalInput(initial?.endsAt));
 
   return (
     <div
@@ -260,6 +266,32 @@ function UpsertModal({
             onChange={setMultiplier}
             type="number"
           />
+
+          {/* ── Schedule window ── */}
+          <div className="border-t border-gray-100 pt-3 mt-1">
+            <div className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+              <Clock className="w-3.5 h-3.5" />
+              نافذة التفعيل (اختيارية)
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Field
+                label="يبدأ في"
+                value={startsAt}
+                onChange={setStartsAt}
+                type="datetime-local"
+              />
+              <Field
+                label="ينتهي في"
+                value={endsAt}
+                onChange={setEndsAt}
+                type="datetime-local"
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5">
+              اتركها فارغة لتطبيق دائم. مفيدة للأسعار الموسمية أو ساعات الذروة.
+            </p>
+          </div>
+
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -287,6 +319,8 @@ function UpsertModal({
                 perKm: Number(perKm),
                 perMinute: Number(perMinute),
                 multiplier: Number(multiplier),
+                startsAt: startsAt ? new Date(startsAt).toISOString() : undefined,
+                endsAt: endsAt ? new Date(endsAt).toISOString() : undefined,
                 active,
               })
             }
@@ -298,6 +332,51 @@ function UpsertModal({
       </div>
     </div>
   );
+}
+
+// ── Schedule helpers ─────────────────────────────────────────────────────
+
+function toLocalInput(value: unknown): string {
+  if (!value) return '';
+  const d = value instanceof Date ? value : new Date(value as string);
+  if (isNaN(d.getTime())) return '';
+  // Format as YYYY-MM-DDThh:mm for <input type="datetime-local">
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function scheduleLabel(z: Zone): string {
+  const s = z.startsAt ? new Date(z.startsAt as string) : null;
+  const e = z.endsAt ? new Date(z.endsAt as string) : null;
+  if (!s && !e) return 'دائم';
+  if (s && e) return `${formatDate(z.startsAt as string)} → ${formatDate(z.endsAt as string)}`;
+  if (s) return `من ${formatDate(z.startsAt as string)}`;
+  if (e) return `حتى ${formatDate(z.endsAt as string)}`;
+  return '—';
+}
+
+function isWithinSchedule(z: Zone): boolean {
+  const now = new Date();
+  const s = z.startsAt ? new Date(z.startsAt as string) : null;
+  const e = z.endsAt ? new Date(z.endsAt as string) : null;
+  if (s && now < s) return false;
+  if (e && now > e) return false;
+  return true;
+}
+
+function scheduleLiveLabel(active: boolean, z: Zone): string {
+  if (!active) return 'موقوفة';
+  if (!isWithinSchedule(z)) {
+    const s = z.startsAt ? new Date(z.startsAt as string) : null;
+    return s && new Date() < s ? 'مجدولة' : 'منتهية';
+  }
+  return 'نشطة';
+}
+
+function scheduleBadgeClass(active: boolean, z: Zone): string {
+  if (!active) return 'badge-gray';
+  if (!isWithinSchedule(z)) return 'badge-yellow';
+  return 'badge-green';
 }
 
 function Field({
