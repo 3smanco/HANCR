@@ -27,6 +27,14 @@ export class AppConfigType {
   @Field(() => GraphQLJSON, { nullable: true })
   loyaltyConfig?: unknown;
 
+  /** K3 — SMS provider config */
+  @Field(() => GraphQLJSON, { nullable: true })
+  smsConfig?: unknown;
+
+  /** K3 — Payment gateway config */
+  @Field(() => GraphQLJSON, { nullable: true })
+  gatewayConfig?: unknown;
+
   @Field({ nullable: true }) updatedBy?: string;
   @Field() updatedAt!: Date;
 }
@@ -46,4 +54,10 @@ export class UpdateAppConfigInput {
 
   @Field(() => GraphQLJSON, { nullable: true })
   loyaltyConfig?: unknown;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  smsConfig?: unknown;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  gatewayConfig?: unknown;
 }

@@ -40,6 +40,8 @@ export class AppConfigService {
     if (input.homeScreenConfig !== undefined) config.homeScreenConfig = input.homeScreenConfig as Record<string, unknown>;
     if (input.featureFlags !== undefined) config.featureFlags = input.featureFlags as Record<string, unknown>;
     if (input.loyaltyConfig !== undefined) config.loyaltyConfig = input.loyaltyConfig as Record<string, unknown>;
+    if (input.smsConfig !== undefined) config.smsConfig = input.smsConfig as Record<string, unknown>;
+    if (input.gatewayConfig !== undefined) config.gatewayConfig = input.gatewayConfig as Record<string, unknown>;
     config.updatedBy = updatedBy;
 
     const saved = await this.configRepo.save(config);
@@ -55,6 +57,8 @@ export class AppConfigService {
     t.homeScreenConfig = e.homeScreenConfig;
     t.featureFlags = e.featureFlags;
     t.loyaltyConfig = e.loyaltyConfig;
+    t.smsConfig = e.smsConfig;
+    t.gatewayConfig = e.gatewayConfig;
     t.updatedBy = e.updatedBy;
     t.updatedAt = e.updatedAt;
     return t;

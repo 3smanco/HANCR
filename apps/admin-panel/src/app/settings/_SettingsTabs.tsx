@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, XCircle, Star } from 'lucide-react';
+import { Bell, XCircle, Star, MessageSquare, CreditCard } from 'lucide-react';
 
 const TABS = [
   { href: '/settings', label: 'الإشعارات', icon: Bell },
   { href: '/settings/cancel-reasons', label: 'أسباب الإلغاء', icon: XCircle },
   { href: '/settings/review-params', label: 'معايير التقييم', icon: Star },
+  { href: '/settings/sms', label: 'مزوّد SMS', icon: MessageSquare },
+  { href: '/settings/gateways', label: 'بوابات الدفع', icon: CreditCard },
 ];
 
 export function SettingsTabs() {
