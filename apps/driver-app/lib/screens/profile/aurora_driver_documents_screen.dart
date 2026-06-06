@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/documents_gql.dart';
@@ -66,23 +68,56 @@ class _AuroraDriverDocumentsScreenState
     );
     if (file == null) return;
 
-    // For now, we'd upload to GCS via a signed URL. As placeholder,
-    // we pass the local path — backend stores it and admin reviews.
-    // TODO(I1-next): wire signed-URL upload service.
-    final url = file.path;
     setState(() => _uploadingType = info.type);
     try {
       final client = await GraphQLClientManager.get();
+      final contentType = _guessContentType(file.path);
+
+      // 1) Ask the API for a presigned PUT URL.
+      final urlRes = await client.mutate(MutationOptions(
+        document: gql(generateUploadUrlMutation),
+        variables: {
+          'input': {
+            'type': info.type,
+            'contentType': contentType,
+          },
+        },
+      ));
+      if (urlRes.hasException) throw urlRes.exception!;
+      final urlData = urlRes.data?['generateDriverDocumentUploadUrl']
+          as Map<String, dynamic>?;
+      if (urlData == null) throw Exception('No upload URL returned');
+      final uploadUrl = urlData['uploadUrl'] as String;
+      final publicUrl = urlData['publicUrl'] as String;
+
+      // 2) PUT the bytes directly to the storage URL.
+      //    Skipped for the dev fallback (`/uploads/...`) because no real
+      //    storage backend is listening — we still persist the placeholder
+      //    publicUrl so the admin reviewer sees the record.
+      if (uploadUrl.startsWith('http')) {
+        final bytes = await File(file.path).readAsBytes();
+        final put = await http.put(
+          Uri.parse(uploadUrl),
+          headers: {'Content-Type': contentType},
+          body: bytes,
+        );
+        if (put.statusCode < 200 || put.statusCode >= 300) {
+          throw Exception('Upload failed (${put.statusCode})');
+        }
+      }
+
+      // 3) Persist the canonical URL on the driver document record.
       final res = await client.mutate(MutationOptions(
         document: gql(uploadDocumentMutation),
         variables: {
           'input': {
             'type': info.type,
-            'url': url,
+            'url': publicUrl,
           },
         },
       ));
       if (res.hasException) throw res.exception!;
+
       _toast(tr('doc_uploaded'));
       await _load();
     } catch (e) {
@@ -90,6 +125,14 @@ class _AuroraDriverDocumentsScreenState
     } finally {
       if (mounted) setState(() => _uploadingType = null);
     }
+  }
+
+  String _guessContentType(String path) {
+    final lower = path.toLowerCase();
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.webp')) return 'image/webp';
+    if (lower.endsWith('.pdf')) return 'application/pdf';
+    return 'image/jpeg';
   }
 
   void _toast(String s) => ScaffoldMessenger.of(context)
