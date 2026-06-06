@@ -288,7 +288,7 @@ export const PRICING_ZONES = gql`
     pricingZones {
       id name regionId serviceId fleetId
       baseFare perKm perMinute multiplier
-      startsAt endsAt active createdAt
+      startsAt endsAt polygon active createdAt
     }
   }
 `;

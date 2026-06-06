@@ -120,8 +120,12 @@ export class OrderService {
     const distanceMeters = route.distanceMeters;
     const durationSeconds = route.durationSeconds;
 
-    // I11 — Zone pricing overrides defaults. Look up active zone for this
-    // (region, service); fleet-specific zone wins over general.
+    // I11/L3 — Zone pricing overrides defaults. Priority:
+    //   1. PostGIS polygon containing the pickup, fleet-specific.
+    //   2. PostGIS polygon containing the pickup, general.
+    //   3. Region-based zone, fleet-specific.
+    //   4. Region-based zone, general.
+    // ST_Within on geography is meters-accurate; GiST index keeps it fast.
     const zoneRow = await this.dataSource.query<
       Array<{
         base_fare: string;
@@ -132,12 +136,22 @@ export class OrderService {
     >(
       `SELECT base_fare, per_km, per_minute, multiplier
        FROM hancr_pricing_zone
-       WHERE region_id = $1 AND service_id = $2 AND active = true
+       WHERE service_id = $1 AND active = true
          AND (starts_at IS NULL OR starts_at <= NOW())
          AND (ends_at   IS NULL OR ends_at   >= NOW())
-       ORDER BY (fleet_id IS NOT NULL) DESC, id DESC
+         AND (
+           (polygon IS NOT NULL AND
+            ST_Within(
+              ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography,
+              polygon
+            ))
+           OR (polygon IS NULL AND region_id = $4)
+         )
+       ORDER BY (polygon IS NOT NULL) DESC,
+                (fleet_id IS NOT NULL) DESC,
+                id DESC
        LIMIT 1`,
-      [input.regionId, input.serviceId],
+      [input.serviceId, originPoint.lng, originPoint.lat, input.regionId],
     );
 
     const zone = zoneRow[0];

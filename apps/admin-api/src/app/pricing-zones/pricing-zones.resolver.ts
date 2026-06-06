@@ -36,14 +36,17 @@ export class PricingZonesService {
   async upsert(
     input: UpsertPricingZoneInput,
   ): Promise<AdminPricingZoneType> {
+    // L3 — normalize polygon: empty string → null (no polygon), basic WKT sanity
+    const polygon = normalizePolygon(input.polygon);
+
     let row: PricingZoneEntity;
     if (input.id) {
       const existing = await this.repo.findOne({ where: { id: input.id } });
       if (!existing) throw new NotFoundException('Zone not found');
-      Object.assign(existing, input);
+      Object.assign(existing, { ...input, polygon });
       row = await this.repo.save(existing);
     } else {
-      row = await this.repo.save(this.repo.create(input));
+      row = await this.repo.save(this.repo.create({ ...input, polygon }));
     }
     return this.toType(row);
   }
@@ -67,9 +70,21 @@ export class PricingZonesService {
       startsAt: z.startsAt,
       endsAt: z.endsAt,
       active: z.active,
+      polygon: z.polygon ?? undefined,
       createdAt: z.createdAt,
     };
   }
+}
+
+/**
+ * Normalize polygon input. Accepts WKT or null/undefined/empty. Strict
+ * validation is done by PostGIS at write time (invalid WKT → SQL error).
+ */
+function normalizePolygon(value?: string | null): string | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return null;
+  return trimmed;
 }
 
 @Resolver(() => AdminPricingZoneType)
