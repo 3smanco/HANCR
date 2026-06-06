@@ -1,18 +1,26 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { DriverService } from './driver.service';
+import { UploadUrlService } from './upload-url.service';
 import { DriverType } from './dto/driver.type';
 import { UpdateDriverInput } from './dto/update-driver.input';
 import {
   DriverDocumentType,
   UploadDocumentInput,
 } from './dto/driver-document.type';
+import {
+  DocumentUploadUrlType,
+  GenerateUploadUrlInput,
+} from './dto/upload-url.type';
 import { JwtAuthGuard, CurrentDriver } from '../auth/jwt-auth.guard';
 import { AuthDriver } from '../auth/jwt.strategy';
 
 @Resolver(() => DriverType)
 export class DriverResolver {
-  constructor(private readonly driverService: DriverService) {}
+  constructor(
+    private readonly driverService: DriverService,
+    private readonly uploadUrlService: UploadUrlService,
+  ) {}
 
   @Query(() => DriverType, { description: 'بيانات السائق الحالي' })
   @UseGuards(JwtAuthGuard)
@@ -65,5 +73,20 @@ export class DriverResolver {
     @Args('input') input: UploadDocumentInput,
   ): Promise<DriverDocumentType> {
     return this.driverService.uploadDocument(driver.driverId, input);
+  }
+
+  /**
+   * K4 — Generate a presigned URL the driver app can PUT a file to.
+   * The returned `publicUrl` is then passed back via uploadDriverDocument.
+   */
+  @Mutation(() => DocumentUploadUrlType, {
+    description: 'توليد رابط رفع موقَّع لوثيقة سائق (GCS v4 signed URL)',
+  })
+  @UseGuards(JwtAuthGuard)
+  generateDriverDocumentUploadUrl(
+    @CurrentDriver() driver: AuthDriver,
+    @Args('input') input: GenerateUploadUrlInput,
+  ): Promise<DocumentUploadUrlType> {
+    return this.uploadUrlService.generate(driver.driverId, input);
   }
 }
