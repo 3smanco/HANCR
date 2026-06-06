@@ -36,6 +36,7 @@ dependencies:
 
   # Image upload (driver documents)
   image_picker: ^1.1.2
+  http: ^1.2.2
 
   # UI
   google_fonts: ^6.2.1
