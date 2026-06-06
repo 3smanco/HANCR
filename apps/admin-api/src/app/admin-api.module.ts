@@ -44,6 +44,7 @@ import {
   FleetEntity,
   PricingZoneEntity,
   LeadEntity,
+  DriverApplicationEntity,
 } from '@hancr/database';
 
 // Feature Modules
@@ -69,6 +70,7 @@ import { SettingsModule } from './settings/settings.module';
 import { FleetsModule } from './fleets/fleets.module';
 import { PricingZonesModule } from './pricing-zones/pricing-zones.module';
 import { LeadsModule } from './leads/leads.module';
+import { DriverApplicationsModule } from './driver-applications/driver-applications.module';
 import { AdminNotificationsModule } from './notifications/notifications.module';
 import { NotificationsModule } from '@hancr/notifications';
 
@@ -135,6 +137,7 @@ import { ObservabilityModule } from '@hancr/observability';
           FleetEntity,
           PricingZoneEntity,
           LeadEntity,
+          DriverApplicationEntity,
         ],
         synchronize: false,
         logging: cfg.get<string>('NODE_ENV') === 'development',
@@ -183,6 +186,7 @@ import { ObservabilityModule } from '@hancr/observability';
     FleetsModule,
     PricingZonesModule,
     LeadsModule,
+    DriverApplicationsModule,
     NotificationsModule,
     AdminNotificationsModule,
     ObservabilityModule,

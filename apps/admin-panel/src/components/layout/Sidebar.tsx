@@ -49,6 +49,7 @@ export function Sidebar() {
     { key: 'nav.sos',           icon: ShieldAlert,     href: '/sos' },
     { key: 'nav.complaints',    icon: AlertOctagon,    href: '/complaints' },
     { key: 'nav.leads',         icon: Inbox,           href: '/leads' },
+    { key: 'nav.applications',  icon: Users2,          href: '/applications' },
     { key: 'nav.services',      icon: Settings,        href: '/services' },
     { key: 'nav.coupons',       icon: Ticket,          href: '/coupons' },
     { key: 'nav.bundles',       icon: Package,         href: '/bundles' },
