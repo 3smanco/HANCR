@@ -10,6 +10,8 @@ import {
 import { AdminJwtGuard } from '../auth/admin-jwt.guard';
 import { AdminRolesGuard } from '../auth/admin-roles.guard';
 import { RequireRole } from '../auth/roles.decorator';
+import { CurrentAdmin } from '../auth/current-admin.decorator';
+import type { AdminUser } from '../auth/admin-jwt.strategy';
 
 @Resolver(() => AdminDriverDetailType)
 export class DriverDetailResolver {
@@ -43,8 +45,8 @@ export class DriverDetailResolver {
   @RequireRole('ops')
   reviewDriverDocument(
     @Args('input') input: ReviewDocumentInput,
+    @CurrentAdmin() admin: AdminUser,
   ): Promise<AdminDriverDocumentType> {
-    // TODO: reviewer id should come from admin JWT; using 0 placeholder for now
-    return this.service.reviewDocument(input, 0);
+    return this.service.reviewDocument(input, admin.adminId);
   }
 }
