@@ -2,10 +2,26 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, XCircle, Star, MessageSquare, CreditCard } from 'lucide-react';
+import {
+  Bell,
+  XCircle,
+  Star,
+  MessageSquare,
+  CreditCard,
+  SlidersHorizontal,
+  Gift,
+  TrendingUp,
+  Palette,
+  LayoutGrid,
+} from 'lucide-react';
 
 const TABS = [
   { href: '/settings', label: 'الإشعارات', icon: Bell },
+  { href: '/settings/operations', label: 'الإعدادات التشغيلية', icon: SlidersHorizontal },
+  { href: '/settings/loyalty', label: 'الولاء', icon: Gift },
+  { href: '/settings/pricing-rules', label: 'قواعد التسعير', icon: TrendingUp },
+  { href: '/settings/theme', label: 'الثيم', icon: Palette },
+  { href: '/settings/home-layout', label: 'الشاشة الرئيسية', icon: LayoutGrid },
   { href: '/settings/cancel-reasons', label: 'أسباب الإلغاء', icon: XCircle },
   { href: '/settings/review-params', label: 'معايير التقييم', icon: Star },
   { href: '/settings/sms', label: 'مزوّد SMS', icon: MessageSquare },

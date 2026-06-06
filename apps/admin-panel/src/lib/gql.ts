@@ -1140,3 +1140,64 @@ export const UPDATE_DRIVER_APPLICATION_STATUS = gql`
     }
   }
 `;
+
+// ─── N2 — SDUI control: operations / loyalty / pricing-rules / theme / home ──
+
+export const SDUI_CONFIG = gql`
+  query SduiConfig {
+    appConfig(configKey: "main") {
+      id
+      operationsConfig
+      loyaltyConfig
+      pricingRulesConfig
+      themeConfig
+      homeScreenConfig
+      featureFlags
+    }
+  }
+`;
+
+export const UPDATE_OPERATIONS_CONFIG = gql`
+  mutation UpdateOperationsConfig($operationsConfig: JSON!) {
+    updateAppConfig(configKey: "main", input: { operationsConfig: $operationsConfig }) {
+      id
+      operationsConfig
+    }
+  }
+`;
+
+export const UPDATE_LOYALTY_CONFIG = gql`
+  mutation UpdateLoyaltyConfig($loyaltyConfig: JSON!) {
+    updateAppConfig(configKey: "main", input: { loyaltyConfig: $loyaltyConfig }) {
+      id
+      loyaltyConfig
+    }
+  }
+`;
+
+export const UPDATE_PRICING_RULES_CONFIG = gql`
+  mutation UpdatePricingRulesConfig($pricingRulesConfig: JSON!) {
+    updateAppConfig(configKey: "main", input: { pricingRulesConfig: $pricingRulesConfig }) {
+      id
+      pricingRulesConfig
+    }
+  }
+`;
+
+export const UPDATE_THEME_CONFIG = gql`
+  mutation UpdateThemeConfig($themeConfig: JSON!) {
+    updateAppConfig(configKey: "main", input: { themeConfig: $themeConfig }) {
+      id
+      themeConfig
+    }
+  }
+`;
+
+export const UPDATE_HOME_LAYOUT_CONFIG = gql`
+  mutation UpdateHomeLayoutConfig($homeScreenConfig: JSON!) {
+    updateAppConfig(configKey: "main", input: { homeScreenConfig: $homeScreenConfig }) {
+      id
+      homeScreenConfig
+    }
+  }
+`;

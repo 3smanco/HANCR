@@ -117,6 +117,11 @@ const ar = {
     operators: 'المشرفون',
   },
 
+  // ── Banners page ──
+  bannersPage: {
+    subtitle: 'تظهر في الشاشة الرئيسية لتطبيق الراكب',
+  },
+
   // ── Dashboard ──
   dashboard: {
     title: 'لوحة التحكم',
@@ -495,6 +500,10 @@ const en: typeof ar = {
     notifications: 'Notifications',
     settings: 'Settings',
     operators: 'Operators',
+  },
+
+  bannersPage: {
+    subtitle: 'Shown on the rider app home screen',
   },
 
   dashboard: {
