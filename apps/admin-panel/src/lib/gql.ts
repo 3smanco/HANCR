@@ -1062,3 +1062,33 @@ export const UPDATE_LEAD_STATUS = gql`
     }
   }
 `;
+
+// ─── K3 — Provider config (SMS + Gateways) ─────────────────────────────────
+
+export const PROVIDER_CONFIG = gql`
+  query ProviderConfig {
+    appConfig(configKey: "main") {
+      id
+      smsConfig
+      gatewayConfig
+    }
+  }
+`;
+
+export const UPDATE_SMS_CONFIG = gql`
+  mutation UpdateSmsConfig($smsConfig: JSON!) {
+    updateAppConfig(configKey: "main", input: { smsConfig: $smsConfig }) {
+      id
+      smsConfig
+    }
+  }
+`;
+
+export const UPDATE_GATEWAY_CONFIG = gql`
+  mutation UpdateGatewayConfig($gatewayConfig: JSON!) {
+    updateAppConfig(configKey: "main", input: { gatewayConfig: $gatewayConfig }) {
+      id
+      gatewayConfig
+    }
+  }
+`;

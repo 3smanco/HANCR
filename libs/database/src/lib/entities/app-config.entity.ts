@@ -72,6 +72,30 @@ export class AppConfigEntity {
   @Column({ type: 'jsonb', default: '{}', name: 'loyalty_config' })
   loyaltyConfig!: Record<string, unknown>;
 
+  /**
+   * K3 — SMS provider config
+   * {
+   *   provider: 'twilio' | 'vonage' | 'local',
+   *   senderId: string,
+   *   active: boolean,
+   *   // credentials are NEVER stored here — they live in .env.prod
+   * }
+   */
+  @Column({ type: 'jsonb', default: '{}', name: 'sms_config' })
+  smsConfig!: Record<string, unknown>;
+
+  /**
+   * K3 — Payment gateway config (one row keyed by gateway code)
+   * {
+   *   hyperpay: { enabled: bool, regions: ['SA'], displayName: 'HyperPay' },
+   *   moyasar:  { enabled: bool, regions: ['SA'] },
+   *   stripe:   { enabled: bool, regions: ['AE','QA'] },
+   *   applepay: { enabled: bool, regions: ['SA','AE'] }
+   * }
+   */
+  @Column({ type: 'jsonb', default: '{}', name: 'gateway_config' })
+  gatewayConfig!: Record<string, unknown>;
+
   /** الإصدار — للـ force update */
   @Column({ default: '1.0.0' })
   version!: string;
