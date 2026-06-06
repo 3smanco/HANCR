@@ -61,16 +61,16 @@ export function Header({ locale }: { locale: Locale }) {
             {tt('nav.language')}
           </Link>
           <Link
-            href={localizedHref(locale, '/help')}
+            href={localizedHref(locale, '/login')}
             className="hidden sm:inline-block text-pearl/80 hover:text-ember transition text-sm font-medium"
           >
             {tt('nav.login')}
           </Link>
           <Link
-            href={localizedHref(locale, '/drive')}
+            href={localizedHref(locale, '/signup')}
             className="hidden md:inline-flex bg-ember hover:bg-ember-deep transition px-4 py-2 rounded-lg font-semibold text-sm text-pearl shadow-ember"
           >
-            {tt('cta.signUpDriver')}
+            {tt('nav.signup')}
           </Link>
           <button
             type="button"
@@ -105,11 +105,18 @@ export function Header({ locale }: { locale: Locale }) {
               {tt('nav.language')}
             </Link>
             <Link
-              href={localizedHref(locale, '/drive')}
+              href={localizedHref(locale, '/login')}
+              className="py-2 text-pearl/90 hover:text-ember transition font-medium"
+              onClick={() => setOpen(false)}
+            >
+              {tt('nav.login')}
+            </Link>
+            <Link
+              href={localizedHref(locale, '/signup')}
               className="mt-2 bg-ember hover:bg-ember-deep transition px-4 py-3 rounded-lg font-semibold text-center text-pearl"
               onClick={() => setOpen(false)}
             >
-              {tt('cta.signUpDriver')}
+              {tt('nav.signup')}
             </Link>
           </nav>
         </div>

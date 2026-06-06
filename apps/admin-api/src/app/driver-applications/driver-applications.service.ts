@@ -79,6 +79,21 @@ export class DriverApplicationsService {
     return this.toType(row);
   }
 
+  /**
+   * M3 — Used by the public status lookup. Returns null instead of throwing
+   * so the resolver doesn't leak which application IDs exist.
+   */
+  async findByIdAndPhone(
+    id: number,
+    phone: string,
+  ): Promise<DriverApplicationType | null> {
+    const normalized = phone.replace(/\s/g, '');
+    const row = await this.repo.findOne({ where: { id } });
+    if (!row) return null;
+    if (row.phone.replace(/\s/g, '') !== normalized) return null;
+    return this.toType(row);
+  }
+
   async updateStatus(
     input: UpdateApplicationStatusInput,
     reviewerId: number,
