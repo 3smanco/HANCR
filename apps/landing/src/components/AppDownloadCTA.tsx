@@ -88,7 +88,7 @@ export function AppDownloadCTA({ locale, variant = 'both' }: Props) {
                     c.accent === 'ember' ? 'text-pearl/70' : 'text-muted'
                   }`}
                 >
-                  APK · 114 MB
+                  APK · 88 MB
                 </div>
               </div>
             </a>
