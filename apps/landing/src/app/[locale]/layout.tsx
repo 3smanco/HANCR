@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { ApolloWrapper } from '@/app/apollo-provider';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { StickyMobileCTA } from '@/components/StickyMobileCTA';
 import {
   DEFAULT_LOCALE,
   SUPPORTED_LOCALES,
@@ -52,6 +53,7 @@ export default function LocaleLayout({
         <Header locale={locale} />
         <main className="min-h-[calc(100vh-4rem)]">{children}</main>
         <Footer locale={locale} />
+        <StickyMobileCTA locale={locale} />
       </div>
     </ApolloWrapper>
   );
