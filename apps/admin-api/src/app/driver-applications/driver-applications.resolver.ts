@@ -31,6 +31,25 @@ export class DriverApplicationsResolver {
 
   // ── Public — called from the marketing-site wizard ──────────────────────
 
+  /**
+   * M3 — Application status lookup for the applicant. The phone acts as a
+   * lightweight verifier so anyone holding the application ID can't peek.
+   * Returns only the public-safe fields.
+   */
+  @Query(() => DriverApplicationType, {
+    nullable: true,
+    description: 'فحص حالة طلب تسجيل سائق بالـ ID والجوال',
+  })
+  @UseGuards(GqlThrottlerGuard)
+  @Throttle({ default: { limit: 30, ttl: 300_000 } })
+  async checkDriverApplicationStatus(
+    @Args('applicationId', { type: () => Int }) applicationId: number,
+    @Args('phone') phone: string,
+  ): Promise<DriverApplicationType | null> {
+    return this.service.findByIdAndPhone(applicationId, phone.trim());
+  }
+
+
   /** Sign one document for upload (PUT). Rate-limited to discourage abuse. */
   @Mutation(() => ApplicationDocUploadUrlType, {
     description: 'توليد رابط رفع موقَّع لوثيقة من نموذج التسجيل العام',
