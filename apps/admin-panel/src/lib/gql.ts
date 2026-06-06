@@ -1092,3 +1092,26 @@ export const UPDATE_GATEWAY_CONFIG = gql`
     }
   }
 `;
+
+// ─── K4 — Dispatcher panel ─────────────────────────────────────────────────
+
+export const ADMIN_RIDER_LOOKUP = gql`
+  query AdminRiderLookup($phone: String!) {
+    adminRiderLookup(phone: $phone) {
+      id
+      name
+      phone
+    }
+  }
+`;
+
+export const ADMIN_CREATE_MANUAL_ORDER = gql`
+  mutation AdminCreateManualOrder($input: AdminCreateOrderInput!) {
+    adminCreateManualOrder(input: $input) {
+      id
+      status
+      driverId
+      costBest
+    }
+  }
+`;

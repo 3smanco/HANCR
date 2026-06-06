@@ -1,9 +1,33 @@
-import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 @ObjectType()
 export class GeoPointType {
   @Field(() => Float) lat!: number;
   @Field(() => Float) lng!: number;
+}
+
+@InputType()
+export class GeoPointInput {
+  @Field(() => Float) lat!: number;
+  @Field(() => Float) lng!: number;
+}
+
+/**
+ * K4 — Dispatcher manual order input.
+ * The admin acts on behalf of a rider — minimal fields, default settings,
+ * cost computed from haversine distance × service rates.
+ */
+@InputType()
+export class AdminCreateOrderInput {
+  @Field(() => Int) @IsInt() riderId!: number;
+  @Field(() => Int) @IsInt() serviceId!: number;
+  @Field(() => Int) @IsInt() regionId!: number;
+  @Field(() => GeoPointInput) origin!: GeoPointInput;
+  @Field(() => GeoPointInput) destination!: GeoPointInput;
+  @Field({ nullable: true }) @IsOptional() @IsString() originAddress?: string;
+  @Field({ nullable: true }) @IsOptional() @IsString() destinationAddress?: string;
+  @Field(() => Int, { nullable: true }) @IsOptional() @IsInt() @Min(0) driverIdHint?: number;
 }
 
 @ObjectType()

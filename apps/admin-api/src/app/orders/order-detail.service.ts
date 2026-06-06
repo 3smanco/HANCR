@@ -11,11 +11,16 @@ import {
   OrderEntity,
   OrderMessageEntity,
   OrderStatus,
+  OrderType,
+  PaymentMode,
   RequestActivityEntity,
   RequestActivityType,
+  RiderEntity,
+  ServiceEntity,
 } from '@hancr/database';
 import { DriverRedisService } from '@hancr/redis';
 import {
+  AdminCreateOrderInput,
   AdminNearbyDriverType,
   AdminOrderActivityType,
   AdminOrderDetailType,
@@ -35,8 +40,112 @@ export class OrderDetailService {
     private readonly messageRepo: Repository<OrderMessageEntity>,
     @InjectRepository(DriverEntity)
     private readonly driverRepo: Repository<DriverEntity>,
+    @InjectRepository(RiderEntity)
+    private readonly riderRepo: Repository<RiderEntity>,
+    @InjectRepository(ServiceEntity)
+    private readonly serviceRepo: Repository<ServiceEntity>,
     private readonly driverRedis: DriverRedisService,
   ) {}
+
+  /**
+   * K4 — Dispatcher: create an order on behalf of a rider.
+   * Uses haversine distance + service rates; skips coupon/pool/bid logic.
+   * If driverIdHint is supplied the driver is force-assigned in the same call.
+   */
+  async createManualOrder(
+    input: AdminCreateOrderInput,
+  ): Promise<AdminOrderDetailType> {
+    const rider = await this.riderRepo.findOne({ where: { id: input.riderId } });
+    if (!rider) throw new NotFoundException(`Rider #${input.riderId} not found`);
+    if (rider.banned) throw new BadRequestException('Rider is banned');
+
+    const service = await this.serviceRepo.findOne({
+      where: { id: input.serviceId },
+    });
+    if (!service) throw new NotFoundException(`Service #${input.serviceId} not found`);
+
+    const distanceMeters = haversineMeters(
+      input.origin.lat,
+      input.origin.lng,
+      input.destination.lat,
+      input.destination.lng,
+    );
+    // Rough city-driving estimate: 30 km/h average.
+    const durationSeconds = Math.round((distanceMeters / 1000 / 30) * 3600);
+
+    const baseFare = Number(service.baseFare);
+    const perKm = Number(service.perHundredMeters) * 10;
+    const perMin = Number(service.perMinuteDrive);
+    const cost =
+      Math.round(
+        (baseFare + (distanceMeters / 1000) * perKm + (durationSeconds / 60) * perMin) *
+          100,
+      ) / 100;
+
+    const order = this.orderRepo.create({
+      riderId: input.riderId,
+      serviceId: input.serviceId,
+      regionId: input.regionId,
+      type: OrderType.Ride,
+      status: OrderStatus.Requested,
+      currency: rider.currency ?? 'SAR',
+      points: [
+        { lat: input.origin.lat, lng: input.origin.lng },
+        { lat: input.destination.lat, lng: input.destination.lng },
+      ],
+      addresses: [
+        input.originAddress ?? '',
+        input.destinationAddress ?? '',
+      ],
+      distanceBest: distanceMeters,
+      durationBest: durationSeconds,
+      costBest: cost,
+      costAfterCoupon: cost,
+      paidAmount: 0,
+      providerShare: 0,
+      paymentMode: PaymentMode.Cash,
+    });
+    const saved = await this.orderRepo.save(order);
+
+    await this.activityRepo.save(
+      this.activityRepo.create({
+        orderId: saved.id,
+        type: RequestActivityType.RequestedByOperator,
+      }),
+    );
+    this.logger.log(`Admin manually created order #${saved.id} for rider #${rider.id}`);
+
+    if (input.driverIdHint) {
+      return this.assignDriver(saved.id, input.driverIdHint);
+    }
+    return this.getDetail(saved.id);
+  }
+
+  /**
+   * K4 — Lookup a rider by phone number for the dispatcher autocomplete.
+   * Returns at most 10 matches.
+   */
+  async searchRidersByPhone(query: string): Promise<Array<{
+    id: number;
+    name: string;
+    phone: string;
+  }>> {
+    const q = query.trim();
+    if (q.length < 3) return [];
+    const riders = await this.riderRepo
+      .createQueryBuilder('r')
+      .where('r.phoneNumber LIKE :q', { q: `%${q}%` })
+      .andWhere('r.banned = false')
+      .limit(10)
+      .getMany();
+    return riders.map((r) => ({
+      id: r.id,
+      name:
+        [r.firstName, r.lastName].filter(Boolean).join(' ') ||
+        `Rider #${r.id}`,
+      phone: r.phoneNumber ?? '',
+    }));
+  }
 
   async getDetail(orderId: number): Promise<AdminOrderDetailType> {
     const order = await this.orderRepo.findOne({
@@ -213,4 +322,23 @@ export class OrderDetailService {
       sentAt: m.sentAt,
     };
   }
+}
+
+// ─── Geometry helpers ─────────────────────────────────────────────────────
+
+function haversineMeters(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+): number {
+  const R = 6371000; // Earth radius in metres
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c);
 }
