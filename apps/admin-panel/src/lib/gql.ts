@@ -1115,3 +1115,28 @@ export const ADMIN_CREATE_MANUAL_ORDER = gql`
     }
   }
 `;
+
+// ─── M2 — Driver applications inbox ────────────────────────────────────────
+
+export const ADMIN_DRIVER_APPLICATIONS = gql`
+  query AdminDriverApplications($page: Int, $limit: Int, $status: String) {
+    adminDriverApplications(page: $page, limit: $limit, status: $status) {
+      items {
+        id fullName email phone city
+        nationalIdNumber dateOfBirth
+        vehicleBrand vehicleModel vehicleYear vehicleColor plateNumber
+        docNationalIdUrl docLicenseUrl docVehicleRegistrationUrl docInsuranceUrl docProfilePhotoUrl
+        status rejectionReason reviewedAt createdAt
+      }
+      total submittedCount inReviewCount
+    }
+  }
+`;
+
+export const UPDATE_DRIVER_APPLICATION_STATUS = gql`
+  mutation UpdateDriverApplicationStatus($input: UpdateApplicationStatusInput!) {
+    updateDriverApplicationStatus(input: $input) {
+      id status rejectionReason reviewedAt
+    }
+  }
+`;

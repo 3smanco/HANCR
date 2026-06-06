@@ -46,6 +46,7 @@ export { ReviewParameterEntity } from './lib/entities/review-parameter.entity';
 export { FleetEntity } from './lib/entities/fleet.entity';
 export { PricingZoneEntity } from './lib/entities/pricing-zone.entity';
 export { LeadEntity } from './lib/entities/lead.entity';
+export { DriverApplicationEntity } from './lib/entities/driver-application.entity';
 
 // Enums
 export { CouponType } from './lib/enums/coupon-type.enum';

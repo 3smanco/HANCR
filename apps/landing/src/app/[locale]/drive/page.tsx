@@ -6,11 +6,13 @@ import {
   type Locale,
   t,
 } from '@/i18n/messages';
+import Link from 'next/link';
 import { Hero } from '@/components/Hero';
 import { ValuePropsGrid } from '@/components/ValuePropsGrid';
 import { HowItWorks } from '@/components/HowItWorks';
 import { FAQAccordion } from '@/components/FAQAccordion';
-import { LeadForm } from '@/components/LeadForm';
+import { localizedHref } from '@/lib/locale';
+import { ArrowRight } from 'lucide-react';
 
 export function generateStaticParams() {
   return SUPPORTED_LOCALES.map((locale) => ({ locale }));
@@ -66,7 +68,7 @@ export default function DrivePage({ params }: { params: { locale: string } }) {
             : 'Join HANCR. Only 15% commission, no subscription fees, withdraw earnings anytime.'
         }
         primaryCta={{
-          href: '#apply',
+          href: localizedHref(locale, '/drive/apply'),
           label: isAr ? 'قدِّم طلبك الآن' : 'Apply now',
         }}
         secondaryCta={{
@@ -153,29 +155,32 @@ export default function DrivePage({ params }: { params: { locale: string } }) {
         ]}
       />
 
-      {/* ── Apply ── */}
+      {/* ── Apply CTA ── */}
       <section id="apply" className="py-20 px-6 bg-coal/50 border-y border-stone/40">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-pearl mb-3">
-              {isAr ? 'قدِّم طلب الانضمام' : 'Apply to drive'}
-            </h2>
-            <p className="text-muted">
-              {isAr
-                ? 'املأ النموذج وسنتواصل معك خلال 48 ساعة.'
-                : "Fill the form and we'll get back to you within 48 hours."}
-            </p>
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="inline-block px-3 py-1 rounded-full bg-ember/10 border border-ember/30 text-ember text-xs font-semibold mb-5 uppercase tracking-wider">
+            {isAr ? 'تقديم احترافي بـ 4 خطوات' : '4-step pro application'}
           </div>
-          <LeadForm
-            locale={locale}
-            type="driver_signup"
-            heading={isAr ? 'بياناتك' : 'Your details'}
-            subheading={
-              isAr
-                ? 'كل البيانات سرية ولا تُشارَك مع طرف ثالث.'
-                : "All data is confidential and won't be shared with third parties."
-            }
-          />
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-pearl mb-4">
+            {isAr ? 'جاهز للانضمام؟' : 'Ready to join?'}
+          </h2>
+          <p className="text-muted mb-8 max-w-md mx-auto">
+            {isAr
+              ? 'بيانات شخصية، سيارة، 5 وثائق، ثم مراجعة. يأخذ عادةً 10 دقائق.'
+              : 'Personal info, vehicle, 5 documents, then a review. Takes about 10 minutes.'}
+          </p>
+          <Link
+            href={localizedHref(locale, '/drive/apply')}
+            className="inline-flex items-center gap-2 bg-ember hover:bg-ember-deep transition px-8 py-4 rounded-xl font-bold text-lg text-pearl shadow-ember-lg"
+          >
+            {isAr ? 'ابدأ التسجيل' : 'Start application'}
+            <ArrowRight className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
+          </Link>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted">
+            <span>{isAr ? '✓ بياناتك سرية' : '✓ Data confidential'}</span>
+            <span>{isAr ? '✓ مراجعة خلال 48 ساعة' : '✓ Reviewed in 48h'}</span>
+            <span>{isAr ? '✓ عمولة 15% فقط' : '✓ 15% commission'}</span>
+          </div>
         </div>
       </section>
 
