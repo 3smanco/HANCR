@@ -6,6 +6,7 @@ import { Image as ImageIcon, Plus, Trash2, ArrowUp, ArrowDown, Save } from 'luci
 import toast from 'react-hot-toast';
 import { GET_APP_CONFIG, UPDATE_APP_CONFIG } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
+import { useT } from '@/i18n/LocaleProvider';
 
 const CONFIG_KEY = 'main';
 
@@ -20,6 +21,7 @@ interface Banner {
 }
 
 export default function BannersPage() {
+  const t = useT();
   const [banners, setBanners] = useState<Banner[]>([]);
 
   const { data, loading } = useQuery(GET_APP_CONFIG, {
@@ -33,7 +35,7 @@ export default function BannersPage() {
     if (home?.banners) {
       setBanners(
         [...home.banners]
-          .map((b, i) => ({ active: true, order: i, ...b }))
+          .map((b, i) => ({ ...b, active: b.active ?? true, order: b.order ?? i }))
           .sort((a, b) => a.order - b.order),
       );
     }
@@ -86,8 +88,8 @@ export default function BannersPage() {
   return (
     <div>
       <Topbar
-        title="البانرات الترويجية"
-        subtitle="تظهر في الشاشة الرئيسية لتطبيق الراكب"
+        title={t('nav.banners')}
+        subtitle={t('bannersPage.subtitle')}
       />
       <div className="p-6 max-w-3xl space-y-4">
         <div className="flex justify-between">
