@@ -5,6 +5,8 @@ import {
   OrderEntity,
   OrderMessageEntity,
   RequestActivityEntity,
+  RiderEntity,
+  ServiceEntity,
 } from '@hancr/database';
 import { HancrRedisModule } from '@hancr/redis';
 import { OrdersService } from './orders.service';
@@ -19,6 +21,8 @@ import { OrderDetailResolver } from './order-detail.resolver';
       RequestActivityEntity,
       OrderMessageEntity,
       DriverEntity,
+      RiderEntity,
+      ServiceEntity,
     ]),
     HancrRedisModule,
   ],
