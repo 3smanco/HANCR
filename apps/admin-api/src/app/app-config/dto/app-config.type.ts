@@ -35,6 +35,14 @@ export class AppConfigType {
   @Field(() => GraphQLJSON, { nullable: true })
   gatewayConfig?: unknown;
 
+  /** N1 — Operational values (OTP, search radius, ETA, matching) */
+  @Field(() => GraphQLJSON, { nullable: true })
+  operationsConfig?: unknown;
+
+  /** N1 — Cancellation rules + dynamic surge */
+  @Field(() => GraphQLJSON, { nullable: true })
+  pricingRulesConfig?: unknown;
+
   @Field({ nullable: true }) updatedBy?: string;
   @Field() updatedAt!: Date;
 }
@@ -60,4 +68,10 @@ export class UpdateAppConfigInput {
 
   @Field(() => GraphQLJSON, { nullable: true })
   gatewayConfig?: unknown;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  operationsConfig?: unknown;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  pricingRulesConfig?: unknown;
 }

@@ -42,6 +42,8 @@ export class AppConfigService {
     if (input.loyaltyConfig !== undefined) config.loyaltyConfig = input.loyaltyConfig as Record<string, unknown>;
     if (input.smsConfig !== undefined) config.smsConfig = input.smsConfig as Record<string, unknown>;
     if (input.gatewayConfig !== undefined) config.gatewayConfig = input.gatewayConfig as Record<string, unknown>;
+    if (input.operationsConfig !== undefined) config.operationsConfig = input.operationsConfig as Record<string, unknown>;
+    if (input.pricingRulesConfig !== undefined) config.pricingRulesConfig = input.pricingRulesConfig as Record<string, unknown>;
     config.updatedBy = updatedBy;
 
     const saved = await this.configRepo.save(config);
@@ -59,6 +61,8 @@ export class AppConfigService {
     t.loyaltyConfig = e.loyaltyConfig;
     t.smsConfig = e.smsConfig;
     t.gatewayConfig = e.gatewayConfig;
+    t.operationsConfig = e.operationsConfig;
+    t.pricingRulesConfig = e.pricingRulesConfig;
     t.updatedBy = e.updatedBy;
     t.updatedAt = e.updatedAt;
     return t;

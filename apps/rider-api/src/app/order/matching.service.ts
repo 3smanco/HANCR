@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DriverRedisService, NearbyDriver } from '@hancr/redis';
 import { DriverEntity } from '@hancr/database';
+import { AppConfigReader } from '../app-config/app-config-reader.service';
 
 export interface MatchResult {
   driver: DriverEntity;
@@ -40,6 +41,8 @@ export class MatchingService {
 
     @InjectRepository(DriverEntity)
     private readonly driverRepo: Repository<DriverEntity>,
+
+    private readonly appConfig: AppConfigReader,
   ) {}
 
   /**
@@ -53,11 +56,16 @@ export class MatchingService {
     lat: number,
     lng: number,
     serviceId: number,
-    radiusKm = 5,
+    radiusKm?: number,
     filters?: MatchingFilters,
   ): Promise<MatchResult[]> {
+    // N1 — نصف القطر و ETA من لوحة التحكم (operationsConfig)
+    const ops = await this.appConfig.getOperations();
+    const effectiveRadiusKm = radiusKm ?? ops.searchRadiusKm ?? 5;
+    const etaPerKm = ops.etaMinutesPerKm ?? 1.5;
+
     // تحويل إلى أمتار كما تتوقعه DriverRedisService
-    const radiusMeters = radiusKm * 1000;
+    const radiusMeters = effectiveRadiusKm * 1000;
 
     const nearby: NearbyDriver[] = await this.driverRedis.findNearbyDrivers(
       lat,
@@ -68,7 +76,7 @@ export class MatchingService {
 
     if (nearby.length === 0) {
       this.logger.log(
-        `No drivers found near (${lat}, ${lng}) within ${radiusKm}km for service ${serviceId}`,
+        `No drivers found near (${lat}, ${lng}) within ${effectiveRadiusKm}km for service ${serviceId}`,
       );
       return [];
     }
@@ -101,9 +109,9 @@ export class MatchingService {
         continue;
       }
 
-      // حساب الوقت المتوقع للوصول (ETA) — تقدير: 1.5 دقيقة لكل كيلومتر
+      // حساب الوقت المتوقع للوصول (ETA) — المعدّل من لوحة التحكم
       const distanceKm = nearbyDriver.distanceMeters / 1000;
-      const etaMinutes = Math.ceil(distanceKm * 1.5);
+      const etaMinutes = Math.ceil(distanceKm * etaPerKm);
 
       results.push({
         driver,
