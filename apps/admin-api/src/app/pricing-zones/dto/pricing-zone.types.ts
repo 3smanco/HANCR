@@ -23,6 +23,8 @@ export class AdminPricingZoneType {
   @Field({ nullable: true }) startsAt?: Date;
   @Field({ nullable: true }) endsAt?: Date;
   @Field() active!: boolean;
+  /** L3 — WKT polygon (POLYGON((lng lat, lng lat, ...))). Null = region-based. */
+  @Field({ nullable: true }) polygon?: string;
   @Field() createdAt!: Date;
 }
 
@@ -45,4 +47,14 @@ export class UpsertPricingZoneInput {
   @Field({ nullable: true }) @IsOptional() startsAt?: Date;
   @Field({ nullable: true }) @IsOptional() endsAt?: Date;
   @Field({ defaultValue: true }) @IsBoolean() active!: boolean;
+
+  /**
+   * L3 — Optional WKT polygon, e.g.
+   *   POLYGON((46.6 24.7, 46.8 24.7, 46.8 24.6, 46.6 24.6, 46.6 24.7))
+   * Server uses ST_GeomFromText + ST_Within for matching. Null = region-based.
+   */
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  polygon?: string;
 }

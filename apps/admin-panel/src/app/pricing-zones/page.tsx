@@ -198,6 +198,7 @@ function UpsertModal({
   const [active, setActive] = useState((initial?.active as boolean) ?? true);
   const [startsAt, setStartsAt] = useState(toLocalInput(initial?.startsAt));
   const [endsAt, setEndsAt] = useState(toLocalInput(initial?.endsAt));
+  const [polygon, setPolygon] = useState((initial?.polygon as string) ?? '');
 
   return (
     <div
@@ -292,6 +293,29 @@ function UpsertModal({
             </p>
           </div>
 
+          {/* ── L3 — PostGIS polygon (optional) ── */}
+          <div className="border-t border-gray-100 pt-3 mt-1">
+            <div className="text-sm font-bold text-gray-700 mb-1">
+              مضلَّع جغرافي (PostGIS — اختياري)
+            </div>
+            <textarea
+              className="input font-mono text-xs"
+              rows={3}
+              value={polygon}
+              onChange={(e) => setPolygon(e.target.value)}
+              placeholder="POLYGON((46.6 24.7, 46.8 24.7, 46.8 24.6, 46.6 24.6, 46.6 24.7))"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              صيغة WKT (lng lat). الصق من <a
+                href="https://geojson.io"
+                target="_blank"
+                rel="noopener"
+                className="text-hancr-violet underline"
+              >geojson.io</a> أو QGIS. لو فارغ ستُستخدم منطقة <code>regionId</code> أعلاه.
+              مضلَّعات تطغى على مطابقة المنطقة عند تطابق نقطة الانطلاق.
+            </p>
+          </div>
+
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -321,6 +345,7 @@ function UpsertModal({
                 multiplier: Number(multiplier),
                 startsAt: startsAt ? new Date(startsAt).toISOString() : undefined,
                 endsAt: endsAt ? new Date(endsAt).toISOString() : undefined,
+                polygon: polygon.trim() || undefined,
                 active,
               })
             }
