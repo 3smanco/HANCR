@@ -23,6 +23,10 @@ import {
   PayoutSessionDetailType,
   PayoutSessionType,
 } from './dto/payout.types';
+import {
+  PayoutGatewayName,
+  PayoutGatewayService,
+} from './payout-gateway.service';
 
 @Injectable()
 export class PayoutsService {
@@ -38,7 +42,76 @@ export class PayoutsService {
     @InjectRepository(DriverEntity)
     private readonly driverRepo: Repository<DriverEntity>,
     private readonly walletService: WalletService,
+    private readonly payoutGateway: PayoutGatewayService,
   ) {}
+
+  /**
+   * N4 — Process a webhook event from the payout gateway.
+   * Flips a pending payout entry to completed/failed. Idempotent: if the
+   * entry is already in a terminal state we no-op. On failure we refund
+   * the wallet so the driver doesn't lose money.
+   */
+  async handleWebhookEvent(
+    internalRef: string,
+    status: 'completed' | 'failed',
+    gatewayRef?: string,
+    errorMessage?: string,
+  ): Promise<{ matched: boolean; alreadyResolved: boolean }> {
+    const entryId = Number(internalRef);
+    if (!entryId) return { matched: false, alreadyResolved: false };
+    const entry = await this.entryRepo.findOne({ where: { id: entryId } });
+    if (!entry) return { matched: false, alreadyResolved: false };
+    if (entry.status === 'completed' || entry.status === 'failed') {
+      return { matched: true, alreadyResolved: true };
+    }
+
+    const session = await this.sessionRepo.findOne({
+      where: { id: entry.sessionId },
+    });
+    if (!session) return { matched: true, alreadyResolved: false };
+
+    if (status === 'completed') {
+      entry.status = 'completed';
+      entry.completedAt = new Date();
+      if (gatewayRef) entry.gatewayRef = gatewayRef;
+    } else {
+      entry.status = 'failed';
+      entry.errorMessage = errorMessage ?? 'gateway reported failure';
+      // Refund the wallet — money never moved
+      await this.walletService.credit({
+        ownerType: WalletOwnerType.Driver,
+        ownerId: entry.driverId,
+        type: WalletTransactionType.DriverEarnings,
+        amount: Number(entry.amount),
+        currency: session.currency,
+        status: WalletTransactionStatus.Completed,
+        description: `Refund: webhook failed for payout entry #${entry.id}`,
+      });
+    }
+    await this.entryRepo.save(entry);
+
+    // Recompute session status based on remaining entries
+    const remaining = await this.entryRepo.find({
+      where: { sessionId: session.id },
+    });
+    const pending = remaining.filter((e) => e.status === 'pending').length;
+    const failed = remaining.filter((e) => e.status === 'failed').length;
+    if (pending === 0) {
+      session.status =
+        failed === 0
+          ? 'completed'
+          : failed === remaining.length
+            ? 'draft'
+            : 'partial_failure';
+      session.completedAt = new Date();
+      await this.sessionRepo.save(session);
+    }
+
+    this.logger.log(
+      `Webhook: entry #${entryId} → ${status} (gateway ref ${gatewayRef ?? 'n/a'})`,
+    );
+    return { matched: true, alreadyResolved: false };
+  }
 
   /**
    * Drivers eligible for payout: have positive balance + default payout method.
@@ -178,11 +251,15 @@ export class PayoutsService {
 
   /**
    * Execute a draft session. For each entry:
-   *  - debit driver.balance via WalletService.debit (DriverWithdrawal)
-   *  - mark entry as completed (or failed if balance < amount)
-   *  - if any failed: session status = partial_failure, else completed
-   *
-   * Note: gateway integration is a TODO; we only debit the ledger.
+   *  1. Debit driver.balance via WalletService.debit (DriverWithdrawal) —
+   *     ledger is updated first so the driver can't double-withdraw while
+   *     gateway is in-flight.
+   *  2. Call PayoutGatewayService.initiate to actually move the money.
+   *  3. Mark entry as completed | pending | failed based on the gateway
+   *     response. Pending entries wait for /payouts/webhook/:gateway to
+   *     flip them.
+   *  4. Session status reflects entry outcomes: 'completed' (all done),
+   *     'partial_failure' (some failed), 'processing' (any still pending).
    */
   async process(sessionId: number): Promise<PayoutSessionDetailType> {
     const session = await this.sessionRepo.findOne({ where: { id: sessionId } });
@@ -198,7 +275,12 @@ export class PayoutsService {
     const entries = await this.entryRepo.find({
       where: { sessionId, status: 'pending' },
     });
+    const methods = await this.methodRepo.find({
+      where: { driverId: In(entries.map((e) => e.driverId)) },
+    });
+    const methodMap = new Map(methods.map((m) => [m.driverId, m]));
 
+    let pendingCount = 0;
     let failedCount = 0;
     for (const e of entries) {
       try {
@@ -211,26 +293,83 @@ export class PayoutsService {
           status: WalletTransactionStatus.Completed,
           description: `Payout session #${session.id}`,
         });
-        e.status = 'completed';
-        e.completedAt = new Date();
       } catch (err) {
         e.status = 'failed';
-        e.errorMessage = (err as Error).message;
+        e.errorMessage = `wallet debit failed: ${(err as Error).message}`;
         failedCount++;
+        await this.entryRepo.save(e);
         this.logger.warn(
           `Payout entry #${e.id} (driver #${e.driverId}) failed: ${e.errorMessage}`,
         );
+        continue;
+      }
+
+      // Ledger debit succeeded — now move the money externally.
+      const method = methodMap.get(e.driverId);
+      const gateway = (method?.type ?? 'manual') as PayoutGatewayName;
+      const destination =
+        method?.iban ?? method?.accountName ?? `driver-${e.driverId}`;
+
+      try {
+        const result = await this.payoutGateway.initiate(gateway, {
+          amount: Number(e.amount),
+          currency: session.currency,
+          internalRef: String(e.id),
+          destinationAccount: destination,
+          description: `HANCR payout #${session.id}`,
+        });
+        e.gatewayRef = result.gatewayRef;
+        if (result.status === 'completed') {
+          e.status = 'completed';
+          e.completedAt = new Date();
+        } else if (result.status === 'failed') {
+          e.status = 'failed';
+          e.errorMessage = result.errorMessage ?? 'gateway returned failed';
+          failedCount++;
+          // Refund the wallet — gateway didn't move money
+          await this.walletService.credit({
+            ownerType: WalletOwnerType.Driver,
+            ownerId: e.driverId,
+            type: WalletTransactionType.DriverEarnings,
+            amount: Number(e.amount),
+            currency: session.currency,
+            status: WalletTransactionStatus.Completed,
+            description: `Refund: gateway failed for payout entry #${e.id}`,
+          });
+        } else {
+          // pending — webhook will resolve
+          e.status = 'pending';
+          pendingCount++;
+        }
+      } catch (err) {
+        e.status = 'failed';
+        e.errorMessage = `gateway error: ${(err as Error).message}`;
+        failedCount++;
+        // Refund the wallet
+        await this.walletService.credit({
+          ownerType: WalletOwnerType.Driver,
+          ownerId: e.driverId,
+          type: WalletTransactionType.DriverEarnings,
+          amount: Number(e.amount),
+          currency: session.currency,
+          status: WalletTransactionStatus.Completed,
+          description: `Refund: gateway threw for payout entry #${e.id}`,
+        });
       }
       await this.entryRepo.save(e);
     }
 
     session.status =
-      failedCount === 0
-        ? 'completed'
-        : failedCount === entries.length
-          ? 'draft' // all failed — let admin retry
-          : 'partial_failure';
-    session.completedAt = new Date();
+      pendingCount > 0
+        ? 'processing'
+        : failedCount === 0
+          ? 'completed'
+          : failedCount === entries.length
+            ? 'draft'
+            : 'partial_failure';
+    if (pendingCount === 0) {
+      session.completedAt = new Date();
+    }
     await this.sessionRepo.save(session);
 
     this.logger.log(
