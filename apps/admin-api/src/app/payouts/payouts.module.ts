@@ -9,6 +9,8 @@ import {
 import { WalletModule as HancrWalletModule } from '@hancr/wallet';
 import { PayoutsService } from './payouts.service';
 import { PayoutsResolver } from './payouts.resolver';
+import { PayoutGatewayService } from './payout-gateway.service';
+import { PayoutsWebhookController } from './payouts.webhook.controller';
 
 @Module({
   imports: [
@@ -20,7 +22,8 @@ import { PayoutsResolver } from './payouts.resolver';
     ]),
     HancrWalletModule,
   ],
-  providers: [PayoutsService, PayoutsResolver],
+  controllers: [PayoutsWebhookController],
+  providers: [PayoutsService, PayoutsResolver, PayoutGatewayService],
   exports: [PayoutsService],
 })
 export class AdminPayoutsModule {}
