@@ -2,10 +2,11 @@ import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
-  AdminRiderType,
   AdminDriverType,
-  RiderListResult,
+  AdminRiderDetailType,
+  AdminRiderType,
   DriverListResult,
+  RiderListResult,
 } from './dto/user.types';
 import { AdminJwtGuard } from '../auth/admin-jwt.guard';
 
@@ -30,6 +31,17 @@ export class UsersResolver {
     @Args('id', { type: () => Int }) id: number,
   ): Promise<AdminRiderType> {
     return this.usersService.getRider(id);
+  }
+
+  /** N3 — Bundled rider detail for /users/riders/[id]. */
+  @Query(() => AdminRiderDetailType, {
+    description: 'تفاصيل راكب موسَّعة (رحلات/أماكن/إنفاق)',
+  })
+  @UseGuards(AdminJwtGuard)
+  adminRiderDetail(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<AdminRiderDetailType> {
+    return this.usersService.getRiderDetail(id);
   }
 
   @Mutation(() => AdminRiderType, { description: 'حظر راكب' })

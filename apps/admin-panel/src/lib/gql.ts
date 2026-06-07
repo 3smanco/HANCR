@@ -1201,3 +1201,51 @@ export const UPDATE_HOME_LAYOUT_CONFIG = gql`
     }
   }
 `;
+
+// ─── N3 — Rider detail + loyalty admin + wallet reverse ────────────────────
+
+export const ADMIN_RIDER_DETAIL = gql`
+  query AdminRiderDetail($id: Int!) {
+    adminRiderDetail(id: $id) {
+      rider {
+        id phoneNumber countryCode firstName lastName email avatarUrl
+        active banned banReason balance currency rating totalRides
+        lastLoginAt createdAt updatedAt
+      }
+      recentOrders {
+        id status costAfterCoupon currency serviceName
+        driverId driverName createdOn
+      }
+      ordersCompleted ordersCancelled totalSpent
+      savedPlaces { id label address lat lng }
+    }
+  }
+`;
+
+export const ADMIN_RIDER_LOYALTY = gql`
+  query AdminRiderLoyalty($riderId: Int!) {
+    adminRiderLoyalty(riderId: $riderId) {
+      riderId tier
+      totalMiles availableMiles lifetimeMiles
+      freeUpgradesRemaining hasFreeCancellation
+      surgeImmunityUntil updatedAt
+    }
+  }
+`;
+
+export const ADMIN_ADJUST_LOYALTY = gql`
+  mutation AdminAdjustLoyalty($input: AdjustLoyaltyInput!) {
+    adminAdjustRiderLoyalty(input: $input) {
+      riderId tier
+      availableMiles lifetimeMiles totalMiles
+    }
+  }
+`;
+
+export const ADMIN_REVERSE_WALLET_TX = gql`
+  mutation AdminReverseWalletTx($transactionId: Int!, $reason: String!) {
+    adminReverseWalletTransaction(transactionId: $transactionId, reason: $reason) {
+      id type direction amount balanceAfter status createdAt description
+    }
+  }
+`;

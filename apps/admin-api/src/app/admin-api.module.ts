@@ -71,6 +71,7 @@ import { FleetsModule } from './fleets/fleets.module';
 import { PricingZonesModule } from './pricing-zones/pricing-zones.module';
 import { LeadsModule } from './leads/leads.module';
 import { DriverApplicationsModule } from './driver-applications/driver-applications.module';
+import { LoyaltyAdminModule } from './loyalty/loyalty-admin.module';
 import { AdminNotificationsModule } from './notifications/notifications.module';
 import { NotificationsModule } from '@hancr/notifications';
 
@@ -187,6 +188,7 @@ import { ObservabilityModule } from '@hancr/observability';
     PricingZonesModule,
     LeadsModule,
     DriverApplicationsModule,
+    LoyaltyAdminModule,
     NotificationsModule,
     AdminNotificationsModule,
     ObservabilityModule,

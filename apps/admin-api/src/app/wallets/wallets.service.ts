@@ -209,6 +209,29 @@ export class WalletsService {
     return this.toTxType(tx);
   }
 
+  /**
+   * N3 — Reverse a Completed transaction. Wraps WalletService.reverse,
+   * returning the new offsetting transaction so the admin UI can show it.
+   */
+  async reverseTransaction(
+    transactionId: number,
+    actorId: number,
+    reason: string,
+  ): Promise<AdminWalletTransactionType> {
+    if (!reason || reason.trim().length < 3) {
+      throw new BadRequestException('Reason is required');
+    }
+    const reversal = await this.walletService.reverseTransaction(
+      transactionId,
+      actorId,
+      reason.trim(),
+    );
+    this.logger.log(
+      `Admin #${actorId} reversed tx #${transactionId} → new tx #${reversal.id}`,
+    );
+    return this.toTxType(reversal);
+  }
+
   private toTxType(t: WalletTransactionEntity): AdminWalletTransactionType {
     return {
       id: t.id,

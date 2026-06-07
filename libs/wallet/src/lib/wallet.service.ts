@@ -166,6 +166,74 @@ export class WalletService {
   }
 
   /**
+   * N3 — Reverse a completed transaction by creating an offsetting one.
+   * Used by ops to undo fraudulent / mistaken charges. Marks the original's
+   * metadata with reversedBy + reversedAt for audit, and the reversal tx
+   * carries metadata.reverses = original_id for traceability.
+   *
+   * Throws if the tx is not Completed (Pending/Failed should be flipped via
+   * updateTransactionStatus, not reversed).
+   */
+  async reverseTransaction(
+    transactionId: number,
+    actorId: number,
+    reason: string,
+  ): Promise<WalletTransactionEntity> {
+    const original = await this.txRepo.findOne({ where: { id: transactionId } });
+    if (!original) throw new Error(`Transaction #${transactionId} not found`);
+    if (original.status !== WalletTransactionStatus.Completed) {
+      throw new Error(
+        `Only Completed transactions can be reversed (got ${original.status})`,
+      );
+    }
+    if ((original.metadata as Record<string, unknown> | null)?.reversedBy) {
+      throw new Error(`Transaction #${transactionId} was already reversed`);
+    }
+
+    const offsetDirection =
+      original.direction === WalletTransactionDirection.Credit
+        ? WalletTransactionDirection.Debit
+        : WalletTransactionDirection.Credit;
+
+    const reversal = await this._executeTransaction({
+      ownerType: original.ownerType,
+      ownerId: original.ownerId,
+      type: WalletTransactionType.AdminAdjustment,
+      amount: Number(original.amount),
+      currency: original.currency,
+      direction: offsetDirection,
+      status: WalletTransactionStatus.Completed,
+      description: `Reversal of tx #${original.id}: ${reason}`,
+      orderId: original.orderId ?? undefined,
+      metadata: {
+        reverses: original.id,
+        reversedBy: actorId,
+        reversedAt: new Date().toISOString(),
+        reason,
+      },
+    });
+
+    // mark the original as reversed (audit trail; status stays Completed)
+    original.metadata = {
+      ...(original.metadata ?? {}),
+      reversedBy: actorId,
+      reversedAt: new Date().toISOString(),
+      reversalTxId: reversal.transactionId,
+      reversalReason: reason,
+    };
+    await this.txRepo.save(original);
+
+    this.logger.log(
+      `Reversed tx #${original.id} via new tx #${reversal.transactionId} by admin #${actorId}`,
+    );
+    const saved = await this.txRepo.findOne({
+      where: { id: reversal.transactionId },
+    });
+    if (!saved) throw new Error('reversal save failed');
+    return saved;
+  }
+
+  /**
    * Reconciliation: إجمالي الـ credits − debits للمالك.
    * يفيد للتحقق من تطابق الـ ledger مع الـ cached balance في rider/driver.
    */

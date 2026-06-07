@@ -23,6 +23,7 @@ import {
   WALLET_BALANCES,
   WALLET_TRANSACTIONS,
   ADJUST_WALLET,
+  ADMIN_REVERSE_WALLET_TX,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { formatDate } from '@/lib/utils';
@@ -296,6 +297,7 @@ function DetailsDrawer({
   adjusting: boolean;
 }) {
   const [showAdjust, setShowAdjust] = useState(false);
+  const [reverseTarget, setReverseTarget] = useState<Record<string, unknown> | null>(null);
   const { data, loading, refetch } = useQuery(WALLET_TRANSACTIONS, {
     variables: { ownerType, ownerId: owner.id, limit: 100, offset: 0 },
     fetchPolicy: 'network-only',
@@ -311,6 +313,14 @@ function DetailsDrawer({
       toast.error(e.message);
       onAdjusting(false);
     },
+  });
+  const [reverse, { loading: reversing }] = useMutation(ADMIN_REVERSE_WALLET_TX, {
+    onCompleted: () => {
+      toast.success('تم إلغاء المعاملة');
+      setReverseTarget(null);
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
   });
 
   const txs: Record<string, unknown>[] =
@@ -381,6 +391,9 @@ function DetailsDrawer({
               <div className="space-y-2">
                 {txs.map((t) => {
                   const isCredit = t.direction === 'Credit';
+                  const canReverse =
+                    (t.status as string) === 'Completed' &&
+                    (t.type as string) !== 'AdminAdjustment';
                   return (
                     <div
                       key={t.id as number}
@@ -413,8 +426,16 @@ function DetailsDrawer({
                             {t.description as string}
                           </div>
                         ) : null}
-                        <div className="text-xs text-gray-400 mt-0.5">
-                          {formatDate(t.createdAt as string)}
+                        <div className="text-xs text-gray-400 mt-0.5 flex items-center gap-2">
+                          <span>{formatDate(t.createdAt as string)}</span>
+                          {canReverse ? (
+                            <button
+                              onClick={() => setReverseTarget(t)}
+                              className="text-red-500 hover:text-red-700 underline text-xs font-bold"
+                            >
+                              إلغاء المعاملة
+                            </button>
+                          ) : null}
                         </div>
                       </div>
                       <div className="text-end shrink-0">
@@ -438,6 +459,22 @@ function DetailsDrawer({
           </div>
         </div>
       </div>
+
+      {reverseTarget && (
+        <ReverseModal
+          tx={reverseTarget}
+          reversing={reversing}
+          onClose={() => setReverseTarget(null)}
+          onConfirm={(reason) =>
+            reverse({
+              variables: {
+                transactionId: reverseTarget.id as number,
+                reason,
+              },
+            })
+          }
+        />
+      )}
 
       {showAdjust && (
         <AdjustModal
@@ -575,6 +612,88 @@ function AdjustModal({
             className="btn-primary flex-1"
           >
             {adjusting ? 'جارٍ الحفظ…' : 'تأكيد'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── N3 — Reverse transaction modal ─────────────────────────────────────────
+
+function ReverseModal({
+  tx,
+  reversing,
+  onClose,
+  onConfirm,
+}: {
+  tx: Record<string, unknown>;
+  reversing: boolean;
+  onClose: () => void;
+  onConfirm: (reason: string) => void;
+}) {
+  const [reason, setReason] = useState('');
+  const isCredit = tx.direction === 'Credit';
+  const amount = Number(tx.amount);
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="card-elevated w-full max-w-md p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="font-extrabold text-gray-900 text-lg mb-2">
+          إلغاء المعاملة #{tx.id as number}
+        </h2>
+        <p className="text-sm text-gray-500 mb-4">
+          سيتم إنشاء معاملة معاكسة بنفس المبلغ. الأصل يبقى مسجَّلاً للـ audit.
+        </p>
+        <div className="p-3 rounded-lg border border-gray-200 bg-gray-50 mb-4 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-600">النوع</span>
+            <span className="font-bold">{tx.type as string}</span>
+          </div>
+          <div className="flex justify-between mt-1">
+            <span className="text-gray-600">المبلغ</span>
+            <span
+              className={`font-bold ${isCredit ? 'text-emerald-700' : 'text-orange-700'}`}
+            >
+              {isCredit ? '+' : '−'}
+              {amount.toFixed(2)} {tx.currency as string}
+            </span>
+          </div>
+          <div className="flex justify-between mt-1 pt-2 border-t border-gray-200">
+            <span className="text-gray-600">سيُنشأ</span>
+            <span
+              className={`font-bold ${isCredit ? 'text-orange-700' : 'text-emerald-700'}`}
+            >
+              {isCredit ? '−' : '+'}
+              {amount.toFixed(2)} {tx.currency as string}
+            </span>
+          </div>
+        </div>
+        <div className="mb-4">
+          <label className="label">السبب (مطلوب — يُحفظ في الـ audit)</label>
+          <textarea
+            className="input"
+            rows={3}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="مثلاً: شحن مكرر بسبب خطأ في الـ webhook"
+          />
+        </div>
+        <div className="flex gap-2">
+          <button onClick={onClose} className="btn-outline flex-1">
+            إلغاء
+          </button>
+          <button
+            disabled={reversing || reason.trim().length < 3}
+            onClick={() => onConfirm(reason.trim())}
+            className="btn-danger flex-1"
+          >
+            {reversing ? 'جارٍ…' : 'تأكيد الإلغاء'}
           </button>
         </div>
       </div>
