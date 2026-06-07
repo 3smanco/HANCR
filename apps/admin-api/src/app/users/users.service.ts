@@ -1,12 +1,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { RiderEntity, DriverEntity } from '@hancr/database';
+import { In, Repository } from 'typeorm';
 import {
-  AdminRiderType,
+  DriverEntity,
+  OrderEntity,
+  OrderStatus,
+  RiderEntity,
+  SavedPlaceEntity,
+} from '@hancr/database';
+import {
   AdminDriverType,
-  RiderListResult,
+  AdminRiderDetailType,
+  AdminRiderType,
   DriverListResult,
+  RiderListResult,
+  RiderRecentOrderType,
+  RiderSavedPlaceType,
 } from './dto/user.types';
 
 @Injectable()
@@ -16,7 +25,92 @@ export class UsersService {
     private readonly riderRepo: Repository<RiderEntity>,
     @InjectRepository(DriverEntity)
     private readonly driverRepo: Repository<DriverEntity>,
+    @InjectRepository(OrderEntity)
+    private readonly orderRepo: Repository<OrderEntity>,
+    @InjectRepository(SavedPlaceEntity)
+    private readonly savedPlaceRepo: Repository<SavedPlaceEntity>,
   ) {}
+
+  /**
+   * N3 — Rider detail bundle for the /users/riders/[id] page.
+   * One round-trip returns the rider + 20 most recent orders + lifetime
+   * spend + completion/cancel counts + saved places.
+   * Loyalty is fetched separately via adminRiderLoyalty (loyalty module).
+   */
+  async getRiderDetail(id: number): Promise<AdminRiderDetailType> {
+    const rider = await this.riderRepo.findOne({ where: { id } });
+    if (!rider) throw new NotFoundException(`Rider #${id} not found`);
+
+    const [recentRaw, completed, cancelled, spendAgg, places] =
+      await Promise.all([
+        this.orderRepo.find({
+          where: { riderId: id },
+          relations: ['service', 'driver'],
+          order: { createdOn: 'DESC' },
+          take: 20,
+        }),
+        this.orderRepo.count({
+          where: { riderId: id, status: OrderStatus.Finished },
+        }),
+        this.orderRepo.count({
+          where: {
+            riderId: id,
+            status: In([
+              OrderStatus.RiderCanceled,
+              OrderStatus.DriverCanceled,
+              OrderStatus.Expired,
+            ]),
+          },
+        }),
+        this.orderRepo
+          .createQueryBuilder('o')
+          .select('COALESCE(SUM(o.cost_after_coupon), 0)', 'total')
+          .where('o.rider_id = :id', { id })
+          .andWhere('o.status = :status', { status: OrderStatus.Finished })
+          .getRawOne<{ total: string }>(),
+        this.savedPlaceRepo.find({
+          where: { riderId: id },
+          order: { id: 'ASC' },
+          take: 10,
+        }),
+      ]);
+
+    const recentOrders: RiderRecentOrderType[] = recentRaw.map((o) => {
+      const svc = (o as OrderEntity & { service?: { name?: string } }).service;
+      const drv = (o as OrderEntity & {
+        driver?: { firstName?: string; lastName?: string };
+      }).driver;
+      return {
+        id: o.id,
+        status: o.status,
+        costAfterCoupon: Number(o.costAfterCoupon),
+        currency: o.currency,
+        serviceName: svc?.name,
+        driverId: o.driverId,
+        driverName: drv
+          ? [drv.firstName, drv.lastName].filter(Boolean).join(' ') || undefined
+          : undefined,
+        createdOn: o.createdOn,
+      };
+    });
+
+    const savedPlaces: RiderSavedPlaceType[] = places.map((p) => ({
+      id: p.id,
+      label: p.label,
+      address: p.address ?? '',
+      lat: p.lat,
+      lng: p.lng,
+    }));
+
+    return {
+      rider: this.toRiderType(rider),
+      recentOrders,
+      ordersCompleted: completed,
+      ordersCancelled: cancelled,
+      totalSpent: Number(spendAgg?.total ?? 0),
+      savedPlaces,
+    };
+  }
 
   // ─── Riders ────────────────────────────────────────────────────────────────
 

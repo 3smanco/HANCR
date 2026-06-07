@@ -23,6 +23,39 @@ export class AdminRiderType {
   @Field() updatedAt!: Date;
 }
 
+// ─── N3 — Rider detail bundle (orders/transactions/loyalty/places) ────────
+
+@ObjectType()
+export class RiderRecentOrderType {
+  @Field(() => Int) id!: number;
+  @Field() status!: string;
+  @Field(() => Float) costAfterCoupon!: number;
+  @Field() currency!: string;
+  @Field({ nullable: true }) serviceName?: string;
+  @Field(() => Int, { nullable: true }) driverId?: number;
+  @Field({ nullable: true }) driverName?: string;
+  @Field() createdOn!: Date;
+}
+
+@ObjectType()
+export class RiderSavedPlaceType {
+  @Field(() => Int) id!: number;
+  @Field() label!: string;
+  @Field() address!: string;
+  @Field(() => Float) lat!: number;
+  @Field(() => Float) lng!: number;
+}
+
+@ObjectType()
+export class AdminRiderDetailType {
+  @Field(() => AdminRiderType) rider!: AdminRiderType;
+  @Field(() => [RiderRecentOrderType]) recentOrders!: RiderRecentOrderType[];
+  @Field(() => Int) ordersCompleted!: number;
+  @Field(() => Int) ordersCancelled!: number;
+  @Field(() => Float) totalSpent!: number;
+  @Field(() => [RiderSavedPlaceType]) savedPlaces!: RiderSavedPlaceType[];
+}
+
 @ObjectType()
 export class RiderListResult {
   @Field(() => [AdminRiderType]) items!: AdminRiderType[];

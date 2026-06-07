@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useQuery, useMutation } from '@apollo/client';
 import {
   Ban,
@@ -94,19 +95,22 @@ export default function RidersPage() {
                 return (
                 <tr key={r.id as number}>
                   <td>
-                    <div className="flex items-center gap-3">
+                    <Link
+                      href={`/users/riders/${r.id as number}`}
+                      className="flex items-center gap-3 group"
+                    >
                       <div className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white font-bold text-xs shrink-0">
                         {(fullName[0] ?? '?').toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <div className="font-bold text-gray-900 truncate">
+                        <div className="font-bold text-gray-900 truncate group-hover:text-hancr-violet transition-colors">
                           {fullName || '—'}
                         </div>
                         {(r.banned as boolean) && (
                           <span className="badge badge-red mt-0.5 inline-flex">{t('common.banned')}</span>
                         )}
                       </div>
-                    </div>
+                    </Link>
                   </td>
                   <td className="text-gray-500 font-mono text-xs ltr">{r.phoneNumber as string}</td>
                   <td className="font-bold text-gray-800">

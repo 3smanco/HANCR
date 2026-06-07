@@ -11,6 +11,8 @@ import {
 import { AdminJwtGuard } from '../auth/admin-jwt.guard';
 import { AdminRolesGuard } from '../auth/admin-roles.guard';
 import { RequireRole } from '../auth/roles.decorator';
+import { CurrentAdmin } from '../auth/current-admin.decorator';
+import type { AdminUser } from '../auth/admin-jwt.strategy';
 
 @Resolver(() => WalletBalanceListResult)
 export class WalletsResolver {
@@ -53,5 +55,23 @@ export class WalletsResolver {
     @Args('input') input: AdjustWalletInput,
   ): Promise<AdminWalletTransactionType> {
     return this.service.adjust(input);
+  }
+
+  /**
+   * N3 — Reverse a completed transaction with an audit trail.
+   * Creates an offsetting AdminAdjustment tx; the original keeps its status
+   * but gains metadata.reversedBy/reversedAt.
+   */
+  @Mutation(() => AdminWalletTransactionType, {
+    description: 'إلغاء معاملة بإنشاء معاملة معاكسة (audit)',
+  })
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('finance')
+  adminReverseWalletTransaction(
+    @Args('transactionId', { type: () => Int }) transactionId: number,
+    @Args('reason') reason: string,
+    @CurrentAdmin() admin: AdminUser,
+  ): Promise<AdminWalletTransactionType> {
+    return this.service.reverseTransaction(transactionId, admin.adminId, reason);
   }
 }
