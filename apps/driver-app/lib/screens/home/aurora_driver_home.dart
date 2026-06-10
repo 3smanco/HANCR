@@ -1,7 +1,6 @@
 import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
 import '../bids/driver_bids_screen.dart';
@@ -18,7 +17,9 @@ import '../../blocs/sos/sos_bloc.dart';
 import '../../blocs/sos/sos_event.dart';
 import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/driver_gql.dart';
+import '../../core/motion/motion.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import 'driver_car_map.dart';
 import '../earnings/aurora_earnings_tab.dart';
 import '../profile/aurora_driver_profile_tab.dart';
 import '../sos/aurora_driver_sos_button.dart';
@@ -138,20 +139,17 @@ class _MapTab extends StatelessWidget {
         // ─── Map ───
         BlocBuilder<LocationBloc, LocationState>(
           builder: (ctx, state) {
-            final lat =
-                state is LocationTracking ? state.lat : 24.7136;
-            final lng =
-                state is LocationTracking ? state.lng : 46.6753;
-            return GoogleMap(
+            final tracking = state is LocationTracking;
+            final lat = tracking ? state.lat : 24.7136;
+            final lng = tracking ? state.lng : 46.6753;
+            final heading = tracking ? state.heading : 0.0;
+            // N8 — سيارة متحركة على الخريطة (interpolation + heading rotation)
+            return DriverCarMap(
+              lat: lat,
+              lng: lng,
+              heading: heading,
               style: _darkMapStyle,
-              initialCameraPosition: CameraPosition(
-                target: LatLng(lat, lng),
-                zoom: 14,
-              ),
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
-              compassEnabled: false,
+              showCar: tracking,
             );
           },
         ),
@@ -372,7 +370,8 @@ class _OnlineToggleState extends State<_OnlineToggle>
     return BlocBuilder<LocationBloc, LocationState>(
       builder: (ctx, locState) {
         final online = locState is LocationTracking;
-        return GestureDetector(
+        // N8 — ضغط + haptic على زر الاتصال
+        return Pressable(
           onTap: _busy ? null : () => _toggle(ctx, online),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
