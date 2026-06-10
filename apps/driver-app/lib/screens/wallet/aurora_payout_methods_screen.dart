@@ -98,7 +98,7 @@ class _AuroraPayoutMethodsScreenState
         title: Text(tr('payout_methods'), style: AuroraText.titleSmall),
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: AuroraColors.ember))
           : RefreshIndicator(
               onRefresh: _load,
@@ -205,7 +205,7 @@ class _AuroraPayoutMethodsScreenState
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AuroraColors.danger,
-                    side: const BorderSide(color: AuroraColors.danger),
+                    side: BorderSide(color: AuroraColors.danger),
                   ),
                   onPressed: () => _confirmRemove(m['id'] as int),
                   child: Text(tr('remove')),
@@ -324,7 +324,7 @@ class _AddSheetState extends State<_AddSheet> {
               ),
               IconButton(
                 onPressed: widget.onClose,
-                icon: const Icon(Icons.close, color: AuroraColors.pearl),
+                icon: Icon(Icons.close, color: AuroraColors.pearl),
               ),
             ],
           ),

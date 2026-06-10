@@ -86,7 +86,7 @@ class _AuroraDriverSosButtonState extends State<AuroraDriverSosButton>
                             ctx, state.activeIncident!.id,
                             state.activeIncident!.contactsNotified)
                         : () => _confirmTrigger(ctx, state),
-                    child: const Icon(
+                    child: Icon(
                       Icons.warning_amber_rounded,
                       color: AuroraColors.pearl,
                       size: 22,

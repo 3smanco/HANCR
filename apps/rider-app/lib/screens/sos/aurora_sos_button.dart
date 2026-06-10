@@ -90,7 +90,7 @@ class _AuroraSosCompactButtonState extends State<AuroraSosCompactButton>
                             )
                         : () => _confirmTrigger(context, state),
                     customBorder: const CircleBorder(),
-                    child: const Icon(
+                    child: Icon(
                       Icons.warning_amber_rounded,
                       color: AuroraColors.pearl,
                       size: 22,

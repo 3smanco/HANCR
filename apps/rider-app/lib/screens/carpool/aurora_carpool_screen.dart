@@ -164,7 +164,7 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
         title: Text(tr('carpool'), style: AuroraText.titleSmall),
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: AuroraColors.ember))
           : ListView(
               padding: const EdgeInsets.all(AuroraSpacing.lg),
@@ -276,7 +276,7 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
           borderRadius: BorderRadius.circular(AuroraRadius.md),
           borderSide: BorderSide.none,
         ),
-        prefixIcon: const Icon(Icons.place, color: AuroraColors.ember),
+        prefixIcon: Icon(Icons.place, color: AuroraColors.ember),
       ),
       hint: Text(hint,
           style: AuroraText.bodyMedium
@@ -338,7 +338,7 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.group, color: AuroraColors.ember, size: 18),
+              Icon(Icons.group, color: AuroraColors.ember, size: 18),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -374,7 +374,7 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
               child: TextButton(
                 onPressed: () => _cancel(r['id'] as int),
                 child: Text(tr('cancel'),
-                    style: const TextStyle(color: AuroraColors.danger)),
+                    style: TextStyle(color: AuroraColors.danger)),
               ),
             ),
         ],

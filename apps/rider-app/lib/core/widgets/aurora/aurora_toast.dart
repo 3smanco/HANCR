@@ -16,9 +16,11 @@ class AuroraToast {
     BuildContext context,
     String message, {
     IconData? icon,
-    Color color = AuroraColors.ember,
+    Color? color,
     Duration duration = const Duration(seconds: 2),
   }) {
+    // N5 — اللون الافتراضي حي (ember) فلا يصلح كقيمة افتراضية const.
+    final bg = color ?? AuroraColors.ember;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -38,7 +40,7 @@ class AuroraToast {
             ),
           ],
         ),
-        backgroundColor: color,
+        backgroundColor: bg,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(AuroraSpacing.lg),
         shape: RoundedRectangleBorder(

@@ -33,7 +33,7 @@ class _WalletView extends StatelessWidget {
         child: BlocBuilder<WalletBloc, WalletState>(
           builder: (context, state) {
             if (state is WalletInitial || state is WalletLoading) {
-              return const Center(
+              return Center(
                 child: CircularProgressIndicator(color: AuroraColors.ember),
               );
             }
@@ -44,7 +44,7 @@ class _WalletView extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline,
+                      Icon(Icons.error_outline,
                           color: AuroraColors.danger, size: 64),
                       const SizedBox(height: AuroraSpacing.md),
                       Text(state.message, style: AuroraText.bodyMedium),
@@ -101,7 +101,7 @@ class _WalletView extends StatelessWidget {
                     child: InkWell(
                       onTap: () => Navigator.of(context).pop(),
                       customBorder: const CircleBorder(),
-                      child: const Icon(Icons.arrow_back,
+                      child: Icon(Icons.arrow_back,
                           color: AuroraColors.pearl, size: 20),
                     ),
                   ),
@@ -179,7 +179,7 @@ class _WalletView extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.account_balance_wallet,
+              Icon(Icons.account_balance_wallet,
                   color: AuroraColors.pearl, size: 20),
               const SizedBox(width: AuroraSpacing.sm),
               Text(

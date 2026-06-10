@@ -46,7 +46,7 @@ Future<void> openExternalNav(
               style: AuroraText.titleSmall.copyWith(color: AuroraColors.pearl)),
           const SizedBox(height: AuroraSpacing.sm),
           ListTile(
-            leading: const Icon(Icons.map, color: AuroraColors.ember),
+            leading: Icon(Icons.map, color: AuroraColors.ember),
             title: Text(tr('googleMaps'),
                 style: AuroraText.bodyMedium
                     .copyWith(color: AuroraColors.pearl)),

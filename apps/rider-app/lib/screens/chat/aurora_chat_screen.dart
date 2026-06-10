@@ -125,7 +125,7 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
         children: [
           Expanded(
             child: _loading
-                ? const Center(
+                ? Center(
                     child:
                         CircularProgressIndicator(color: AuroraColors.ember))
                 : _messages.isEmpty
@@ -213,7 +213,7 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
               child: Container(
                 width: 44,
                 height: 44,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AuroraColors.ember,
                   shape: BoxShape.circle,
                 ),

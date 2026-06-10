@@ -440,7 +440,7 @@ class AuroraProfileTab extends StatelessWidget {
                         value: progress / total,
                         strokeWidth: 4,
                         backgroundColor: AuroraColors.smoke,
-                        valueColor: const AlwaysStoppedAnimation(AuroraColors.ember),
+                        valueColor: AlwaysStoppedAnimation(AuroraColors.ember),
                       ),
                     ),
                     Text(

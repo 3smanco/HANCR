@@ -18,7 +18,7 @@ class AuroraStarsTab extends StatelessWidget {
           child: BlocBuilder<DriverBloc, DriverState>(
             builder: (ctx, state) {
               if (state is! DriverLoaded) {
-                return const Center(
+                return Center(
                   child: CircularProgressIndicator(color: AuroraColors.ember),
                 );
               }
@@ -52,7 +52,7 @@ class AuroraStarsTab extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.workspace_premium,
+                            Icon(Icons.workspace_premium,
                                 color: AuroraColors.obsidian, size: 24),
                             const SizedBox(width: AuroraSpacing.sm),
                             Text(
@@ -119,8 +119,10 @@ class AuroraStarsTab extends StatelessWidget {
     required IconData icon,
     required String label,
     required String value,
-    Color color = AuroraColors.ember,
+    Color? color,
   }) {
+    // N5 — اللون الحي ember لا يصلح كقيمة افتراضية const.
+    final c = color ?? AuroraColors.ember;
     return AuroraCard(
       padding: const EdgeInsets.all(AuroraSpacing.lg),
       child: Column(
@@ -129,10 +131,10 @@ class AuroraStarsTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(AuroraSpacing.sm),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
+              color: c.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: color, size: 18),
+            child: Icon(icon, color: c, size: 18),
           ),
           const SizedBox(height: AuroraSpacing.sm),
           Text(value, style: AuroraText.titleLarge),

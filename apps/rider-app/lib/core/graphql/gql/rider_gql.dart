@@ -108,6 +108,13 @@ const String appConfigQuery = r'''
   }
 ''';
 
+// ─── N5 — Live SDUI theme (public, no auth) ───
+const String appThemeQuery = r'''
+  query AppTheme {
+    appTheme
+  }
+''';
+
 // ─── Coupons ───
 const String validateCouponQuery = r'''
   query ValidateCoupon($code: String!, $fare: Int!, $regionId: Int!) {

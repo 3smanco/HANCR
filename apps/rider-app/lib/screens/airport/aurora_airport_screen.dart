@@ -160,7 +160,7 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
         title: Text(tr('airportPickup'), style: AuroraText.titleSmall),
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: AuroraColors.ember))
           : ListView(
               padding: const EdgeInsets.all(AuroraSpacing.lg),
@@ -208,7 +208,7 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
                 borderRadius: BorderRadius.circular(AuroraRadius.md),
                 borderSide: BorderSide.none,
               ),
-              prefixIcon: const Icon(Icons.flight, color: AuroraColors.ember),
+              prefixIcon: Icon(Icons.flight, color: AuroraColors.ember),
             ),
             style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
           ),
@@ -224,7 +224,7 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.event, color: AuroraColors.ember),
+                  Icon(Icons.event, color: AuroraColors.ember),
                   const SizedBox(width: AuroraSpacing.sm),
                   Text(_formatDate(_flightDate),
                       style: AuroraText.bodyMedium
@@ -246,7 +246,7 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
                 borderSide: BorderSide.none,
               ),
               prefixIcon:
-                  const Icon(Icons.location_on, color: AuroraColors.ember),
+                  Icon(Icons.location_on, color: AuroraColors.ember),
             ),
             hint: Text(tr('pickPickupPlace'),
                 style: AuroraText.bodyMedium
@@ -290,7 +290,7 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.flight, color: AuroraColors.ember),
+          Icon(Icons.flight, color: AuroraColors.ember),
           const SizedBox(width: AuroraSpacing.sm),
           Expanded(
             child: Column(
@@ -310,7 +310,7 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
           if (status == 'tracking')
             IconButton(
               icon:
-                  const Icon(Icons.close, color: AuroraColors.danger),
+                  Icon(Icons.close, color: AuroraColors.danger),
               onPressed: () => _cancel(t['id'] as int),
             ),
         ],

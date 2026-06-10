@@ -198,7 +198,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
                 : null;
 
         if (order == null) {
-          return const Scaffold(
+          return Scaffold(
             backgroundColor: AuroraColors.obsidian,
             body: Center(
               child: CircularProgressIndicator(color: AuroraColors.ember),
@@ -229,7 +229,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
                   heroTag: 'recenter',
                   backgroundColor: AuroraColors.coal,
                   onPressed: _fitBounds,
-                  child: const Icon(Icons.center_focus_strong,
+                  child: Icon(Icons.center_focus_strong,
                       color: AuroraColors.ember),
                 ),
               ),
@@ -436,7 +436,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
   // ─────────────────────────────────────────────────────────────
   Widget _buildBottomCard(OrderModel order) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AuroraColors.obsidian,
         borderRadius: BorderRadius.vertical(top: Radius.circular(AuroraRadius.xl)),
         boxShadow: AuroraShadows.floatingNav,
@@ -532,7 +532,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.lock_outline, color: AuroraColors.ember),
+          Icon(Icons.lock_outline, color: AuroraColors.ember),
           const SizedBox(width: AuroraSpacing.md),
           Expanded(
             child: Column(
@@ -604,7 +604,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
                     ),
                   ),
                   const SizedBox(width: AuroraSpacing.xs),
-                  const Icon(Icons.star,
+                  Icon(Icons.star,
                       color: AuroraColors.gold, size: 14),
                   const SizedBox(width: 2),
                   Text(
@@ -744,7 +744,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
       context: ctx,
       builder: (dCtx) => Theme(
         data: Theme.of(dCtx).copyWith(
-          dialogTheme: const DialogThemeData(backgroundColor: AuroraColors.ash),
+          dialogTheme: DialogThemeData(backgroundColor: AuroraColors.ash),
         ),
         child: AlertDialog(
           backgroundColor: AuroraColors.ash,

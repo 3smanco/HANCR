@@ -23,7 +23,7 @@ class NotificationsScreen extends StatelessWidget {
         backgroundColor: AuroraColors.obsidian,
         elevation: 0,
         title: Text(tr('notifications'), style: AuroraText.titleMedium),
-        iconTheme: const IconThemeData(color: AuroraColors.pearl),
+        iconTheme: IconThemeData(color: AuroraColors.pearl),
       ),
       body: AuroraBackground(
         child: SafeArea(
@@ -103,7 +103,7 @@ class OffersScreen extends StatelessWidget {
         backgroundColor: AuroraColors.obsidian,
         elevation: 0,
         title: Text(tr('offersTitle'), style: AuroraText.titleMedium),
-        iconTheme: const IconThemeData(color: AuroraColors.pearl),
+        iconTheme: IconThemeData(color: AuroraColors.pearl),
       ),
       body: AuroraBackground(
         child: SafeArea(

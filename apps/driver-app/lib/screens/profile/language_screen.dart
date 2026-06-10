@@ -18,9 +18,9 @@ class _DriverLanguageScreenState extends State<DriverLanguageScreen> {
       appBar: AppBar(
         backgroundColor: AuroraColors.obsidian,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AuroraColors.pearl),
+        iconTheme: IconThemeData(color: AuroraColors.pearl),
         title: Text(tr('selectLanguage'),
-            style: const TextStyle(
+            style: TextStyle(
                 color: AuroraColors.pearl, fontWeight: FontWeight.w700)),
       ),
       body: ListView(
@@ -54,7 +54,7 @@ class _DriverLanguageScreenState extends State<DriverLanguageScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(lang.code.toUpperCase().substring(0, 2),
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: AuroraColors.ember,
                             fontWeight: FontWeight.w700,
                             fontSize: 12)),
@@ -65,7 +65,7 @@ class _DriverLanguageScreenState extends State<DriverLanguageScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(lang.nativeName,
-                            style: const TextStyle(
+                            style: TextStyle(
                                 color: AuroraColors.pearl,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15)),
@@ -77,7 +77,7 @@ class _DriverLanguageScreenState extends State<DriverLanguageScreen> {
                     ),
                   ),
                   if (selected)
-                    const Icon(Icons.check_circle, color: AuroraColors.ember),
+                    Icon(Icons.check_circle, color: AuroraColors.ember),
                 ],
               ),
             ),

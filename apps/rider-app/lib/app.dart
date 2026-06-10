@@ -15,6 +15,7 @@ import 'blocs/rider/rider_event.dart';
 import 'core/router/app_router.dart';
 import 'core/services/push_service.dart';
 import 'core/theme/aurora_theme.dart';
+import 'core/theme/theme_controller.dart';
 import 'screens/auth/aurora_otp_screen.dart';
 import 'screens/auth/aurora_phone_screen.dart';
 import 'core/models/order_model.dart';
@@ -201,20 +202,29 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
         child: ValueListenableBuilder<Locale>(
           valueListenable: LocaleController.instance,
           builder: (context, locale, _) {
-            return MaterialApp.router(
-              title: 'HANCR',
-              theme: AuroraTheme.dark,
-              darkTheme: AuroraTheme.dark,
-              themeMode: ThemeMode.dark,
-              routerConfig: _router,
-              debugShowCheckedModeBanner: false,
-              locale: locale,
-              supportedLocales: kSupportedLocales,
-              localizationsDelegates: const [
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
+            // N5 — إعادة بناء MaterialApp عند نشر ثيم جديد من اللوحة.
+            // الـ key يُجبر إعادة بناء كامل الشجرة فتلتقط الـ widgets غير الـ const
+            // ألوان AuroraColors الحية. الـ routerConfig (GoRouter) يحفظ مساره.
+            return AnimatedBuilder(
+              animation: ThemeController.instance,
+              builder: (context, _) {
+                return MaterialApp.router(
+                  key: ValueKey('theme-${ThemeController.instance.version}'),
+                  title: 'HANCR',
+                  theme: AuroraTheme.dark,
+                  darkTheme: AuroraTheme.dark,
+                  themeMode: ThemeMode.dark,
+                  routerConfig: _router,
+                  debugShowCheckedModeBanner: false,
+                  locale: locale,
+                  supportedLocales: kSupportedLocales,
+                  localizationsDelegates: const [
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                );
+              },
             );
           },
         ),

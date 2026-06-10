@@ -52,12 +52,12 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AuroraColors.ash,
         title: Text(tr('yourOffer'),
-            style: const TextStyle(color: AuroraColors.pearl)),
+            style: TextStyle(color: AuroraColors.pearl)),
         content: TextField(
           controller: ctrl,
           keyboardType: TextInputType.number,
           autofocus: true,
-          style: const TextStyle(color: AuroraColors.pearl),
+          style: TextStyle(color: AuroraColors.pearl),
           decoration: InputDecoration(
             suffixText: bid['currency'] as String? ?? '',
             suffixStyle: const TextStyle(color: AuroraColors.textSecondary),
@@ -73,7 +73,7 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
             onPressed: () =>
                 Navigator.pop(ctx, double.tryParse(ctrl.text.trim())),
             child: Text(tr('send'),
-                style: const TextStyle(color: AuroraColors.ember)),
+                style: TextStyle(color: AuroraColors.ember)),
           ),
         ],
       ),
@@ -115,13 +115,13 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
       appBar: AppBar(
         backgroundColor: AuroraColors.obsidian,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AuroraColors.pearl),
+        iconTheme: IconThemeData(color: AuroraColors.pearl),
         title: Text(tr('availableBids'),
-            style: const TextStyle(
+            style: TextStyle(
                 color: AuroraColors.pearl, fontWeight: FontWeight.w700)),
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: AuroraColors.ember))
           : _bids.isEmpty
               ? Center(
@@ -168,14 +168,14 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.my_location,
+              Icon(Icons.my_location,
                   color: AuroraColors.success, size: 16),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(b['originAddress'] as String? ?? '—',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AuroraColors.pearl, fontSize: 13)),
               ),
             ],
@@ -183,13 +183,13 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
           const SizedBox(height: 4),
           Row(
             children: [
-              const Icon(Icons.location_on, color: AuroraColors.ember, size: 16),
+              Icon(Icons.location_on, color: AuroraColors.ember, size: 16),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(b['destinationAddress'] as String? ?? '—',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AuroraColors.pearl, fontSize: 13)),
               ),
             ],
@@ -205,7 +205,7 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
                         style: const TextStyle(
                             color: AuroraColors.textSecondary, fontSize: 11)),
                     Text('${price.toStringAsFixed(0)} $cur',
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: AuroraColors.ember,
                             fontWeight: FontWeight.w800,
                             fontSize: 18)),
@@ -221,7 +221,7 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(tr('offered'),
-                      style: const TextStyle(
+                      style: TextStyle(
                           color: AuroraColors.success,
                           fontWeight: FontWeight.w700,
                           fontSize: 12)),
@@ -237,7 +237,7 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(tr('submitOffer'),
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: AuroraColors.pearl,
                             fontWeight: FontWeight.w700,
                             fontSize: 13)),

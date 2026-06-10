@@ -138,7 +138,7 @@ class _AuroraCommuterSetupScreenState
               )
             else
               ..._savedPlaces.map((p) => ListTile(
-                    leading: const Icon(Icons.bookmark,
+                    leading: Icon(Icons.bookmark,
                         color: AuroraColors.ember),
                     title: Text(p['label'] as String? ?? '',
                         style: AuroraText.bodyMedium
@@ -260,7 +260,7 @@ class _AuroraCommuterSetupScreenState
         title: Text(tr('createCommuter'), style: AuroraText.titleSmall),
       ),
       body: _loadingPlaces
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: AuroraColors.ember))
           : ListView(
               padding: const EdgeInsets.all(AuroraSpacing.lg),

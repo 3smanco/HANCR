@@ -36,7 +36,7 @@ class _AuroraAddContactSheetState extends State<AuroraAddContactSheet> {
   Widget build(BuildContext context) {
     final padding = MediaQuery.of(context).viewInsets.bottom;
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AuroraColors.coal,
         borderRadius: BorderRadius.vertical(top: Radius.circular(AuroraRadius.xxl)),
         border: Border(

@@ -124,7 +124,7 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
         children: [
           Expanded(
             child: _loading
-                ? const Center(
+                ? Center(
                     child:
                         CircularProgressIndicator(color: AuroraColors.ember))
                 : _messages.isEmpty
@@ -212,7 +212,7 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
               child: Container(
                 width: 44,
                 height: 44,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AuroraColors.ember,
                   shape: BoxShape.circle,
                 ),

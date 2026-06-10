@@ -63,7 +63,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const CircularProgressIndicator(
+                      CircularProgressIndicator(
                           color: AuroraColors.ember),
                       const SizedBox(height: AuroraSpacing.lg),
                       TextButton(
@@ -216,7 +216,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.check_circle_outline,
+              Icon(Icons.check_circle_outline,
                   color: AuroraColors.pearl, size: 20),
               const SizedBox(width: AuroraSpacing.sm),
               Text(
@@ -347,7 +347,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               boxShadow: filled
-                  ? const [
+                  ? [
                       BoxShadow(
                         color: AuroraColors.gold,
                         blurRadius: 16,

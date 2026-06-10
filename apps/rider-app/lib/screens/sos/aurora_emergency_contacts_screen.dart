@@ -85,7 +85,7 @@ class _ContactsView extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, SosState state) {
     if (state is SosInitial || state is SosLoading) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(color: AuroraColors.ember),
       );
     }
@@ -96,7 +96,7 @@ class _ContactsView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline,
+              Icon(Icons.error_outline,
                   color: AuroraColors.danger, size: 64),
               const SizedBox(height: AuroraSpacing.md),
               Text(state.message, style: AuroraText.bodyMedium),
@@ -161,7 +161,7 @@ class _ContactsView extends StatelessWidget {
               color: AuroraColors.pearl.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.shield_outlined,
+            child: Icon(Icons.shield_outlined,
                 color: AuroraColors.pearl, size: 24),
           ),
           const SizedBox(width: AuroraSpacing.md),
@@ -253,7 +253,7 @@ class _ContactsView extends StatelessWidget {
           ),
           IconButton(
             icon:
-                const Icon(Icons.delete_outline, color: AuroraColors.danger),
+                Icon(Icons.delete_outline, color: AuroraColors.danger),
             onPressed: () => _confirmDelete(context, c),
           ),
         ],

@@ -154,7 +154,7 @@ class _AuroraDriverDocumentsScreenState
         title: Text(tr('myDocuments'), style: AuroraText.titleSmall),
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: AuroraColors.ember))
           : RefreshIndicator(
               onRefresh: _load,

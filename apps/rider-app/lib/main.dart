@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'app.dart';
 import 'core/i18n/app_localization.dart';
 import 'core/services/push_service.dart';
+import 'core/theme/theme_controller.dart';
 
 /// Sentry معطَّل مؤقتاً للـ demo. سيُفعَّل في production build.
 Future<void> main() async {
@@ -60,6 +61,10 @@ Future<void> main() async {
 
     // تحميل اللغة (المحفوظة أو لغة الجهاز)
     await LocaleController.instance.load();
+
+    // N5 — تطبيق الثيم الحي المخزَّن محلياً قبل أول إطار (يمنع وميض الألوان)،
+    // ثم جلب أحدث ثيم من الخادم في الخلفية.
+    await ThemeController.instance.bootstrap();
 
     // تهيئة الإشعارات — لا تُعطّل الإقلاع لو فشلت (محاطة بـ try داخلياً أيضاً)
     try {

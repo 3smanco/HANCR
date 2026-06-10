@@ -1,3 +1,10 @@
+// ─── N5 — Live SDUI theme (public, no auth) ───
+const String appThemeQuery = r'''
+  query AppTheme {
+    appTheme
+  }
+''';
+
 const String driverMeQuery = r'''
   query DriverMe {
     driverMe {

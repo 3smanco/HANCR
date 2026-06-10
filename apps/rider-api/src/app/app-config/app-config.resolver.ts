@@ -2,6 +2,7 @@ import { Resolver, Query } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { GraphQLJSON } from 'graphql-scalars';
 import { AppConfigEntity } from '@hancr/database';
 import { AppConfigPublicType, BannerType } from './dto/app-config.type';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -48,5 +49,22 @@ export class AppConfigResolver {
       .sort((a, b) => a.order - b.order);
 
     return { banners };
+  }
+
+  /**
+   * N5 — الثيم الحي (SDUI). عام بدون مصادقة حتى يُطبَّق على شاشات
+   * الـ splash/login قبل تسجيل الدخول. يقرأ نفس صف 'main' الذي تكتبه اللوحة.
+   * يُعيد JSON بالمفاتيح: ember/emberLight/emberDeep/obsidian/coal/ash/gold/
+   * pearl/success/danger/fontFamily/borderRadius/mode — أو null للافتراضي.
+   */
+  @Query(() => GraphQLJSON, {
+    nullable: true,
+    description: 'ثيم التطبيق الحي (SDUI) — عام بدون مصادقة',
+  })
+  async appTheme(): Promise<unknown> {
+    const cfg = await this.appConfigRepo.findOne({
+      where: { configKey: 'main' },
+    });
+    return cfg?.themeConfig ?? null;
   }
 }

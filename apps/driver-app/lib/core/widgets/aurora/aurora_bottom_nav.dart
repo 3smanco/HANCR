@@ -99,7 +99,7 @@ class AuroraBottomNav extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: AuroraShadows.emberGlow,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.auto_awesome,
               color: AuroraColors.pearl,
               size: 26,

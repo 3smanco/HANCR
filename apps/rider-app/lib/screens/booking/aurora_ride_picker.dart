@@ -24,7 +24,7 @@ class _AuroraRidePickerState extends State<AuroraRidePicker> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AuroraColors.obsidian,
         borderRadius: BorderRadius.vertical(top: Radius.circular(AuroraRadius.xl)),
       ),
@@ -117,7 +117,7 @@ class _AuroraRidePickerState extends State<AuroraRidePicker> {
                     borderRadius: BorderRadius.circular(AuroraRadius.md),
                     border: Border.all(color: AuroraColors.border),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.schedule,
                     color: AuroraColors.ember,
                   ),
@@ -205,7 +205,7 @@ class _AuroraRidePickerState extends State<AuroraRidePicker> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.bolt,
+                              Icon(Icons.bolt,
                                   size: 12, color: AuroraColors.pearl),
                               const SizedBox(width: 2),
                               Text(

@@ -46,6 +46,19 @@ class StorageService {
       _storage.write(key: _keyLang, value: code);
   static Future<String?> getLanguage() => _storage.read(key: _keyLang);
 
+  // ── N5 — Live SDUI theme cache ──────────────────────────────────────────────
+  // يُخزَّن آخر themeConfig (JSON string) ليُطبَّق فوراً عند الإقلاع قبل وصول الشبكة.
+  static const _keyTheme = 'hancr_theme_config';
+  static Future<void> saveThemeConfig(String json) =>
+      _storage.write(key: _keyTheme, value: json);
+  static Future<String?> getThemeConfig() => _storage.read(key: _keyTheme);
+
   // ── Clear All ─────────────────────────────────────────────────────────────
-  static Future<void> clearAll() => _storage.deleteAll();
+  // ملاحظة: لا يمسح ثيم الـ SDUI (مفتاح عام، ليس بيانات مستخدم) ليبقى الثيم
+  // المنشور ظاهراً بعد تسجيل الخروج.
+  static Future<void> clearAll() async {
+    final theme = await _storage.read(key: _keyTheme);
+    await _storage.deleteAll();
+    if (theme != null) await _storage.write(key: _keyTheme, value: theme);
+  }
 }

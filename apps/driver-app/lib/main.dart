@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'app.dart';
 import 'core/i18n/app_localization.dart';
 import 'core/services/push_service.dart';
+import 'core/theme/theme_controller.dart';
 
 Future<void> main() async {
   // ── حماية جذرية ضد الشاشة السوداء ──────────────────────────────────────
@@ -50,6 +51,10 @@ Future<void> main() async {
       ),
     );
     await LocaleController.instance.load();
+
+    // N5 — تطبيق الثيم الحي المخزَّن محلياً قبل أول إطار، ثم جلب أحدثه من الخادم.
+    await ThemeController.instance.bootstrap();
+
     try {
       await PushService.instance.initialize();
     } catch (e) {
