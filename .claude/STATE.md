@@ -7,17 +7,21 @@
 ---
 
 ## أين نحن الآن
-- **آخر إنجاز:** N6 — مكتبة الحركة المشتركة Aurora Motion (PR #58، مدموج في main).
-- **التالي:** N7 — أنيميشن تطبيق الراكب (success/confetti, bid bounce, splash glow, ripples) — يبني على مكتبة N6.
-- **الخطة المعتمدة:** `C:\Users\7bici\.claude\plans\valiant-percolating-sparkle.md` (N5→N11).
-- **نشر معلّق على الإنتاج:** ⏳ N5 (backend `appTheme`: `git pull`+rebuild+`pm2 restart`، لا migration) + N6 (deps Flutter جديدة → إعادة بناء APK). التطبيقات تحتاج إعادة بناء على أي حال.
+- **خطة N مكتملة (N1→N11).** آخر إنجاز: N11 — ذكاء اللوحة (PR #63).
+- **التالي:** معاينة/مراجعة المستخدم ثم النشر على الإنتاج.
+- **الخطة المعتمدة:** `C:\Users\7bici\.claude\plans\valiant-percolating-sparkle.md` (مكتملة).
+- **نشر معلّق على الإنتاج (PRs #57–63):**
+  - backend (rider/driver/admin-api): `git pull` + rebuild + `pm2 restart`. لا migration (كل شيء على حقول JSON قائمة / استعلامات قراءة).
+  - admin-panel: rebuild (تذكّر `.env.production` بـ NEXT_PUBLIC_ADMIN_API_URL قبل build).
+  - تطبيقات Flutter: إعادة بناء APK (deps حركة جديدة في N6 + ميزات N5–N10).
+- ⚠️ خطأ tsc سابق في `apps/admin-panel/src/app/live/page.tsx` (GoogleMap vs React types) غير متعلّق بخطة N — مهمة منفصلة.
 
-## المتبقي من خطة N
-- N7: أنيميشن تطبيق الراكب (success/confetti, bid bounce, splash glow, ripples) — الحالي التالي
-- N8: أنيميشن السائق + سيارة متحركة على الخريطة
-- N9: ميزات الراكب (live activity, rewards hub, إيصالات)
-- N10: أدوات السائق (heatmap, أهداف يومية, رسوم أرباح)
-- N11: ذكاء اللوحة (surge engine, حملات إشعارات مجدولة, A/B flags)
+## خطة N — منجزة
+- N7: أنيميشن الراكب (splash glow, bid bounce, ripple, success) — PR #59
+- N8: أنيميشن السائق + سيارة متحركة على الخريطة (DriverCarMap) — PR #60
+- N9: Live Activity bar + إيصال قابل للمشاركة — PR #61
+- N10: أدوات السائق (أرباح يومية + هدف + heatmap الطلب) — PR #62
+- N11: ذكاء اللوحة (surge engine + حملات مجدولة + A/B flags) — PR #63
 - قرارات معتمدة: أنيميشن "أقصى" · ثيم تحكم كامل حي · الربط باللوحة أولاً · كل فئات الميزات الجديدة.
 
 ## ما أُنجز (مختصر — التفاصيل في git log و المهارة)
