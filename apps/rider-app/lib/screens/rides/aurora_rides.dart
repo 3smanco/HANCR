@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../blocs/order/order_bloc.dart';
 import '../../blocs/order/order_event.dart';
 import '../../blocs/order/order_state.dart';
@@ -169,6 +170,13 @@ class RideDetailsScreen extends StatelessWidget {
         elevation: 0,
         title: Text(tr('rideDetails'), style: AuroraText.titleMedium),
         iconTheme: IconThemeData(color: AuroraColors.pearl),
+        actions: [
+          // N9 — مشاركة الإيصال
+          IconButton(
+            onPressed: () => Share.share(_receipt()),
+            icon: Icon(Icons.ios_share, color: AuroraColors.pearl),
+          ),
+        ],
       ),
       body: AuroraBackground(
         child: SafeArea(
@@ -235,6 +243,24 @@ class RideDetailsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // N9 — نص الإيصال للمشاركة
+  String _receipt() {
+    final df = DateFormat('yyyy-MM-dd HH:mm', 'ar');
+    final b = StringBuffer()
+      ..writeln('HANCR — ${tr('rideDetails')}')
+      ..writeln('${tr('date')}: ${df.format(order.createdOn)}')
+      ..writeln('${order.originAddress} → ${order.destinationAddress}')
+      ..writeln('${tr('distance')}: ${order.distanceLabel} · ${tr('duration')}: ${order.durationLabel}')
+      ..writeln('${tr('cost')}: ${order.costBest.toStringAsFixed(2)} ${order.currency}');
+    if (order.paidAmount > 0) {
+      b.writeln('${tr('paid')}: ${order.paidAmount.toStringAsFixed(2)} ${order.currency}');
+    }
+    if (order.driverName != null) {
+      b.writeln('${tr('driver')}: ${order.driverName}');
+    }
+    return b.toString();
   }
 
   Widget _card(Widget child) => Container(
