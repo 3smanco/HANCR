@@ -1,9 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { FC, ReactNode } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@apollo/client';
-import { GoogleMap, MarkerF, useJsApiLoader } from '@react-google-maps/api';
+import {
+  GoogleMap as GoogleMapComponent,
+  MarkerF,
+  useJsApiLoader,
+  type GoogleMapProps,
+} from '@react-google-maps/api';
 import {
   Car,
   Activity,
@@ -23,6 +29,13 @@ import {
   LIVE_DRIVERS,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
+
+// @react-google-maps/api 2.20.8 يصدّر GoogleMap كـ class component مبني على نسخة
+// أحدث من @types/react، فيفشل فحص JSX تحت @types/react 18.3.x. نحوّله إلى FC
+// (مع الحفاظ على props و children) — السلوك وقت التشغيل لا يتغيّر.
+const GoogleMap = GoogleMapComponent as unknown as FC<
+  GoogleMapProps & { children?: ReactNode }
+>;
 
 type Driver = Record<string, unknown>;
 
