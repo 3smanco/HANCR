@@ -1249,3 +1249,23 @@ export const ADMIN_REVERSE_WALLET_TX = gql`
     }
   }
 `;
+
+// ─── N11 — ذكاء اللوحة (surge + campaigns) ────────────────────────────────
+
+export const SURGE_STATE = gql`
+  query SurgeState {
+    surgeState {
+      recentDemand
+      driversOnline
+      suggestedMultiplier
+      currentMultiplier
+      autoSurge
+    }
+  }
+`;
+
+export const DISPATCH_CAMPAIGNS = gql`
+  mutation DispatchDueCampaigns {
+    dispatchDueCampaigns
+  }
+`;

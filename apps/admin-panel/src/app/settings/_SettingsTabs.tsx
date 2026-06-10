@@ -13,6 +13,9 @@ import {
   TrendingUp,
   Palette,
   LayoutGrid,
+  FlaskConical,
+  Zap,
+  Megaphone,
 } from 'lucide-react';
 
 const TABS = [
@@ -20,6 +23,9 @@ const TABS = [
   { href: '/settings/operations', label: 'الإعدادات التشغيلية', icon: SlidersHorizontal },
   { href: '/settings/loyalty', label: 'الولاء', icon: Gift },
   { href: '/settings/pricing-rules', label: 'قواعد التسعير', icon: TrendingUp },
+  { href: '/settings/surge', label: 'التسعير الديناميكي', icon: Zap },
+  { href: '/settings/campaigns', label: 'الحملات المجدولة', icon: Megaphone },
+  { href: '/settings/flags', label: 'الأعلام و A/B', icon: FlaskConical },
   { href: '/settings/theme', label: 'الثيم', icon: Palette },
   { href: '/settings/home-layout', label: 'الشاشة الرئيسية', icon: LayoutGrid },
   { href: '/settings/cancel-reasons', label: 'أسباب الإلغاء', icon: XCircle },
