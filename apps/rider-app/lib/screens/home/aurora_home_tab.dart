@@ -6,6 +6,7 @@ import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/models/order_model.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/widgets/live_activity_bar.dart';
 import '../commuter/aurora_commuter_screen.dart';
 import '../airport/aurora_airport_screen.dart';
 import 'home_extras.dart';
@@ -89,6 +90,9 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
           padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.lg),
           children: [
             const SizedBox(height: AuroraSpacing.md),
+
+            // N9 — شريط النشاط الحي (يظهر فقط أثناء رحلة فعّالة)
+            const LiveActivityBar(),
 
             // ─── Header: greeting + offers + notifications ───
             Row(
