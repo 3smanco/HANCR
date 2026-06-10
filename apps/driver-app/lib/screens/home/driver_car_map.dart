@@ -1,8 +1,19 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import '../../core/graphql/graphql_client.dart';
+import '../../core/graphql/gql/driver_gql.dart';
 import '../../core/motion/motion.dart';
 import '../../core/theme/aurora_theme.dart';
+
+/// N10 — منطقة طلب ساخنة على الخريطة.
+class DemandZone {
+  const DemandZone(this.lat, this.lng, this.weight);
+  final double lat;
+  final double lng;
+  final int weight;
+}
 
 /// ╔══════════════════════════════════════════════════════════════╗
 /// ║  N8 — DriverCarMap                                            ║
@@ -34,6 +45,7 @@ class _DriverCarMapState extends State<DriverCarMap>
     with SingleTickerProviderStateMixin {
   GoogleMapController? _ctrl;
   BitmapDescriptor? _carIcon;
+  List<DemandZone> _demand = const [];
 
   late final AnimationController _anim;
   late LatLng _from;
@@ -49,6 +61,7 @@ class _DriverCarMapState extends State<DriverCarMap>
     _anim = AnimationController(vsync: this, duration: Motion.driverMove)
       ..addListener(() => setState(() {}));
     _loadCarIcon();
+    _loadDemand();
   }
 
   Future<void> _loadCarIcon() async {
@@ -57,6 +70,27 @@ class _DriverCarMapState extends State<DriverCarMap>
       fg: AuroraColors.ember,
     );
     if (mounted) setState(() => _carIcon = icon);
+  }
+
+  /// N10 — يجلب مناطق الطلب الساخنة (heatmap) ويرسمها كدوائر. يفشل بصمت.
+  Future<void> _loadDemand() async {
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(demandZonesQuery),
+        fetchPolicy: FetchPolicy.networkOnly,
+      ));
+      final zones = ((res.data?['demandZones'] as List<dynamic>?) ?? [])
+          .map((e) => DemandZone(
+                ((e as Map<String, dynamic>)['lat'] as num).toDouble(),
+                (e['lng'] as num).toDouble(),
+                (e['weight'] as num).toInt(),
+              ))
+          .toList();
+      if (mounted) setState(() => _demand = zones);
+    } catch (_) {
+      /* لا شبكة — تجاهل */
+    }
   }
 
   @override
@@ -112,11 +146,25 @@ class _DriverCarMapState extends State<DriverCarMap>
         zIndexInt: 2,
       ));
     }
+    // N10 — دوائر الطلب الساخنة (heatmap)؛ الشفافية ∝ الكثافة
+    final maxW = _demand.fold<int>(1, (a, z) => z.weight > a ? z.weight : a);
+    final circles = <Circle>{
+      for (final z in _demand)
+        Circle(
+          circleId: CircleId('d${z.lat}_${z.lng}'),
+          center: LatLng(z.lat, z.lng),
+          radius: 350,
+          fillColor: AuroraColors.ember
+              .withValues(alpha: 0.08 + 0.30 * (z.weight / maxW)),
+          strokeWidth: 0,
+        ),
+    };
     return GoogleMap(
       style: widget.style,
       initialCameraPosition: CameraPosition(target: pos, zoom: 15.5),
       onMapCreated: (c) => _ctrl = c,
       markers: markers,
+      circles: circles,
       myLocationEnabled: false,
       myLocationButtonEnabled: false,
       zoomControlsEnabled: false,
