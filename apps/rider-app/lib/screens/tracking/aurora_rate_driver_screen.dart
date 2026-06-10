@@ -7,6 +7,7 @@ import '../../blocs/order/order_event.dart';
 import '../../blocs/order/order_state.dart';
 import '../../core/models/order_model.dart';
 import '../../core/i18n/app_localization.dart';
+import '../../core/motion/motion.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
 /// AuroraRateDriverScreen — تقييم السائق بنمط Aurora.
@@ -84,6 +85,10 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: AuroraSpacing.md),
+
+                    // N7 — احتفال اكتمال الرحلة
+                    const Center(child: SuccessCheck(size: 64)),
+                    const SizedBox(height: AuroraSpacing.lg),
 
                     // ─── Header ───
                     Row(

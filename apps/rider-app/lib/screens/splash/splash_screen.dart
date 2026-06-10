@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/motion/motion.dart';
 
 /// SplashScreen — Aurora design (dark obsidian + ember glow).
 class SplashScreen extends StatefulWidget {
@@ -60,22 +61,27 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 96,
-                      height: 96,
-                      decoration: BoxDecoration(
-                        gradient: AuroraColors.emberGradient,
-                        borderRadius: BorderRadius.circular(28),
-                        boxShadow: AuroraShadows.emberGlow,
-                      ),
-                      child: Center(
-                        child: Text(
-                          'H',
-                          style: TextStyle(
-                            fontSize: 52,
-                            fontWeight: FontWeight.w800,
-                            color: AuroraColors.pearl,
-                            letterSpacing: -2,
+                    // N7 — توهّج "يتنفّس" حول الشعار
+                    GlowPulse(
+                      color: AuroraColors.ember,
+                      minBlur: 14,
+                      maxBlur: 40,
+                      child: Container(
+                        width: 96,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          gradient: AuroraColors.emberGradient,
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'H',
+                            style: TextStyle(
+                              fontSize: 52,
+                              fontWeight: FontWeight.w800,
+                              color: AuroraColors.pearl,
+                              letterSpacing: -2,
+                            ),
                           ),
                         ),
                       ),
