@@ -73,7 +73,9 @@ import { LeadsModule } from './leads/leads.module';
 import { DriverApplicationsModule } from './driver-applications/driver-applications.module';
 import { LoyaltyAdminModule } from './loyalty/loyalty-admin.module';
 import { AdminNotificationsModule } from './notifications/notifications.module';
+import { IntelligenceModule } from './intelligence/intelligence.module';
 import { NotificationsModule } from '@hancr/notifications';
+import { ScheduleModule } from '@nestjs/schedule';
 
 // Observability
 import { ObservabilityModule } from '@hancr/observability';
@@ -87,6 +89,9 @@ import { ObservabilityModule } from '@hancr/observability';
       isGlobal: true,
       envFilePath: '.env',
     }),
+
+    // N11 — جدولة الحملات + auto-surge
+    ScheduleModule.forRoot(),
 
     // =============================================
     // TypeORM — PostgreSQL 16 + PostGIS (port 5433)
@@ -167,6 +172,7 @@ import { ObservabilityModule } from '@hancr/observability';
     // =============================================
     AuthModule,
     AppConfigModule,
+    IntelligenceModule,
     UsersModule,
     RegionsModule,
     ServicesModule,

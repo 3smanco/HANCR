@@ -7,5 +7,6 @@ import { NotificationsResolver } from './notifications.resolver';
 @Module({
   imports: [TypeOrmModule.forFeature([RiderEntity, DriverEntity])],
   providers: [BroadcastService, NotificationsResolver],
+  exports: [BroadcastService], // N11 — يستهلكه IntelligenceModule
 })
 export class AdminNotificationsModule {}
