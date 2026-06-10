@@ -6,6 +6,7 @@ import '../../blocs/driver/driver_bloc.dart';
 import '../../blocs/driver/driver_state.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../wallet/aurora_driver_wallet_screen.dart';
+import 'earnings_insights.dart';
 
 void _soon(BuildContext c) => ScaffoldMessenger.of(c).showSnackBar(
       SnackBar(
@@ -91,6 +92,11 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
                         )),
                       ],
                     ),
+
+                    const SizedBox(height: AuroraSpacing.lg),
+
+                    // N10 — رؤى الأرباح: الهدف اليومي + رسم آخر 7 أيام
+                    EarningsInsights(currency: d.currency),
 
                     const SizedBox(height: AuroraSpacing.lg),
 

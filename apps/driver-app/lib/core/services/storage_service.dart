@@ -47,6 +47,15 @@ class StorageService {
       _storage.write(key: _themeKey, value: json);
   static Future<String?> getThemeConfig() => _storage.read(key: _themeKey);
 
+  // ── N10 — هدف الأرباح اليومي (محلي) ──
+  static const _dailyGoalKey = 'hancr_driver_daily_goal';
+  static Future<void> saveDailyGoal(double v) =>
+      _storage.write(key: _dailyGoalKey, value: v.toStringAsFixed(0));
+  static Future<double?> getDailyGoal() async {
+    final v = await _storage.read(key: _dailyGoalKey);
+    return v != null ? double.tryParse(v) : null;
+  }
+
   // لا يمسح ثيم الـ SDUI (مفتاح عام) ليبقى الثيم المنشور بعد تسجيل الخروج.
   static Future<void> clearAll() async {
     final theme = await _storage.read(key: _themeKey);

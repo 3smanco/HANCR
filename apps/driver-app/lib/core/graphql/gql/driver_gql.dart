@@ -5,6 +5,19 @@ const String appThemeQuery = r'''
   }
 ''';
 
+// ─── N10 — Driver tools: daily earnings + demand heatmap ───
+const String myDailyEarningsQuery = r'''
+  query MyDailyEarnings($days: Int!) {
+    myDailyEarnings(days: $days) { date amount }
+  }
+''';
+
+const String demandZonesQuery = r'''
+  query DemandZones {
+    demandZones { lat lng weight }
+  }
+''';
+
 const String driverMeQuery = r'''
   query DriverMe {
     driverMe {
