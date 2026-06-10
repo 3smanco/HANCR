@@ -9,6 +9,7 @@ import '../../blocs/order/order_event.dart';
 import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
+import '../../core/motion/motion.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
 /// AuroraBidWaitingScreen — بعد إرسال المزايدة: عرض عروض السائقين وقبول أحدها.
@@ -156,8 +157,14 @@ class _AuroraBidWaitingScreenState extends State<AuroraBidWaitingScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.gavel,
-                                color: AuroraColors.textHint, size: 56),
+                            // N7 — حلقة نابضة أثناء انتظار العروض (ripple)
+                            PulseRing(
+                              color: AuroraColors.ember,
+                              size: 56,
+                              maxScale: 1.8,
+                              child: Icon(Icons.gavel,
+                                  color: AuroraColors.ember, size: 40),
+                            ),
                             const SizedBox(height: AuroraSpacing.md),
                             Text(tr('noOffersYet'),
                                 style: AuroraText.bodyMedium),
@@ -167,7 +174,8 @@ class _AuroraBidWaitingScreenState extends State<AuroraBidWaitingScreen> {
                     : ListView.builder(
                         padding: const EdgeInsets.all(AuroraSpacing.lg),
                         itemCount: _offers.length,
-                        itemBuilder: (_, i) => _offerCard(_offers[i]),
+                        // N7 — كل عرض جديد يقفز للداخل (bid bounce)
+                        itemBuilder: (_, i) => _offerCard(_offers[i]).popIn(index: i),
                       ),
               ),
             ],
