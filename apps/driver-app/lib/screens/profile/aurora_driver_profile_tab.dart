@@ -208,7 +208,7 @@ class AuroraDriverProfileTab extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.verified,
+                      Icon(Icons.verified,
                           color: AuroraColors.success, size: 12),
                       const SizedBox(width: 4),
                       Text(
@@ -428,7 +428,7 @@ class AuroraDriverProfileTab extends StatelessWidget {
         Expanded(
           child: Text(label, style: AuroraText.bodyMedium),
         ),
-        const Icon(Icons.verified, color: AuroraColors.success, size: 18),
+        Icon(Icons.verified, color: AuroraColors.success, size: 18),
       ],
     );
   }

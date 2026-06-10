@@ -42,7 +42,7 @@ class _View extends StatelessWidget {
           },
           builder: (context, state) {
             if (state is WalletInitial || state is WalletLoading) {
-              return const Center(
+              return Center(
                 child: CircularProgressIndicator(color: AuroraColors.ember),
               );
             }
@@ -95,7 +95,7 @@ class _View extends StatelessWidget {
           if (withdrawing)
             Container(
               color: Colors.black.withValues(alpha: 0.5),
-              child: const Center(
+              child: Center(
                 child: CircularProgressIndicator(color: AuroraColors.ember),
               ),
             ),
@@ -120,7 +120,7 @@ class _View extends StatelessWidget {
             child: InkWell(
               onTap: () => Navigator.of(ctx).pop(),
               customBorder: const CircleBorder(),
-              child: const Icon(Icons.arrow_back,
+              child: Icon(Icons.arrow_back,
                   color: AuroraColors.pearl, size: 20),
             ),
           ),
@@ -146,7 +146,7 @@ class _View extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.savings, color: AuroraColors.pearl, size: 20),
+              Icon(Icons.savings, color: AuroraColors.pearl, size: 20),
               const SizedBox(width: AuroraSpacing.sm),
               Text(
                 tr('availableEarnings'),
@@ -353,7 +353,7 @@ class _View extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline,
+            Icon(Icons.error_outline,
                 color: AuroraColors.danger, size: 64),
             const SizedBox(height: AuroraSpacing.md),
             Text(msg, style: AuroraText.bodyMedium, textAlign: TextAlign.center),
@@ -379,7 +379,7 @@ class _View extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (sheetCtx) {
         return Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: AuroraColors.coal,
             borderRadius: BorderRadius.vertical(
                 top: Radius.circular(AuroraRadius.xxl)),

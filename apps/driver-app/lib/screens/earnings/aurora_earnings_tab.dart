@@ -34,7 +34,7 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
           child: BlocBuilder<DriverBloc, DriverState>(
             builder: (ctx, state) {
               if (state is DriverLoading) {
-                return const Center(
+                return Center(
                   child: CircularProgressIndicator(color: AuroraColors.ember),
                 );
               }
@@ -175,7 +175,7 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
         children: [
           Row(
             children: [
-              const Icon(Icons.savings,
+              Icon(Icons.savings,
                   color: AuroraColors.pearl, size: 20),
               const SizedBox(width: AuroraSpacing.sm),
               Text(
@@ -195,7 +195,7 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.star,
+                    Icon(Icons.star,
                         color: AuroraColors.gold, size: 14),
                     const SizedBox(width: 4),
                     Text(
@@ -283,8 +283,10 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
     required IconData icon,
     required String label,
     required String value,
-    Color iconColor = AuroraColors.ember,
+    Color? iconColor,
   }) {
+    // N5 — اللون الحي ember لا يصلح كقيمة افتراضية const.
+    final ic = iconColor ?? AuroraColors.ember;
     return Container(
       padding: const EdgeInsets.all(AuroraSpacing.lg),
       decoration: BoxDecoration(
@@ -298,10 +300,10 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
           Container(
             padding: const EdgeInsets.all(AuroraSpacing.sm),
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.15),
+              color: ic.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: iconColor, size: 18),
+            child: Icon(icon, color: ic, size: 18),
           ),
           const SizedBox(height: AuroraSpacing.sm),
           Text(value, style: AuroraText.titleLarge),

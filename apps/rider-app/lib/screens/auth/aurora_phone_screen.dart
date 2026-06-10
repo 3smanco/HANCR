@@ -271,7 +271,7 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
           ],
         ),
       ),
-      child: const Center(
+      child: Center(
         child: Icon(
           Icons.directions_car,
           size: 130,

@@ -16,6 +16,7 @@ import 'blocs/order/order_state.dart';
 import 'core/router/app_router.dart';
 import 'core/services/push_service.dart';
 import 'core/theme/aurora_theme.dart';
+import 'core/theme/theme_controller.dart';
 import 'screens/auth/otp_screen.dart';
 import 'screens/auth/phone_screen.dart';
 import 'screens/home/aurora_driver_home.dart';
@@ -129,20 +130,27 @@ class _HancrCaptainAppState extends State<HancrCaptainApp> {
         child: ValueListenableBuilder<Locale>(
           valueListenable: LocaleController.instance,
           builder: (context, locale, _) {
-            return MaterialApp.router(
-              title: 'HANCR Captain',
-              theme: AuroraTheme.dark,
-              darkTheme: AuroraTheme.dark,
-              themeMode: ThemeMode.dark,
-              routerConfig: _router,
-              debugShowCheckedModeBanner: false,
-              locale: locale,
-              supportedLocales: kSupportedLocales,
-              localizationsDelegates: const [
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
+            // N5 — إعادة بناء MaterialApp عند نشر ثيم جديد من اللوحة.
+            return AnimatedBuilder(
+              animation: ThemeController.instance,
+              builder: (context, _) {
+                return MaterialApp.router(
+                  key: ValueKey('theme-${ThemeController.instance.version}'),
+                  title: 'HANCR Captain',
+                  theme: AuroraTheme.dark,
+                  darkTheme: AuroraTheme.dark,
+                  themeMode: ThemeMode.dark,
+                  routerConfig: _router,
+                  debugShowCheckedModeBanner: false,
+                  locale: locale,
+                  supportedLocales: kSupportedLocales,
+                  localizationsDelegates: const [
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                );
+              },
             );
           },
         ),

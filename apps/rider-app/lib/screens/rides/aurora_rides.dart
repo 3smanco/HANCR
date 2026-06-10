@@ -27,7 +27,7 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
     return BlocBuilder<OrderBloc, OrderState>(
       builder: (ctx, state) {
         if (state is OrderLoading) {
-          return const Center(
+          return Center(
               child: CircularProgressIndicator(color: AuroraColors.ember));
         }
         if (state is OrderHistoryLoaded) {
@@ -90,7 +90,7 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
                 color: AuroraColors.coal,
                 borderRadius: BorderRadius.circular(AuroraRadius.sm),
               ),
-              child: const Icon(Icons.local_taxi,
+              child: Icon(Icons.local_taxi,
                   color: AuroraColors.ember, size: 22),
             ),
             const SizedBox(width: AuroraSpacing.md),
@@ -147,7 +147,7 @@ class RidesHistoryScreen extends StatelessWidget {
         backgroundColor: AuroraColors.obsidian,
         elevation: 0,
         title: Text(tr('myRides'), style: AuroraText.titleMedium),
-        iconTheme: const IconThemeData(color: AuroraColors.pearl),
+        iconTheme: IconThemeData(color: AuroraColors.pearl),
       ),
       body: const AuroraBackground(child: AuroraRidesView()),
     );
@@ -168,7 +168,7 @@ class RideDetailsScreen extends StatelessWidget {
         backgroundColor: AuroraColors.obsidian,
         elevation: 0,
         title: Text(tr('rideDetails'), style: AuroraText.titleMedium),
-        iconTheme: const IconThemeData(color: AuroraColors.pearl),
+        iconTheme: IconThemeData(color: AuroraColors.pearl),
       ),
       body: AuroraBackground(
         child: SafeArea(

@@ -178,7 +178,7 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
             child: InkWell(
               onTap: () => Navigator.of(context).pop(),
               customBorder: const CircleBorder(),
-              child: const Icon(
+              child: Icon(
                 Icons.close,
                 color: AuroraColors.ember,
                 size: 18,
@@ -206,7 +206,7 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
                   gradient: AuroraColors.emberGradient,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.attach_money,
+                child: Icon(Icons.attach_money,
                     size: 14, color: AuroraColors.pearl),
               ),
               const SizedBox(width: AuroraSpacing.sm),
@@ -319,7 +319,7 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
                 gradient: AuroraColors.emberGradient,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.attach_money,
                 size: 16,
                 color: AuroraColors.pearl,
@@ -356,7 +356,7 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
               gradient: AuroraColors.emberGradient,
               borderRadius: BorderRadius.circular(4),
             ),
-            child: const Center(
+            child: Center(
               child: Icon(Icons.credit_card,
                   color: AuroraColors.pearl, size: 14),
             ),

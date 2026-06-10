@@ -18,7 +18,7 @@ class AuroraBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: AuroraColors.pageBackground,
       ),
       child: Stack(

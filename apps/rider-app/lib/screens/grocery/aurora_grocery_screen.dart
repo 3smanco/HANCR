@@ -203,7 +203,7 @@ class _AuroraGroceryScreenState extends State<AuroraGroceryScreen> {
         title: Text(tr('groceryRun'), style: AuroraText.titleSmall),
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: AuroraColors.ember))
           : ListView(
               padding: const EdgeInsets.all(AuroraSpacing.lg),
@@ -239,7 +239,7 @@ class _AuroraGroceryScreenState extends State<AuroraGroceryScreen> {
                       labelText: tr('budget'),
                       filled: true,
                       fillColor: AuroraColors.coal,
-                      prefixIcon: const Icon(Icons.payments,
+                      prefixIcon: Icon(Icons.payments,
                           color: AuroraColors.ember),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AuroraRadius.md),
@@ -337,7 +337,7 @@ class _AuroraGroceryScreenState extends State<AuroraGroceryScreen> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, color: AuroraColors.danger),
+            icon: Icon(Icons.close, color: AuroraColors.danger),
             onPressed: () => _removeItem(i),
           ),
         ],
@@ -379,7 +379,7 @@ class _AuroraGroceryScreenState extends State<AuroraGroceryScreen> {
                   style: AuroraText.titleSmall
                       .copyWith(color: AuroraColors.pearl)),
               IconButton(
-                icon: const Icon(Icons.add_circle_outline,
+                icon: Icon(Icons.add_circle_outline,
                     color: AuroraColors.ember),
                 onPressed: _itemQty < 20
                     ? () => setState(() => _itemQty++)
@@ -401,9 +401,9 @@ class _AuroraGroceryScreenState extends State<AuroraGroceryScreen> {
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: TextButton.icon(
-              icon: const Icon(Icons.add, color: AuroraColors.ember),
+              icon: Icon(Icons.add, color: AuroraColors.ember),
               label: Text(tr('addItem'),
-                  style: const TextStyle(color: AuroraColors.ember)),
+                  style: TextStyle(color: AuroraColors.ember)),
               onPressed: _addItem,
             ),
           ),

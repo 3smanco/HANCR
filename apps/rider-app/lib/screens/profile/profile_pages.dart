@@ -24,7 +24,7 @@ class _AuroraPage extends StatelessWidget {
         backgroundColor: AuroraColors.obsidian,
         elevation: 0,
         title: Text(title, style: AuroraText.titleMedium),
-        iconTheme: const IconThemeData(color: AuroraColors.pearl),
+        iconTheme: IconThemeData(color: AuroraColors.pearl),
       ),
       body: AuroraBackground(child: SafeArea(top: false, child: child)),
     );
@@ -124,7 +124,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AuroraRadius.md),
-              borderSide: const BorderSide(color: AuroraColors.ember, width: 1.5),
+              borderSide: BorderSide(color: AuroraColors.ember, width: 1.5),
             ),
           ),
         ),
@@ -272,7 +272,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
     return _AuroraPage(
       title: tr('inviteFriends'),
       child: _loading
-          ? const Center(
+          ? Center(
               child: Padding(
                 padding: EdgeInsets.all(AuroraSpacing.xxl),
                 child: CircularProgressIndicator(color: AuroraColors.ember),
@@ -291,7 +291,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
                       shape: BoxShape.circle,
                       boxShadow: AuroraShadows.emberGlow,
                     ),
-                    child: const Icon(Icons.card_giftcard,
+                    child: Icon(Icons.card_giftcard,
                         color: AuroraColors.pearl, size: 44),
                   ),
                 ),
@@ -322,7 +322,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
                       GestureDetector(
                         onTap: _copy,
                         child:
-                            const Icon(Icons.copy, color: AuroraColors.pearl),
+                            Icon(Icons.copy, color: AuroraColors.pearl),
                       ),
                     ],
                   ),
@@ -382,7 +382,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               border: Border.all(color: AuroraColors.border),
             ),
             child: ListTile(
-              leading: const Icon(Icons.translate, color: AuroraColors.ember),
+              leading: Icon(Icons.translate, color: AuroraColors.ember),
               title: Text(LocaleController.instance.currentLanguage.nativeName,
                   style: AuroraText.bodyMedium
                       .copyWith(color: AuroraColors.pearl)),
@@ -511,7 +511,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
                     ),
                   ),
                   if (selected)
-                    const Icon(Icons.check_circle, color: AuroraColors.ember),
+                    Icon(Icons.check_circle, color: AuroraColors.ember),
                 ],
               ),
             ),

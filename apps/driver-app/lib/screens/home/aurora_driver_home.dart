@@ -57,7 +57,7 @@ class _AuroraDriverHomeState extends State<AuroraDriverHome> {
 
   Widget _buildNav() {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AuroraColors.coal,
         border: Border(top: BorderSide(color: AuroraColors.border)),
         boxShadow: AuroraShadows.floatingNav,
@@ -186,11 +186,11 @@ class _MapTab extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.gavel,
+                      Icon(Icons.gavel,
                           color: AuroraColors.ember, size: 16),
                       const SizedBox(width: 6),
                       Text(tr('bids'),
-                          style: const TextStyle(
+                          style: TextStyle(
                               color: AuroraColors.pearl,
                               fontWeight: FontWeight.w700,
                               fontSize: 13)),
@@ -265,11 +265,11 @@ class _DriverTopBar extends StatelessWidget {
               Container(
                 width: 32,
                 height: 32,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: AuroraColors.emberGradient,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.person,
+                child: Icon(Icons.person,
                     color: AuroraColors.pearl, size: 18),
               ),
               const SizedBox(width: AuroraSpacing.sm),
@@ -379,13 +379,13 @@ class _OnlineToggleState extends State<_OnlineToggle>
             padding: const EdgeInsets.symmetric(vertical: AuroraSpacing.lg),
             decoration: BoxDecoration(
               gradient: online
-                  ? const LinearGradient(
+                  ? LinearGradient(
                       colors: [AuroraColors.success, Color(0xFF059669)],
                     )
                   : AuroraColors.emberGradient,
               borderRadius: BorderRadius.circular(AuroraRadius.xl),
               boxShadow: online
-                  ? const [
+                  ? [
                       BoxShadow(
                         color: AuroraColors.success,
                         blurRadius: 24,
@@ -397,7 +397,7 @@ class _OnlineToggleState extends State<_OnlineToggle>
             child: Column(
               children: [
                 if (_busy)
-                  const SizedBox(
+                  SizedBox(
                     width: 24,
                     height: 24,
                     child: CircularProgressIndicator(
@@ -526,7 +526,7 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.chat_bubble_outline,
+                icon: Icon(Icons.chat_bubble_outline,
                     color: AuroraColors.ember),
                 tooltip: tr('chatWithRider'),
                 onPressed: () => Navigator.of(context).push(
@@ -565,7 +565,7 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
           const SizedBox(height: AuroraSpacing.sm),
           Row(
             children: [
-              const Icon(Icons.location_on,
+              Icon(Icons.location_on,
                   size: 18, color: AuroraColors.ember),
               const SizedBox(width: AuroraSpacing.sm),
               Expanded(
@@ -614,7 +614,7 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
                       .read<OrderBloc>()
                       .add(OrderCancelRequested(order.id)),
               child: Text(tr('cancelRide'),
-                  style: const TextStyle(color: AuroraColors.danger)),
+                  style: TextStyle(color: AuroraColors.danger)),
             ),
           ],
         ],

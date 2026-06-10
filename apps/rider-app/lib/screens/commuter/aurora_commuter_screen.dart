@@ -92,13 +92,13 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
             style: AuroraText.titleSmall),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: AuroraColors.ember),
+            icon: Icon(Icons.add, color: AuroraColors.ember),
             onPressed: _openSetup,
           ),
         ],
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: AuroraColors.ember))
           : _subs.isEmpty
               ? _empty()
@@ -181,7 +181,7 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
           const SizedBox(height: 4),
           Row(
             children: [
-              const Icon(Icons.location_on,
+              Icon(Icons.location_on,
                   size: 16, color: AuroraColors.ember),
               const SizedBox(width: 6),
               Expanded(
@@ -222,7 +222,7 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
                   style: AuroraText.bodySmall),
               const Spacer(),
               IconButton(
-                icon: const Icon(Icons.delete_outline,
+                icon: Icon(Icons.delete_outline,
                     color: AuroraColors.danger),
                 onPressed: () => _delete(s['id'] as int),
               ),

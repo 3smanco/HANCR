@@ -97,7 +97,7 @@ class _AuroraBidWaitingScreenState extends State<AuroraBidWaitingScreen> {
       appBar: AppBar(
         backgroundColor: AuroraColors.obsidian,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AuroraColors.pearl),
+        iconTheme: IconThemeData(color: AuroraColors.pearl),
         title: Text(tr('bidMode'), style: AuroraText.titleMedium),
       ),
       body: AuroraBackground(
@@ -135,7 +135,7 @@ class _AuroraBidWaitingScreenState extends State<AuroraBidWaitingScreen> {
                 child: Row(
                   children: [
                     if (_status == 'Open')
-                      const SizedBox(
+                      SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
@@ -213,7 +213,7 @@ class _AuroraBidWaitingScreenState extends State<AuroraBidWaitingScreen> {
               children: [
                 Text(name, style: AuroraText.titleSmall),
                 Row(children: [
-                  const Icon(Icons.star, color: AuroraColors.gold, size: 13),
+                  Icon(Icons.star, color: AuroraColors.gold, size: 13),
                   const SizedBox(width: 2),
                   Text(rating.toStringAsFixed(1), style: AuroraText.caption),
                   if (car.isNotEmpty) ...[

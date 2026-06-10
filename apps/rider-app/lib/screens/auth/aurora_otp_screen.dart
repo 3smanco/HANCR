@@ -118,7 +118,7 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                           child: InkWell(
                             onTap: () => context.pop(),
                             customBorder: const CircleBorder(),
-                            child: const Icon(Icons.arrow_back,
+                            child: Icon(Icons.arrow_back,
                                 color: AuroraColors.pearl, size: 20),
                           ),
                         ),
@@ -136,7 +136,7 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                         shape: BoxShape.circle,
                         boxShadow: AuroraShadows.emberGlow,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.lock_outline,
                         color: AuroraColors.pearl,
                         size: 36,
@@ -210,7 +210,7 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                         hintText: tr('referralCodeOptional'),
                         hintStyle: AuroraText.bodySmall
                             .copyWith(color: AuroraColors.textSecondary),
-                        prefixIcon: const Icon(Icons.card_giftcard,
+                        prefixIcon: Icon(Icons.card_giftcard,
                             color: AuroraColors.ember, size: 20),
                         filled: true,
                         fillColor: AuroraColors.ash,
@@ -221,7 +221,7 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AuroraRadius.md),
-                          borderSide: const BorderSide(
+                          borderSide: BorderSide(
                               color: AuroraColors.ember, width: 1.5),
                         ),
                       ),

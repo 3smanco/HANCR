@@ -567,7 +567,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
               color: AuroraColors.pearl.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.schedule,
               color: AuroraColors.pearl,
               size: 30,

@@ -68,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen>
                         borderRadius: BorderRadius.circular(28),
                         boxShadow: AuroraShadows.emberGlow,
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
                           'H',
                           style: TextStyle(
@@ -97,7 +97,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ),
                     const SizedBox(height: 40),
-                    const SizedBox(
+                    SizedBox(
                       width: 32,
                       height: 32,
                       child: CircularProgressIndicator(

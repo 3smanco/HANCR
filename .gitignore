@@ -47,3 +47,7 @@ deliverables/
 # Next.js build outputs
 **/.next/
 **/out/
+
+# graphify knowledge graph (~16MB) + installed skills — large, regenerable
+graphify-out/
+.claude/skills/

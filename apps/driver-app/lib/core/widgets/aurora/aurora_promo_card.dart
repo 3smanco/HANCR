@@ -78,7 +78,7 @@ class AuroraPromoCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const Icon(
+                        Icon(
                           Icons.arrow_forward,
                           color: AuroraColors.ember,
                           size: 18,

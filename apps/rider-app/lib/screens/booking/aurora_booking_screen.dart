@@ -561,7 +561,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AuroraRadius.md),
-          borderSide: const BorderSide(color: AuroraColors.ember, width: 1.5),
+          borderSide: BorderSide(color: AuroraColors.ember, width: 1.5),
         ),
       );
 
@@ -685,7 +685,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
 
               // ─── Center destination pin ───
               if (_step == _BookingStep.pickDestination)
-                const Center(
+                Center(
                   child: Padding(
                     padding: EdgeInsets.only(bottom: 40),
                     child: Icon(Icons.location_on,
@@ -789,7 +789,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                     Icons.location_on, AuroraColors.ember, _destinationLabel),
               ),
               IconButton(
-                icon: const Icon(Icons.bookmark_add_outlined,
+                icon: Icon(Icons.bookmark_add_outlined,
                     color: AuroraColors.ember),
                 tooltip: tr('savePlace'),
                 onPressed: _saveCurrentPlace,
@@ -799,7 +799,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           if (_stops.length < 3)
             TextButton.icon(
               onPressed: _addStopAtCurrentMap,
-              icon: const Icon(Icons.add_location_alt_outlined,
+              icon: Icon(Icons.add_location_alt_outlined,
                   color: AuroraColors.ember, size: 18),
               label: Text(tr('addStop'),
                   style: AuroraText.bodySmall
@@ -859,7 +859,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           const SizedBox(height: AuroraSpacing.md),
 
           if (_loadingServices)
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(AuroraSpacing.xl),
               child: Center(
                   child: CircularProgressIndicator(color: AuroraColors.ember)),
@@ -903,7 +903,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.timer, size: 18, color: AuroraColors.ember),
+                  Icon(Icons.timer, size: 18, color: AuroraColors.ember),
                   const SizedBox(width: AuroraSpacing.sm),
                   Expanded(
                     child: Text(
@@ -923,7 +923,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                       style: AuroraText.titleMedium
                           .copyWith(color: AuroraColors.ember)),
                   IconButton(
-                    icon: const Icon(Icons.add_circle_outline,
+                    icon: Icon(Icons.add_circle_outline,
                         color: AuroraColors.ember),
                     onPressed: _bookedHours < 12
                         ? () => setState(() => _bookedHours++)
@@ -1002,7 +1002,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               decoration: InputDecoration(
                 hintText: tr('yourPrice'),
                 prefixIcon:
-                    const Icon(Icons.attach_money, color: AuroraColors.ember),
+                    Icon(Icons.attach_money, color: AuroraColors.ember),
                 filled: true,
                 fillColor: AuroraColors.ash,
                 enabledBorder: OutlineInputBorder(
@@ -1012,7 +1012,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AuroraRadius.md),
                   borderSide:
-                      const BorderSide(color: AuroraColors.ember, width: 1.5),
+                      BorderSide(color: AuroraColors.ember, width: 1.5),
                 ),
               ),
             ),
@@ -1144,7 +1144,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                         ),
                       ),
                       child: _couponLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
@@ -1166,7 +1166,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.check_circle,
+                    Icon(Icons.check_circle,
                         color: AuroraColors.success, size: 18),
                     const SizedBox(width: AuroraSpacing.sm),
                     Expanded(
@@ -1280,7 +1280,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               ),
             ),
             if (selected)
-              const Icon(Icons.check_circle,
+              Icon(Icons.check_circle,
                   color: AuroraColors.ember, size: 22),
           ],
         ),
@@ -1334,7 +1334,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline,
+          Icon(Icons.error_outline,
               color: AuroraColors.danger, size: 18),
           const SizedBox(width: AuroraSpacing.sm),
           Expanded(
@@ -1357,7 +1357,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(
           AuroraSpacing.lg, AuroraSpacing.lg, AuroraSpacing.lg, AuroraSpacing.xl),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AuroraColors.coal,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         border: Border(top: BorderSide(color: AuroraColors.border)),

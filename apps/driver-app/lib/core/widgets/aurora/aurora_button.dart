@@ -142,7 +142,7 @@ class AuroraButton extends StatelessWidget {
                   SizedBox(
                     height: _iconSize,
                     width: _iconSize,
-                    child: const CircularProgressIndicator(
+                    child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation(AuroraColors.pearl),
                     ),
@@ -174,7 +174,7 @@ class AuroraButton extends StatelessWidget {
       case AuroraButtonVariant.primary:
         return AuroraColors.emberGradient;
       case AuroraButtonVariant.danger:
-        return const LinearGradient(
+        return LinearGradient(
           colors: [AuroraColors.danger, Color(0xFFCC2424)],
         );
       default:
