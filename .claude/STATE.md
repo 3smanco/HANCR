@@ -7,14 +7,13 @@
 ---
 
 ## أين نحن الآن
-- **آخر إنجاز:** N5 — الثيم الحي SDUI (PR #57، مدموج في main).
-- **التالي:** N6 — مكتبة الحركة المشتركة (flutter_animate + lottie + rive + haptics + transitions + shimmer + ripple).
+- **آخر إنجاز:** N6 — مكتبة الحركة المشتركة Aurora Motion (PR #58، مدموج في main).
+- **التالي:** N7 — أنيميشن تطبيق الراكب (success/confetti, bid bounce, splash glow, ripples) — يبني على مكتبة N6.
 - **الخطة المعتمدة:** `C:\Users\7bici\.claude\plans\valiant-percolating-sparkle.md` (N5→N11).
-- **نشر N5 على الإنتاج:** ⏳ معلّق — يحتاج `git pull` + rebuild + `pm2 restart` للـ backend (استعلام appTheme). لا migration. التطبيقات تحتاج إعادة بناء APK.
+- **نشر معلّق على الإنتاج:** ⏳ N5 (backend `appTheme`: `git pull`+rebuild+`pm2 restart`، لا migration) + N6 (deps Flutter جديدة → إعادة بناء APK). التطبيقات تحتاج إعادة بناء على أي حال.
 
 ## المتبقي من خطة N
-- N6: مكتبة حركة مشتركة (الحالي التالي)
-- N7: أنيميشن تطبيق الراكب (success/confetti, bid bounce, splash glow, ripples)
+- N7: أنيميشن تطبيق الراكب (success/confetti, bid bounce, splash glow, ripples) — الحالي التالي
 - N8: أنيميشن السائق + سيارة متحركة على الخريطة
 - N9: ميزات الراكب (live activity, rewards hub, إيصالات)
 - N10: أدوات السائق (heatmap, أهداف يومية, رسوم أرباح)
@@ -25,6 +24,7 @@
 - I1–I11: لوحة إدارة كاملة. J1–J9: موقع تسويقي. K1–K4, L1–L3, M1–M4: JWT/تسعير/وثائق/دفع/PostGIS/تسجيل سائق/APKs.
 - N1: AppConfig مصدر حقيقة. N2: صفحات SDUI. N3: تفصيل الراكب+loyalty. N4: دفعات السائقين (Stripe).
 - N5: الثيم الحي — `AuroraColors` صار non-const يُقرأ من `themeConfig` (صف `main`) عبر `AuroraThemeData.apply` + `ThemeController`؛ استعلام عام `appTheme` في rider-api و driver-api.
+- N6: مكتبة الحركة `lib/core/motion/motion.dart` (barrel) — Motion tokens · Haptics · Pressable · AppTransitions · PulseRing/GlowPulse · Skeleton · `.fadeSlideIn/.popIn` · LottieView · RiveView · SuccessCheck. حزم: flutter_animate/lottie/rive/shimmer. مطابقة في التطبيقين.
 
 ---
 
@@ -35,6 +35,7 @@
 - Mobile: rider-app + driver-app (Flutter، تصميم Aurora obsidian/ember، Cairo/Inter، RTL).
 - entity جديد يُسجَّل في 3 أماكن: `libs/database/src/index.ts` + `data-source.ts` + module `entities[]`.
 - ثيم الموبايل الحي: `apps/{rider,driver}-app/lib/core/theme/aurora_theme.dart` + `theme_controller.dart`. محرّر اللوحة: `apps/admin-panel/src/app/settings/theme/page.tsx`.
+- مكتبة الحركة: `apps/{rider,driver}-app/lib/core/motion/motion.dart` (barrel). أصول Lottie/Rive في `assets/anim/`.
 
 ## أوامر التحقق (شغّلها قبل أي commit)
 - Backend: `npx tsc --noEmit -p apps/<api>/tsconfig.app.json` (rider/driver/admin) → 0 أخطاء.
