@@ -71,17 +71,17 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
             title={isAr ? 'الراكب' : 'Rider'}
             body={
               isAr
-                ? 'افتح تطبيق HANCR على جوالك، أدخل رقمك، وأرسل لك رمز التحقُّق.'
-                : 'Open the HANCR app on your phone, enter your number, and we send you a verification code.'
+                ? 'سجّل دخولك من المتصفح برقم جوالك ورمز التحقُّق، أو حمّل التطبيق.'
+                : 'Sign in from your browser with your phone and a verification code, or get the app.'
             }
             primary={{
-              href: '/downloads/hancr-rider.apk',
-              label: isAr ? 'حمِّل تطبيق الراكب' : 'Download rider app',
-              download: true,
+              href: localizedHref(locale, '/account'),
+              label: isAr ? 'تسجيل الدخول' : 'Log in',
             }}
             secondary={{
-              href: localizedHref(locale, '/ride'),
-              label: isAr ? 'تعرَّف على الخدمة' : 'Learn more',
+              href: '/downloads/hancr-rider.apk',
+              label: isAr ? 'حمِّل التطبيق' : 'Download app',
+              download: true,
             }}
           />
 
@@ -182,7 +182,7 @@ function RoleCard({
   title: string;
   body: string;
   primary: { href: string; label: string; external?: boolean; download?: boolean };
-  secondary?: { href: string; label: string };
+  secondary?: { href: string; label: string; download?: boolean };
 }) {
   const isEmber = tone === 'ember';
   return (
@@ -235,6 +235,7 @@ function RoleCard({
         {secondary ? (
           <Link
             href={secondary.href}
+            {...(secondary.download ? { download: true } : {})}
             className="w-full inline-flex items-center justify-center gap-2 border border-stone hover:border-ember hover:text-ember transition px-4 py-2.5 rounded-lg font-semibold text-xs text-pearl"
           >
             {secondary.label}
