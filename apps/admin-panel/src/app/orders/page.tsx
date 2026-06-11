@@ -12,10 +12,12 @@ import {
   Route,
   Wallet,
   RefreshCw,
+  Plus,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { LIST_ORDERS, FORCE_CANCEL_ORDER } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
+import { DispatcherDrawer } from '@/components/DispatcherDrawer';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { useT } from '@/i18n/LocaleProvider';
 
@@ -65,6 +67,7 @@ export default function OrdersPage() {
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState('');
   const [cancelTarget, setCancelTarget] = useState<number | null>(null);
+  const [bookOpen, setBookOpen] = useState(false);
   const limit = 20;
 
   const { data, loading, refetch } = useQuery(LIST_ORDERS, {
@@ -93,8 +96,12 @@ export default function OrdersPage() {
       />
 
       <div className="p-6 space-y-5">
-        {/* ── Filter tabs ── */}
-        <div className="flex flex-wrap gap-2">
+        {/* ── Filter tabs + Book ── */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <button className="btn-primary me-2" onClick={() => setBookOpen(true)}>
+            <Plus className="w-4 h-4" />
+            احجز رحلة
+          </button>
           {FILTER_TABS.map((t) => {
             const Icon = t.icon;
             const active = status === t.key;
@@ -297,6 +304,13 @@ export default function OrdersPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {bookOpen && (
+        <DispatcherDrawer
+          onClose={() => setBookOpen(false)}
+          onCreated={() => refetch()}
+        />
       )}
     </div>
   );
