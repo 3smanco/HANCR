@@ -170,3 +170,29 @@ export async function routePreview(
   );
   return data.routePreview;
 }
+
+/** إنشاء طلب رحلة فعلي من الويب (نفس mutation التطبيق، authed). */
+export async function createOrder(input: {
+  origin: { lat: number; lng: number };
+  destination: { lat: number; lng: number };
+  originAddress: string;
+  destinationAddress: string;
+  serviceId: number;
+  regionId?: number;
+}): Promise<{ id: number; status: string }> {
+  const data = await gql<{ createOrder: { id: number; status: string } }>(
+    `mutation CreateOrder($input: CreateOrderInput!) {
+      createOrder(input: $input) { id status }
+    }`,
+    {
+      input: {
+        points: [input.origin, input.destination],
+        addresses: [input.originAddress, input.destinationAddress],
+        serviceId: input.serviceId,
+        regionId: input.regionId ?? 1,
+      },
+    },
+    true,
+  );
+  return data.createOrder;
+}
