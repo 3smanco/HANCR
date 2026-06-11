@@ -114,3 +114,59 @@ export async function fetchMe(): Promise<RiderProfile> {
   );
   return data.me;
 }
+
+export interface WebService {
+  id: number;
+  name: string;
+  nameEn?: string | null;
+}
+
+export async function fetchServices(regionId = 1): Promise<WebService[]> {
+  const data = await gql<{ services: WebService[] }>(
+    `query Services($regionId: Int!) { services(regionId: $regionId) { id name nameEn } }`,
+    { regionId },
+    true,
+  );
+  return data.services ?? [];
+}
+
+export interface WebSavedPlace {
+  id: number;
+  label: string;
+  address?: string | null;
+  lat: number;
+  lng: number;
+}
+
+export async function fetchSavedPlaces(): Promise<WebSavedPlace[]> {
+  const data = await gql<{ savedPlaces: WebSavedPlace[] }>(
+    `query SavedPlaces { savedPlaces { id label address lat lng } }`,
+    {},
+    true,
+  );
+  return data.savedPlaces ?? [];
+}
+
+export interface RouteEstimate {
+  distanceMeters: number;
+  durationSeconds: number;
+  estimatedFare: number;
+  currency: string;
+}
+
+export async function routePreview(
+  origin: { lat: number; lng: number },
+  destination: { lat: number; lng: number },
+  serviceId: number,
+): Promise<RouteEstimate> {
+  const data = await gql<{ routePreview: RouteEstimate }>(
+    `query RoutePreview($input: RoutePreviewInput!) {
+      routePreview(input: $input) {
+        distanceMeters durationSeconds estimatedFare currency
+      }
+    }`,
+    { input: { origin, destination, serviceId } },
+    true,
+  );
+  return data.routePreview;
+}
