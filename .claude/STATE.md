@@ -14,7 +14,10 @@
   - **🔧 الموجة 3 (بنية تحتية) منجزة:** webhook الدفع يتحقّق من البايتات الخام (الشحنات تعمل الآن) · migration فهارس DB (`1779700000000`) · `CronLockService` على الـ7 crons · `enableShutdownHooks` في الـ3 APIs. كلها tsc=0.
   - **🎨 الموجة 4 (UX + تحصين) منجزة:** مفتاح الخريطة الحية (env+Dockerfile+compose) · مهلات بوابات الدفع · كاش Directions في Redis · توطين أزرار تطبيق السائق (9 مفاتيح، flutter analyze نظيف) · ربط 10 أزرار ميتة بـ"قريباً" (سائق+راكب).
   - **متبقٍّ (يحتاج موافقة):** migrations الـ~25 entity (يحتاج DB لتوليده) · تسوية الدفع المعامَلاتية (حسّاس، يحتاج اختبارات) · حدود سعر المزايدة (قرار عملي) · Throttler-Redis (يحتاج حزمة) · OTP السائق 6 خانات crypto.
-- **التالي:** اعتماد الموجة التالية من REMEDIATION.md (الباقي الحسّاس/التحصيني)، ثم معاينة/نشر.
+- **🚀 نُشر على الإنتاج (2026-06-11):** PR #65 مُدمَج في main (squash 6ca02a7). الخادم على 6ca02a7، npm ci، الـ3 APIs + admin-panel أُعيد تشغيلها وكلها `/health/ready=200`. فهارس الأداء مطبَّقة عبر docker exec psql (CONCURRENTLY). admin-panel أُعيد بناؤه بمفتاح الخريطة (مخبوز ✓).
+  - **درس مهم للنشر:** pm2 يعمل على المضيف لا داخل docker. `.env.prod` يحوي `DATABASE_HOST=postgres`/`REDIS_HOST=redis` (أسماء شبكة docker لا تُحلّ على المضيف). **لا** تُعِد التشغيل بـ `--update-env` بعد `source .env.prod` مباشرة. الصحيح: استخدم `scripts/server-fix-restart.sh` (يضبط HOST=127.0.0.1 ويعيد عبر ecosystem.config.js). docker postgres/redis منشوران على 127.0.0.1:5432/6379.
+  - **ecosystem.config.js على الخادم:** أُضيف `JWT_DRIVER_SECRET: process.env.JWT_DRIVER_SECRET` (كتلة السائق كانت تمرّر JWT_SECRET فقط). المنافذ: rider 3000 · driver 3001 · admin 3002 · admin-panel 3003.
+- **متبقٍّ:** (4) إعادة بناء APK للراكب/السائق ورفعها على الموقع · (5) توليد migration للجداول الناقصة (prod فيه الجداول أصلاً؛ للـ clean-deploy فقط).
 - **⚠️ نشر هذه الإصلاحات:** الـ3 APIs تحتاج rebuild + `pm2 restart`. شغّل migration الفهارس: `npm run migration:run`. تأكّد من وجود `JWT_DRIVER_SECRET` و`STRIPE/HYPERPAY/MOYASAR_WEBHOOK_SECRET` في بيئة الإنتاج (fail-fast يرفض الإقلاع بدونها).
 - **الخطة المعتمدة:** `C:\Users\7bici\.claude\plans\valiant-percolating-sparkle.md` (مكتملة).
 - **نشر معلّق على الإنتاج (PRs #57–63):**
