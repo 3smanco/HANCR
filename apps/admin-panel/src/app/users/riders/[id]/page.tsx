@@ -30,6 +30,7 @@ import {
   ADMIN_RIDER_LOYALTY,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
+import { DispatcherDrawer } from '@/components/DispatcherDrawer';
 import { formatDate } from '@/lib/utils';
 
 type Tab = 'overview' | 'orders' | 'loyalty' | 'places';
@@ -39,6 +40,7 @@ export default function RiderDetailPage() {
   const router = useRouter();
   const id = Number(params?.id ?? 0);
   const [tab, setTab] = useState<Tab>('overview');
+  const [bookOpen, setBookOpen] = useState(false);
 
   const { data, loading, refetch } = useQuery(ADMIN_RIDER_DETAIL, {
     variables: { id },
@@ -109,7 +111,26 @@ export default function RiderDetailPage() {
               <span>· انضم {formatDate(rider.createdAt)}</span>
             </div>
           </div>
+          <button
+            className="btn-primary btn-sm shrink-0"
+            onClick={() => setBookOpen(true)}
+          >
+            <Plus className="w-4 h-4" />
+            احجز رحلة
+          </button>
         </div>
+
+        {bookOpen && (
+          <DispatcherDrawer
+            onClose={() => setBookOpen(false)}
+            onCreated={() => refetch()}
+            presetRider={{
+              id: rider.id,
+              name,
+              phone: rider.phoneNumber,
+            }}
+          />
+        )}
 
         {/* Stats strip */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
