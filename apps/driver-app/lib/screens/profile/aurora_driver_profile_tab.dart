@@ -9,18 +9,14 @@ import '../../blocs/driver/driver_event.dart';
 import '../../blocs/driver/driver_state.dart';
 import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/driver_gql.dart';
+import '../../core/models/driver_model.dart';
+import '../../core/utils/external_launch.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../sos/driver_emergency_contacts_screen.dart';
 import '../wallet/aurora_driver_wallet_screen.dart';
 import '../wallet/aurora_payout_methods_screen.dart';
 import 'aurora_driver_documents_screen.dart';
 import 'language_screen.dart';
-
-void _soon(BuildContext c) => ScaffoldMessenger.of(c).showSnackBar(
-      SnackBar(
-          content: Text('${tr('comingSoon')} ✨'),
-          backgroundColor: AuroraColors.ash),
-    );
 
 class AuroraDriverProfileTab extends StatelessWidget {
   const AuroraDriverProfileTab({super.key});
@@ -87,7 +83,8 @@ class AuroraDriverProfileTab extends StatelessWidget {
                       Expanded(child: _quickTile(
                         icon: Icons.support_agent,
                         label: tr('support'),
-                        onTap: () => _soon(context),
+                        onTap: () =>
+                            launchSupportEmail(context, subject: 'دعم السائق'),
                       )),
                     ],
                   ),
@@ -109,7 +106,12 @@ class AuroraDriverProfileTab extends StatelessWidget {
                           subtitle: state is DriverLoaded
                               ? '${state.driver.carBrand ?? ''} ${state.driver.carModel ?? ''}'.trim()
                               : '—',
-                          onTap: () => _soon(context),
+                          onTap: () {
+                            final s = state;
+                            if (s is DriverLoaded) {
+                              _showCarEditSheet(context, s.driver);
+                            }
+                          },
                         ),
                         const Divider(height: 1, color: AuroraColors.divider),
                         _menuItem(
@@ -481,4 +483,84 @@ class AuroraDriverProfileTab extends StatelessWidget {
       ),
     );
   }
+}
+
+// ─── تعديل بيانات السيارة (يُرسل DriverUpdateRequested) ───
+void _showCarEditSheet(BuildContext context, DriverModel d) {
+  final bloc = context.read<DriverBloc>();
+  final brand = TextEditingController(text: d.carBrand ?? '');
+  final model = TextEditingController(text: d.carModel ?? '');
+  final color = TextEditingController(text: d.carColor ?? '');
+  final plate = TextEditingController(text: d.plateNumber ?? '');
+  final year = TextEditingController(text: d.carYear?.toString() ?? '');
+
+  Widget field(String label, TextEditingController c, {TextInputType? kb}) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: AuroraSpacing.sm),
+        child: TextField(
+          controller: c,
+          keyboardType: kb,
+          style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
+          decoration: InputDecoration(
+            labelText: label,
+            labelStyle: AuroraText.bodySmall
+                .copyWith(color: AuroraColors.textSecondary),
+            filled: true,
+            fillColor: AuroraColors.coal,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AuroraRadius.md),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+      );
+
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: AuroraColors.obsidian,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(AuroraRadius.xl)),
+    ),
+    builder: (ctx) => Padding(
+      padding: EdgeInsets.only(
+        left: AuroraSpacing.lg,
+        right: AuroraSpacing.lg,
+        top: AuroraSpacing.lg,
+        bottom: MediaQuery.of(ctx).viewInsets.bottom + AuroraSpacing.lg,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(tr('carData'),
+              style: AuroraText.titleSmall.copyWith(color: AuroraColors.pearl)),
+          const SizedBox(height: AuroraSpacing.md),
+          field(tr('carBrand'), brand),
+          field(tr('carModel'), model),
+          field(tr('carColor'), color),
+          field(tr('plateNumber'), plate),
+          field(tr('carYear'), year, kb: TextInputType.number),
+          const SizedBox(height: AuroraSpacing.sm),
+          AuroraButton(
+            label: tr('save'),
+            onPressed: () {
+              bloc.add(DriverUpdateRequested(
+                carBrand: brand.text.trim().isEmpty ? null : brand.text.trim(),
+                carModel: model.text.trim().isEmpty ? null : model.text.trim(),
+                carColor: color.text.trim().isEmpty ? null : color.text.trim(),
+                plateNumber:
+                    plate.text.trim().isEmpty ? null : plate.text.trim(),
+                carYear: int.tryParse(year.text.trim()),
+              ));
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(tr('saved'))),
+              );
+            },
+          ),
+        ],
+      ),
+    ),
+  );
 }

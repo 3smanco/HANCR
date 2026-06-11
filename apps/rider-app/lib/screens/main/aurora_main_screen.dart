@@ -41,14 +41,7 @@ class _AuroraMainScreenState extends State<AuroraMainScreen> {
       bottomNavigationBar: AuroraBottomNav(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
-        onCenterPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(tr('aiSoon')),
-              backgroundColor: AuroraColors.ash,
-            ),
-          );
-        },
+        onCenterPressed: () => context.push('/book'),
         items: [
           AuroraNavItem(
             icon: Icons.home_outlined,

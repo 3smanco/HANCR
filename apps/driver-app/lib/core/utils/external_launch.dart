@@ -83,3 +83,19 @@ Future<void> _launch(BuildContext context, Uri uri) async {
     );
   }
 }
+
+/// يفتح بريد الدعم (support@hancr.com) لمراسلة فريق الدعم.
+Future<void> launchSupportEmail(BuildContext context, {String? subject}) async {
+  final uri = Uri(
+    scheme: 'mailto',
+    path: 'support@hancr.com',
+    query: subject != null ? 'subject=${Uri.encodeComponent(subject)}' : null,
+  );
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  } else if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('support@hancr.com')),
+    );
+  }
+}

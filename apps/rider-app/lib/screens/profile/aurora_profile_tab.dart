@@ -99,17 +99,6 @@ class AuroraProfileTab extends StatelessWidget {
                 ),
                 const SizedBox(height: AuroraSpacing.md),
 
-                // ─── Promo cards ───
-                _promoCard(
-                  title: tr('premiumTitle'),
-                  subtitle: tr('premiumSub'),
-                  icon: Icons.workspace_premium,
-                  gradient: [AuroraColors.ember, AuroraColors.emberDeep],
-                  onTap: () => AuroraToast.comingSoon(context,
-                      feature: tr('premiumTitle')),
-                ),
-                const SizedBox(height: AuroraSpacing.md),
-
                 _checkupCard(
                   title: tr('safetyCheck'),
                   subtitle: tr('safetyCheckSub'),

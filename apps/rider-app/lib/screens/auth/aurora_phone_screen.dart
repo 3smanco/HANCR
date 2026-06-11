@@ -154,11 +154,6 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
                         // ─── Phone Number CTA (primary) ───
                         _buildPhoneSection(state),
 
-                        const SizedBox(height: AuroraSpacing.lg),
-
-                        // ─── Social Logins ───
-                        _buildSocialButtons(),
-
                         const SizedBox(height: AuroraSpacing.xl),
 
                         // ─── Existing account link (نفس تدفق OTP) ───
@@ -345,54 +340,4 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
     );
   }
 
-  Widget _buildSocialButtons() {
-    return Row(
-      children: [
-        Expanded(child: _socialButton(Icons.g_mobiledata, 'Google')),
-        const SizedBox(width: AuroraSpacing.sm),
-        Expanded(child: _socialButton(Icons.apple, 'Apple')),
-        const SizedBox(width: AuroraSpacing.sm),
-        Expanded(child: _socialButton(Icons.close, 'X')),
-      ],
-    );
-  }
-
-  Widget _socialButton(IconData icon, String label) {
-    return Container(
-      height: 64,
-      decoration: BoxDecoration(
-        color: AuroraColors.ash,
-        borderRadius: BorderRadius.circular(AuroraRadius.md),
-        border: Border.all(color: AuroraColors.border),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('$label قريباً'),
-                backgroundColor: AuroraColors.ash,
-              ),
-            );
-          },
-          borderRadius: BorderRadius.circular(AuroraRadius.md),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: AuroraColors.ember, size: 26),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: AuroraText.caption.copyWith(
-                  color: AuroraColors.textPrimary,
-                  fontSize: 11,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
