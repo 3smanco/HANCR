@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Car,
   Filter,
+  UserPlus,
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -20,6 +21,7 @@ import {
   BAN_DRIVER,
   UNBAN_DRIVER,
   SET_DRIVER_APPROVAL,
+  CREATE_DRIVER,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { formatDate } from '@/lib/utils';
@@ -39,11 +41,55 @@ export default function DriversPage() {
   const [pendingOnly, setPendingOnly] = useState(false);
   const [banReason, setBanReason] = useState('');
   const [banTarget, setBanTarget] = useState<{ id: number; name: string } | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const emptyForm = {
+    phoneNumber: '', firstName: '', lastName: '',
+    carBrand: '', carModel: '', carColor: '', plateNumber: '', carYear: '',
+    approveImmediately: true,
+  };
+  const [form, setForm] = useState(emptyForm);
   const limit = 20;
 
   const { data, loading, refetch } = useQuery(LIST_DRIVERS, {
     variables: { page, limit, pendingOnly },
   });
+
+  const [createDriver, { loading: creating }] = useMutation(CREATE_DRIVER, {
+    onCompleted: () => {
+      toast.success('تم إنشاء السائق');
+      setCreateOpen(false);
+      setForm(emptyForm);
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const submitCreate = () => {
+    const phone = form.phoneNumber.trim();
+    if (!/^\+\d{8,15}$/.test(phone)) {
+      toast.error('أدخل رقماً دولياً صحيحاً (مثل +966500000000)');
+      return;
+    }
+    if (!form.firstName.trim()) {
+      toast.error('الاسم الأول مطلوب');
+      return;
+    }
+    createDriver({
+      variables: {
+        input: {
+          phoneNumber: phone,
+          firstName: form.firstName.trim(),
+          lastName: form.lastName.trim() || undefined,
+          carBrand: form.carBrand.trim() || undefined,
+          carModel: form.carModel.trim() || undefined,
+          carColor: form.carColor.trim() || undefined,
+          plateNumber: form.plateNumber.trim() || undefined,
+          carYear: form.carYear ? parseInt(form.carYear, 10) : undefined,
+          approveImmediately: form.approveImmediately,
+        },
+      },
+    });
+  };
 
   const [approveDriver] = useMutation(APPROVE_DRIVER, {
     onCompleted: () => {
@@ -104,6 +150,10 @@ export default function DriversPage() {
             {pendingOnly && pendingCount > 0 && (
               <span className="badge badge-violet">{pendingCount}</span>
             )}
+          </button>
+          <button className="btn-primary ms-auto" onClick={() => setCreateOpen(true)}>
+            <UserPlus className="w-4 h-4" />
+            سائق جديد
           </button>
         </div>
 
@@ -294,6 +344,89 @@ export default function DriversPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Create Driver Modal ── */}
+      {createOpen && (
+        <div className="fixed inset-0 bg-hancr-navy/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="card p-6 w-full max-w-lg animate-slide-up max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-hancr-violet/10 shrink-0">
+                  <UserPlus className="w-5 h-5 text-hancr-violet" />
+                </div>
+                <h3 className="font-extrabold text-gray-900 text-lg mt-1">سائق جديد</h3>
+              </div>
+              <button
+                onClick={() => { setCreateOpen(false); setForm(emptyForm); }}
+                className="text-gray-400 hover:text-gray-600 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label">رقم الجوال (دولي) *</label>
+                  <input className="input ltr" placeholder="+966500000000"
+                    value={form.phoneNumber}
+                    onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })} />
+                </div>
+                <div>
+                  <label className="label">الاسم الأول *</label>
+                  <input className="input" value={form.firstName}
+                    onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
+                </div>
+                <div>
+                  <label className="label">الاسم الأخير</label>
+                  <input className="input" value={form.lastName}
+                    onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
+                </div>
+                <div>
+                  <label className="label">لوحة المركبة</label>
+                  <input className="input ltr" value={form.plateNumber}
+                    onChange={(e) => setForm({ ...form, plateNumber: e.target.value })} />
+                </div>
+                <div>
+                  <label className="label">ماركة السيارة</label>
+                  <input className="input" value={form.carBrand}
+                    onChange={(e) => setForm({ ...form, carBrand: e.target.value })} />
+                </div>
+                <div>
+                  <label className="label">الموديل</label>
+                  <input className="input" value={form.carModel}
+                    onChange={(e) => setForm({ ...form, carModel: e.target.value })} />
+                </div>
+                <div>
+                  <label className="label">اللون</label>
+                  <input className="input" value={form.carColor}
+                    onChange={(e) => setForm({ ...form, carColor: e.target.value })} />
+                </div>
+                <div>
+                  <label className="label">سنة الصنع</label>
+                  <input className="input ltr" type="number" value={form.carYear}
+                    onChange={(e) => setForm({ ...form, carYear: e.target.value })} />
+                </div>
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer mt-1">
+                <input type="checkbox" checked={form.approveImmediately}
+                  onChange={(e) => setForm({ ...form, approveImmediately: e.target.checked })} />
+                <span className="text-sm text-gray-700">اعتماد فوري (تفعيل بدون رفع وثائق)</span>
+              </label>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button className="btn-outline flex-1"
+                onClick={() => { setCreateOpen(false); setForm(emptyForm); }}>
+                {t('common.cancel')}
+              </button>
+              <button className="btn-primary flex-1" disabled={creating || !form.phoneNumber.trim()}
+                onClick={submitCreate}>
+                <UserPlus className="w-4 h-4" />
+                إنشاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Ban Modal ── */}
       {banTarget !== null && (

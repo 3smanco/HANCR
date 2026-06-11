@@ -2,9 +2,13 @@ import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
+  AdminCreateDriverInput,
+  AdminCreateRiderInput,
   AdminDriverType,
   AdminRiderDetailType,
   AdminRiderType,
+  AdminUpdateDriverInput,
+  AdminUpdateRiderInput,
   DriverListResult,
   RiderListResult,
 } from './dto/user.types';
@@ -46,6 +50,24 @@ export class UsersResolver {
     return this.usersService.getRiderDetail(id);
   }
 
+  @Mutation(() => AdminRiderType, { description: 'إنشاء راكب يدوياً' })
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('ops')
+  adminCreateRider(
+    @Args('input') input: AdminCreateRiderInput,
+  ): Promise<AdminRiderType> {
+    return this.usersService.createRider(input);
+  }
+
+  @Mutation(() => AdminRiderType, { description: 'تعديل بيانات راكب' })
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('ops')
+  adminUpdateRider(
+    @Args('input') input: AdminUpdateRiderInput,
+  ): Promise<AdminRiderType> {
+    return this.usersService.updateRider(input);
+  }
+
   @Mutation(() => AdminRiderType, { description: 'حظر راكب' })
   @UseGuards(AdminJwtGuard, AdminRolesGuard)
   @RequireRole('ops')
@@ -83,6 +105,24 @@ export class UsersResolver {
     @Args('id', { type: () => Int }) id: number,
   ): Promise<AdminDriverType> {
     return this.usersService.getDriver(id);
+  }
+
+  @Mutation(() => AdminDriverType, { description: 'إنشاء سائق يدوياً' })
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('ops')
+  adminCreateDriver(
+    @Args('input') input: AdminCreateDriverInput,
+  ): Promise<AdminDriverType> {
+    return this.usersService.createDriver(input);
+  }
+
+  @Mutation(() => AdminDriverType, { description: 'تعديل بيانات سائق' })
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('ops')
+  adminUpdateDriver(
+    @Args('input') input: AdminUpdateDriverInput,
+  ): Promise<AdminDriverType> {
+    return this.usersService.updateDriver(input);
   }
 
   @Mutation(() => AdminDriverType, { description: 'اعتماد سائق جديد' })

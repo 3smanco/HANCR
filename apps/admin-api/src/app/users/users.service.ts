@@ -1,17 +1,26 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import {
   DriverEntity,
+  DriverStatus,
   OrderEntity,
   OrderStatus,
   RiderEntity,
   SavedPlaceEntity,
 } from '@hancr/database';
 import {
+  AdminCreateDriverInput,
+  AdminCreateRiderInput,
   AdminDriverType,
   AdminRiderDetailType,
   AdminRiderType,
+  AdminUpdateDriverInput,
+  AdminUpdateRiderInput,
   DriverListResult,
   RiderListResult,
   RiderRecentOrderType,
@@ -129,6 +138,70 @@ export class UsersService {
     return this.toRiderType(rider);
   }
 
+  /** A1 — إنشاء راكب يدوياً من اللوحة (نفس منطق التسجيل الذاتي). */
+  async createRider(input: AdminCreateRiderInput): Promise<AdminRiderType> {
+    const phone = input.phoneNumber.trim();
+    const exists = await this.riderRepo.findOne({
+      where: { phoneNumber: phone },
+      select: ['id'],
+    });
+    if (exists) {
+      throw new ConflictException(`رقم ${phone} مسجَّل بالفعل`);
+    }
+    const countryCode = input.countryCode ?? extractCountryCode(phone);
+    const rider = this.riderRepo.create({
+      phoneNumber: phone,
+      countryCode,
+      firstName: input.firstName?.trim(),
+      lastName: input.lastName?.trim(),
+      email: input.email?.trim(),
+      active: true,
+      banned: false,
+      balance: 0,
+      currency: defaultCurrency(countryCode),
+      rating: 5.0,
+      totalRides: 0,
+      referralCode: await this.generateReferralCode(),
+      referralRewarded: false,
+    });
+    const saved = await this.riderRepo.save(rider);
+    return this.toRiderType(saved);
+  }
+
+  /** A6 — تعديل بيانات راكب. */
+  async updateRider(input: AdminUpdateRiderInput): Promise<AdminRiderType> {
+    const rider = await this.riderRepo.findOne({ where: { id: input.id } });
+    if (!rider) throw new NotFoundException(`Rider #${input.id} not found`);
+    if (input.phoneNumber && input.phoneNumber.trim() !== rider.phoneNumber) {
+      const dup = await this.riderRepo.findOne({
+        where: { phoneNumber: input.phoneNumber.trim() },
+        select: ['id'],
+      });
+      if (dup) throw new ConflictException('رقم الهاتف مستخدَم لراكب آخر');
+      rider.phoneNumber = input.phoneNumber.trim();
+    }
+    if (input.firstName !== undefined) rider.firstName = input.firstName.trim();
+    if (input.lastName !== undefined) rider.lastName = input.lastName.trim();
+    if (input.email !== undefined) rider.email = input.email.trim();
+    return this.toRiderType(await this.riderRepo.save(rider));
+  }
+
+  private async generateReferralCode(): Promise<string> {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    for (let attempt = 0; attempt < 8; attempt++) {
+      let code = '';
+      for (let i = 0; i < 6; i++) {
+        code += alphabet[Math.floor(Math.random() * alphabet.length)];
+      }
+      const exists = await this.riderRepo.findOne({
+        where: { referralCode: code },
+        select: ['id'],
+      });
+      if (!exists) return code;
+    }
+    return `R${Date.now().toString(36).toUpperCase().slice(-7)}`;
+  }
+
   async banRider(id: number, reason?: string): Promise<AdminRiderType> {
     const rider = await this.riderRepo.findOne({ where: { id } });
     if (!rider) throw new NotFoundException(`Rider #${id} not found`);
@@ -174,6 +247,68 @@ export class UsersService {
     const driver = await this.driverRepo.findOne({ where: { id } });
     if (!driver) throw new NotFoundException(`Driver #${id} not found`);
     return this.toDriverType(driver);
+  }
+
+  /** A2 — إنشاء سائق يدوياً (يتجاوز معالج الطلب) — لأسطول/اختبار. */
+  async createDriver(input: AdminCreateDriverInput): Promise<AdminDriverType> {
+    const phone = input.phoneNumber.trim();
+    const exists = await this.driverRepo.findOne({
+      where: { phoneNumber: phone },
+      select: ['id'],
+    });
+    if (exists) {
+      throw new ConflictException(`رقم ${phone} مسجَّل لسائق بالفعل`);
+    }
+    const countryCode = input.countryCode ?? extractCountryCode(phone);
+    const approved = input.approveImmediately ?? false;
+    const driver = this.driverRepo.create({
+      phoneNumber: phone,
+      countryCode,
+      firstName: input.firstName.trim(),
+      lastName: input.lastName?.trim() ?? '',
+      active: approved,
+      banned: false,
+      balance: 0,
+      currency: defaultCurrency(countryCode),
+      rating: 5.0,
+      ratingCount: 0,
+      serviceIds: input.serviceIds ?? [],
+      regionId: input.regionId,
+      carBrand: input.carBrand?.trim(),
+      carModel: input.carModel?.trim(),
+      carColor: input.carColor?.trim(),
+      plateNumber: input.plateNumber?.trim(),
+      carYear: input.carYear,
+      status: DriverStatus.Offline,
+      approvalStatus: approved ? 'approved' : 'pending_docs',
+    });
+    const saved = await this.driverRepo.save(driver);
+    return this.toDriverType(saved);
+  }
+
+  /** A6 — تعديل بيانات سائق (الاسم/الهاتف/السيارة/المنطقة). */
+  async updateDriver(input: AdminUpdateDriverInput): Promise<AdminDriverType> {
+    const driver = await this.driverRepo.findOne({ where: { id: input.id } });
+    if (!driver) throw new NotFoundException(`Driver #${input.id} not found`);
+    if (input.phoneNumber && input.phoneNumber.trim() !== driver.phoneNumber) {
+      const dup = await this.driverRepo.findOne({
+        where: { phoneNumber: input.phoneNumber.trim() },
+        select: ['id'],
+      });
+      if (dup) throw new ConflictException('رقم الهاتف مستخدَم لسائق آخر');
+      driver.phoneNumber = input.phoneNumber.trim();
+    }
+    if (input.firstName !== undefined) driver.firstName = input.firstName.trim();
+    if (input.lastName !== undefined) driver.lastName = input.lastName.trim();
+    if (input.carBrand !== undefined) driver.carBrand = input.carBrand.trim();
+    if (input.carModel !== undefined) driver.carModel = input.carModel.trim();
+    if (input.carColor !== undefined) driver.carColor = input.carColor.trim();
+    if (input.plateNumber !== undefined) {
+      driver.plateNumber = input.plateNumber.trim();
+    }
+    if (input.carYear !== undefined) driver.carYear = input.carYear;
+    if (input.regionId !== undefined) driver.regionId = input.regionId;
+    return this.toDriverType(await this.driverRepo.save(driver));
   }
 
   async approveDriver(id: number): Promise<AdminDriverType> {
@@ -275,4 +410,28 @@ export class UsersService {
     t.rejectionReason = e.rejectionReason;
     return t;
   }
+}
+
+// ─── Helpers (مطابقة لمنطق rider/driver auth.service) ─────────────────────────
+
+function extractCountryCode(phone: string): string {
+  if (phone.startsWith('+974')) return '+974';
+  if (phone.startsWith('+971')) return '+971';
+  if (phone.startsWith('+966')) return '+966';
+  if (phone.startsWith('+965')) return '+965';
+  if (phone.startsWith('+973')) return '+973';
+  if (phone.startsWith('+968')) return '+968';
+  return phone.substring(0, 4);
+}
+
+function defaultCurrency(countryCode: string): string {
+  const map: Record<string, string> = {
+    '+974': 'QAR',
+    '+971': 'AED',
+    '+966': 'SAR',
+    '+965': 'KWD',
+    '+973': 'BHD',
+    '+968': 'OMR',
+  };
+  return map[countryCode] ?? 'SAR';
 }

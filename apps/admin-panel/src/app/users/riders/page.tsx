@@ -9,10 +9,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Users,
+  UserPlus,
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { LIST_RIDERS, BAN_RIDER, UNBAN_RIDER } from '@/lib/gql';
+import { LIST_RIDERS, BAN_RIDER, UNBAN_RIDER, CREATE_RIDER } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { formatDate } from '@/lib/utils';
 import { useT } from '@/i18n/LocaleProvider';
@@ -22,6 +23,9 @@ export default function RidersPage() {
   const [page, setPage] = useState(1);
   const [banReason, setBanReason] = useState('');
   const [banTarget, setBanTarget] = useState<{ id: number; name: string } | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const emptyForm = { phoneNumber: '', firstName: '', lastName: '', email: '' };
+  const [form, setForm] = useState(emptyForm);
   const limit = 20;
 
   const { data, loading, refetch } = useQuery(LIST_RIDERS, {
@@ -44,6 +48,33 @@ export default function RidersPage() {
     },
     onError: (e) => toast.error(e.message),
   });
+  const [createRider, { loading: creating }] = useMutation(CREATE_RIDER, {
+    onCompleted: () => {
+      toast.success('تم إنشاء الراكب');
+      setCreateOpen(false);
+      setForm(emptyForm);
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const submitCreate = () => {
+    const phone = form.phoneNumber.trim();
+    if (!/^\+\d{8,15}$/.test(phone)) {
+      toast.error('أدخل رقماً دولياً صحيحاً (مثل +966500000000)');
+      return;
+    }
+    createRider({
+      variables: {
+        input: {
+          phoneNumber: phone,
+          firstName: form.firstName.trim() || undefined,
+          lastName: form.lastName.trim() || undefined,
+          email: form.email.trim() || undefined,
+        },
+      },
+    });
+  };
 
   const riders = data?.adminListRiders?.items ?? [];
   const total = data?.adminListRiders?.total ?? 0;
@@ -57,6 +88,14 @@ export default function RidersPage() {
       />
 
       <div className="p-6 space-y-5">
+        {/* ── Actions ── */}
+        <div className="flex justify-end">
+          <button className="btn-primary btn-sm" onClick={() => setCreateOpen(true)}>
+            <UserPlus className="w-4 h-4" />
+            راكب جديد
+          </button>
+        </div>
+
         {/* ── Table ── */}
         <div className="table-container">
           <table className="table">
@@ -185,6 +224,82 @@ export default function RidersPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Create Rider Modal ── */}
+      {createOpen && (
+        <div className="fixed inset-0 bg-hancr-navy/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="card p-6 w-full max-w-md animate-slide-up">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-100 shrink-0">
+                  <UserPlus className="w-5 h-5 text-blue-600" />
+                </div>
+                <h3 className="font-extrabold text-gray-900 text-lg mt-1">راكب جديد</h3>
+              </div>
+              <button
+                onClick={() => { setCreateOpen(false); setForm(emptyForm); }}
+                className="text-gray-400 hover:text-gray-600 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="label">رقم الجوال (دولي) *</label>
+                <input
+                  className="input ltr"
+                  placeholder="+966500000000"
+                  value={form.phoneNumber}
+                  onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label">الاسم الأول</label>
+                  <input
+                    className="input"
+                    value={form.firstName}
+                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="label">الاسم الأخير</label>
+                  <input
+                    className="input"
+                    value={form.lastName}
+                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="label">البريد الإلكتروني</label>
+                <input
+                  className="input ltr"
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button
+                className="btn-outline flex-1"
+                onClick={() => { setCreateOpen(false); setForm(emptyForm); }}
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                className="btn-primary flex-1"
+                disabled={creating || !form.phoneNumber.trim()}
+                onClick={submitCreate}
+              >
+                <UserPlus className="w-4 h-4" />
+                إنشاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Ban Modal ── */}
       {banTarget !== null && (
