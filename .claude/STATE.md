@@ -24,7 +24,7 @@
     - ✅ **منفّذ أصلاً:** التقييم بعد الرحلة (`aurora_rate_driver_screen.dart` + `/rate` في app.dart:145 + `rateDriverMutation` + order_bloc) · الإحالات (`InviteFriendsScreen` موصولة في aurora_profile_tab:135) · المحفظة/الشحن (aurora_wallet + recharge).
     - 🔴 **فجوة حقيقية:** شاشة إدارة الأماكن المحفوظة — الـ gql جاهز كاملاً (`savedPlacesQuery`/`addSavedPlaceMutation`/`deleteSavedPlaceMutation` في `apps/rider-app/lib/core/graphql/gql/rider_gql.dart`)، لكن لا شاشة إدارة في الملف (تُستخدم فقط داخل grocery/airport). الإضافة تحتاج منتقي موقع (يوجد `destination_bottom_sheet.dart` + geocoding للإعادة).
     - ⚠️ **تحسينات (ليست فجوات حادة):** الرحلات المجدولة (منتقي وقت موجود، تحقّق صارم، لا cron مطابقة) · توقّع أرباح السائق (earnings_tab فيه إحصاءات، الإضافة بطاقة توقّع) · شاشة كوبونات الراكب (`validateCoupon` موجود).
-    - **✅ شاشة الأماكن المحفوظة منجزة (PR #72):** `aurora_saved_places_screen.dart` (عرض/إضافة عبر DestinationBottomSheet/حذف) مربوطة في ملف الراكب. flutter analyze نظيف. نشر APK الراكب جارٍ.
+    - **✅ شاشة الأماكن المحفوظة منشورة (PR #72):** `aurora_saved_places_screen.dart` مربوطة في ملف الراكب. APK الراكب (98.8MB) أُعيد بناؤه ورُفع — HTTP 200 على hancr.com/downloads.
     - **متبقٍّ C (تحسينات اختيارية):** رحلات مجدولة (cron) · توقّع أرباح السائق · شاشة كوبونات الراكب — كلها تحسينات لا فجوات حادة.
   - **بعد C:** D (دفع ببوابة) · E (ويب: دخول+حجز — الأكبر، مراجعة أمنية).
 - **خطة N مكتملة (N1→N11).** آخر إنجاز: N11 — ذكاء اللوحة (PR #63).
