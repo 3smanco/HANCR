@@ -11,8 +11,11 @@
   - **A1+A2+A3 منجزة ومنشورة (PR #68، #69):** إنشاء/تعديل راكب وسائق + تسطيح حجز رحلة. الثلاثة بنود المسمّاة من المالك مكتملة حيّاً على admin.hancr.com.
     - A1/A2: mutations adminCreateRider/Driver+Update (RequireRole('ops')) + modals.
     - A3: `DispatcherDrawer` استُخرج لمكوّن مشترك `apps/admin-panel/src/components/DispatcherDrawer.tsx` (يقبل presetRider) + زر "احجز رحلة" في orders/page و riders/[id]/page.
-  - **متبقٍّ Wave A:** A4 مكاسب سريعة (pricing-zone create/edit · reverse-wallet · SOS/complaints actions · broadcast notifications · order refund — كل الـ backends جاهزة، UI ناقص) · A5 صفحات إعدادات قابلة للتحرير (theme/loyalty/surge/pricing-rules/home-layout) · A6 UI تعديل ملف راكب/سائق (mutations adminUpdateRider/Driver جاهزة) · A7 إخفاء أزرار حسب دور الأدمن.
-    - ملاحظة نشر: تعديلات admin-panel فقط تحتاج rebuild admin-panel (لا API restart). backend تحتاج server-fix-restart.sh.
+  - **A6 منجزة ومنشورة (PR #70):** زر "تعديل البيانات" + modal على صفحتي تفاصيل الراكب والسائق.
+  - **🟢 الموجة A مكتملة فعلياً.** اكتشاف مهم: **A4 و A5 كانتا منفّذتين أصلاً** (الفحص بالغ في التقدير): SOS (RESOLVE/ESCALATE) · complaints (ADD_NOTE) · pricing-zones (UPSERT/DELETE) · reverse-wallet (ADMIN_REVERSE_WALLET_TX) · كل صفحات الإعدادات الخمس لها mutations (UPDATE_THEME/LOYALTY/PRICING_RULES/HOME_LAYOUT). الفجوات الحقيقية كانت A1/A2/A3/A6 فقط — كلها منشورة.
+  - **متبقٍّ ثانوي (غير حاجب، يمكن لاحقاً):** زر استرداد على تفاصيل الطلب (لا يوجد adminRefundOrder backend — البديل: wallet adjust) · A7 إخفاء أزرار اللوحة حسب دور الأدمن (الـ backend يفرض RBAC أصلاً).
+    - ملاحظة نشر: تعديلات admin-panel فقط = rebuild admin-panel (لا API restart). backend = server-fix-restart.sh.
+  - **التالي: الموجة B** — تصفير "قريباً" في تطبيقي الراكب/السائق.
 - **خطة N مكتملة (N1→N11).** آخر إنجاز: N11 — ذكاء اللوحة (PR #63).
 - **🔒 فحص أمني شامل (مجلس LLM) — 2026-06-11:** أُصلحت 13 نقطة حرجة/عالية (أمن+مال)، مُتحقَّقة tsc=0. التفاصيل والمتبقّي المرتّب في `.claude/council/REMEDIATION.md`. تقرير المجلس: `.claude/council/council-report-20260611.html`.
   - **أُصلح:** أسرار JWT منفصلة+fail-fast · وقف تسريب/تسجيل OTP · حصر شحن المحفظة المجاني+التأكيد الذاتي في dev · حُرّاس أدوار الأدمن · IDOR المحادثة · `providerShare` عمولة المنصة · قبول الرحلة/المزايدة/الكوبون ذرّي · تحرير السائق عند الإلغاء · `.env` بأسرار قوية.
