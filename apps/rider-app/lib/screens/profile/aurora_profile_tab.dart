@@ -11,6 +11,7 @@ import '../wallet/aurora_wallet_screen.dart';
 import '../rides/aurora_rides.dart';
 import '../loyalty/loyalty_tab.dart';
 import 'profile_pages.dart';
+import 'aurora_saved_places_screen.dart';
 
 void _open(BuildContext context, Widget page) {
   Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
@@ -109,6 +110,14 @@ class AuroraProfileTab extends StatelessWidget {
                         builder: (_) =>
                             const AuroraEmergencyContactsScreen()),
                   ),
+                ),
+                const SizedBox(height: AuroraSpacing.md),
+
+                _simpleCard(
+                  title: tr('savedPlaces'),
+                  subtitle: tr('savedPlacesSub'),
+                  icon: Icons.bookmark_outline,
+                  onTap: () => _open(context, const AuroraSavedPlacesScreen()),
                 ),
                 const SizedBox(height: AuroraSpacing.md),
 
