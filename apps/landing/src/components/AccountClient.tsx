@@ -7,7 +7,13 @@ import {
   fetchMe,
   getToken,
   clearToken,
+  fetchServices,
+  fetchSavedPlaces,
+  routePreview,
   type RiderProfile,
+  type WebService,
+  type WebSavedPlace,
+  type RouteEstimate,
 } from '@/lib/riderAuth';
 
 type Step = 'loading' | 'phone' | 'otp' | 'profile';
@@ -21,12 +27,30 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // ── تقدير الأجرة (E3 — قراءة فقط) ──
+  const [services, setServices] = useState<WebService[]>([]);
+  const [places, setPlaces] = useState<WebSavedPlace[]>([]);
+  const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
+  const [destId, setDestId] = useState<number | null>(null);
+  const [serviceId, setServiceId] = useState<number | null>(null);
+  const [estimate, setEstimate] = useState<RouteEstimate | null>(null);
+  const [estimating, setEstimating] = useState(false);
+
+  function loadEstimateData() {
+    fetchServices().then((s) => {
+      setServices(s);
+      if (s.length) setServiceId(s[0].id);
+    }).catch(() => {});
+    fetchSavedPlaces().then(setPlaces).catch(() => {});
+  }
+
   useEffect(() => {
     if (getToken()) {
       fetchMe()
         .then((p) => {
           setProfile(p);
           setStep('profile');
+          loadEstimateData();
         })
         .catch(() => {
           clearToken();
@@ -36,6 +60,40 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
       setStep('phone');
     }
   }, []);
+
+  const useMyLocation = () => {
+    setError(null);
+    if (!navigator.geolocation) {
+      setError(t('الموقع غير مدعوم في متصفحك', 'Geolocation not supported'));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => setError(t('تعذّر الحصول على موقعك', 'Could not get your location')),
+    );
+  };
+
+  const calcEstimate = async () => {
+    setError(null);
+    setEstimate(null);
+    const dest = places.find((p) => p.id === destId);
+    if (!origin) {
+      setError(t('حدّد موقعك الحالي أولاً', 'Set your current location first'));
+      return;
+    }
+    if (!dest || !serviceId) {
+      setError(t('اختر الوجهة والخدمة', 'Pick a destination and service'));
+      return;
+    }
+    setEstimating(true);
+    try {
+      const r = await routePreview(origin, { lat: dest.lat, lng: dest.lng }, serviceId);
+      setEstimate(r);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+    setEstimating(false);
+  };
 
   const onSendOtp = async () => {
     setError(null);
@@ -174,10 +232,87 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
           >
             {t('تسجيل الخروج', 'Log out')}
           </button>
-          <p className="mt-4 text-center text-xs text-white/40">
-            {t('الحجز من المتصفح قريباً — حمّل التطبيق للحجز الآن.',
-               'Web booking soon — download the app to book now.')}
+        </div>
+      )}
+
+      {step === 'profile' && profile && (
+        <div className={`${card} mt-4`}>
+          <h2 className="mb-1 text-lg font-bold text-white">
+            {t('تقدير رحلة', 'Trip estimate')}
+          </h2>
+          <p className="mb-4 text-xs text-white/50">
+            {t('احسب الأجرة التقديرية من موقعك إلى أحد أماكنك المحفوظة.',
+               'Estimate the fare from your location to a saved place.')}
           </p>
+
+          <button
+            className="mb-3 w-full rounded-xl border border-white/15 px-4 py-2.5 text-sm text-white/80 hover:bg-white/5"
+            onClick={useMyLocation}
+          >
+            {origin
+              ? t('✓ تم تحديد موقعك', '✓ Location set')
+              : t('📍 استخدم موقعي الحالي', '📍 Use my current location')}
+          </button>
+
+          {places.length === 0 ? (
+            <p className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white/50">
+              {t('لا أماكن محفوظة بعد — أضِفها من التطبيق لتقدير الرحلات.',
+                 'No saved places yet — add them in the app to estimate trips.')}
+            </p>
+          ) : (
+            <>
+              <label className="mb-1 block text-xs text-white/60">
+                {t('الوجهة', 'Destination')}
+              </label>
+              <select
+                className={`${input} mb-3`}
+                value={destId ?? ''}
+                onChange={(e) => setDestId(Number(e.target.value) || null)}
+              >
+                <option value="">{t('اختر مكاناً', 'Pick a place')}</option>
+                {places.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+
+              <label className="mb-1 block text-xs text-white/60">
+                {t('الخدمة', 'Service')}
+              </label>
+              <select
+                className={`${input} mb-4`}
+                value={serviceId ?? ''}
+                onChange={(e) => setServiceId(Number(e.target.value) || null)}
+              >
+                {services.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {isAr ? s.name : s.nameEn ?? s.name}
+                  </option>
+                ))}
+              </select>
+
+              <button className={btn} disabled={estimating} onClick={calcEstimate}>
+                {estimating ? t('جارٍ الحساب…', 'Calculating…') : t('احسب الأجرة', 'Estimate fare')}
+              </button>
+            </>
+          )}
+
+          {estimate && (
+            <div className="mt-4 rounded-xl border border-orange-500/30 bg-orange-500/10 p-4 text-center">
+              <div className="text-2xl font-extrabold text-white">
+                {estimate.estimatedFare.toFixed(2)} {estimate.currency}
+              </div>
+              <div className="mt-1 text-xs text-white/60">
+                {(estimate.distanceMeters / 1000).toFixed(1)} {t('كم', 'km')} ·{' '}
+                {Math.round(estimate.durationSeconds / 60)} {t('دقيقة', 'min')}
+              </div>
+              <p className="mt-3 text-xs text-white/50">
+                {t('أكمل الحجز الفعلي من تطبيق HANCR.',
+                   'Complete the actual booking in the HANCR app.')}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </section>
