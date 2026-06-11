@@ -8,8 +8,11 @@
 
 ## أين نحن الآن
 - **🟦 خطة الإكمال الشاملة (مجلس) — الموجة A جارية.** الخطة: `C:\Users\7bici\.claude\plans\llm-council-lexical-owl.md`. 6 موجات (A لوحة·B تصفير قريباً·C ميزات·D دفع·E ويب·F تدقيق).
-  - **A1+A2 منجزتان ومنشورتان (PR #68):** إنشاء/تعديل راكب وسائق من اللوحة (mutations adminCreateRider/Driver+Update في admin-api مع RequireRole('ops') + modals في admin-panel). مؤكَّد حيّ (adminCreateRider يردّ 401 unauth = الحقل موجود). الـ3 APIs 200، admin-panel أُعيد بناؤه.
-  - **متبقٍّ Wave A:** A3 تسطيح حجز رحلة (الـ backend adminCreateManualOrder موجود في live/page — يحتاج زر على orders + rider detail) · A4 مكاسب سريعة (pricing-zone/reverse-wallet/SOS/complaints/broadcast/refund) · A5 صفحات إعدادات قابلة للتحرير · A6 تعديل ملف (mutations جاهزة) · A7 إخفاء أزرار حسب الدور.
+  - **A1+A2+A3 منجزة ومنشورة (PR #68، #69):** إنشاء/تعديل راكب وسائق + تسطيح حجز رحلة. الثلاثة بنود المسمّاة من المالك مكتملة حيّاً على admin.hancr.com.
+    - A1/A2: mutations adminCreateRider/Driver+Update (RequireRole('ops')) + modals.
+    - A3: `DispatcherDrawer` استُخرج لمكوّن مشترك `apps/admin-panel/src/components/DispatcherDrawer.tsx` (يقبل presetRider) + زر "احجز رحلة" في orders/page و riders/[id]/page.
+  - **متبقٍّ Wave A:** A4 مكاسب سريعة (pricing-zone create/edit · reverse-wallet · SOS/complaints actions · broadcast notifications · order refund — كل الـ backends جاهزة، UI ناقص) · A5 صفحات إعدادات قابلة للتحرير (theme/loyalty/surge/pricing-rules/home-layout) · A6 UI تعديل ملف راكب/سائق (mutations adminUpdateRider/Driver جاهزة) · A7 إخفاء أزرار حسب دور الأدمن.
+    - ملاحظة نشر: تعديلات admin-panel فقط تحتاج rebuild admin-panel (لا API restart). backend تحتاج server-fix-restart.sh.
 - **خطة N مكتملة (N1→N11).** آخر إنجاز: N11 — ذكاء اللوحة (PR #63).
 - **🔒 فحص أمني شامل (مجلس LLM) — 2026-06-11:** أُصلحت 13 نقطة حرجة/عالية (أمن+مال)، مُتحقَّقة tsc=0. التفاصيل والمتبقّي المرتّب في `.claude/council/REMEDIATION.md`. تقرير المجلس: `.claude/council/council-report-20260611.html`.
   - **أُصلح:** أسرار JWT منفصلة+fail-fast · وقف تسريب/تسجيل OTP · حصر شحن المحفظة المجاني+التأكيد الذاتي في dev · حُرّاس أدوار الأدمن · IDOR المحادثة · `providerShare` عمولة المنصة · قبول الرحلة/المزايدة/الكوبون ذرّي · تحرير السائق عند الإلغاء · `.env` بأسرار قوية.
