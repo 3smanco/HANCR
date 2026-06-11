@@ -22,6 +22,7 @@ import {
   DRIVER_DETAIL,
   SET_DRIVER_STATUS,
   REVIEW_DRIVER_DOCUMENT,
+  UPDATE_DRIVER,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { formatDate } from '@/lib/utils';
@@ -62,6 +63,7 @@ export default function DriverDetailPage() {
   const id = Number(params.id);
   const [tab, setTab] = useState<Tab>('details');
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const [editForm, setEditForm] = useState<Record<string, string> | null>(null);
 
   const { data, loading, refetch } = useQuery(DRIVER_DETAIL, {
     variables: { id },
@@ -79,6 +81,15 @@ export default function DriverDetailPage() {
       onError: (e) => toast.error(e.message),
     },
   );
+
+  const [updateDriver, { loading: savingEdit }] = useMutation(UPDATE_DRIVER, {
+    onCompleted: () => {
+      toast.success('تم حفظ التعديلات');
+      setEditForm(null);
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
 
   const [reviewDoc] = useMutation(REVIEW_DRIVER_DOCUMENT, {
     onCompleted: () => {
@@ -164,8 +175,80 @@ export default function DriverDetailPage() {
             >
               تغيير الحالة
             </button>
+            <button
+              onClick={() =>
+                setEditForm({
+                  firstName: (d.firstName as string) ?? '',
+                  lastName: (d.lastName as string) ?? '',
+                  phoneNumber: (d.phoneNumber as string) ?? '',
+                  carBrand: (d.carBrand as string) ?? '',
+                  carModel: (d.carModel as string) ?? '',
+                  carColor: (d.carColor as string) ?? '',
+                  plateNumber: (d.plateNumber as string) ?? '',
+                  carYear: d.carYear ? String(d.carYear) : '',
+                })
+              }
+              className="btn-outline btn-sm"
+            >
+              تعديل البيانات
+            </button>
           </div>
         </div>
+
+        {editForm && (
+          <div className="fixed inset-0 bg-hancr-navy/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+            <div className="card p-6 w-full max-w-lg animate-slide-up max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-extrabold text-gray-900 text-lg">تعديل بيانات السائق</h3>
+                <button onClick={() => setEditForm(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none px-2">✕</button>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  ['firstName', 'الاسم الأول'],
+                  ['lastName', 'الاسم الأخير'],
+                  ['phoneNumber', 'رقم الجوال'],
+                  ['plateNumber', 'لوحة المركبة'],
+                  ['carBrand', 'ماركة السيارة'],
+                  ['carModel', 'الموديل'],
+                  ['carColor', 'اللون'],
+                  ['carYear', 'سنة الصنع'],
+                ].map(([key, lbl]) => (
+                  <div key={key}>
+                    <label className="label">{lbl}</label>
+                    <input
+                      className="input"
+                      value={editForm[key] ?? ''}
+                      onChange={(e) => setEditForm({ ...editForm, [key]: e.target.value })}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-3 mt-5">
+                <button className="btn-outline flex-1" onClick={() => setEditForm(null)}>إلغاء</button>
+                <button className="btn-primary flex-1" disabled={savingEdit}
+                  onClick={() =>
+                    updateDriver({
+                      variables: {
+                        input: {
+                          id: d.id,
+                          firstName: editForm.firstName.trim() || undefined,
+                          lastName: editForm.lastName.trim() || undefined,
+                          phoneNumber: editForm.phoneNumber.trim() || undefined,
+                          carBrand: editForm.carBrand.trim() || undefined,
+                          carModel: editForm.carModel.trim() || undefined,
+                          carColor: editForm.carColor.trim() || undefined,
+                          plateNumber: editForm.plateNumber.trim() || undefined,
+                          carYear: editForm.carYear ? parseInt(editForm.carYear, 10) : undefined,
+                        },
+                      },
+                    })
+                  }>
+                  حفظ
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex gap-1 border-b border-gray-200">

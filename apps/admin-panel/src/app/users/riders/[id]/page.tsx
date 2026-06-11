@@ -28,6 +28,7 @@ import {
   ADMIN_ADJUST_LOYALTY,
   ADMIN_RIDER_DETAIL,
   ADMIN_RIDER_LOYALTY,
+  UPDATE_RIDER,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { DispatcherDrawer } from '@/components/DispatcherDrawer';
@@ -41,10 +42,22 @@ export default function RiderDetailPage() {
   const id = Number(params?.id ?? 0);
   const [tab, setTab] = useState<Tab>('overview');
   const [bookOpen, setBookOpen] = useState(false);
+  const [editForm, setEditForm] = useState<
+    { firstName: string; lastName: string; email: string; phoneNumber: string } | null
+  >(null);
 
   const { data, loading, refetch } = useQuery(ADMIN_RIDER_DETAIL, {
     variables: { id },
     skip: !id,
+  });
+
+  const [updateRider, { loading: saving }] = useMutation(UPDATE_RIDER, {
+    onCompleted: () => {
+      toast.success('تم حفظ التعديلات');
+      setEditForm(null);
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
   });
 
   if (!id) return null;
@@ -111,14 +124,85 @@ export default function RiderDetailPage() {
               <span>· انضم {formatDate(rider.createdAt)}</span>
             </div>
           </div>
-          <button
-            className="btn-primary btn-sm shrink-0"
-            onClick={() => setBookOpen(true)}
-          >
-            <Plus className="w-4 h-4" />
-            احجز رحلة
-          </button>
+          <div className="flex flex-col gap-2 shrink-0">
+            <button
+              className="btn-primary btn-sm"
+              onClick={() => setBookOpen(true)}
+            >
+              <Plus className="w-4 h-4" />
+              احجز رحلة
+            </button>
+            <button
+              className="btn-outline btn-sm"
+              onClick={() =>
+                setEditForm({
+                  firstName: rider.firstName ?? '',
+                  lastName: rider.lastName ?? '',
+                  email: rider.email ?? '',
+                  phoneNumber: rider.phoneNumber ?? '',
+                })
+              }
+            >
+              تعديل البيانات
+            </button>
+          </div>
         </div>
+
+        {editForm && (
+          <div className="fixed inset-0 bg-hancr-navy/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+            <div className="card p-6 w-full max-w-md animate-slide-up">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-extrabold text-gray-900 text-lg">تعديل بيانات الراكب</h3>
+                <button onClick={() => setEditForm(null)} className="text-gray-400 hover:text-gray-600 p-1">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="label">الاسم الأول</label>
+                    <input className="input" value={editForm.firstName}
+                      onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="label">الاسم الأخير</label>
+                    <input className="input" value={editForm.lastName}
+                      onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })} />
+                  </div>
+                </div>
+                <div>
+                  <label className="label">البريد الإلكتروني</label>
+                  <input className="input ltr" type="email" value={editForm.email}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+                </div>
+                <div>
+                  <label className="label">رقم الجوال</label>
+                  <input className="input ltr" value={editForm.phoneNumber}
+                    onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })} />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-5">
+                <button className="btn-outline flex-1" onClick={() => setEditForm(null)}>إلغاء</button>
+                <button className="btn-primary flex-1" disabled={saving}
+                  onClick={() =>
+                    updateRider({
+                      variables: {
+                        input: {
+                          id: rider.id,
+                          firstName: editForm.firstName.trim() || undefined,
+                          lastName: editForm.lastName.trim() || undefined,
+                          email: editForm.email.trim() || undefined,
+                          phoneNumber: editForm.phoneNumber.trim() || undefined,
+                        },
+                      },
+                    })
+                  }>
+                  حفظ
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {bookOpen && (
           <DispatcherDrawer
