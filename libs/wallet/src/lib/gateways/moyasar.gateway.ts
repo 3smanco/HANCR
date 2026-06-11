@@ -8,6 +8,7 @@ import {
   CheckoutResult,
   WebhookEvent,
   WebhookVerificationError,
+  extractRawBody,
 } from './gateway.interface';
 
 /**
@@ -58,6 +59,7 @@ export class MoyasarGateway implements IPaymentGateway {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(10_000),
       });
 
       const data = (await response.json()) as {
@@ -101,8 +103,9 @@ export class MoyasarGateway implements IPaymentGateway {
       throw new WebhookVerificationError('Missing X-Moyasar-Signature header');
     }
 
-    const payload = JSON.stringify(body);
-    const expected = createHmac('sha256', secret).update(payload).digest('hex');
+    // أمن: HMAC على البايتات الخام كما وصلت، لا على إعادة تسلسل الكائن.
+    const { raw, parsed } = extractRawBody(body);
+    const expected = createHmac('sha256', secret).update(raw).digest('hex');
 
     const sigBuf = Buffer.from(signature);
     const expBuf = Buffer.from(expected);
@@ -110,7 +113,7 @@ export class MoyasarGateway implements IPaymentGateway {
       throw new WebhookVerificationError('Invalid HMAC signature');
     }
 
-    const event = body as {
+    const event = parsed as {
       type?: string;
       data?: {
         id?: string;

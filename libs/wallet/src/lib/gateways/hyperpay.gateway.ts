@@ -8,6 +8,7 @@ import {
   CheckoutResult,
   WebhookEvent,
   WebhookVerificationError,
+  extractRawBody,
 } from './gateway.interface';
 
 /**
@@ -72,6 +73,7 @@ export class HyperPayGateway implements IPaymentGateway {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: params.toString(),
+        signal: AbortSignal.timeout(10_000),
       });
 
       const data = (await response.json()) as {
@@ -125,14 +127,15 @@ export class HyperPayGateway implements IPaymentGateway {
       throw new WebhookVerificationError('Missing X-Signature header');
     }
 
-    const payload = JSON.stringify(body);
-    const expectedSig = createHmac('sha256', secret).update(payload).digest('hex');
+    // أمن: HMAC على البايتات الخام كما وصلت، لا على إعادة تسلسل الكائن.
+    const { raw, parsed } = extractRawBody(body);
+    const expectedSig = createHmac('sha256', secret).update(raw).digest('hex');
 
     if (!timingSafeEqualString(signature, expectedSig)) {
       throw new WebhookVerificationError('Invalid HMAC signature');
     }
 
-    const payloadObj = body as {
+    const payloadObj = parsed as {
       id?: string;
       merchantTransactionId?: string;
       result?: { code?: string };

@@ -9,6 +9,8 @@ import {
   RiderListResult,
 } from './dto/user.types';
 import { AdminJwtGuard } from '../auth/admin-jwt.guard';
+import { AdminRolesGuard } from '../auth/admin-roles.guard';
+import { RequireRole } from '../auth/roles.decorator';
 
 @Resolver()
 export class UsersResolver {
@@ -45,7 +47,8 @@ export class UsersResolver {
   }
 
   @Mutation(() => AdminRiderType, { description: 'حظر راكب' })
-  @UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('ops')
   banRider(
     @Args('id', { type: () => Int }) id: number,
     @Args('reason', { nullable: true }) reason?: string,
@@ -54,7 +57,8 @@ export class UsersResolver {
   }
 
   @Mutation(() => AdminRiderType, { description: 'رفع الحظر عن راكب' })
-  @UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('ops')
   unbanRider(
     @Args('id', { type: () => Int }) id: number,
   ): Promise<AdminRiderType> {
@@ -82,7 +86,8 @@ export class UsersResolver {
   }
 
   @Mutation(() => AdminDriverType, { description: 'اعتماد سائق جديد' })
-  @UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('ops')
   approveDriver(
     @Args('id', { type: () => Int }) id: number,
   ): Promise<AdminDriverType> {
@@ -90,7 +95,8 @@ export class UsersResolver {
   }
 
   @Mutation(() => AdminDriverType, { description: 'حظر سائق' })
-  @UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('ops')
   banDriver(
     @Args('id', { type: () => Int }) id: number,
   ): Promise<AdminDriverType> {
@@ -98,7 +104,8 @@ export class UsersResolver {
   }
 
   @Mutation(() => AdminDriverType, { description: 'رفع الحظر عن سائق' })
-  @UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('ops')
   unbanDriver(
     @Args('id', { type: () => Int }) id: number,
   ): Promise<AdminDriverType> {
@@ -109,7 +116,8 @@ export class UsersResolver {
   @Mutation(() => AdminDriverType, {
     description: 'تعيين اعتمادات السائق (مدارس / ليلي)',
   })
-  @UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard, AdminRolesGuard)
+  @RequireRole('ops')
   setDriverApproval(
     @Args('driverId', { type: () => Int }) driverId: number,
     @Args('kidsApproved', { nullable: true }) kidsApproved?: boolean,

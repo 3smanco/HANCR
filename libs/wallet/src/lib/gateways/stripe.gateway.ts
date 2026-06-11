@@ -8,6 +8,7 @@ import {
   CheckoutResult,
   WebhookEvent,
   WebhookVerificationError,
+  extractRawBody,
 } from './gateway.interface';
 
 /**
@@ -70,6 +71,8 @@ export class StripeGateway implements IPaymentGateway {
           'Stripe-Version': '2024-11-20.acacia',
         },
         body: params.toString(),
+        // مهلة: اتصال معلّق لا يحبس الطلب/الحدث للأبد.
+        signal: AbortSignal.timeout(10_000),
       });
 
       const data = (await response.json()) as {
@@ -130,7 +133,9 @@ export class StripeGateway implements IPaymentGateway {
       throw new WebhookVerificationError(`Webhook too old (${tsAge}s)`);
     }
 
-    const payload = `${timestamp}.${JSON.stringify(body)}`;
+    // أمن: التوقيع يُحسب على البايتات الخام كما وصلت، لا على إعادة تسلسل الكائن.
+    const { raw, parsed } = extractRawBody(body);
+    const payload = `${timestamp}.${raw}`;
     const expected = createHmac('sha256', secret).update(payload).digest('hex');
 
     const sigBuf = Buffer.from(signature);
@@ -139,7 +144,7 @@ export class StripeGateway implements IPaymentGateway {
       throw new WebhookVerificationError('Invalid Stripe signature');
     }
 
-    const event = body as {
+    const event = parsed as {
       type?: string;
       data?: {
         object?: {

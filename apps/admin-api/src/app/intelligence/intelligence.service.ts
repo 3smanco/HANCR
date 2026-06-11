@@ -8,6 +8,7 @@ import {
   DriverStatus,
   OrderEntity,
 } from '@hancr/database';
+import { CronLockService } from '@hancr/redis';
 import { BroadcastService } from '../notifications/broadcast.service';
 import { BroadcastTarget } from '../notifications/dto/broadcast.types';
 import { SurgeStateType } from './intelligence.types';
@@ -39,6 +40,7 @@ export class IntelligenceService {
     @InjectRepository(AppConfigEntity)
     private readonly cfgRepo: Repository<AppConfigEntity>,
     private readonly broadcast: BroadcastService,
+    private readonly cronLock: CronLockService,
   ) {}
 
   async surgeState(): Promise<SurgeStateType> {
@@ -132,6 +134,8 @@ export class IntelligenceService {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async tick(): Promise<void> {
+    // قفل موزّع: instance واحد فقط ينفّذ (يمنع إرسال الحملات وحساب surge مكرّراً).
+    if (!(await this.cronLock.acquire('intelligence:tick', 50))) return;
     try {
       await this.dispatchDueCampaigns();
     } catch (e) {

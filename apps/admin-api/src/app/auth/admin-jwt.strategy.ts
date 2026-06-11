@@ -3,6 +3,20 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 
+/**
+ * أمن: يجبر وجود سرّ أدمن قوي (≥32 محرفاً) ويرفض الإقلاع بقيمة ضعيفة/افتراضية.
+ */
+export function requireSecret(cfg: ConfigService, key: string): string {
+  const v = cfg.get<string>(key);
+  if (!v || v.trim().length < 32) {
+    throw new Error(
+      `[SECURITY] ${key} مفقود أو ضعيف (يجب ≥32 محرفاً عشوائياً). ` +
+        `ولّد واحداً عبر: openssl rand -base64 48. رفض الإقلاع.`,
+    );
+  }
+  return v;
+}
+
 export interface AdminJwtPayload {
   sub: number;
   email: string;
@@ -23,7 +37,7 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: cfg.get<string>('ADMIN_JWT_SECRET') ?? 'hancr_admin_jwt_secret_change_in_production',
+      secretOrKey: requireSecret(cfg, 'ADMIN_JWT_SECRET'),
     });
   }
 

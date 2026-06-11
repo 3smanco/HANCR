@@ -17,7 +17,11 @@ import {
 } from '@hancr/database';
 import { DriverRedisService, OrderRedisService } from '@hancr/redis';
 import { PushNotificationService } from '@hancr/notifications';
-import { WalletService, InsufficientBalanceError } from '@hancr/wallet';
+import {
+  WalletService,
+  InsufficientBalanceError,
+  PaymentGatewayService,
+} from '@hancr/wallet';
 import { SosService } from '@hancr/sos';
 import { PUB_SUB } from '../pubsub.provider';
 
@@ -114,6 +118,14 @@ describe('OrderService', () => {
           useValue: {
             credit: jest.fn(),
             debit: jest.fn(),
+            reverseTransaction: jest.fn(),
+            updateTransactionStatus: jest.fn(),
+          },
+        },
+        {
+          provide: PaymentGatewayService,
+          useValue: {
+            createCheckout: jest.fn(),
           },
         },
         {
@@ -154,17 +166,26 @@ describe('OrderService', () => {
     beforeEach(() => {
       orderRepo.findOne.mockResolvedValue(makeOrder({ status: OrderStatus.Found }));
       driverRepo.findOne.mockResolvedValue(makeDriver());
+      // القبول الآن تحديث مشروط ذرّي يُرجع affected
+      orderRepo.update.mockResolvedValue({ affected: 1 } as never);
     });
 
-    it('يقبل الطلب ويُحدِّث الحالة + يضع ETA', async () => {
+    it('يقبل الطلب ويُحدِّث الحالة + يضع ETA (تحديث مشروط على Found)', async () => {
       await service.acceptOrder(7, 1);
 
       expect(orderRepo.update).toHaveBeenCalledWith(
-        1,
+        expect.objectContaining({ id: 1, status: OrderStatus.Found }),
         expect.objectContaining({
           status: OrderStatus.DriverAccepted,
           driverId: 7,
         }),
+      );
+    });
+
+    it('يرفض لو سبق قبول الطلب من سائق آخر (affected=0)', async () => {
+      orderRepo.update.mockResolvedValue({ affected: 0 } as never);
+      await expect(service.acceptOrder(7, 1)).rejects.toThrow(
+        BadRequestException,
       );
     });
 
@@ -334,7 +355,7 @@ describe('OrderService', () => {
       );
     });
 
-    it('Wallet payment: InsufficientBalance يُسجَّل warning ولا يكسر الرحلة', async () => {
+    it('Wallet payment: InsufficientBalance لا رحلة مجانية — ينقل لـ WaitingForPostPay بلا credit', async () => {
       orderRepo.findOne.mockResolvedValue(
         makeOrder({
           status: OrderStatus.Started,
@@ -347,13 +368,48 @@ describe('OrderService', () => {
 
       const result = await service.finishRide(7, 1);
 
-      // الرحلة انتهت بنجاح رغم فشل الـ debit
       expect(result).toBeDefined();
-      // ما تم credit للسائق (لأن debit فشل، نُلغي الـ flow)
+      // لا يُدفع للسائق عند رصيد ناقص
       expect(walletService.credit).not.toHaveBeenCalled();
+      // الطلب يُنقل لانتظار الدفع (يمنع إكمال الرحلة مجاناً)
+      expect(orderRepo.update).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ status: OrderStatus.WaitingForPostPay }),
+      );
     });
 
-    it('PaymentGateway: يُضيف للسائق فقط (الراكب دفع externally)', async () => {
+    it('Wallet payment: فشل إيداع السائق بعد خصم الراكب → يعكس خصم الراكب', async () => {
+      orderRepo.findOne.mockResolvedValue(
+        makeOrder({
+          status: OrderStatus.Started,
+          paymentMode: PaymentMode.Wallet,
+          costAfterCoupon: 100,
+          providerShare: 20,
+        }),
+      );
+      walletService.debit.mockResolvedValue({
+        transactionId: 42,
+        newBalance: 0,
+        currency: 'SAR',
+      });
+      walletService.credit.mockRejectedValue(new Error('credit failed'));
+      walletService.reverseTransaction.mockResolvedValue(
+        {} as never,
+      );
+
+      // _settlePayment محاط بـ try/catch في finishRide فلا يرمي
+      const result = await service.finishRide(7, 1);
+      expect(result).toBeDefined();
+
+      // تم عكس خصم الراكب (tx #42) حتى لا يُخصم بلا دفع السائق
+      expect(walletService.reverseTransaction).toHaveBeenCalledWith(
+        42,
+        expect.any(Number),
+        expect.any(String),
+      );
+    });
+
+    it('PaymentGateway: يفتح خصماً Pending على الراكب ويترك إيداع السائق للـ webhook', async () => {
       orderRepo.findOne.mockResolvedValue(
         makeOrder({
           status: OrderStatus.Started,
@@ -362,21 +418,32 @@ describe('OrderService', () => {
           providerShare: 25,
         }),
       );
-      walletService.credit.mockResolvedValue({
-        transactionId: 1,
-        newBalance: 75,
+      walletService.debit.mockResolvedValue({
+        transactionId: 9,
+        newBalance: 0,
         currency: 'SAR',
+      });
+      (
+        service as unknown as {
+          paymentGatewayService: { createCheckout: jest.Mock };
+        }
+      ).paymentGatewayService.createCheckout.mockResolvedValue({
+        gatewayRef: 'gw_1',
+        redirectUrl: 'https://pay',
+        gateway: 'HyperPay',
       });
 
       await service.finishRide(7, 1);
 
-      expect(walletService.debit).not.toHaveBeenCalled();
-      expect(walletService.credit).toHaveBeenCalledWith(
+      // خصم Pending على الراكب يحمل بيانات السائق (للـ webhook)
+      expect(walletService.debit).toHaveBeenCalledWith(
         expect.objectContaining({
-          ownerType: WalletOwnerType.Driver,
-          amount: 75,
+          ownerType: WalletOwnerType.Rider,
+          status: 'Pending',
         }),
       );
+      // لا يُدفع للسائق synchronously — الـ webhook يفعل ذلك بعد تأكيد البوابة
+      expect(walletService.credit).not.toHaveBeenCalled();
     });
 
     it('السائق يعود لـ Online بعد انتهاء الرحلة', async () => {

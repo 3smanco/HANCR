@@ -18,7 +18,13 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(
     RiderApiModule,
     new FastifyAdapter({ logger: false }),
+    // أمن الدفع: نحتفظ بالبايتات الخام للجسم للتحقق من توقيع webhook الدفع.
+    { rawBody: true },
   );
+
+  // إغلاق رشيق: يُنهي المعاملات الجارية ويُغلق DB/Redis/PubSub عند SIGTERM
+  // (نشر/إعادة تشغيل pm2) بدل قطعها فجأة.
+  app.enableShutdownHooks();
 
   // =============================================
   // Validation

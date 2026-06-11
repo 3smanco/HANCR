@@ -110,13 +110,20 @@ export class OrderService {
     if (!driver.active) throw new ForbiddenException('Account not active');
     if (driver.banned) throw new ForbiddenException('Account is banned');
 
-    // تحديث الطلب
+    // تحديث الطلب — ذرّي ومشروط: ينجح فقط إن كان الطلب ما زال Found.
+    // يمنع سباق القبول المزدوج (سائقان يقبلان نفس الرحلة).
     const eta = new Date(Date.now() + 5 * 60 * 1000); // ETA 5 دقائق افتراضياً
-    await this.orderRepo.update(orderId, {
-      status: OrderStatus.DriverAccepted,
-      driverId,
-      etaPickup: eta,
-    });
+    const claim = await this.orderRepo.update(
+      { id: orderId, status: OrderStatus.Found },
+      {
+        status: OrderStatus.DriverAccepted,
+        driverId,
+        etaPickup: eta,
+      },
+    );
+    if (!claim.affected) {
+      throw new BadRequestException('تم قبول هذا الطلب من سائق آخر بالفعل');
+    }
 
     // تحديث حالة السائق إلى Busy
     await this.driverRepo.update(driverId, { status: DriverStatus.Busy });
@@ -506,10 +513,13 @@ export class OrderService {
         `commission=${platformCommission}, driverNet=${driverNet}, mode=${mode}`,
     );
 
-    // 1) Wallet payment: debit rider wallet
+    // 1) Wallet payment: خصم الراكب ثم إيداع السائق — بتعويض عند الفشل.
+    //    إصلاح: كان الخصم والإيداع منفصلين بلا تعويض (خصم ينجح + إيداع يفشل →
+    //    الراكب يُخصم والسائق لا يُدفع)، والرصيد الناقص كان يُكمل الرحلة مجاناً.
     if (mode === PaymentMode.Wallet) {
+      let debitTxId: number;
       try {
-        await this.walletService.debit({
+        const debited = await this.walletService.debit({
           ownerType: WalletOwnerType.Rider,
           ownerId: order.riderId,
           type: WalletTransactionType.TripPayment,
@@ -518,16 +528,51 @@ export class OrderService {
           orderId: order.id,
           description: `Trip payment — order #${order.id}`,
         });
+        debitTxId = debited.transactionId;
       } catch (e) {
         if (e instanceof InsufficientBalanceError) {
-          // Rider has no balance — order stays in WaitingForPostPay
+          // لا رحلة مجانية: ننقل الطلب لانتظار الدفع (تُحجب المراجعة/الإغلاق حتى يُدفع).
+          await this.orderRepo.update(order.id, {
+            status: OrderStatus.WaitingForPostPay,
+          });
           this.logger.warn(
-            `Rider #${order.riderId} has insufficient balance for order #${order.id}`,
+            `Order #${order.id}: رصيد الراكب #${order.riderId} غير كافٍ — WaitingForPostPay`,
           );
-          return; // لا نُكمل التسوية حتى يدفع الراكب
+          return;
         }
         throw e;
       }
+
+      // إيداع أرباح السائق — لو فشل نعكس خصم الراكب (سلامة المال).
+      try {
+        await this.walletService.credit({
+          ownerType: WalletOwnerType.Driver,
+          ownerId: order.driverId,
+          type: WalletTransactionType.DriverEarnings,
+          amount: driverNet,
+          currency: order.currency,
+          orderId: order.id,
+          description: `Driver earnings — order #${order.id} (commission: ${platformCommission})`,
+          metadata: { commission: platformCommission, total },
+        });
+      } catch (e) {
+        await this.walletService
+          .reverseTransaction(
+            debitTxId,
+            0,
+            `Driver credit failed for order #${order.id}`,
+          )
+          .catch((re) =>
+            this.logger.error(
+              `فشل عكس خصم الراكب tx #${debitTxId}: ${(re as Error).message}`,
+            ),
+          );
+        this.logger.error(
+          `Driver credit failed for order #${order.id} — تم عكس خصم الراكب`,
+        );
+        throw e;
+      }
+      return;
     }
 
     // 2) Gateway modes: open a Pending charge against the rider's card and
@@ -592,23 +637,9 @@ export class OrderService {
       return; // Driver is credited by the webhook on success.
     }
 
-    // 3) Wallet + Cash: credit driver earnings now.
-    // - Cash: السائق استلم النقد من الراكب مباشرة، ندوّن الأرباح للسجل فقط
-    // - Wallet: السائق يستحق المبلغ في محفظته
-    if (mode === PaymentMode.Wallet) {
-      await this.walletService.credit({
-        ownerType: WalletOwnerType.Driver,
-        ownerId: order.driverId,
-        type: WalletTransactionType.DriverEarnings,
-        amount: driverNet,
-        currency: order.currency,
-        orderId: order.id,
-        description: `Driver earnings — order #${order.id} (commission: ${platformCommission})`,
-        metadata: { commission: platformCommission, total },
-      });
-    }
-    // Cash mode: السائق استلم نقداً، لا نُحرّك محفظته
-    // (لكن من المستحسن تسجيل معاملة informational هنا للـ reporting)
+    // 3) Cash mode: السائق استلم النقد من الراكب مباشرة، لا نُحرّك محفظته.
+    //    (Wallet عولج بالكامل في الفرع 1؛ Gateway عبر webhook في الفرع 2.)
+    // (يُستحسن لاحقاً تسجيل معاملة informational للـ reporting في الوضع النقدي.)
   }
 
   private async getOrderOrThrow(orderId: number): Promise<OrderEntity> {

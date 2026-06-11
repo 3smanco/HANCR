@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThan, Repository } from 'typeorm';
 import { FlightTrackingEntity } from '@hancr/database';
+import { CronLockService } from '@hancr/redis';
 import { OrderService } from '../order/order.service';
 import {
   FlightTrackingInput,
@@ -32,6 +33,7 @@ export class FlightService {
     private readonly repo: Repository<FlightTrackingEntity>,
     private readonly orderService: OrderService,
     private readonly config: ConfigService,
+    private readonly cronLock: CronLockService,
   ) {}
 
   async list(riderId: number): Promise<FlightTrackingType[]> {
@@ -76,6 +78,8 @@ export class FlightService {
 
   @Cron('0 */10 * * * *')
   async pollFlights(): Promise<void> {
+    // قفل موزّع: instance واحد فقط ينفّذ (يمنع استعلامات AviationStack المكرّرة).
+    if (!(await this.cronLock.acquire('flight:poll', 540))) return;
     try {
       const tracking = await this.repo.find({
         where: { status: 'tracking' },

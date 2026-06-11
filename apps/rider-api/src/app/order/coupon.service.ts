@@ -93,9 +93,22 @@ export class CouponService {
   }
 
   /**
-   * يزيد عدّاد الاستخدام بعد إنشاء الطلب بنجاح.
+   * يزيد عدّاد الاستخدام بعد إنشاء الطلب بنجاح — ذرّياً ومشروطاً بالحد.
+   * يمنع تجاوز maxUses عند الطلبات المتزامنة (سباق التحقّق ثم الزيادة).
+   * (maxUses = 0 يعني بلا حد.)
    */
   async incrementUsage(couponId: number): Promise<void> {
-    await this.couponRepo.increment({ id: couponId }, 'usedCount', 1);
+    const res = await this.couponRepo
+      .createQueryBuilder()
+      .update(CouponEntity)
+      .set({ usedCount: () => 'used_count + 1' })
+      .where('id = :id', { id: couponId })
+      .andWhere('(max_uses = 0 OR used_count < max_uses)')
+      .execute();
+    if (!res.affected) {
+      this.logger.warn(
+        `Coupon #${couponId} استُنفد عند الزيادة — تم تفادي تجاوز الحد.`,
+      );
+    }
   }
 }

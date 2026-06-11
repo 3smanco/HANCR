@@ -134,6 +134,15 @@ const Map<String, Map<String, String>> _t = {
   'delete': {'ar': 'حذف', 'en': 'Delete', 'ur': 'حذف', 'hi': 'हटाएं', 'bn': 'মুছুন', 'fil': 'Tanggalin', 'fr': 'Supprimer', 'tr': 'Sil'},
   'noData': {'ar': 'لا توجد بيانات', 'en': 'No data', 'ur': 'کوئی ڈیٹا نہیں', 'hi': 'कोई डेटा नहीं', 'bn': 'কোনো ডেটা নেই', 'fil': 'Walang data', 'fr': 'Aucune donnée', 'tr': 'Veri yok'},
   'comingSoon': {'ar': 'قريباً', 'en': 'Coming soon', 'ur': 'جلد آ رہا ہے', 'hi': 'जल्द आ रहा है', 'bn': 'শীঘ্রই আসছে', 'fil': 'Malapit na', 'fr': 'Bientôt', 'tr': 'Yakında'},
+  'accept': {'ar': 'قبول', 'en': 'Accept', 'ur': 'قبول کریں', 'hi': 'स्वीकार करें', 'bn': 'গ্রহণ করুন', 'fil': 'Tanggapin', 'fr': 'Accepter', 'tr': 'Kabul et'},
+  'decline': {'ar': 'رفض', 'en': 'Decline', 'ur': 'مسترد کریں', 'hi': 'अस्वीकार करें', 'bn': 'প্রত্যাখ্যান করুন', 'fil': 'Tanggihan', 'fr': 'Refuser', 'tr': 'Reddet'},
+  'verify': {'ar': 'تحقّق', 'en': 'Verify', 'ur': 'تصدیق کریں', 'hi': 'सत्यापित करें', 'bn': 'যাচাই করুন', 'fil': 'I-verify', 'fr': 'Vérifier', 'tr': 'Doğrula'},
+  'resendOtp': {'ar': 'إعادة إرسال الرمز', 'en': 'Resend OTP', 'ur': 'کوڈ دوبارہ بھیجیں', 'hi': 'ओटीपी पुनः भेजें', 'bn': 'ওটিপি পুনঃপ্রেরণ', 'fil': 'Ipadala muli ang OTP', 'fr': 'Renvoyer le code', 'tr': 'Kodu tekrar gönder'},
+  'sendOtp': {'ar': 'إرسال الرمز', 'en': 'Send OTP', 'ur': 'کوڈ بھیجیں', 'hi': 'ओटीपी भेजें', 'bn': 'ওটিপি পাঠান', 'fil': 'Magpadala ng OTP', 'fr': 'Envoyer le code', 'tr': 'Kod gönder'},
+  'profile': {'ar': 'الملف الشخصي', 'en': 'Profile', 'ur': 'پروفائل', 'hi': 'प्रोफ़ाइल', 'bn': 'প্রোফাইল', 'fil': 'Profile', 'fr': 'Profil', 'tr': 'Profil'},
+  'edit': {'ar': 'تعديل', 'en': 'Edit', 'ur': 'ترمیم', 'hi': 'संपादित करें', 'bn': 'সম্পাদনা', 'fil': 'I-edit', 'fr': 'Modifier', 'tr': 'Düzenle'},
+  'help_support': {'ar': 'المساعدة والدعم', 'en': 'Help & Support', 'ur': 'مدد اور سپورٹ', 'hi': 'सहायता और समर्थन', 'bn': 'সাহায্য ও সহায়তা', 'fil': 'Tulong at Suporta', 'fr': 'Aide et support', 'tr': 'Yardım ve Destek'},
+  'privacy_policy': {'ar': 'سياسة الخصوصية', 'en': 'Privacy Policy', 'ur': 'پرائیویسی پالیسی', 'hi': 'गोपनीयता नीति', 'bn': 'গোপনীয়তা নীতি', 'fil': 'Patakaran sa Privacy', 'fr': 'Politique de confidentialité', 'tr': 'Gizlilik Politikası'},
 
   // ─── Nav (driver tabs) ───
   'nav_map': {'ar': 'الخريطة', 'en': 'Map', 'ur': 'نقشہ', 'hi': 'मानचित्र', 'bn': 'মানচিত্র', 'fil': 'Mapa', 'fr': 'Carte', 'tr': 'Harita'},

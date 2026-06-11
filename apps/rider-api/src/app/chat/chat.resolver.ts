@@ -55,9 +55,12 @@ export class ChatResolver {
     },
   })
   @UseGuards(JwtAuthGuard)
-  orderMessageAdded(
-    @Args('orderId', { type: () => Int }) _orderId: number,
-  ): AsyncIterator<unknown> {
+  async orderMessageAdded(
+    @CurrentUser() user: AuthUser,
+    @Args('orderId', { type: () => Int }) orderId: number,
+  ): Promise<AsyncIterator<unknown>> {
+    // أمن: امنع IDOR — لا يشترك الراكب إلا في محادثة طلب يملكه.
+    await this.chatService.assertOwnership(user.riderId, orderId);
     return this.pubSub.asyncIterator(ORDER_MESSAGE_ADDED);
   }
 }

@@ -20,6 +20,9 @@ async function bootstrap(): Promise<void> {
     new FastifyAdapter({ logger: false }),
   );
 
+  // إغلاق رشيق عند SIGTERM (نشر/إعادة تشغيل pm2).
+  app.enableShutdownHooks();
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

@@ -19,6 +19,15 @@ COPY apps/admin-panel ./apps/admin-panel
 # Next.js standalone build
 WORKDIR /workspace/apps/admin-panel
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# متغيّرات NEXT_PUBLIC_* تُخبَز وقت البناء (Next يُضمّنها في الحزمة).
+# مرّرها عبر --build-arg أو build.args في compose، وإلا ستشير اللوحة لـ localhost
+# وتظهر الخريطة الحية فارغة في الإنتاج.
+ARG NEXT_PUBLIC_ADMIN_API_URL
+ARG NEXT_PUBLIC_GOOGLE_MAPS_KEY
+ENV NEXT_PUBLIC_ADMIN_API_URL=${NEXT_PUBLIC_ADMIN_API_URL}
+ENV NEXT_PUBLIC_GOOGLE_MAPS_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_KEY}
+
 RUN npm run build || npx next build
 
 # ─── Stage 2: Runtime ───────────────────────────────────────────

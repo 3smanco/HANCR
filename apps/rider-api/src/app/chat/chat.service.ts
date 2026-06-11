@@ -17,8 +17,8 @@ export class ChatService {
     private readonly orderRepo: Repository<OrderEntity>,
   ) {}
 
-  /** يتحقق أن الطلب يخصّ هذا الراكب */
-  private async assertOwnership(riderId: number, orderId: number): Promise<void> {
+  /** يتحقق أن الطلب يخصّ هذا الراكب (عام — يُستخدم أيضاً لحراسة الاشتراك الفوري) */
+  async assertOwnership(riderId: number, orderId: number): Promise<void> {
     const order = await this.orderRepo.findOne({
       where: { id: orderId },
       select: ['id', 'riderId'],

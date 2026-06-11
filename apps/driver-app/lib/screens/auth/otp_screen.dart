@@ -6,6 +6,7 @@ import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/i18n/app_localization.dart';
 
 class OtpScreen extends StatefulWidget {
   final String phone;
@@ -127,7 +128,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     onPressed: _ctrl.text.length == 6
                         ? () => _verify(_ctrl.text)
                         : null,
-                    child: const Text('Verify'),
+                    child: Text(tr('verify')),
                   ),
                   const SizedBox(height: 16),
                   Center(
@@ -138,7 +139,7 @@ class _OtpScreenState extends State<OtpScreen> {
                           )
                         : TextButton(
                             onPressed: _resend,
-                            child: const Text('Resend OTP'),
+                            child: Text(tr('resendOtp')),
                           ),
                   ),
                 ],

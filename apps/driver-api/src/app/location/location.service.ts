@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
 import { DriverEntity, DriverStatus } from '@hancr/database';
-import { DriverRedisService } from '@hancr/redis';
+import { DriverRedisService, CronLockService } from '@hancr/redis';
 import { UpdateLocationInput } from './dto/update-location.input';
 import { DriverLocationType } from './dto/driver-location.type';
 
@@ -16,6 +16,7 @@ export class LocationService {
     private readonly driverRepo: Repository<DriverEntity>,
 
     private readonly driverRedis: DriverRedisService,
+    private readonly cronLock: CronLockService,
   ) {}
 
   /**
@@ -95,6 +96,7 @@ export class LocationService {
    */
   @Cron('0 * * * * *') // كل دقيقة
   async cleanupStaleDrivers(): Promise<void> {
+    if (!(await this.cronLock.acquire('driver:cleanup-stale', 50))) return;
     const count = await this.driverRedis.cleanupStaleDrivers();
     if (count > 0) {
       this.logger.log(`Cleaned up ${count} stale drivers from Redis`);

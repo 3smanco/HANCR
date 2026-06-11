@@ -201,7 +201,7 @@ class ActiveRideCard extends StatelessWidget {
               .read<OrderBloc>()
               .add(OrderArrivedAtPickupRequested(order.id)),
           icon: const Icon(Icons.location_on),
-          label: const Text('Arrived at Pickup'),
+          label: Text(tr('arrivedPickup')),
           style: ElevatedButton.styleFrom(
               backgroundColor: HancrColors.statusBlue),
         );
@@ -211,7 +211,7 @@ class ActiveRideCard extends StatelessWidget {
               .read<OrderBloc>()
               .add(OrderStartRideRequested(order.id)),
           icon: const Icon(Icons.play_arrow),
-          label: const Text('Start Ride'),
+          label: Text(tr('startRide')),
           style: ElevatedButton.styleFrom(
               backgroundColor: HancrColors.onlineGreen),
         );
@@ -221,7 +221,7 @@ class ActiveRideCard extends StatelessWidget {
               .read<OrderBloc>()
               .add(OrderFinishRideRequested(order.id)),
           icon: const Icon(Icons.flag),
-          label: const Text('Finish Ride'),
+          label: Text(tr('finishRide')),
           style: ElevatedButton.styleFrom(
               backgroundColor: HancrColors.accent),
         );

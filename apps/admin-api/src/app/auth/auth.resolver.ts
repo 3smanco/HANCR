@@ -12,7 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { AdminUserEntity } from '@hancr/database';
-import { AdminJwtPayload } from './admin-jwt.strategy';
+import { AdminJwtPayload, requireSecret } from './admin-jwt.strategy';
 
 @ObjectType()
 class AdminLoginResponse {
@@ -83,9 +83,7 @@ class AdminAuthService implements OnModuleInit {
       type: 'admin',
     };
 
-    const secret =
-      this.cfg.get<string>('ADMIN_JWT_SECRET') ??
-      'hancr_admin_jwt_secret_change_in_production';
+    const secret = requireSecret(this.cfg, 'ADMIN_JWT_SECRET');
     const accessToken = this.jwtService.sign(payload, { secret });
 
     return {

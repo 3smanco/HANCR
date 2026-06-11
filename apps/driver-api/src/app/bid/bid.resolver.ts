@@ -107,6 +107,25 @@ export class BidResolver {
       throw new BadRequestException('Bid has expired');
     }
 
+    // حدود سعر العرض — يُقصّ ضمن نطاق معقول حول سعر الراكب المقترح.
+    // كان السعر موثوقاً بلا حدّ (سائق يعرض 9999 يصبح الأجرة الملزمة).
+    // النِّسَب قابلة للتعديل حسب سياسة العمل.
+    const BID_MIN_FACTOR = 0.5; // لا يقل عن 50% من سعر الراكب
+    const BID_MAX_FACTOR = 3.0; // لا يزيد عن 300% من سعر الراكب
+    const proposed = Number(bid.riderProposedPrice);
+    if (!Number.isFinite(offeredPrice) || offeredPrice <= 0) {
+      throw new BadRequestException('سعر العرض غير صالح');
+    }
+    if (proposed > 0) {
+      const floor = Math.max(1, Math.round(proposed * BID_MIN_FACTOR * 100) / 100);
+      const cap = Math.round(proposed * BID_MAX_FACTOR * 100) / 100;
+      if (offeredPrice < floor || offeredPrice > cap) {
+        throw new BadRequestException(
+          `سعر العرض يجب أن يكون بين ${floor} و ${cap}`,
+        );
+      }
+    }
+
     // التحقق من عدم تقديم عرض سابق
     const existing = await this.offerRepo.findOne({
       where: { bidId, driverId: driver.driverId },
