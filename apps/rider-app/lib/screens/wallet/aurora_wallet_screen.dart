@@ -230,23 +230,6 @@ class _WalletView extends StatelessWidget {
             onTap: () => _openRecharge(context, wallet),
           ),
         ),
-        const SizedBox(width: AuroraSpacing.md),
-        Expanded(
-          child: _actionBtn(
-            icon: Icons.send_outlined,
-            label: tr('send'),
-            onTap: () => AuroraToast.comingSoon(context, feature: tr('sendMoney')),
-          ),
-        ),
-        const SizedBox(width: AuroraSpacing.md),
-        Expanded(
-          child: _actionBtn(
-            icon: Icons.receipt_long_outlined,
-            label: tr('statement'),
-            onTap: () =>
-                AuroraToast.comingSoon(context, feature: tr('statementPdf')),
-          ),
-        ),
       ],
     );
   }
