@@ -404,6 +404,28 @@ export const UNBAN_RIDER = gql`
   }
 `;
 
+export const CREATE_RIDER = gql`
+  mutation AdminCreateRider($input: AdminCreateRiderInput!) {
+    adminCreateRider(input: $input) {
+      id
+      firstName
+      phoneNumber
+    }
+  }
+`;
+
+export const UPDATE_RIDER = gql`
+  mutation AdminUpdateRider($input: AdminUpdateRiderInput!) {
+    adminUpdateRider(input: $input) {
+      id
+      firstName
+      lastName
+      email
+      phoneNumber
+    }
+  }
+`;
+
 // ─── DRIVERS ───────────────────────────────────────────────────────────────
 
 export const LIST_DRIVERS = gql`
@@ -641,6 +663,33 @@ export const APPROVE_DRIVER = gql`
     approveDriver(id: $id) {
       id
       active
+    }
+  }
+`;
+
+export const CREATE_DRIVER = gql`
+  mutation AdminCreateDriver($input: AdminCreateDriverInput!) {
+    adminCreateDriver(input: $input) {
+      id
+      firstName
+      phoneNumber
+      active
+    }
+  }
+`;
+
+export const UPDATE_DRIVER = gql`
+  mutation AdminUpdateDriver($input: AdminUpdateDriverInput!) {
+    adminUpdateDriver(input: $input) {
+      id
+      firstName
+      lastName
+      phoneNumber
+      carBrand
+      carModel
+      carColor
+      plateNumber
+      carYear
     }
   }
 `;

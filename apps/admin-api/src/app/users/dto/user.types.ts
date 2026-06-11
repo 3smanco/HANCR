@@ -113,3 +113,55 @@ export class BanUserInput {
   @Field(() => Int) userId!: number;
   @Field({ nullable: true }) reason?: string;
 }
+
+// ─── A1/A2 — Admin manual create + edit ───────────────────────────────────────
+
+@InputType()
+export class AdminCreateRiderInput {
+  @Field() phoneNumber!: string;
+  @Field({ nullable: true }) firstName?: string;
+  @Field({ nullable: true }) lastName?: string;
+  @Field({ nullable: true }) email?: string;
+  /** يُشتق من الهاتف إن لم يُمرَّر (+966 → SAR …) */
+  @Field({ nullable: true }) countryCode?: string;
+}
+
+@InputType()
+export class AdminUpdateRiderInput {
+  @Field(() => Int) id!: number;
+  @Field({ nullable: true }) firstName?: string;
+  @Field({ nullable: true }) lastName?: string;
+  @Field({ nullable: true }) email?: string;
+  @Field({ nullable: true }) phoneNumber?: string;
+}
+
+@InputType()
+export class AdminCreateDriverInput {
+  @Field() phoneNumber!: string;
+  @Field() firstName!: string;
+  @Field({ nullable: true }) lastName?: string;
+  @Field({ nullable: true }) countryCode?: string;
+  @Field({ nullable: true }) carBrand?: string;
+  @Field({ nullable: true }) carModel?: string;
+  @Field({ nullable: true }) carColor?: string;
+  @Field({ nullable: true }) plateNumber?: string;
+  @Field(() => Int, { nullable: true }) carYear?: number;
+  @Field(() => [Int], { nullable: true }) serviceIds?: number[];
+  @Field(() => Int, { nullable: true }) regionId?: number;
+  /** اعتماد فوري (يتجاوز رفع الوثائق) — لسائقي الأسطول/الاختبار */
+  @Field({ nullable: true, defaultValue: false }) approveImmediately?: boolean;
+}
+
+@InputType()
+export class AdminUpdateDriverInput {
+  @Field(() => Int) id!: number;
+  @Field({ nullable: true }) firstName?: string;
+  @Field({ nullable: true }) lastName?: string;
+  @Field({ nullable: true }) phoneNumber?: string;
+  @Field({ nullable: true }) carBrand?: string;
+  @Field({ nullable: true }) carModel?: string;
+  @Field({ nullable: true }) carColor?: string;
+  @Field({ nullable: true }) plateNumber?: string;
+  @Field(() => Int, { nullable: true }) carYear?: number;
+  @Field(() => Int, { nullable: true }) regionId?: number;
+}
