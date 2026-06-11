@@ -6,7 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DriverEntity } from '@hancr/database';
 import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
-import { JwtStrategy } from './jwt.strategy';
+import { JwtStrategy, requireSecret } from './jwt.strategy';
 
 @Module({
   imports: [
@@ -16,7 +16,8 @@ import { JwtStrategy } from './jwt.strategy';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (cfg: ConfigService) => ({
-        secret: cfg.get<string>('JWT_SECRET') ?? 'hancr_jwt_secret_change_in_production_min_32_chars',
+        // أمن: التوقيع بسرّ السائق المستقل (يطابق jwt.strategy).
+        secret: requireSecret(cfg, 'JWT_DRIVER_SECRET'),
         signOptions: { expiresIn: cfg.get<string>('JWT_EXPIRES_IN') ?? '7d' },
       }),
     }),

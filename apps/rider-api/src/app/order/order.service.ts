@@ -20,11 +20,12 @@ import {
   RequestActivityEntity,
   RequestActivityType,
   DriverEntity,
+  DriverStatus,
   WalletOwnerType,
   WalletTransactionType,
   WalletTransactionStatus,
 } from '@hancr/database';
-import { OrderRedisService } from '@hancr/redis';
+import { OrderRedisService, CronLockService } from '@hancr/redis';
 import { PushNotificationService } from '@hancr/notifications';
 import { WalletService } from '@hancr/wallet';
 import { SosService } from '@hancr/sos';
@@ -65,6 +66,7 @@ export class OrderService {
     private readonly driverRepo: Repository<DriverEntity>,
 
     private readonly orderRedis: OrderRedisService,
+    private readonly cronLock: CronLockService,
     private readonly matchingService: MatchingService,
     private readonly directionsService: DirectionsService,
     private readonly couponService: CouponService,
@@ -246,6 +248,12 @@ export class OrderService {
       companyId = link.company.id;
     }
 
+    // عمولة المنصة: تُحسَب وتُحفظ على الطلب وقت الإنشاء (كانت دائماً 0 — تسريب إيراد).
+    // تُحسب على السعر النهائي بعد الكوبون؛ رحلات الحزمة (cost=0) عمولتها 0.
+    const providerSharePercent = Number(service.providerSharePercent ?? 20);
+    const providerShare =
+      Math.round(costAfterCoupon * (providerSharePercent / 100) * 100) / 100;
+
     // استخدام Transaction لضمان الاتساق
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -274,6 +282,7 @@ export class OrderService {
         couponId: appliedCouponId,
         couponCode: appliedCouponCode,
         discountAmount,
+        providerShare,
         currency: rider.currency,
         paymentMode: (input.paymentMode as PaymentMode) ?? PaymentMode.Cash,
         // Ride Moods
@@ -630,6 +639,15 @@ export class OrderService {
     await this.orderRepo.update(orderId, {
       status: OrderStatus.RiderCanceled,
     });
+
+    // تحرير السائق المُسنَد (كان يبقى Busy للأبد بعد الإلغاء) — يعيده للتوفّر.
+    // ملاحظة: حالة Redis الفورية يملكها driver-api ويعيد ضبطها عند استقبال ORDER_UPDATED.
+    if (order.driverId) {
+      await this.driverRepo.update(
+        { id: order.driverId, status: DriverStatus.Busy },
+        { status: DriverStatus.Online },
+      );
+    }
 
     // إزالة من Redis
     await this.orderRedis.removeOrder(orderId);
@@ -1019,6 +1037,8 @@ export class OrderService {
   // =============================================
   @Cron('30 * * * * *') // كل دقيقة (الثانية 30)
   async activateDueScheduledOrders(): Promise<void> {
+    // قفل موزّع: instance واحد فقط ينفّذ (يمنع مطابقة نفس الطلب مراراً مع pm2).
+    if (!(await this.cronLock.acquire('order:activate-scheduled', 50))) return;
     // فعّل الطلبات المحجوزة التي حان موعدها (خلال دقيقتين)
     const due = await this.orderRepo.find({
       where: {
@@ -1132,6 +1152,7 @@ export class OrderService {
    */
   @Cron('45 * * * * *')
   async expandUnacceptedVipOrders(): Promise<void> {
+    if (!(await this.cronLock.acquire('order:expand-vip', 50))) return;
     const cutoff = new Date(Date.now() - 60_000);
     const candidates = await this.orderRepo.find({
       where: {

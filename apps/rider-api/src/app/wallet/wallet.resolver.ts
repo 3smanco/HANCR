@@ -123,10 +123,16 @@ export class WalletResolver {
       user.riderId,
     );
 
-    // الدفع بالبطاقة معطّل (لا توجد بيانات تاجر HyperPay بعد) →
-    // نشحن المحفظة فوراً كمحاكاة لتمكين الاختبار والدفع من الرصيد.
+    // الدفع بالبطاقة معطّل (لا توجد بيانات تاجر HyperPay بعد).
+    // أمن: المحاكاة (شحن فوري بلا دفع) مسموحة في غير الإنتاج فقط.
+    // في الإنتاج كان هذا ثغرة "مال مجاني" — نرفض بدل الشحن.
     const cardEnabled = await this.isCardPaymentsEnabled();
     if (!cardEnabled) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new BadRequestException(
+          'الدفع بالبطاقة غير مُفعَّل حالياً. لا يمكن شحن المحفظة.',
+        );
+      }
       const sim = await this.walletService.credit({
         ownerType: WalletOwnerType.Rider,
         ownerId: user.riderId,
@@ -183,17 +189,23 @@ export class WalletResolver {
   }
 
   /**
-   * تأكيد شحن (dev/admin/webhook).
-   * في الإنتاج: webhook handler يستدعي هذا بعد التحقُّق من signature.
+   * تأكيد شحن — أداة تطوير فقط.
+   * أمن: في الإنتاج لا يجوز للراكب تأكيد شحنته ذاتياً (كان ثغرة شحن بلا دفع).
+   * التأكيد في الإنتاج يحدث حصراً في wallet-webhook.controller بعد التحقّق من توقيع HMAC.
    */
   @Mutation(() => Boolean, {
-    description: 'تأكيد شحن المحفظة (dev/admin)',
+    description: 'تأكيد شحن المحفظة (dev فقط)',
   })
   @UseGuards(JwtAuthGuard)
   async confirmWalletRecharge(
     @CurrentUser() user: AuthUser,
     @Args('transactionId', { type: () => Int }) transactionId: number,
   ): Promise<boolean> {
+    if (process.env.NODE_ENV === 'production') {
+      throw new BadRequestException(
+        'تأكيد الشحن يتم تلقائياً عبر بوابة الدفع، لا يدوياً.',
+      );
+    }
     const txs = await this.walletService.listTransactions(
       WalletOwnerType.Rider,
       user.riderId,

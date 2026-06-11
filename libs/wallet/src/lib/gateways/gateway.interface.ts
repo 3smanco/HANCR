@@ -52,3 +52,31 @@ export class WebhookVerificationError extends Error {
     this.name = 'WebhookVerificationError';
   }
 }
+
+/**
+ * يستخرج البايتات الخام للجسم (للتحقق من HMAC) مع نسخته المُحلَّلة.
+ *
+ * أمن حرج: بوابات الدفع توقّع البايتات الخام للجسم. إعادة تسلسل الكائن
+ * المُحلَّل (JSON.stringify) تُنتج بايتات مختلفة (ترتيب مفاتيح/مسافات) فيفشل
+ * كل توقيع حقيقي. لذا يجب تمرير السلسلة الخام كما وصلت.
+ *
+ * - string  → تُستخدم كما هي (المسار الصحيح للإنتاج عبر rawBody).
+ * - Buffer  → تُحوَّل لـ utf8.
+ * - object  → احتياط للاختبارات/dev: JSON.stringify (ليس آمناً للإنتاج).
+ */
+export function extractRawBody(body: unknown): {
+  raw: string;
+  parsed: Record<string, unknown>;
+} {
+  if (typeof body === 'string') {
+    return { raw: body, parsed: JSON.parse(body) as Record<string, unknown> };
+  }
+  if (Buffer.isBuffer(body)) {
+    const raw = body.toString('utf8');
+    return { raw, parsed: JSON.parse(raw) as Record<string, unknown> };
+  }
+  return {
+    raw: JSON.stringify(body ?? {}),
+    parsed: (body ?? {}) as Record<string, unknown>,
+  };
+}

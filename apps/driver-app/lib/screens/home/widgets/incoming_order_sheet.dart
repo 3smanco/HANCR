@@ -202,7 +202,7 @@ class _IncomingOrderSheetState extends State<IncomingOrderSheet> {
                       foregroundColor: HancrColors.error,
                       side: const BorderSide(color: HancrColors.error),
                     ),
-                    child: const Text('Decline'),
+                    child: Text(tr('decline')),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -213,7 +213,7 @@ class _IncomingOrderSheetState extends State<IncomingOrderSheet> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: HancrColors.onlineGreen,
                     ),
-                    child: const Text('Accept'),
+                    child: Text(tr('accept')),
                   ),
                 ),
               ],

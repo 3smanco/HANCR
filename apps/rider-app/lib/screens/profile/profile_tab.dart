@@ -58,6 +58,12 @@ class _ProfileTabState extends State<ProfileTab> {
     setState(() => _editing = false);
   }
 
+  void _showComingSoon() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('قريباً')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -336,14 +342,14 @@ class _ProfileTabState extends State<ProfileTab> {
                   icon: Icons.credit_card_rounded,
                   iconColor: HancrColors.info,
                   label: 'طرق الدفع',
-                  onTap: () {},
+                  onTap: _showComingSoon,
                 ),
                 const _MenuDivider(),
                 _MenuRow(
                   icon: Icons.bookmark_rounded,
                   iconColor: const Color(0xFFFBBF24),
                   label: 'العناوين المحفوظة',
-                  onTap: () {},
+                  onTap: _showComingSoon,
                 ),
               ],
             ),
@@ -359,7 +365,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   icon: Icons.notifications_outlined,
                   iconColor: HancrColors.violet,
                   label: 'الإشعارات',
-                  onTap: () {},
+                  onTap: _showComingSoon,
                 ),
                 const _MenuDivider(),
                 _MenuRow(
@@ -367,7 +373,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   iconColor: HancrColors.success,
                   label: 'اللغة',
                   subtitle: 'العربية',
-                  onTap: () {},
+                  onTap: _showComingSoon,
                 ),
                 const _MenuDivider(),
                 _MenuRow(
@@ -375,7 +381,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   iconColor: HancrColors.warning,
                   label: 'المنطقة',
                   subtitle: 'السعودية (SAR)',
-                  onTap: () {},
+                  onTap: _showComingSoon,
                 ),
               ],
             ),
@@ -405,21 +411,21 @@ class _ProfileTabState extends State<ProfileTab> {
                   icon: Icons.help_outline_rounded,
                   iconColor: HancrColors.info,
                   label: 'المساعدة والدعم',
-                  onTap: () {},
+                  onTap: _showComingSoon,
                 ),
                 const _MenuDivider(),
                 _MenuRow(
                   icon: Icons.privacy_tip_outlined,
                   iconColor: HancrColors.purple,
                   label: 'سياسة الخصوصية',
-                  onTap: () {},
+                  onTap: _showComingSoon,
                 ),
                 const _MenuDivider(),
                 _MenuRow(
                   icon: Icons.gavel_rounded,
                   iconColor: HancrColors.purple,
                   label: 'الشروط والأحكام',
-                  onTap: () {},
+                  onTap: _showComingSoon,
                 ),
               ],
             ),

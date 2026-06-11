@@ -9,6 +9,7 @@ import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CommuterSubscriptionEntity } from '@hancr/database';
+import { CronLockService } from '@hancr/redis';
 import { OrderService } from '../order/order.service';
 import {
   CommuterSubscriptionInput,
@@ -24,6 +25,7 @@ export class CommuterService {
     @InjectRepository(CommuterSubscriptionEntity)
     private readonly repo: Repository<CommuterSubscriptionEntity>,
     private readonly orderService: OrderService,
+    private readonly cronLock: CronLockService,
   ) {}
 
   async list(riderId: number): Promise<CommuterSubscriptionType[]> {
@@ -102,6 +104,8 @@ export class CommuterService {
    */
   @Cron('0 * * * * *')
   async autoBookDueSubscriptions(): Promise<void> {
+    // قفل موزّع: instance واحد فقط ينفّذ (يمنع حجز نفس الاشتراك مراراً).
+    if (!(await this.cronLock.acquire('commuter:autobook', 50))) return;
     try {
       const subs = await this.repo.find({ where: { active: true } });
       if (subs.length === 0) return;

@@ -4,11 +4,14 @@ import {
   Param,
   Body,
   Headers,
+  Req,
   HttpCode,
   HttpStatus,
   Logger,
   BadRequestException,
+  RawBodyRequest,
 } from '@nestjs/common';
+import type { FastifyRequest } from 'fastify';
 import {
   WalletService,
   PaymentGatewayService,
@@ -50,15 +53,21 @@ export class WalletWebhookController {
   async handleWebhook(
     @Param('gateway') gatewayParam: string,
     @Headers() headers: Record<string, string>,
+    @Req() req: RawBodyRequest<FastifyRequest>,
     @Body() body: unknown,
   ): Promise<{ received: boolean; status: string }> {
     const gateway = this._parseGateway(gatewayParam);
     this.logger.log(`Webhook received from ${gateway}`);
 
+    // أمن: نمرّر البايتات الخام (req.rawBody) للتحقق من HMAC. التحقق على الجسم
+    // المُحلَّل (body) كان يفشل دائماً لأن البوابات توقّع البايتات الأصلية.
+    // احتياط dev: لو rawBody غير متاح نقع على body المُحلَّل.
+    const rawBody: unknown = req.rawBody ? req.rawBody.toString('utf8') : body;
+
     // HMAC verification — يرمي WebhookVerificationError لو signature غير صحيح
     let event;
     try {
-      event = this.paymentGateway.verifyAndParseWebhook(gateway, headers, body);
+      event = this.paymentGateway.verifyAndParseWebhook(gateway, headers, rawBody);
     } catch (e) {
       if (e instanceof WebhookVerificationError) {
         this.logger.error(`Webhook verification failed: ${e.message}`);

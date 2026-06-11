@@ -1,4 +1,4 @@
-import { ThrottlerModuleOptions, seconds } from '@nestjs/throttler';
+import { ThrottlerOptions, seconds } from '@nestjs/throttler';
 
 /**
  * إعداد throttler عام لكل APIs.
@@ -10,7 +10,7 @@ import { ThrottlerModuleOptions, seconds } from '@nestjs/throttler';
  *
  * Override per-resolver عبر `@Throttle({ strict: { limit, ttl } })`.
  */
-export const HANCR_THROTTLER_CONFIG: ThrottlerModuleOptions = [
+export const HANCR_THROTTLER_CONFIG: ThrottlerOptions[] = [
   {
     name: 'default',
     ttl: seconds(60),

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HANCR — تقرير المجلس | فحص شامل</title>
+<style>
+  :root{--bg:#fff;--ink:#1a1a2e;--muted:#6b7280;--line:#e5e7eb;--crit:#dc2626;--high:#ea580c;--med:#d97706;--low:#65a30d;--card:#f9fafb;--accent:#7c3aed}
+  *{box-sizing:border-box}
+  body{font-family:system-ui,'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--ink);margin:0;line-height:1.7;font-size:15px}
+  .wrap{max-width:980px;margin:0 auto;padding:32px 24px 80px}
+  header{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:8px}
+  h1{font-size:26px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:14px}
+  h2{font-size:19px;margin:34px 0 12px;display:flex;align-items:center;gap:8px}
+  .verdict{background:linear-gradient(135deg,#faf5ff,#f0f9ff);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:18px 0}
+  .pill{display:inline-block;font-size:11px;font-weight:700;color:#fff;border-radius:6px;padding:2px 8px;margin-inline-end:6px}
+  .c-crit{background:var(--crit)}.c-high{background:var(--high)}.c-med{background:var(--med)}.c-low{background:var(--low)}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:start}
+  th{background:var(--card);font-weight:700}
+  .agree li{margin:7px 0}
+  details{background:var(--card);border:1px solid var(--line);border-radius:10px;margin:9px 0;padding:4px 14px}
+  summary{cursor:pointer;font-weight:700;padding:9px 0}
+  .adv{border-inline-start:4px solid var(--accent);padding-inline-start:12px;margin:8px 0}
+  code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12.5px;direction:ltr;display:inline-block}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0}
+  .ag{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;font-size:12.5px}
+  .ag b{display:block;font-size:13px;margin-bottom:4px}
+  .num{font-size:22px;font-weight:800}
+  footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+  .green{color:#16a34a;font-weight:700}
+  ol li,ul li{margin:5px 0}
+</style>
+</head>
+<body><div class="wrap">
+<header>
+  <h1>🏛️ مجلس HANCR — تقرير الفحص الشامل</h1>
+  <div class="sub">منصة HANCR للتنقّل الذكي · 5 وكلاء دقّقوا الكود الحقيقي · الوكيل المعارض صارم · 2026-06-11</div>
+</header>
+
+<div class="grid">
+  <div class="ag"><b>🔴 المعارض</b>أمن<div class="num">13</div>ثغرة</div>
+  <div class="ag"><b>🧱 المبادئ</b>منطق/مال<div class="num">18</div>خلل</div>
+  <div class="ag"><b>📈 التوسّعي</b>إنتاج<div class="num">19</div>عائق</div>
+  <div class="ag"><b>👁️ الغريب</b>UX<div class="num">12</div>نقطة</div>
+  <div class="ag"><b>🔧 المنفّذ</b>بناء<div class="num green">أخضر</div>0 عوائق</div>
+</div>
+
+<div class="verdict">
+  <h2 style="margin-top:0">🎯 خلاصة الرئيس</h2>
+  <p><b>المشروع سليم معمارياً ويُترجَم بنجاح.</b> ألم المالك ليس بناءً معطّلاً — سجلّات التعطّل مجرد نفاد ذاكرة لأدوات التحليل المحلية. المشكلة ثلاث فئات منفصلة:</p>
+  <ol>
+    <li><b>الأمن (أولاً، اليوم):</b> سرّ JWT واحد ضعيف <code>OS.009988.os</code> للأدوار الثلاثة (يُزوّر أدمن خارق)، تسريب OTP في الاستجابة عند فشل SMS، شحن محفظة مجاني + تأكيد ذاتي، غياب حُرّاس الأدوار، تسريب محادثة (IDOR).</li>
+    <li><b>صحّة المال/المنطق:</b> عمولة المنصة = صفر دائماً، قبول مزدوج للرحلة، تسوية بلا معاملة (رحلات مجانية)، أسعار المزايدة بلا حدود.</li>
+    <li><b>الإنتاج + UX:</b> webhook الدفع يرفض كل الطلبات الحقيقية، لا فهارس DB، ~25 entity بلا migration، تطبيق السائق نصفه إنجليزي، أزرار ميتة، خريطة حية فارغة.</li>
+  </ol>
+  <p><b>🥇 الخطوة الأولى:</b> إصلاح سلسلة ثقة المصادقة — 3 أسرار JWT قوية منفصلة مع fail-fast (بلا قيم احتياطية مزروعة). كل ما عداه بلا معنى ما دام سلسلة نصية واحدة تُزوّر أدمن خارق.</p>
+</div>
+
+<h2>✅ حيث يتّفق المجلس <span class="sub" style="font-weight:400">(ثقة عالية — وجدها وكيلان مستقلان أو أكثر)</span></h2>
+<ul class="agree">
+  <li><span class="pill c-crit">CRIT</span><b>تسريب OTP في الاستجابة عند فشل SMS</b> — استيلاء كامل على الحساب. (المعارض + التوسّعي)</li>
+  <li><span class="pill c-crit">CRIT</span><b>confirmWalletRecharge يتيح للراكب شحن محفظته ذاتياً</b> — مال مجاني. (المعارض + المبادئ)</li>
+  <li><span class="pill c-crit">CRIT</span><b>التسوية مبتلَعة → رحلات مجانية</b> برصيد محفظة غير كافٍ. (المعارض + المبادئ)</li>
+  <li><span class="pill c-high">HIGH</span><b>لا فهارس على Order/Driver/Rider/Bid</b> — مسح كامل عند كل تسجيل دخول + cron كل دقيقة. (المبادئ + التوسّعي)</li>
+  <li><span class="pill c-high">HIGH</span><b>الخريطة الحية فارغة</b> — <code>NEXT_PUBLIC_GOOGLE_MAPS_KEY</code> غير معرّف في أي ملف. (الغريب + التوسّعي)</li>
+  <li><span class="pill c-high">HIGH</span><b>مفتاح خرائط مزروع في git</b> (.env + كلا manifest أندرويد). (المعارض + الغريب)</li>
+  <li><span class="pill c-crit">CRIT</span><b>سرّ JWT ضعيف مشترك</b> = كلمة مرور الأدمن أيضاً. (المعارض)</li>
+</ul>
+
+<h2>⚔️ تصحيحات المجلس للفرضيات</h2>
+<ul>
+  <li><b>"التطبيقات لا تعمل":</b> الغريب + المنفّذ يدحضان — سجلّات التعطّل نفاد ذاكرة أدوات محلية، لا أعطال. <span class="green">flutter analyze = 0 أخطاء</span> في التطبيقين، وكل بوابات البناء خضراء. الإحساس بالعطل سببه أزرار ميتة + تطبيق سائق نصفه إنجليزي + خريطة فارغة.</li>
+  <li><b>خطأ <code>live/page.tsx</code> المعروف:</b> المنفّذ يدحض — مُصلَح بالفعل (cast في live/page.tsx:36)، tsc 0 أخطاء.</li>
+</ul>
+
+<h2>🔍 نقاط عمياء كشفتها المراجعة المتبادلة</h2>
+<ul>
+  <li>مسار الشحن المجاني "المحاكى" موجود <b>لأن</b> webhook الدفع الحقيقي معطّل (HMAC على JSON معاد تحليله يرفض كل webhook حقيقي) — إصلاح أمن الشحن يستلزم إصلاح rawBody أيضاً.</li>
+  <li><code>providerShare</code> لا يُعيَّن أبداً → حتى بعد عمل الدفع، المنصة تدفع للسائق 100% وتربح صفراً.</li>
+  <li><code>ignoreBuildErrors:true</code> + <code>ignoreDuringBuilds:true</code> في اللوحة → أخطاء النوع/اللينت تُشحَن صامتة. أخضر ≠ آمن.</li>
+  <li>~25 entity بلا migration (incl. <code>pricing_zone</code>/<code>fleet</code>) → إنشاء الطلب يرمي "relation does not exist" في DB إنتاج نظيف.</li>
+</ul>
+
+<h2>📋 جدول الخطورة (مختصر)</h2>
+<table>
+<tr><th>#</th><th>البند</th><th>الخطورة</th><th>الوكيل</th></tr>
+<tr><td>1</td><td>سرّ JWT واحد ضعيف للأدوار الثلاثة → تزوير أدمن خارق</td><td><span class="pill c-crit">CRIT</span></td><td>المعارض</td></tr>
+<tr><td>2</td><td>تسريب OTP في الاستجابة + تسجيله نصاً صريحاً</td><td><span class="pill c-crit">CRIT</span></td><td>المعارض+التوسّعي</td></tr>
+<tr><td>3</td><td>شحن محفظة مجاني (startWalletRecharge) + تأكيد ذاتي</td><td><span class="pill c-crit">CRIT</span></td><td>المعارض+المبادئ</td></tr>
+<tr><td>4</td><td>عمولة المنصة = صفر دائماً (providerShare)</td><td><span class="pill c-crit">CRIT</span></td><td>المبادئ</td></tr>
+<tr><td>5</td><td>قبول مزدوج للرحلة (لا قفل ذرّي)</td><td><span class="pill c-crit">CRIT</span></td><td>المبادئ</td></tr>
+<tr><td>6</td><td>تسوية بلا معاملة + رحلات مجانية برصيد ناقص</td><td><span class="pill c-crit">CRIT</span></td><td>المعارض+المبادئ</td></tr>
+<tr><td>7</td><td>webhook الدفع يرفض كل الطلبات (HMAC على JSON معاد تحليله)</td><td><span class="pill c-crit">CRIT</span></td><td>التوسّعي</td></tr>
+<tr><td>8</td><td>~25 entity بلا migration (pricing_zone/fleet)</td><td><span class="pill c-crit">CRIT</span></td><td>المبادئ</td></tr>
+<tr><td>9</td><td>غياب حُرّاس الأدوار على حظر/اعتماد السائقين</td><td><span class="pill c-high">HIGH</span></td><td>المعارض</td></tr>
+<tr><td>10</td><td>أسعار المزايدة موثوقة بلا حدود</td><td><span class="pill c-high">HIGH</span></td><td>المبادئ</td></tr>
+<tr><td>11</td><td>لا فهارس DB على الجداول الساخنة</td><td><span class="pill c-high">HIGH</span></td><td>المبادئ+التوسّعي</td></tr>
+<tr><td>12</td><td>cron على كل instance بلا قفل موزّع</td><td><span class="pill c-high">HIGH</span></td><td>التوسّعي</td></tr>
+<tr><td>13</td><td>Throttler في الذاكرة → حدود لكل عملية</td><td><span class="pill c-high">HIGH</span></td><td>التوسّعي</td></tr>
+<tr><td>14</td><td>IDOR في اشتراك المحادثة</td><td><span class="pill c-med">MED</span></td><td>المعارض</td></tr>
+<tr><td>15</td><td>تطبيق السائق: الأزرار الأساسية إنجليزية في منتج عربي</td><td><span class="pill c-high">HIGH</span></td><td>الغريب</td></tr>
+<tr><td>16</td><td>أزرار ميتة (7 صفوف راكب + 4 سائق)</td><td><span class="pill c-high">HIGH</span></td><td>الغريب</td></tr>
+<tr><td>17</td><td>الخريطة الحية فارغة (مفتاح NEXT_PUBLIC مفقود)</td><td><span class="pill c-high">HIGH</span></td><td>الغريب+التوسّعي</td></tr>
+</table>
+
+<h2>📂 تقارير الوكلاء الكاملة</h2>
+<details><summary>🔴 المعارض — فريق الاختراق (13 ثغرة)</summary><div class="adv">انظر <code>.claude/council/01-contrarian-security.md</code> — سرّ JWT مشترك، شحن مجاني، تسريب OTP، IDOR، CORS، تسوية مبتلَعة.</div></details>
+<details><summary>🧱 المبادئ الأولى — المنطق والمال (18 خلل)</summary><div class="adv">انظر <code>.claude/council/02-firstprinciples-logic-money.md</code> — عمولة صفر، قبول مزدوج، تسوية بلا معاملة، migrations ناقصة، أسعار مزايدة، كوبونات racy.</div></details>
+<details><summary>📈 التوسّعي — جاهزية الإنتاج (19 عائق)</summary><div class="adv">انظر <code>.claude/council/03-expansionist-production.md</code> — webhook معطّل، لا فهارس، cron مكرّر، throttler ذاكرة، لا graceful shutdown، Maps بلا cache.</div></details>
+<details><summary>👁️ الغريب — هل يعمل فعلاً (12 نقطة)</summary><div class="adv">انظر <code>.claude/council/04-outsider-ux.md</code> — تصحيح: التطبيقات تُبنى. المشكلة أزرار ميتة + توطين السائق + خريطة فارغة.</div></details>
+<details><summary>🔧 المنفّذ — البناء/CI (أخضر)</summary><div class="adv">انظر <code>.claude/council/05-executor-build.md</code> — كل بوابات tsc/build خضراء؛ خطأ live/page معروف مُصلَح؛ مخاطر CI: نسخة Flutter + تحذيرات.</div></details>
+
+<footer>
+  تقرير مجلس LLM (منهجية Karpathy) · 5 وكلاء فحصوا الكود الحقيقي لـ HANCR + مراجعة متبادلة + توليفة الرئيس<br>
+  الملفات: <code>.claude/council/01..05-*.md</code> · <code>VERDICT.md</code> · هذا التقرير · 2026-06-11
+</footer>
+</div></body></html>

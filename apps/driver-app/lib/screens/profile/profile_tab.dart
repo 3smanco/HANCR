@@ -6,6 +6,7 @@ import '../../blocs/driver/driver_bloc.dart';
 import '../../blocs/driver/driver_event.dart';
 import '../../blocs/driver/driver_state.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/i18n/app_localization.dart';
 import '../sos/driver_emergency_contacts_screen.dart';
 
 class ProfileTab extends StatefulWidget {
@@ -71,18 +72,24 @@ class _ProfileTabState extends State<ProfileTab> {
     setState(() => _editing = false);
   }
 
+  void _showComingSoon(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(tr('comingSoon'))),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(tr('profile')),
         actions: [
           BlocBuilder<DriverBloc, DriverState>(
             builder: (ctx, state) {
               if (state is! DriverLoaded) return const SizedBox.shrink();
               return TextButton(
                 onPressed: _editing ? _save : () => _startEdit(state),
-                child: Text(_editing ? 'Save' : 'Edit'),
+                child: Text(_editing ? tr('save') : tr('edit')),
               );
             },
           ),
@@ -205,18 +212,18 @@ class _ProfileTabState extends State<ProfileTab> {
             ),
             _MenuItem(
               icon: Icons.help_outline,
-              label: 'Help & Support',
-              onTap: () {},
+              label: tr('help_support'),
+              onTap: () => _showComingSoon(context),
             ),
             _MenuItem(
               icon: Icons.privacy_tip_outlined,
-              label: 'Privacy Policy',
-              onTap: () {},
+              label: tr('privacy_policy'),
+              onTap: () => _showComingSoon(context),
             ),
             const SizedBox(height: 12),
             _MenuItem(
               icon: Icons.logout,
-              label: 'Sign out',
+              label: tr('logout'),
               iconColor: HancrColors.error,
               labelColor: HancrColors.error,
               onTap: () => _confirmLogout(context),

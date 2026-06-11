@@ -123,6 +123,10 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile.admin-panel
+      # NEXT_PUBLIC_* تُخبَز وقت البناء — تُمرَّر كـ build args لا runtime env.
+      args:
+        NEXT_PUBLIC_ADMIN_API_URL: ${ADMIN_API_URL:-https://api.hancr.com/admin/graphql}
+        NEXT_PUBLIC_GOOGLE_MAPS_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_KEY:-}
     container_name: hancr_admin_panel
     restart: always
     depends_on:

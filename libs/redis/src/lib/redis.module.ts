@@ -4,6 +4,7 @@ import { RedisModule } from '@songkeys/nestjs-redis';
 import { DriverRedisService } from './driver-redis.service';
 import { OrderRedisService } from './order-redis.service';
 import { BidRedisService } from './bid-redis.service';
+import { CronLockService } from './cron-lock.service';
 
 /**
  * HancrRedisModule — وحدة Redis المشتركة
@@ -27,7 +28,17 @@ import { BidRedisService } from './bid-redis.service';
       }),
     }),
   ],
-  providers: [DriverRedisService, OrderRedisService, BidRedisService],
-  exports: [DriverRedisService, OrderRedisService, BidRedisService],
+  providers: [
+    DriverRedisService,
+    OrderRedisService,
+    BidRedisService,
+    CronLockService,
+  ],
+  exports: [
+    DriverRedisService,
+    OrderRedisService,
+    BidRedisService,
+    CronLockService,
+  ],
 })
 export class HancrRedisModule {}

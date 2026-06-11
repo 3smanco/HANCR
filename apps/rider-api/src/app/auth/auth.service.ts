@@ -70,13 +70,19 @@ export class AuthService {
       otpTtl,
       JSON.stringify({ code, attempts: 0 }),
     );
-    this.logger.log(`OTP for ${phone}: ${code}`);
+    // أمن: لا نُسجّل قيمة OTP أبداً. في dev فقط نُظهر الكود للتشخيص.
+    if (isDev) {
+      this.logger.debug(`[dev] OTP for ${phone}: ${code}`);
+    } else {
+      this.logger.log(`OTP issued for ${phone}`);
+    }
 
     // إرسال SMS عبر Twilio لو مُكوَّن
     const sms = await this.smsService.sendOtp(phone, code, 'ar');
 
-    // في dev mode أو لو Twilio لم يُرسل أو رقم تجريبي — نُعيد الكود
-    const exposeDevOtp = isDev || !sms.success || isTestPhone;
+    // أمن: لا نُعيد الكود في الاستجابة إلا في dev أو لرقم تجريبي ثابت (123456 معروف).
+    // فشل Twilio في الإنتاج لا يكشف الكود إطلاقاً (سابقاً كان ثغرة استيلاء على الحساب).
+    const exposeDevOtp = isDev || isTestPhone;
 
     let message: string;
     if (sms.success) {

@@ -7,7 +7,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, LessThan } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import {
@@ -20,8 +20,9 @@ import {
   OrderType,
   PaymentMode,
   RiderEntity,
+  ServiceEntity,
 } from '@hancr/database';
-import { BidRedisService } from '@hancr/redis';
+import { BidRedisService, CronLockService } from '@hancr/redis';
 import { PUB_SUB } from '../pubsub.provider';
 import { CreateBidInput } from './dto/create-bid.input';
 import { BidType, BidOfferType } from './dto/bid.type';
@@ -50,6 +51,7 @@ export class BidService {
     private readonly riderRepo: Repository<RiderEntity>,
 
     private readonly bidRedis: BidRedisService,
+    private readonly cronLock: CronLockService,
 
     @Inject(PUB_SUB)
     private readonly pubSub: RedisPubSub,
@@ -134,12 +136,16 @@ export class BidService {
       throw new BadRequestException('Bid has expired');
     }
 
-    // قبول العرض
+    // قبول المزايدة — ذرّي ومشروط: ينجح فقط إن كانت ما زالت Open.
+    // يمنع سباق القبول المزدوج / القبول بعد انتهاء المهلة (cron).
+    const claim = await this.bidRepo.update(
+      { id: offer.bid.id, status: BidStatus.Open },
+      { status: BidStatus.Accepted, acceptedOfferId: offer.id },
+    );
+    if (!claim.affected) {
+      throw new BadRequestException('Bid is no longer open');
+    }
     await this.offerRepo.update(offerId, { accepted: true });
-    await this.bidRepo.update(offer.bid.id, {
-      status: BidStatus.Accepted,
-      acceptedOfferId: offer.id,
-    });
 
     // إزالة المزايدة من Redis
     await this.bidRedis.removeBid(offer.bid.id);
@@ -147,6 +153,16 @@ export class BidService {
     // إنشاء طلب رحلة فعلي بالسعر المتّفق عليه — مُسنَد للسائق مباشرةً
     const bid = offer.bid;
     const price = Number(offer.offeredPrice);
+
+    // عمولة المنصة على طلب المزايدة (كانت 0 — تسريب إيراد).
+    const svc = await this.orderRepo.manager.findOne(ServiceEntity, {
+      where: { id: bid.serviceId },
+      select: ['id', 'providerSharePercent'],
+    });
+    const providerSharePercent = Number(svc?.providerSharePercent ?? 20);
+    const providerShare =
+      Math.round(price * (providerSharePercent / 100) * 100) / 100;
+
     const order = this.orderRepo.create({
       riderId,
       driverId: offer.driverId,
@@ -160,6 +176,7 @@ export class BidService {
       durationBest: bid.estimatedDuration,
       costBest: price,
       costAfterCoupon: price,
+      providerShare,
       currency: bid.currency,
       paymentMode: PaymentMode.Cash,
       isBidOrder: true,
@@ -186,26 +203,28 @@ export class BidService {
   // =============================================
   @Cron('*/30 * * * * *')
   async cleanupExpiredBids(): Promise<void> {
-    const expired = await this.bidRepo.find({
-      where: { status: BidStatus.Open },
+    // قفل موزّع: instance واحد فقط ينفّذ كل نافذة (يمنع التكرار مع عدّة عمليات pm2).
+    await this.cronLock.run('bid:cleanup', 25, async () => {
+      // فلترة على مستوى DB (كان يحمّل كل المزايدات المفتوحة للذاكرة ثم يفلتر).
+      const expired = await this.bidRepo.find({
+        where: { status: BidStatus.Open, expiresAt: LessThan(new Date()) },
+        select: ['id'],
+      });
+
+      const expiredIds = expired.map((b) => b.id);
+
+      if (expiredIds.length === 0) return;
+
+      await this.bidRepo.update(expiredIds, { status: BidStatus.Expired });
+      await this.bidRedis.cleanupExpiredBids();
+
+      this.logger.log(`Cleaned up ${expiredIds.length} expired bids`);
+
+      // إشعار الراكبين بانتهاء مزايداتهم
+      for (const id of expiredIds) {
+        await this.pubSub.publish(BID_EXPIRED, { bidExpired: { id } });
+      }
     });
-
-    const now = new Date();
-    const expiredIds = expired
-      .filter((b) => b.expiresAt < now)
-      .map((b) => b.id);
-
-    if (expiredIds.length === 0) return;
-
-    await this.bidRepo.update(expiredIds, { status: BidStatus.Expired });
-    await this.bidRedis.cleanupExpiredBids();
-
-    this.logger.log(`Cleaned up ${expiredIds.length} expired bids`);
-
-    // إشعار الراكبين بانتهاء مزايداتهم
-    for (const id of expiredIds) {
-      await this.pubSub.publish(BID_EXPIRED, { bidExpired: { id } });
-    }
   }
 
   // =============================================

@@ -9,4 +9,5 @@ export { OrderRedisService } from './lib/order-redis.service';
 export type { OrderRedisData } from './lib/order-redis.service';
 export { BidRedisService } from './lib/bid-redis.service';
 export type { BidRedisDetails } from './lib/bid-redis.service';
+export { CronLockService } from './lib/cron-lock.service';
 export { RedisKeys, BID_EXPIRY_MS, ORDER_DRIVER_TIMEOUT_SECONDS } from './lib/redis-keys.constant';

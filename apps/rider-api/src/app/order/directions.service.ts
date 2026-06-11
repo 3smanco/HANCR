@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRedis } from '@songkeys/nestjs-redis';
+import Redis from 'ioredis';
 
 export interface RouteResult {
   /** مسافة الطريق الفعلية بالأمتار */
@@ -21,9 +23,25 @@ export interface RouteResult {
 export class DirectionsService {
   private readonly logger = new Logger(DirectionsService.name);
   private readonly apiKey: string | undefined;
+  /** مدة بقاء نتيجة المسار في الكاش (دقائق) — يقلّل نداءات Google المُكلفة. */
+  private static readonly CACHE_TTL_SECONDS = 600;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    @InjectRedis() private readonly redis: Redis,
+  ) {
     this.apiKey = this.config.get<string>('GOOGLE_MAPS_API_KEY');
+  }
+
+  /** مفتاح كاش من إحداثيات مقرّبة (~11م دقة) — رحلات متشابهة تشترك بالنتيجة. */
+  private cacheKey(
+    origin: { lat: number; lng: number },
+    destination: { lat: number; lng: number },
+    waypoints: Array<{ lat: number; lng: number }>,
+  ): string {
+    const r = (n: number) => n.toFixed(4);
+    const pt = (p: { lat: number; lng: number }) => `${r(p.lat)},${r(p.lng)}`;
+    return `hancr:route:${pt(origin)}|${pt(destination)}|${waypoints.map(pt).join('~')}`;
   }
 
   async getRoute(
@@ -31,6 +49,14 @@ export class DirectionsService {
     destination: { lat: number; lng: number },
     waypoints: Array<{ lat: number; lng: number }> = [],
   ): Promise<RouteResult> {
+    const key = this.cacheKey(origin, destination, waypoints);
+    try {
+      const cached = await this.redis.get(key);
+      if (cached) return JSON.parse(cached) as RouteResult;
+    } catch {
+      // كاش غير متاح — نكمل للحساب المباشر
+    }
+
     if (this.apiKey) {
       try {
         const wp =
@@ -71,12 +97,14 @@ export class DirectionsService {
               (s, l) => s + (l.duration?.value ?? 0),
               0,
             );
-            return {
+            const apiResult: RouteResult = {
               distanceMeters,
               durationSeconds,
               polyline: data.routes[0].overview_polyline?.points,
               fromApi: true,
             };
+            await this.cacheResult(key, apiResult);
+            return apiResult;
           }
         }
         this.logger.warn(
@@ -96,7 +124,22 @@ export class DirectionsService {
       distanceMeters += Math.round(this.haversine(seq[i], seq[i + 1]) * 1.3);
     }
     const durationSeconds = Math.ceil(distanceMeters / 8); // ~30 كم/س
-    return { distanceMeters, durationSeconds, fromApi: false };
+    const fallback: RouteResult = { distanceMeters, durationSeconds, fromApi: false };
+    // نكتب الاحتياط بمدة أقصر — يُستبدَل بنتيجة API لاحقاً عند توفّرها.
+    await this.cacheResult(key, fallback, 120);
+    return fallback;
+  }
+
+  private async cacheResult(
+    key: string,
+    result: RouteResult,
+    ttl: number = DirectionsService.CACHE_TTL_SECONDS,
+  ): Promise<void> {
+    try {
+      await this.redis.setex(key, ttl, JSON.stringify(result));
+    } catch {
+      // كاش غير متاح — نتجاهل بصمت
+    }
   }
 
   private haversine(

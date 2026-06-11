@@ -50,10 +50,16 @@ export class AuthService {
       OTP_TTL_SECONDS,
       JSON.stringify({ code, attempts: 0 }),
     );
-    this.logger.log(`Driver OTP for ${phone}: ${code}`);
+    // أمن: لا نُسجّل قيمة OTP أبداً. في dev فقط للتشخيص.
+    if (isDev) {
+      this.logger.debug(`[dev] Driver OTP for ${phone}: ${code}`);
+    } else {
+      this.logger.log(`Driver OTP issued for ${phone}`);
+    }
 
     const sms = await this.smsService.sendOtp(phone, code, 'ar');
-    const exposeDevOtp = isDev || !sms.success || isTestPhone;
+    // أمن: لا نكشف الكود إلا في dev أو لرقم تجريبي ثابت. فشل Twilio لا يكشفه.
+    const exposeDevOtp = isDev || isTestPhone;
 
     let message: string;
     if (sms.success) {

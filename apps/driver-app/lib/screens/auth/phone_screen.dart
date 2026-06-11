@@ -6,6 +6,7 @@ import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/i18n/app_localization.dart';
 
 class _Country {
   final String flag;
@@ -158,7 +159,7 @@ class _PhoneScreenState extends State<PhoneScreen> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2, color: Colors.white),
                           )
-                        : const Text('Send OTP'),
+                        : Text(tr('sendOtp')),
                   ),
                 ],
               ),
