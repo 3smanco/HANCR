@@ -30,9 +30,10 @@
     - معماري: الموقع `output:'export'` (static) → مصادقة **client-side** (توكن localStorage، مطابق للتطبيق). `riderAuth.ts` (fetch لـ `api.hancr.com/rider/graphql`: sendOtp/verifyOtp/me).
     - **نشر الموقع:** على الخادم `cd /opt/hancr/apps/landing && npm run build` ثم `sudo rsync -a --delete --exclude downloads out/ /var/www/hancr-landing/` (⚠️ exclude downloads ليبقى الـ APK). chown www-data.
   - **✅ E3 (تقدير الأجرة من الويب) منشور (PR #74):** ودجة في /account — الموقع الحالي (geolocation) + وجهة من الأماكن المحفوظة + خدمة → routePreview (قراءة فقط، لا إنشاء طلب). أضيفت استعلامات services/savedPlaces/routePreview في riderAuth.ts.
-    - **متبقٍّ E (الحجز الكامل — الأكبر، يحتاج جلسة مركّزة + مراجعة أمنية):** إنشاء طلب فعلي من الويب (`createOrder`) + اختيار وجهة حرّة عبر خرائط (الموقع **يحتاج NEXT_PUBLIC_GOOGLE_MAPS_KEY** + Google Maps JS SDK — غير موجود حالياً) + متابعة حية (subscription) + دفع ويب (مع D). مخطّط rider-api جاهز: `createOrder(input{points,addresses,serviceId,regionId})`, `routePreview`, `services(regionId)`.
-    - تحصين: httpOnly cookie بدل localStorage يتطلّب تحويل الموقع من static-export إلى SSR.
-  - **متبقٍّ عام:** D (دفع ببوابة، مؤجَّل لبيانات التاجر) · الحجز الويب الكامل (E3 المتبقّي).
+    - **✅ E3 الحجز الكامل من المتصفح منشور (PR #75):** Google Places Autocomplete (بحث وجهة حرّ) + اختصارات الأماكن المحفوظة + الموقع الحالي → routePreview → **createOrder** (طلب فعلي). `NEXT_PUBLIC_GOOGLE_MAPS_KEY` مضبوط في `/opt/hancr/apps/landing/.env.production` على الخادم (gitignored؛ يجب إعادة ضبطه إن أُعيد تثبيت الخادم). المفتاح مخبوز في البناء.
+    - ⚠️ **للتحقق من المالك:** مفتاح Google يجب أن يكون مُفعَّلاً لـ **Maps JavaScript API + Places API** ويسمح بـ referrer `hancr.com` ليعمل الـ autocomplete في المتصفح.
+    - **متبقٍّ E (تحسينات):** متابعة حية للطلب من الويب (subscription) · دفع ويب (مع D) · تحصين httpOnly cookie (يتطلّب تحويل لـ SSR).
+  - **متبقٍّ عام:** D (دفع ببوابة، مؤجَّل لبيانات التاجر) · متابعة/دفع الويب.
 - **خطة N مكتملة (N1→N11).** آخر إنجاز: N11 — ذكاء اللوحة (PR #63).
 - **🔒 فحص أمني شامل (مجلس LLM) — 2026-06-11:** أُصلحت 13 نقطة حرجة/عالية (أمن+مال)، مُتحقَّقة tsc=0. التفاصيل والمتبقّي المرتّب في `.claude/council/REMEDIATION.md`. تقرير المجلس: `.claude/council/council-report-20260611.html`.
   - **أُصلح:** أسرار JWT منفصلة+fail-fast · وقف تسريب/تسجيل OTP · حصر شحن المحفظة المجاني+التأكيد الذاتي في dev · حُرّاس أدوار الأدمن · IDOR المحادثة · `providerShare` عمولة المنصة · قبول الرحلة/المزايدة/الكوبون ذرّي · تحرير السائق عند الإلغاء · `.env` بأسرار قوية.
