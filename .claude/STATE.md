@@ -17,7 +17,14 @@
 - **🚀 نُشر على الإنتاج (2026-06-11):** PR #65 مُدمَج في main (squash 6ca02a7). الخادم على 6ca02a7، npm ci، الـ3 APIs + admin-panel أُعيد تشغيلها وكلها `/health/ready=200`. فهارس الأداء مطبَّقة عبر docker exec psql (CONCURRENTLY). admin-panel أُعيد بناؤه بمفتاح الخريطة (مخبوز ✓).
   - **درس مهم للنشر:** pm2 يعمل على المضيف لا داخل docker. `.env.prod` يحوي `DATABASE_HOST=postgres`/`REDIS_HOST=redis` (أسماء شبكة docker لا تُحلّ على المضيف). **لا** تُعِد التشغيل بـ `--update-env` بعد `source .env.prod` مباشرة. الصحيح: استخدم `scripts/server-fix-restart.sh` (يضبط HOST=127.0.0.1 ويعيد عبر ecosystem.config.js). docker postgres/redis منشوران على 127.0.0.1:5432/6379.
   - **ecosystem.config.js على الخادم:** أُضيف `JWT_DRIVER_SECRET: process.env.JWT_DRIVER_SECRET` (كتلة السائق كانت تمرّر JWT_SECRET فقط). المنافذ: rider 3000 · driver 3001 · admin 3002 · admin-panel 3003.
-- **متبقٍّ:** (4) إعادة بناء APK للراكب/السائق ورفعها على الموقع · (5) توليد migration للجداول الناقصة (prod فيه الجداول أصلاً؛ للـ clean-deploy فقط).
+- **✅ التطبيقات منشورة (2026-06-11):** أُعيد بناء APK release للراكب (98.5MB) والسائق (94.5MB)، ورُفعا إلى `/var/www/hancr-landing/downloads/hancr-{rider,driver}.apk` (www-data 644). كلاهما يردّ HTTP 200 على hancr.com/downloads. (نسخ احتياطية `.bak` محفوظة.)
+- **⏸️ محجوب — توليد migration الجداول الناقصة:** Docker Desktop المحلي غير مستجيب (postgis pull عالق، 5433 ECONNREFUSED). غير حاجب: prod فيه كل الجداول. أمر التشغيل الجاهز عند توفّر Docker (يصلح خطأ ts-node TS5109 عبر TS_NODE_PROJECT):
+  ```
+  docker compose -f docker/docker-compose.yml up -d postgres   # انتظر healthy
+  TS_NODE_PROJECT=tsconfig.base.json node --require ts-node/register/transpile-only ./node_modules/typeorm/cli.js migration:run -d libs/database/src/lib/data-source.ts
+  TS_NODE_PROJECT=tsconfig.base.json node --require ts-node/register/transpile-only ./node_modules/typeorm/cli.js migration:generate libs/database/src/lib/migrations/MissingTables -d libs/database/src/lib/data-source.ts
+  ```
+  (data-source يحمّل `.env` عبر dotenv → DB المحلي localhost:5433. راجع SQL المولّد قبل الاعتماد.)
 - **⚠️ نشر هذه الإصلاحات:** الـ3 APIs تحتاج rebuild + `pm2 restart`. شغّل migration الفهارس: `npm run migration:run`. تأكّد من وجود `JWT_DRIVER_SECRET` و`STRIPE/HYPERPAY/MOYASAR_WEBHOOK_SECRET` في بيئة الإنتاج (fail-fast يرفض الإقلاع بدونها).
 - **الخطة المعتمدة:** `C:\Users\7bici\.claude\plans\valiant-percolating-sparkle.md` (مكتملة).
 - **نشر معلّق على الإنتاج (PRs #57–63):**
