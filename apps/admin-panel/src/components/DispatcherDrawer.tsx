@@ -73,6 +73,14 @@ export function DispatcherDrawer({
 
   const handleSubmit = () => {
     if (!picked) return;
+    // تحقّق: الإحداثيات أرقام صحيحة (كان Number('abc')=NaN يمرّ ويُرسَل للـ API).
+    const nums = [originLat, originLng, destLat, destLng, serviceId, regionId].map(
+      Number,
+    );
+    if (nums.some((n) => !Number.isFinite(n))) {
+      toast.error('قيم غير صحيحة — تحقّق من الإحداثيات/المعرّفات');
+      return;
+    }
     create({
       variables: {
         input: {

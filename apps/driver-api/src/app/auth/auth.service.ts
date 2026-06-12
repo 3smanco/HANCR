@@ -11,6 +11,7 @@ import { InjectRedis } from '@songkeys/nestjs-redis';
 import Redis from 'ioredis';
 import { DriverEntity } from '@hancr/database';
 import { SmsService } from '@hancr/notifications';
+import { captureException } from '@hancr/observability';
 import { JwtPayload } from './jwt.strategy';
 
 const OTP_TTL_SECONDS = 300;
@@ -68,18 +69,27 @@ export class AuthService {
     const sms = await this.smsService.sendOtp(phone, code, 'ar');
     // أمن: لا نكشف الكود إلا في dev أو لرقم تجريبي ثابت. فشل Twilio لا يكشفه.
     const exposeDevOtp = isDev || isTestPhone;
+    const deliverable = sms.success || exposeDevOtp;
+
+    if (!deliverable && this.smsService.enabled) {
+      this.logger.error(`Driver OTP SMS delivery failed for ${phone}: ${sms.error}`);
+      captureException(
+        new Error(`Driver OTP SMS delivery failed: ${sms.error}`),
+        { phone, gateway: 'twilio' },
+      );
+    }
 
     let message: string;
     if (sms.success) {
       message = `OTP sent to ${phone}`;
-    } else if (!this.smsService.enabled) {
-      message = 'OTP sent (dev mode — Twilio not configured)';
+    } else if (exposeDevOtp) {
+      message = 'OTP (dev) — returned in response';
     } else {
-      message = `SMS failed (${sms.error}) — using dev OTP`;
+      message = 'تعذّر إرسال رمز التحقق حالياً. حاول لاحقاً.';
     }
 
     return {
-      success: true,
+      success: deliverable,
       message,
       devOtp: exposeDevOtp ? code : undefined,
     };
