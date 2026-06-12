@@ -95,6 +95,14 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
         showBottomHalo: true,
         child: BlocConsumer<AuthBloc, AuthState>(
           listener: (ctx, state) {
+            if (state is AuthNeedsPhone) {
+              ScaffoldMessenger.of(ctx).showSnackBar(
+                SnackBar(
+                  content: Text(tr('addPhoneToComplete')),
+                  backgroundColor: AuroraColors.smoke,
+                ),
+              );
+            }
             if (state is AuthError) {
               ScaffoldMessenger.of(ctx).showSnackBar(
                 SnackBar(
@@ -370,29 +378,39 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _socialButton(Icons.g_mobiledata_rounded, 'Google'),
+            // Google — دخول حقيقي
+            _socialButton(
+              Icons.g_mobiledata_rounded,
+              onTap: () => context
+                  .read<AuthBloc>()
+                  .add(const AuthGoogleSignInRequested()),
+            ),
             const SizedBox(width: AuroraSpacing.md),
-            _socialButton(Icons.apple, 'Apple'),
+            // الإيميل — دخول حقيقي (OTP)
+            _socialButton(
+              Icons.alternate_email,
+              onTap: () => context.push('/auth/email'),
+            ),
             const SizedBox(width: AuroraSpacing.md),
-            _socialButton(Icons.close_rounded, 'X'),
+            // Apple — قريباً
+            _socialButton(
+              Icons.apple,
+              onTap: () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text('Apple — ${tr('comingSoonSocial')}'),
+                backgroundColor: AuroraColors.smoke,
+              )),
+            ),
           ],
         ),
       ],
     );
   }
 
-  Widget _socialButton(IconData icon, String provider) {
+  Widget _socialButton(IconData icon, {required VoidCallback onTap}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('$provider — ${tr('comingSoonSocial')}'),
-              backgroundColor: AuroraColors.smoke,
-            ),
-          );
-        },
+        onTap: onTap,
         borderRadius: BorderRadius.circular(AuroraRadius.md),
         child: Container(
           width: 64,

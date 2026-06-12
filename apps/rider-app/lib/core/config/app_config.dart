@@ -56,6 +56,14 @@ class AppConfig {
     defaultValue: '',
   );
 
+  // ── Google Sign-In ────────────────────────────────────────────────────────
+  /// Web OAuth client ID (من Google Cloud) — لازم لإرجاع idToken للخادم.
+  /// فارغ = زر Google معطّل (يُظهر رسالة "غير مُهيّأ بعد").
+  static const String googleServerClientId = String.fromEnvironment(
+    'GOOGLE_SERVER_CLIENT_ID',
+    defaultValue: '',
+  );
+
   // ── OTP ───────────────────────────────────────────────────────────────────
   static const int otpLength = 6;
   static const int otpResendSeconds = 30;

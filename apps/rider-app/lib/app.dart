@@ -18,6 +18,8 @@ import 'core/theme/aurora_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'screens/auth/aurora_otp_screen.dart';
 import 'screens/auth/aurora_phone_screen.dart';
+import 'screens/auth/aurora_email_screen.dart';
+import 'screens/auth/aurora_email_otp_screen.dart';
 import 'core/models/order_model.dart';
 import 'screens/booking/aurora_booking_screen.dart';
 import 'screens/booking/pickup_confirmation_screen.dart';
@@ -123,6 +125,19 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
               devOtp = m['devOtp'] as String?;
             }
             return AuroraOtpScreen(phone: phone, devOtp: devOtp);
+          },
+        ),
+        GoRoute(
+            path: '/auth/email',
+            builder: (_, __) => const AuroraEmailScreen()),
+        GoRoute(
+          path: '/auth/email-otp',
+          builder: (_, state) {
+            final m = (state.extra as Map?) ?? const {};
+            return AuroraEmailOtpScreen(
+              email: m['email'] as String? ?? '',
+              devOtp: m['devOtp'] as String?,
+            );
           },
         ),
         GoRoute(path: '/home', builder: (_, __) => const AuroraMainScreen()),

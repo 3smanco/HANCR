@@ -62,8 +62,10 @@ export class AuthService {
   // أرقام تجريبية بـ OTP ثابت — للـ demo + Play Store reviewers
   // OTP الثابت: 123456 (6 خانات)
   private static readonly TEST_PHONES = new Set<string>([
-    '+966500000001', // Rider demo
-    '+966500000002', // Rider demo 2
+    '+97433000001', // Rider demo (Qatar)
+    '+97433000002', // Rider demo 2 (Qatar)
+    '+966500000001', // Rider demo (KSA) — legacy
+    '+966500000002', // Rider demo 2 (KSA) — legacy
   ]);
 
   async sendOtp(input: SendOtpInput): Promise<SendOtpResponse> {

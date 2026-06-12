@@ -11,8 +11,8 @@ const String sendOtpMutation = r'''
 ''';
 
 const String verifyOtpMutation = r'''
-  mutation VerifyOtp($phone: String!, $code: String!, $referralCode: String) {
-    verifyOtp(input: { phone: $phone, code: $code, referralCode: $referralCode }) {
+  mutation VerifyOtp($phone: String!, $code: String!, $referralCode: String, $pendingToken: String) {
+    verifyOtp(input: { phone: $phone, code: $code, referralCode: $referralCode, pendingToken: $pendingToken }) {
       accessToken
       isNewUser
       rider {
@@ -30,6 +30,46 @@ const String verifyOtpMutation = r'''
         banned
         active
       }
+    }
+  }
+''';
+
+// ─── دخول الإيميل (OTP) ───
+const String sendEmailOtpMutation = r'''
+  mutation SendEmailOtp($email: String!) {
+    sendEmailOtp(input: { email: $email }) {
+      success
+      message
+      devOtp
+    }
+  }
+''';
+
+const String verifyEmailOtpMutation = r'''
+  mutation VerifyEmailOtp($email: String!, $code: String!, $referralCode: String) {
+    verifyEmailOtp(input: { email: $email, code: $code, referralCode: $referralCode }) {
+      success
+      needsPhone
+      pendingToken
+      accessToken
+      isNewUser
+      message
+      rider { id phoneNumber firstName email balance currency banned active }
+    }
+  }
+''';
+
+// ─── دخول Google ───
+const String googleAuthMutation = r'''
+  mutation GoogleAuth($idToken: String!, $referralCode: String) {
+    googleAuth(input: { idToken: $idToken, referralCode: $referralCode }) {
+      success
+      needsPhone
+      pendingToken
+      accessToken
+      isNewUser
+      message
+      rider { id phoneNumber firstName email balance currency banned active }
     }
   }
 ''';

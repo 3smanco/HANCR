@@ -67,8 +67,10 @@ export class AuthService {
 
   // أرقام تجريبية بـ OTP ثابت = 123456 (6 خانات)
   private static readonly TEST_DRIVER_PHONES = new Set<string>([
-    '+966500000010', // Driver demo
-    '+966500000011', // Driver demo 2
+    '+97433000010', // Driver demo (Qatar)
+    '+97433000011', // Driver demo 2 (Qatar)
+    '+966500000010', // Driver demo (KSA) — legacy
+    '+966500000011', // Driver demo 2 (KSA) — legacy
   ]);
 
   async sendOtp(
