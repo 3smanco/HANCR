@@ -2,7 +2,18 @@
 
 > هذا الملف هو **المصدر الحي لحالة المشروع**. يُحدَّث بعد كل خطوة عمل.
 > ابدأ أي محادثة جديدة بقراءته (وحده يكفي للسياق) بدل تحميل المهارة الضخمة أو قراءة عشرات الملفات.
-> آخر تحديث: 2026-06-11
+> آخر تحديث: 2026-06-12
+
+---
+
+## 🔴 آخر إصلاح (2026-06-12) — regression الدخول (PR #78، منشور+محقَّق حيّاً)
+**المشكلة:** الموجة F عطّلت الأرقام التجريبية في الإنتاج (`isTestPhone = isDev && ...`)، ومع بقاء Twilio تجريبياً → **لا طريق دخول يعمل** للتطبيقين + زر رجوع OTP لا يعمل + أزرار دخول اجتماعي محذوفة.
+- **الدخول:** علم `ALLOW_TEST_PHONES` (افتراضي `true`؛ يُضبط `false` عند ترقية Twilio) في rider-api + driver-api `auth.service.ts`. **محقَّق حيّاً:** `+966500000001/123456` و`+966500000010/123456` (driver: mutation `driverSendOtp`/`driverVerifyOtp` بوسيط `phone`) يُصدران JWT صالحاً.
+- **زر رجوع OTP:** السبب = هاتف→OTP كان `context.go` (يستبدل المكدّس). صار `context.push` + احتياط `canPop()?pop():go('/auth/phone')` في `aurora_otp_screen.dart`.
+- **أزرار الدخول الاجتماعي (Google·Apple·X):** أُعيدت في `aurora_phone_screen.dart` (`_buildSocialButtons`/`_socialButton`، toast "قريباً" صادق) + مفتاحا i18n `orContinueWith`/`comingSoonSocial`.
+- **TimeoutException (No stream event 5s):** كان عابراً (الـ API يُعاد تشغيله أثناء نشر F). تأكّد أن مسار ws سليم: nginx يضبط `Upgrade`/`Connection $connection_upgrade` (map معرّف في `/etc/nginx/sites-available/hancr:1`) على /rider /driver /admin — الاشتراكات تعمل.
+- **APK الراكب الجديد (98.8MB) منشور** على hancr.com/downloads/hancr-rider.apk (HTTP 200). driver-app لم يتغيّر (إصلاح الدخول خادمي فقط).
+- **⚠️ تذكير للمالك:** بعد ترقية Twilio عن الحساب التجريبي، اضبط `ALLOW_TEST_PHONES=false` في `.env.prod` لإغلاق باب الأرقام التجريبية.
 
 ---
 
