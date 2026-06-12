@@ -37,6 +37,10 @@ dependencies:
   # Auth — Google Sign-In
   google_sign_in: ^6.2.1
 
+  # AI assistant — voice in/out
+  speech_to_text: ^7.0.0
+  flutter_tts: ^4.2.0
+
   # UI
   cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1

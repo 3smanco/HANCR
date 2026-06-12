@@ -395,14 +395,14 @@ class _AuroraCommuterSetupScreenState
                 Wrap(
                   spacing: 6,
                   children: List.generate(7, (i) {
-                    const names = [
-                      'الأحد',
-                      'الإثنين',
-                      'الثلاثاء',
-                      'الأربعاء',
-                      'الخميس',
-                      'الجمعة',
-                      'السبت',
+                    final names = [
+                      tr('daySun'),
+                      tr('dayMon'),
+                      tr('dayTue'),
+                      tr('dayWed'),
+                      tr('dayThu'),
+                      tr('dayFri'),
+                      tr('daySat'),
                     ];
                     final sel = _days.contains(i);
                     return ChoiceChip(

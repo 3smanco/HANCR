@@ -67,6 +67,7 @@ import { ObservabilityModule } from '@hancr/observability';
 import { AuthModule } from './auth/auth.module';
 import { RiderModule } from './rider/rider.module';
 import { OrderModule } from './order/order.module';
+import { AiModule } from './ai/ai.module';
 import { BidModule } from './bid/bid.module';
 import { LoyaltyModule } from './loyalty/loyalty.module';
 import { ServiceModule } from './service/service.module';
@@ -196,6 +197,7 @@ import { pubSubProvider } from './pubsub.provider';
     AuthModule,
     RiderModule,
     OrderModule,
+    AiModule,
     BidModule,
     LoyaltyModule,
     ServiceModule,
