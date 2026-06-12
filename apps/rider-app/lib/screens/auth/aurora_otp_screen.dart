@@ -116,7 +116,9 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: () => context.pop(),
+                            onTap: () => context.canPop()
+                                ? context.pop()
+                                : context.go('/auth/phone'),
                             customBorder: const CircleBorder(),
                             child: Icon(Icons.arrow_back,
                                 color: AuroraColors.pearl, size: 20),

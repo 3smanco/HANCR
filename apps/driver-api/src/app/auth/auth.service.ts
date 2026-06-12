@@ -48,8 +48,13 @@ export class AuthService {
     if (sent > 3) {
       throw new UnauthorizedException('محاولات كثيرة. انتظر دقيقة.');
     }
-    // أمن: الأرقام التجريبية مُعطّلة في الإنتاج (باب خلفي سابق).
-    const isTestPhone = isDev && AuthService.TEST_DRIVER_PHONES.has(phone);
+    // الأرقام التجريبية — مُتحكَّم بها عبر ALLOW_TEST_PHONES (مُفعَّلة للاختبار
+    // حتى يعمل Twilio؛ اضبطها false عند الإطلاق الحقيقي).
+    const allowTestPhones =
+      isDev ||
+      this.configService.get<string>('ALLOW_TEST_PHONES', 'true') !== 'false';
+    const isTestPhone =
+      allowTestPhones && AuthService.TEST_DRIVER_PHONES.has(phone);
     const code = isTestPhone
       ? '123456'
       : Math.floor(100000 + Math.random() * 900000).toString();
