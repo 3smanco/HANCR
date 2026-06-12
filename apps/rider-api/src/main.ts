@@ -17,7 +17,9 @@ const logger = new Logger('RiderAPI');
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(
     RiderApiModule,
-    new FastifyAdapter({ logger: false }),
+    // trustProxy: خلف nginx/LB → req.ip يصبح IP العميل الحقيقي (لا البروكسي)
+    // ليعمل تحديد المعدّل لكل IP فعلياً (كان منهاراً لبكت واحد).
+    new FastifyAdapter({ logger: false, trustProxy: true }),
     // أمن الدفع: نحتفظ بالبايتات الخام للجسم للتحقق من توقيع webhook الدفع.
     { rawBody: true },
   );
@@ -56,9 +58,17 @@ async function bootstrap(): Promise<void> {
   const config = app.get(ConfigService);
   const env = config.get<string>('NODE_ENV') ?? 'development';
   const corsOrigins = config.get<string>('CORS_ORIGINS') ?? '';
+  // أمن: في الإنتاج لا نعكس أي origin مع credentials. لو CORS_ORIGINS فارغ
+  // نقع على نطاقات hancr الافتراضية (fail-closed) بدل origin:true.
   const allowedOrigins =
-    env === 'production' && corsOrigins
-      ? corsOrigins.split(',').map((s) => s.trim())
+    env === 'production'
+      ? (corsOrigins
+          ? corsOrigins.split(',').map((s) => s.trim())
+          : [
+              'https://hancr.com',
+              'https://www.hancr.com',
+              'https://admin.hancr.com',
+            ])
       : true;
 
   await app.register(

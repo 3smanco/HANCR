@@ -106,11 +106,15 @@ export class OrderService {
       throw new BadRequestException('You already have an active order');
     }
 
-    // جلب الخدمة
+    // جلب الخدمة — أمن: تُقيَّد بالمنطقة المطلوبة وبكونها مُفعَّلة.
+    // (كان يُجلب بالـ id فقط → يمكن تمرير خدمة منطقة أخرى/معطّلة فيُسعَّر بسعرها،
+    // وregionId وهمي يتجاوز تسعير المناطق. ربط الخدمة بالمنطقة يسدّ الثغرتين.)
     const service = await this.serviceRepo.findOne({
-      where: { id: input.serviceId },
+      where: { id: input.serviceId, regionId: input.regionId, enabled: true },
     });
-    if (!service) throw new NotFoundException('Service not found');
+    if (!service) {
+      throw new NotFoundException('الخدمة غير متاحة في هذه المنطقة');
+    }
 
     // حساب مسافة الطريق الفعلية ومدتها عبر Google Directions (مع احتياط haversine)
     const originPoint = input.points[0];
@@ -589,7 +593,7 @@ export class OrderService {
     polyline?: string;
   }> {
     const service = await this.serviceRepo.findOne({
-      where: { id: serviceId },
+      where: { id: serviceId, enabled: true },
     });
     if (!service) throw new NotFoundException('Service not found');
 

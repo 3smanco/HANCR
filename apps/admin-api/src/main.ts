@@ -17,7 +17,7 @@ const logger = new Logger('AdminAPI');
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(
     AdminApiModule,
-    new FastifyAdapter({ logger: false }),
+    new FastifyAdapter({ logger: false, trustProxy: true }),
   );
 
   // إغلاق رشيق عند SIGTERM (نشر/إعادة تشغيل pm2).
@@ -46,9 +46,16 @@ async function bootstrap(): Promise<void> {
   const config = app.get(ConfigService);
   const env = config.get<string>('NODE_ENV') ?? 'development';
   const corsOrigins = config.get<string>('ADMIN_CORS_ORIGINS') ?? '';
+  // أمن: fail-closed في الإنتاج — لا origin:true مع credentials.
   const allowedOrigins =
-    env === 'production' && corsOrigins
-      ? corsOrigins.split(',').map((s) => s.trim())
+    env === 'production'
+      ? (corsOrigins
+          ? corsOrigins.split(',').map((s) => s.trim())
+          : [
+              'https://admin.hancr.com',
+              'https://hancr.com',
+              'https://www.hancr.com',
+            ])
       : true;
 
   await app.register(

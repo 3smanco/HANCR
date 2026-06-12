@@ -1,4 +1,13 @@
 import { ObjectType, InputType, Field, Int, Float } from '@nestjs/graphql';
+import {
+  IsEmail,
+  IsInt,
+  IsOptional,
+  Matches,
+  MaxLength,
+} from 'class-validator';
+
+const PHONE_RE = /^\+\d{8,15}$/;
 
 // ─── Rider ──────────────────────────────────────────────────────────────────
 
@@ -118,50 +127,50 @@ export class BanUserInput {
 
 @InputType()
 export class AdminCreateRiderInput {
-  @Field() phoneNumber!: string;
-  @Field({ nullable: true }) firstName?: string;
-  @Field({ nullable: true }) lastName?: string;
-  @Field({ nullable: true }) email?: string;
+  @Field() @Matches(PHONE_RE, { message: 'رقم جوال دولي غير صحيح' }) phoneNumber!: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(60) firstName?: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(60) lastName?: string;
+  @Field({ nullable: true }) @IsOptional() @IsEmail() email?: string;
   /** يُشتق من الهاتف إن لم يُمرَّر (+966 → SAR …) */
-  @Field({ nullable: true }) countryCode?: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(5) countryCode?: string;
 }
 
 @InputType()
 export class AdminUpdateRiderInput {
-  @Field(() => Int) id!: number;
-  @Field({ nullable: true }) firstName?: string;
-  @Field({ nullable: true }) lastName?: string;
-  @Field({ nullable: true }) email?: string;
-  @Field({ nullable: true }) phoneNumber?: string;
+  @Field(() => Int) @IsInt() id!: number;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(60) firstName?: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(60) lastName?: string;
+  @Field({ nullable: true }) @IsOptional() @IsEmail() email?: string;
+  @Field({ nullable: true }) @IsOptional() @Matches(PHONE_RE) phoneNumber?: string;
 }
 
 @InputType()
 export class AdminCreateDriverInput {
-  @Field() phoneNumber!: string;
-  @Field() firstName!: string;
-  @Field({ nullable: true }) lastName?: string;
-  @Field({ nullable: true }) countryCode?: string;
-  @Field({ nullable: true }) carBrand?: string;
-  @Field({ nullable: true }) carModel?: string;
-  @Field({ nullable: true }) carColor?: string;
-  @Field({ nullable: true }) plateNumber?: string;
-  @Field(() => Int, { nullable: true }) carYear?: number;
-  @Field(() => [Int], { nullable: true }) serviceIds?: number[];
-  @Field(() => Int, { nullable: true }) regionId?: number;
+  @Field() @Matches(PHONE_RE, { message: 'رقم جوال دولي غير صحيح' }) phoneNumber!: string;
+  @Field() @MaxLength(60) firstName!: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(60) lastName?: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(5) countryCode?: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(40) carBrand?: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(40) carModel?: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(30) carColor?: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(20) plateNumber?: string;
+  @Field(() => Int, { nullable: true }) @IsOptional() @IsInt() carYear?: number;
+  @Field(() => [Int], { nullable: true }) @IsOptional() serviceIds?: number[];
+  @Field(() => Int, { nullable: true }) @IsOptional() @IsInt() regionId?: number;
   /** اعتماد فوري (يتجاوز رفع الوثائق) — لسائقي الأسطول/الاختبار */
-  @Field({ nullable: true, defaultValue: false }) approveImmediately?: boolean;
+  @Field({ nullable: true, defaultValue: false }) @IsOptional() approveImmediately?: boolean;
 }
 
 @InputType()
 export class AdminUpdateDriverInput {
-  @Field(() => Int) id!: number;
-  @Field({ nullable: true }) firstName?: string;
-  @Field({ nullable: true }) lastName?: string;
-  @Field({ nullable: true }) phoneNumber?: string;
-  @Field({ nullable: true }) carBrand?: string;
-  @Field({ nullable: true }) carModel?: string;
-  @Field({ nullable: true }) carColor?: string;
-  @Field({ nullable: true }) plateNumber?: string;
-  @Field(() => Int, { nullable: true }) carYear?: number;
-  @Field(() => Int, { nullable: true }) regionId?: number;
+  @Field(() => Int) @IsInt() id!: number;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(60) firstName?: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(60) lastName?: string;
+  @Field({ nullable: true }) @IsOptional() @Matches(PHONE_RE) phoneNumber?: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(40) carBrand?: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(40) carModel?: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(30) carColor?: string;
+  @Field({ nullable: true }) @IsOptional() @MaxLength(20) plateNumber?: string;
+  @Field(() => Int, { nullable: true }) @IsOptional() @IsInt() carYear?: number;
+  @Field(() => Int, { nullable: true }) @IsOptional() @IsInt() regionId?: number;
 }
