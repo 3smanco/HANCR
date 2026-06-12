@@ -21,9 +21,11 @@ flutter build apk --release --dart-define=ENV=production \
 المشروع: **hancr-494520** (Hancr). أُنشئ في Google Cloud Console:
 - **HANCR Web** (Web application) = `GOOGLE_OAUTH_CLIENT_ID` = `390136620892-bkt9ive9las4eqqft40dorpnva676l4l.apps.googleusercontent.com`. JS origins: hancr.com + www. مضبوط على الخادم في `/opt/hancr/.env` + `.env.prod` (مُتحقَّق: الخلفية تتحقّق من توكنات Google).
 - **HANCR Rider Android** (package `com.zancr.hancr_rider` + SHA-1 `48:3B:B3:F2:50:4E:94:2B:7F:B1:D4:39:F1:B5:91:16:69:1B:CE:22` = توقيع debug، مُتحقَّق أنه نفس موقّع APK المنشور). يمنع DEVELOPER_ERROR على الجهاز.
-- **شاشة الموافقة في وضع Testing** (النشر للإنتاج مرفوض بالحارس). أُضيف `7bicii@gmail.com` كـ test user → يمكنه الدخول بـ Google. لإتاحته لكل المستخدمين: المالك ينشر التطبيق (Audience → Publish app) — النطاقات email/profile غير حسّاسة فلا تحتاج مراجعة Google.
-- **serverClientId في بناء الراكب:** أضِف دائماً `--dart-define=GOOGLE_SERVER_CLIENT_ID=390136620892-bkt9ive9las4eqqft40dorpnva676l4l.apps.googleusercontent.com` لبناء تطبيق الراكب (مع ENV=production + MAPS).
-- **ناقص لـ Android سائق:** عند بناء واجهة Google للسائق، أنشئ Android OAuth client بـ package تطبيق السائق + نفس SHA-1.
+- **✅ شاشة الموافقة منشورة للإنتاج (Production):** أي مستخدم Google يقدر يدخل (النطاقات email/profile غير حسّاسة، لا تحتاج مراجعة). (test user 7bicii@gmail.com مُضاف أيضاً.)
+- **✅ Android client للسائق:** `HANCR Driver Android` (package `com.zancr.hancr_driver` + SHA-1 debug `48:3B:...`).
+- **serverClientId في البناء (راكب + سائق):** أضِف دائماً `--dart-define=GOOGLE_SERVER_CLIENT_ID=390136620892-bkt9ive9las4eqqft40dorpnva676l4l.apps.googleusercontent.com`.
+- **🔑 keystore الإصدار (Play Store) — مُجهَّز لكن غير مُفعَّل:** أُنشئ `keys/hancr-upload.jks` (alias `hancr`، كلمة المرور سُلِّمت للمالك في المحادثة، gitignored؛ SHA-1 `B1:E0:93:51:16:22:D4:ED:F9:64:0A:B0:97:BD:F3:82:CA:5C:19:9D`). **مُعطَّل حالياً** (حُذف key.properties → التواقيع debug للتجربة، أبسط وأكثر اتساقاً). **مفتاح التوقيع الإنتاجي ملك المالك** — عند الإطلاق على Play: المالك يفعّله (يضع key.properties في android/ لكل تطبيق) + يسجّل بصمته B1:E0 على عميلَي Android (أو يستخدم Play App Signing ويسجّل بصمة Play). أنشأ الحارس فجوة هنا عمداً (لا يولّد الوكيل مفتاح الإنتاج تلقائياً).
+- **✅ G2-سائق (PR #85):** واجهة Google/الإيميل للسائق مكتملة.
 
 ## 🔑 حسابات تجريبية (الدخول — OTP ثابت 123456)
 | التطبيق | الرقم/الإيميل | الرمز |
