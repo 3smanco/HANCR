@@ -1,6 +1,9 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard, CurrentUser } from './jwt-auth.guard';
+import { AuthUser } from './jwt.strategy';
 import { SendOtpInput } from './dto/send-otp.input';
 import { VerifyOtpInput } from './dto/verify-otp.input';
 import { SendOtpResponse } from './dto/send-otp-response.type';
@@ -87,5 +90,14 @@ export class AuthResolver {
   @Throttle({ strict: { limit: 10, ttl: 60000 } })
   googleAuth(@Args('input') input: GoogleAuthInput): Promise<AuthResult> {
     return this.authService.googleAuth(input);
+  }
+
+  // ─── تسجيل الخروج — يُبطل كل التوكنات الحالية (إبطال جلسة الويب) ───
+  @Mutation(() => Boolean, {
+    description: 'إبطال جلسة الراكب (كل التوكنات الصادرة حتى الآن)',
+  })
+  @UseGuards(JwtAuthGuard)
+  logout(@CurrentUser() user: AuthUser): Promise<boolean> {
+    return this.authService.logout(user.riderId);
   }
 }

@@ -22,7 +22,7 @@ import { SendEmailOtpInput } from './dto/send-email-otp.input';
 import { VerifyEmailOtpInput } from './dto/verify-email-otp.input';
 import { GoogleAuthInput } from './dto/google-auth.input';
 import { RiderType } from '../rider/dto/rider.type';
-import { JwtPayload } from './jwt.strategy';
+import { JwtPayload, revokedKey } from './jwt.strategy';
 import { AppConfigReader } from '../app-config/app-config-reader.service';
 
 // N1 — defaults preserved as fallback; live values come from AppConfigReader.
@@ -522,6 +522,16 @@ export class AuthService {
       this.logger.warn(`Google token verify failed: ${(e as Error).message}`);
       return null;
     }
+  }
+
+  // =============================================
+  // logout — إبطال كل توكنات الراكب الصادرة حتى الآن
+  // =============================================
+  async logout(riderId: number): Promise<boolean> {
+    // طابع زمني (ms): JwtStrategy يرفض أي توكن iat أقدم منه.
+    // TTL = أقصى عمر توكن (7 أيام) — بعدها التوكنات منتهية أصلاً.
+    await this.redis.setex(revokedKey(riderId), 7 * 24 * 3600, Date.now().toString());
+    return true;
   }
 
   // =============================================
