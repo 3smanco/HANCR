@@ -37,7 +37,10 @@
     - **أُصلح:** 🔴 createOrder/previewRoute يربط serviceId بالمنطقة+enabled (كان يُسعَّر من منطقة وهمية/خدمة معطّلة — مؤكَّد من وكيلين) · 🟠 إلغاء باب OTP الخلفي (123456) في الإنتاج · 🟠 trustProxy:true ×3 + حدّ OTP لكل رقم 3/60ث · 🟠 CORS fail-closed · 🟡 DTO validators للأدمن + addresses[] حدود.
     - **برّأه المجلس:** IDOR (riderId من JWT)، صلاحيات الأدمن الجديدة (RBAC)، لا حقن، providerShare سليم.
     - **مُتحقَّق حيّاً:** الباب الخلفي مُغلق على الإنتاج — `sendOtp(+966500000001)` يُرجع `devOtp:null` (كان 123456). الـ3 APIs 200.
-    - **تحصين مؤجَّل:** إبطال جلسة الويب عند الخروج + CSP + referral_code unique + اشتقاق المنطقة من PostGIS.
+    - **🟫 المجلس الكامل (5 وكلاء + مراجعة متبادلة + HTML/transcript) — PR #77:** أُضيف التوسّعي + الغريب. كشفا معضلات تشغيلية فاتت على الأمن. التقارير: `.claude/council/wave-f/01-05 + VERDICT + transcript + HTML`.
+      - **🔴 إجراء المالك (CONFIG، لا كود — حاجب الإطلاق):** (T1) **ترقية Twilio من الحساب التجريبي** — خطأ 21608 + مُرسِل +1618 أمريكي → دخول كل المستخدمين الحقيقيين (ويب+تطبيق) معطّل حتى الترقية + مُرسِل KSA/QA/UAE (Messaging-Service SID). (T2) **تقييد مفتاح Google Maps** (referrer hancr.com + Maps JS/Places فقط + حدّ يومي + تنبيه فوترة).
+      - **أُصلح ونُشر (r2):** sendOtp صادق (success يعكس التسليم + Sentry) — مؤكَّد حيّاً (`success:false` عند فشل SMS) · الويب لا ينتقل لشاشة رمز ميتة + "لا سائقين" بدل "تم ✓" الكاذب + إظهار فشل الخرائط/لا خدمات · DispatcherDrawer يرفض NaN.
+      - **مؤجَّل موثّق:** إبطال توكن الويب عند الحظر/الخروج (Redis jti أو فحص banned في JwtStrategy) · Places session-token+debounce · referral_code unique · اشتقاق المنطقة من PostGIS.
   - **متبقٍّ عام:** D (دفع ببوابة، مؤجَّل لبيانات التاجر) · متابعة/دفع الويب.
 - **خطة N مكتملة (N1→N11).** آخر إنجاز: N11 — ذكاء اللوحة (PR #63).
 - **🔒 فحص أمني شامل (مجلس LLM) — 2026-06-11:** أُصلحت 13 نقطة حرجة/عالية (أمن+مال)، مُتحقَّقة tsc=0. التفاصيل والمتبقّي المرتّب في `.claude/council/REMEDIATION.md`. تقرير المجلس: `.claude/council/council-report-20260611.html`.
