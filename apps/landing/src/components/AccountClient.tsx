@@ -65,6 +65,8 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
   const [estimating, setEstimating] = useState(false);
   const [booking, setBooking] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
+  const [orderStatus, setOrderStatus] = useState<string | null>(null);
+  const [mapsError, setMapsError] = useState(false);
   const destInputRef = useRef<HTMLInputElement | null>(null);
 
   function loadEstimateData() {
@@ -112,8 +114,10 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
             setOrderId(null);
           }
         });
+        setMapsError(false);
       })
-      .catch(() => {});
+      // لا نبتلع الفشل: نُظهر للمستخدم أن بحث الوجهة غير متاح (مفتاح خرائط/شبكة).
+      .catch(() => setMapsError(true));
   }, [step]);
 
   const pickSavedPlace = (p: WebSavedPlace) => {
@@ -173,6 +177,7 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
         serviceId,
       });
       setOrderId(order.id);
+      setOrderStatus(order.status);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -188,8 +193,17 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
     }
     setBusy(true);
     try {
-      await sendOtp(p);
-      setStep('otp');
+      const res = await sendOtp(p);
+      if (res.success) {
+        setStep('otp');
+      } else {
+        // الـ backend صادق الآن: success=false يعني لم يُرسَل (لا ننتقل لشاشة الرمز).
+        setError(
+          res.message ||
+            t('تعذّر إرسال رمز التحقق حالياً. حاول لاحقاً.',
+              'Could not send the verification code right now. Try again later.'),
+        );
+      }
     } catch (e) {
       setError((e as Error).message);
     }
@@ -330,24 +344,41 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
           </p>
 
           {orderId ? (
-            <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-5 text-center">
-              <div className="text-lg font-extrabold text-white">
-                {t('تم إنشاء طلبك ✓', 'Your ride is requested ✓')}
-              </div>
-              <div className="mt-1 text-sm text-white/60">
-                {t('رقم الطلب', 'Order')} #{orderId}
-              </div>
-              <p className="mt-3 text-xs text-white/50">
-                {t('تابع رحلتك وحالة السائق من تطبيق HANCR.',
-                   'Track your ride and driver status in the HANCR app.')}
-              </p>
-              <button
-                className="mt-4 w-full rounded-xl border border-white/15 px-4 py-2.5 text-sm text-white/80 hover:bg-white/5"
-                onClick={() => { setOrderId(null); setEstimate(null); }}
-              >
-                {t('حجز رحلة أخرى', 'Book another ride')}
-              </button>
-            </div>
+            (() => {
+              const noDriver =
+                orderStatus === 'NotFound' || orderStatus === 'NoCloseFound';
+              return (
+                <div
+                  className={`rounded-xl border p-5 text-center ${
+                    noDriver
+                      ? 'border-amber-500/30 bg-amber-500/10'
+                      : 'border-green-500/30 bg-green-500/10'
+                  }`}
+                >
+                  <div className="text-lg font-extrabold text-white">
+                    {noDriver
+                      ? t('لا سائقين متاحين قربك الآن', 'No drivers available nearby right now')
+                      : t('تم إنشاء طلبك ✓', 'Your ride is requested ✓')}
+                  </div>
+                  <div className="mt-1 text-sm text-white/60">
+                    {t('رقم الطلب', 'Order')} #{orderId}
+                  </div>
+                  <p className="mt-3 text-xs text-white/50">
+                    {noDriver
+                      ? t('حاول بعد قليل أو من تطبيق HANCR.',
+                          'Try again shortly, or from the HANCR app.')
+                      : t('تابع رحلتك وحالة السائق من تطبيق HANCR.',
+                          'Track your ride and driver status in the HANCR app.')}
+                  </p>
+                  <button
+                    className="mt-4 w-full rounded-xl border border-white/15 px-4 py-2.5 text-sm text-white/80 hover:bg-white/5"
+                    onClick={() => { setOrderId(null); setOrderStatus(null); setEstimate(null); }}
+                  >
+                    {t('حجز رحلة أخرى', 'Book another ride')}
+                  </button>
+                </div>
+              );
+            })()
           ) : (
             <>
               <button
@@ -368,6 +399,12 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
                 placeholder={t('ابحث عن وجهة…', 'Search a destination…')}
                 onChange={() => { setDestCoord(null); setEstimate(null); }}
               />
+              {mapsError && (
+                <p className="mb-2 text-xs text-amber-300">
+                  {t('تعذّر تحميل بحث الخرائط. اختر من أماكنك المحفوظة أو استخدم التطبيق.',
+                     'Map search failed to load. Pick a saved place or use the app.')}
+                </p>
+              )}
               {places.length > 0 && (
                 <div className="mb-3 flex flex-wrap gap-2">
                   {places.map((p) => (
@@ -385,17 +422,24 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
               <label className="mb-1 block text-xs text-white/60">
                 {t('الخدمة', 'Service')}
               </label>
-              <select
-                className={`${input} mb-4`}
-                value={serviceId ?? ''}
-                onChange={(e) => setServiceId(Number(e.target.value) || null)}
-              >
-                {services.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {isAr ? s.name : s.nameEn ?? s.name}
-                  </option>
-                ))}
-              </select>
+              {services.length === 0 ? (
+                <p className="mb-4 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white/50">
+                  {t('لا خدمات متاحة في منطقتك حالياً.',
+                     'No services available in your area right now.')}
+                </p>
+              ) : (
+                <select
+                  className={`${input} mb-4`}
+                  value={serviceId ?? ''}
+                  onChange={(e) => setServiceId(Number(e.target.value) || null)}
+                >
+                  {services.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {isAr ? s.name : s.nameEn ?? s.name}
+                    </option>
+                  ))}
+                </select>
+              )}
 
               <button className={btn} disabled={estimating || !destCoord} onClick={calcEstimate}>
                 {estimating ? t('جارٍ الحساب…', 'Calculating…') : t('احسب الأجرة', 'Estimate fare')}

@@ -11,6 +11,7 @@ import { InjectRedis } from '@songkeys/nestjs-redis';
 import Redis from 'ioredis';
 import { RiderEntity } from '@hancr/database';
 import { SmsService } from '@hancr/notifications';
+import { captureException } from '@hancr/observability';
 import { SendOtpInput } from './dto/send-otp.input';
 import { VerifyOtpInput } from './dto/verify-otp.input';
 import { SendOtpResponse } from './dto/send-otp-response.type';
@@ -96,17 +97,31 @@ export class AuthService {
     // فشل Twilio في الإنتاج لا يكشف الكود إطلاقاً (سابقاً كان ثغرة استيلاء على الحساب).
     const exposeDevOtp = isDev || isTestPhone;
 
+    // قابل للتسليم لو نجح SMS أو كنّا في dev/رقم تجريبي (الكود يُعاد في الاستجابة).
+    const deliverable = sms.success || exposeDevOtp;
+
+    // مراقبة: فشل تسليم OTP في الإنتاج (Twilio مُفعَّل لكنه فشل) يُرسَل لـ Sentry —
+    // كان يُبتلَع كـ success:true فلا يُنبّه أحداً (مثال: حساب Twilio تجريبي/خطأ 21608).
+    if (!deliverable && this.smsService.enabled) {
+      this.logger.error(`OTP SMS delivery failed for ${phone}: ${sms.error}`);
+      captureException(
+        new Error(`OTP SMS delivery failed: ${sms.error}`),
+        { phone, gateway: 'twilio' },
+      );
+    }
+
     let message: string;
     if (sms.success) {
       message = `OTP sent to ${phone}`;
-    } else if (!this.smsService.enabled) {
-      message = 'OTP sent (dev mode — Twilio not configured)';
+    } else if (exposeDevOtp) {
+      message = 'OTP (dev) — returned in response';
     } else {
-      message = `SMS failed (${sms.error}) — using dev OTP`;
+      message = 'تعذّر إرسال رمز التحقق حالياً. حاول لاحقاً.';
     }
 
     return {
-      success: true, // OTP is always usable in dev (returned in response)
+      // أمن/صدق: success يعكس قابلية التسليم فعلاً (لا success:true كاذب).
+      success: deliverable,
       message,
       devOtp: exposeDevOtp ? code : undefined,
     };

@@ -55,11 +55,14 @@ async function gql<T>(
   return json.data;
 }
 
-export async function sendOtp(phone: string): Promise<void> {
-  await gql(
-    `mutation SendOtp($input: SendOtpInput!) { sendOtp(input: $input) { success } }`,
+export async function sendOtp(
+  phone: string,
+): Promise<{ success: boolean; message: string }> {
+  const data = await gql<{ sendOtp: { success: boolean; message: string } }>(
+    `mutation SendOtp($input: SendOtpInput!) { sendOtp(input: $input) { success message } }`,
     { input: { phone } },
   );
+  return data.sendOtp;
 }
 
 export interface RiderProfile {

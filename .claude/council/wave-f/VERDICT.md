@@ -1,33 +1,36 @@
-# 🏛️ Wave F — Council Verdict (adversarial audit of new code)
+# 🏛️ Wave F — Chairman Verdict (FULL 5-advisor council + peer review)
 
-## ✅ Where the council agrees (high confidence — ≥2 agents independently)
-- 🔴 **createOrder trusts client regionId + serviceId without validation** — Contrarian + First Principles BOTH found independently. No region-existence check; service fetched by id alone (no region/enabled binding). → bogus-region base-rate pricing, cheaper foreign-service pricing, region-locked coupon unlock. **TOP FIX.**
+5 advisors audited this session's new code (admin · saved-places · web platform): 🔴 Contrarian (web sec), 🧱 First Principles (money), 🔧 Executor (admin+build), 📈 Expansionist (prod/scale), 👁️ Outsider (does-it-work).
 
-## Confirmed SAFE (council cleared)
-- IDOR: all rider queries/mutations key on `@CurrentUser().riderId` from JWT — client can't supply riderId; ownership enforced. ✓
-- Coords bounds (lat/lng validated), points ArrayMinSize2/MaxSize5. ✓
-- Admin new mutations RBAC: all 4 + DispatcherDrawer guarded (AdminJwtGuard+AdminRolesGuard+RequireRole('ops')). ✓
-- No SQL injection (TypeORM parameterized throughout). ✓
-- providerShare applies correctly to web orders (earlier fix holds). ✓
-- Throttler STORAGE Redis-backed/global (storage fix holds). ✓
-- Build green: rider/driver/admin-api + landing tsc=0; 27/27 jest. ✓
+## ✅ Where the council agrees (cross-confirmed = highest confidence)
+- 🔴 **createOrder trusts regionId+serviceId** — Contrarian + First Principles independently. **[FIXED + deployed]**
+- 🔴 **Twilio TRIAL account → real OTP never delivered → login broken (web+app)** — Expansionist + Outsider independently. Err 21608 + US +1618 sender. The #1 launch blocker. Backend hides it (success:true).
 
-## 🎯 Prioritized fix list
-**CRITICAL**
-1. `createOrder` + `routePreview`: validate `regionId` exists/active AND resolve service with `{id, regionId, enabled:true}` (404 else). (order.service.ts:110-113,158 / previewRoute:591)
+## 🔍 Blind spots peer review caught
+The 3 security agents (round 1) cleared the code as "safe" but MISSED that the features **don't actually work for real users** — the Outsider+Expansionist (round 2) found the operational dead-ends (Twilio, Maps config, silent failures, false success). Security ≠ usability. This is the council's core value.
 
-**HIGH**
-2. **devOtp test-phone backdoor in prod** — `+966500000001/2` return static OTP `123456` via schema-exposed `devOtp`. Hard-disable TEST_PHONES when NODE_ENV=production. (auth.service.ts:47-50 rider+driver)
-3. **Throttling broken behind proxy** — enable `FastifyAdapter({trustProxy:true})` + per-PHONE rate limit on sendOtp (Redis), not just per-IP. (main.ts, auth.service.ts)
-4. **CORS** — fail closed: if prod + CORS_ORIGINS empty don't default origin:true+credentials. Set CORS_ORIGINS on server to include hancr.com/admin.hancr.com. (main.ts)
+## 🎯 Findings + status
+**CRITICAL — CONFIG (owner must act, not code):**
+1. **Twilio off-trial** + KSA/QA/UAE sender (Messaging-Service SID / Alphanumeric ID). Until done, web+app login dead for real users. **DO FIRST.**
+2. **Lock Maps key** (hancr.com referrers + Maps JS/Places only + daily quota + budget alert) — unrestricted public key = billing blowout.
 
-**MEDIUM**
-5. New admin DTOs: add class-validator (@Matches phone, @IsEmail, @MaxLength). (user.types.ts)
-6. `addresses[]`: @ArrayMaxSize(5) + length===points + @MaxLength. (create-order.input.ts)
-7. Web token: server-side logout revocation + landing CSP (config) + short TTL. (deferred-config)
+**CRITICAL/HIGH — CODE (this wave):**
+3. ✅ createOrder/previewRoute region+service validation. [done r1]
+4. ✅ devOtp backdoor disabled in prod. [done r1]
+5. ✅ trustProxy + per-phone OTP limit. [done r1]
+6. ✅ CORS fail-closed. [done r1]
+7. **sendOtp honest failure + Sentry alert** — success must reflect actual SMS delivery; capture to Sentry (the Twilio outage currently pages nobody). [r2 fix]
+8. **Web UI honest:** show SMS-failure error (don't advance to OTP); branch booking success on order.status (NotFound→"no drivers"); surface Maps-load error; empty-services state; geolocation fallback. [r2 fix]
+9. **banRider must block live tokens** — JwtStrategy.validate re-check rider.banned (banned rider rides until expiry today). [r2 fix]
 
-**LOW**
-8. referral_code add unique:true + migration. proposedPrice bid re-pricing (verify acceptOffer).
+**MEDIUM:**
+10. ✅ admin DTO validators + addresses bounds. [done r1]
+11. Places session-token + debounce (billing 5-10x). [r2 fix — optional]
+12. DispatcherDrawer reject NaN lat/lng. [r2 fix — quick]
+13. per-phone counter TTL race (SET NX EX); web token revocation/refresh; build-env assert. [deferred]
+
+## ✅ Council cleared (no vuln)
+IDOR (riderId from JWT) · admin RBAC (RequireRole ops) · no SQL injection · providerShare on web orders · coords bounds · throttler Redis storage · admin pagination/N+1 · JWT-guarded routePreview/createOrder.
 
 ## The one thing to do first
-Fix #1 (regionId+serviceId validation in createOrder/routePreview) — it's the only CRITICAL, cross-confirmed by two agents, and protects ALL clients (app + web) from mispriced/free-ish rides.
+**Upgrade Twilio off the trial account** — without it, no real user (web or app) can log in. Everything else is moot. (Owner action — outside code.)
