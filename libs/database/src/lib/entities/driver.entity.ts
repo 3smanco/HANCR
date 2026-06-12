@@ -39,6 +39,14 @@ export class DriverEntity {
   @Column({ nullable: true, name: 'avatar_url' })
   avatarUrl?: string;
 
+  /** البريد الإلكتروني (دخول بالإيميل — اختياري) */
+  @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
+  email?: string;
+
+  /** معرّف حساب Google المرتبط (Sign-in with Google) */
+  @Column({ type: 'varchar', length: 255, nullable: true, unique: true, name: 'google_id' })
+  googleId?: string;
+
   /** الجنس — يُستخدم لفلترة "وضع العائلة" / تفضيل السائقات */
   @Column({ length: 1, nullable: true })
   gender?: string;

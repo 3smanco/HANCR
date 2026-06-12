@@ -10,6 +10,7 @@ export {
   type MulticastResult,
 } from './lib/push-notification.service';
 export { SmsService, type SmsResult } from './lib/sms.service';
+export { EmailService, type EmailResult } from './lib/email.service';
 export {
   renderTemplate,
   type NotificationTemplate,

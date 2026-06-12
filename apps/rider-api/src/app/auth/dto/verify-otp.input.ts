@@ -26,4 +26,13 @@ export class VerifyOtpInput {
   @IsOptional()
   @IsString()
   referralCode?: string;
+
+  /**
+   * رمز ربط مؤقّت من دخول Google/الإيميل — عند وجوده يُربط الإيميل/googleId
+   * بحساب الهاتف (إنشاءً أو دمجاً) بعد التحقق الناجح من OTP.
+   */
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  pendingToken?: string;
 }

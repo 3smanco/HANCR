@@ -9,13 +9,19 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRedis } from '@songkeys/nestjs-redis';
 import Redis from 'ioredis';
+import { OAuth2Client } from 'google-auth-library';
 import { RiderEntity } from '@hancr/database';
-import { SmsService } from '@hancr/notifications';
+import { SmsService, EmailService } from '@hancr/notifications';
 import { captureException } from '@hancr/observability';
 import { SendOtpInput } from './dto/send-otp.input';
 import { VerifyOtpInput } from './dto/verify-otp.input';
 import { SendOtpResponse } from './dto/send-otp-response.type';
 import { AuthPayload } from './dto/auth-payload.type';
+import { AuthResult } from './dto/auth-result.type';
+import { SendEmailOtpInput } from './dto/send-email-otp.input';
+import { VerifyEmailOtpInput } from './dto/verify-email-otp.input';
+import { GoogleAuthInput } from './dto/google-auth.input';
+import { RiderType } from '../rider/dto/rider.type';
 import { JwtPayload } from './jwt.strategy';
 import { AppConfigReader } from '../app-config/app-config-reader.service';
 
@@ -23,9 +29,18 @@ import { AppConfigReader } from '../app-config/app-config-reader.service';
 const DEFAULT_OTP_TTL_SECONDS = 300; // 5 دقائق
 const DEFAULT_MAX_OTP_ATTEMPTS = 5;
 
+/** هوية مُتحقَّق منها (Google/إيميل) بانتظار ربط هاتف */
+interface PendingIdentity {
+  email?: string;
+  googleId?: string;
+  name?: string;
+  referralCode?: string;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private googleClient: OAuth2Client | null = null;
 
   constructor(
     @InjectRepository(RiderEntity)
@@ -34,6 +49,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly smsService: SmsService,
+    private readonly emailService: EmailService,
     private readonly appConfig: AppConfigReader,
 
     @InjectRedis()
@@ -180,6 +196,12 @@ export class AuthService {
     // استخراج رمز الدولة من الرقم
     const countryCode = this.extractCountryCode(phone);
 
+    // فكّ رمز الربط (Google/إيميل) إن وُجد — يوفّر هوية مُتحقَّقة + كود إحالة
+    const pending = input.pendingToken
+      ? this.verifyPendingToken(input.pendingToken)
+      : null;
+    const referralInput = input.referralCode?.trim() || pending?.referralCode;
+
     // إيجاد أو إنشاء الراكب
     let rider = await this.riderRepo.findOne({ where: { phoneNumber: phone } });
     const isNewUser = !rider;
@@ -187,9 +209,9 @@ export class AuthService {
     if (!rider) {
       // التقاط المُحيل من كود الإحالة (إن وُجد وصالح ولا يحيل نفسه لاحقاً)
       let referredBy: number | undefined;
-      if (input.referralCode && input.referralCode.trim()) {
+      if (referralInput && referralInput.trim()) {
         const referrer = await this.riderRepo.findOne({
-          where: { referralCode: input.referralCode.trim().toUpperCase() },
+          where: { referralCode: referralInput.trim().toUpperCase() },
           select: ['id'],
         });
         if (referrer) referredBy = referrer.id;
@@ -219,29 +241,285 @@ export class AuthService {
       rider.lastLoginAt = new Date();
     }
 
+    // ربط هوية Google/الإيميل بحساب الهاتف (إنشاءً أو دمجاً)
+    if (pending) {
+      await this.applyPendingIdentity(rider, pending);
+    }
+
     const accessToken = this.signToken(rider);
 
     return {
       accessToken,
-      rider: {
-        id: rider.id,
-        phoneNumber: rider.phoneNumber,
-        countryCode: rider.countryCode,
-        firstName: rider.firstName,
-        lastName: rider.lastName,
-        avatarUrl: rider.avatarUrl,
-        email: rider.email,
-        banned: rider.banned,
-        active: rider.active,
-        balance: Number(rider.balance),
-        currency: rider.currency,
-        rating: Number(rider.rating),
-        totalRides: rider.totalRides,
-        lastLoginAt: rider.lastLoginAt,
-        createdAt: rider.createdAt,
-      },
+      rider: this.toRiderType(rider),
       isNewUser,
     };
+  }
+
+  // =============================================
+  // مُحوِّل موحّد: RiderEntity → RiderType
+  // =============================================
+  private toRiderType(rider: RiderEntity): RiderType {
+    return {
+      id: rider.id,
+      phoneNumber: rider.phoneNumber,
+      countryCode: rider.countryCode,
+      firstName: rider.firstName,
+      lastName: rider.lastName,
+      avatarUrl: rider.avatarUrl,
+      email: rider.email,
+      banned: rider.banned,
+      active: rider.active,
+      balance: Number(rider.balance),
+      currency: rider.currency,
+      rating: Number(rider.rating),
+      totalRides: rider.totalRides,
+      lastLoginAt: rider.lastLoginAt,
+      createdAt: rider.createdAt,
+    };
+  }
+
+  // =============================================
+  // الدخول بالإيميل (OTP) + Google
+  // =============================================
+  // إيميلات تجريبية بـ OTP ثابت 123456 — للـ demo + المراجعين.
+  private static readonly TEST_EMAILS = new Set<string>([
+    'rider-demo@hancr.com',
+  ]);
+
+  /** هل نسمح بالهويات التجريبية (نفس علم الأرقام التجريبية) */
+  private allowTestIdentities(): boolean {
+    const isDev = this.configService.get<string>('NODE_ENV') === 'development';
+    return (
+      isDev ||
+      this.configService.get<string>('ALLOW_TEST_PHONES', 'true') !== 'false'
+    );
+  }
+
+  /** يُرسل رمز OTP إلى البريد (تخزين Redis مع TTL من اللوحة) */
+  async sendEmailOtp(input: SendEmailOtpInput): Promise<SendOtpResponse> {
+    const email = input.email.trim().toLowerCase();
+    const isDev = this.configService.get<string>('NODE_ENV') === 'development';
+
+    // حدّ لكل بريد: 3/60ث (يمنع قصف البريد)
+    const rlKey = `hancr:otp:rl:email:${email}`;
+    const sent = await this.redis.incr(rlKey);
+    if (sent === 1) await this.redis.expire(rlKey, 60);
+    if (sent > 3) {
+      throw new UnauthorizedException('محاولات كثيرة. انتظر دقيقة.');
+    }
+
+    const isTest =
+      this.allowTestIdentities() && AuthService.TEST_EMAILS.has(email);
+    const code = isTest
+      ? '123456'
+      : Math.floor(100000 + Math.random() * 900000).toString();
+
+    const ops = await this.appConfig.getOperations();
+    const otpTtl = ops.otpTtlSeconds ?? DEFAULT_OTP_TTL_SECONDS;
+    await this.redis.setex(
+      `hancr:otp:email:${email}`,
+      otpTtl,
+      JSON.stringify({ code, attempts: 0 }),
+    );
+    if (isDev) this.logger.debug(`[dev] Email OTP for ${email}: ${code}`);
+
+    const res = await this.emailService.sendOtp(email, code, 'ar');
+    const expose = isDev || isTest;
+    const deliverable = res.success || expose;
+
+    if (!deliverable && this.emailService.enabled) {
+      this.logger.error(`Email OTP delivery failed for ${email}: ${res.error}`);
+      captureException(new Error(`Email OTP delivery failed: ${res.error}`), {
+        email,
+        gateway: 'smtp',
+      });
+    }
+
+    let message: string;
+    if (res.success) message = `تم إرسال الرمز إلى ${email}`;
+    else if (expose) message = 'OTP (dev) — returned in response';
+    else message = 'تعذّر إرسال رمز التحقق للبريد حالياً. حاول لاحقاً.';
+
+    return { success: deliverable, message, devOtp: expose ? code : undefined };
+  }
+
+  /** يتحقق من OTP البريد — دخول كامل إن وُجد حساب، وإلا رمز ربط هاتف */
+  async verifyEmailOtp(input: VerifyEmailOtpInput): Promise<AuthResult> {
+    const email = input.email.trim().toLowerCase();
+    const key = `hancr:otp:email:${email}`;
+    const raw = await this.redis.get(key);
+    if (!raw) {
+      throw new UnauthorizedException('انتهت صلاحية الرمز. اطلب رمزاً جديداً.');
+    }
+    const stored = JSON.parse(raw) as { code: string; attempts: number };
+
+    const ops = await this.appConfig.getOperations();
+    const maxAttempts = ops.maxOtpAttempts ?? DEFAULT_MAX_OTP_ATTEMPTS;
+    const otpTtl = ops.otpTtlSeconds ?? DEFAULT_OTP_TTL_SECONDS;
+
+    if (stored.attempts >= maxAttempts) {
+      await this.redis.del(key);
+      throw new UnauthorizedException('محاولات كثيرة. اطلب رمزاً جديداً.');
+    }
+    if (stored.code !== input.code) {
+      stored.attempts += 1;
+      await this.redis.setex(key, otpTtl, JSON.stringify(stored));
+      throw new UnauthorizedException(
+        `رمز خاطئ. تبقّى ${maxAttempts - stored.attempts} محاولات.`,
+      );
+    }
+    await this.redis.del(key);
+
+    return this.resolveIdentity({ email, referralCode: input.referralCode });
+  }
+
+  /** يتحقق من Google ID token — دخول كامل إن وُجد حساب، وإلا رمز ربط هاتف */
+  async googleAuth(input: GoogleAuthInput): Promise<AuthResult> {
+    const identity = await this.verifyGoogleIdToken(input.idToken);
+    if (!identity) {
+      return {
+        success: false,
+        needsPhone: false,
+        message:
+          'تعذّر التحقق من حساب Google. (قد لا يكون الدخول بـ Google مُهيّأً بعد.)',
+      };
+    }
+    return this.resolveIdentity({
+      email: identity.email,
+      googleId: identity.googleId,
+      name: identity.name,
+      referralCode: input.referralCode,
+    });
+  }
+
+  /**
+   * منطق موحّد: من هوية مُتحقَّقة (إيميل/Google) →
+   *  - إن وُجد راكب مطابق (googleId أو email): دخول كامل (نربط googleId إن نقص).
+   *  - وإلا: رمز ربط مؤقّت (المستخدم يُكمل بربط هاتف عبر verifyOtp).
+   */
+  private async resolveIdentity(p: PendingIdentity): Promise<AuthResult> {
+    let rider: RiderEntity | null = null;
+    if (p.googleId) {
+      rider = await this.riderRepo.findOne({ where: { googleId: p.googleId } });
+    }
+    if (!rider && p.email) {
+      rider = await this.riderRepo.findOne({ where: { email: p.email } });
+    }
+
+    if (rider) {
+      if (rider.banned) {
+        throw new UnauthorizedException('هذا الحساب محظور.');
+      }
+      // اربط googleId/الإيميل إن كانا ناقصين على الحساب
+      const patch: {
+        lastLoginAt: Date;
+        googleId?: string;
+        email?: string;
+      } = { lastLoginAt: new Date() };
+      if (p.googleId && !rider.googleId) patch.googleId = p.googleId;
+      if (p.email && !rider.email) patch.email = p.email;
+      await this.riderRepo.update(rider.id, patch);
+      Object.assign(rider, patch);
+
+      return {
+        success: true,
+        needsPhone: false,
+        accessToken: this.signToken(rider),
+        rider: this.toRiderType(rider),
+        isNewUser: false,
+      };
+    }
+
+    // لا حساب بعد — يحتاج ربط هاتف
+    return {
+      success: true,
+      needsPhone: true,
+      isNewUser: true,
+      pendingToken: this.signPendingToken(p),
+      message: 'أضف رقم هاتفك لإكمال إنشاء الحساب.',
+    };
+  }
+
+  /** يربط هوية مُتحقَّقة بحساب هاتف موجود/جديد (يحترم القيود الفريدة) */
+  private async applyPendingIdentity(
+    rider: RiderEntity,
+    p: PendingIdentity,
+  ): Promise<void> {
+    const patch: { email?: string; googleId?: string; firstName?: string } = {};
+    if (p.email && !rider.email) patch.email = p.email;
+    if (p.googleId && !rider.googleId) patch.googleId = p.googleId;
+    if (p.name && !rider.firstName) patch.firstName = p.name.split(' ')[0];
+    if (Object.keys(patch).length === 0) return;
+    try {
+      await this.riderRepo.update(rider.id, patch);
+      Object.assign(rider, patch);
+    } catch (e) {
+      // قيد فريد (الإيميل/googleId مرتبط بحساب آخر) — لا نكسر الدخول بالهاتف
+      this.logger.warn(
+        `Could not link identity to rider #${rider.id}: ${(e as Error).message}`,
+      );
+    }
+  }
+
+  /** يوقّع رمز ربط قصير الأجل (15 دقيقة) يحمل الهوية المُتحقَّقة */
+  private signPendingToken(p: PendingIdentity): string {
+    return this.jwtService.sign(
+      { scope: 'link-phone', ...p },
+      { expiresIn: '15m' },
+    );
+  }
+
+  /** يتحقق من رمز الربط ويعيد الهوية (أو null إن لم يكن صالحاً) */
+  private verifyPendingToken(token: string): PendingIdentity | null {
+    try {
+      const payload = this.jwtService.verify<
+        PendingIdentity & { scope?: string }
+      >(token);
+      if (payload.scope !== 'link-phone') return null;
+      return {
+        email: payload.email,
+        googleId: payload.googleId,
+        name: payload.name,
+        referralCode: payload.referralCode,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /** يتحقق من Google ID token محلياً (التوقيع + الجمهور). null إن لم يُهيّأ/فشل */
+  private async verifyGoogleIdToken(
+    idToken: string,
+  ): Promise<{ email: string; googleId: string; name?: string } | null> {
+    const clientIds = (
+      this.configService.get<string>('GOOGLE_OAUTH_CLIENT_ID') ?? ''
+    )
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (clientIds.length === 0) {
+      this.logger.warn('GOOGLE_OAUTH_CLIENT_ID غير مُهيّأ — دخول Google معطّل.');
+      return null;
+    }
+    if (!this.googleClient) this.googleClient = new OAuth2Client();
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken,
+        audience: clientIds,
+      });
+      const payload = ticket.getPayload();
+      if (!payload?.sub || !payload.email || !payload.email_verified) {
+        return null;
+      }
+      return {
+        email: payload.email.toLowerCase(),
+        googleId: payload.sub,
+        name: payload.name,
+      };
+    } catch (e) {
+      this.logger.warn(`Google token verify failed: ${(e as Error).message}`);
+      return null;
+    }
   }
 
   // =============================================

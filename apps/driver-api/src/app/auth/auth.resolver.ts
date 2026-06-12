@@ -13,6 +13,17 @@ class SendOtpResponse {
   @Field({ nullable: true }) devOtp?: string;
 }
 
+@ObjectType()
+class AuthResult {
+  @Field() success!: boolean;
+  @Field() needsPhone!: boolean;
+  @Field({ nullable: true }) pendingToken?: string;
+  @Field({ nullable: true }) accessToken?: string;
+  @Field(() => DriverType, { nullable: true }) driver?: DriverType;
+  @Field({ nullable: true }) isNewDriver?: boolean;
+  @Field({ nullable: true }) message?: string;
+}
+
 function toDriverType(d: DriverEntity): DriverType {
   return {
     id: d.id,
@@ -62,12 +73,64 @@ export class AuthResolver {
   async driverVerifyOtp(
     @Args('phone') phone: string,
     @Args('code') code: string,
+    @Args('pendingToken', { nullable: true }) pendingToken?: string,
   ): Promise<AuthPayload> {
-    const result = await this.authService.verifyOtp(phone, code);
+    const result = await this.authService.verifyOtp(phone, code, pendingToken);
     return {
       accessToken: result.accessToken,
       driver: toDriverType(result.driver),
       isNewDriver: result.isNewDriver,
+    };
+  }
+
+  // ─── الدخول بالإيميل (OTP) ───
+  @Mutation(() => SendOtpResponse, { description: 'ارسال OTP لبريد السائق' })
+  @Throttle({ strict: { limit: 3, ttl: 60000 } })
+  async driverSendEmailOtp(
+    @Args('email') email: string,
+  ): Promise<SendOtpResponse> {
+    return this.authService.sendEmailOtp(email);
+  }
+
+  @Mutation(() => AuthResult, {
+    description: 'تحقق من OTP البريد — دخول كامل أو ربط هاتف',
+  })
+  @Throttle({ strict: { limit: 10, ttl: 60000 } })
+  async driverVerifyEmailOtp(
+    @Args('email') email: string,
+    @Args('code') code: string,
+  ): Promise<AuthResult> {
+    const r = await this.authService.verifyEmailOtp(email, code);
+    return this.toAuthResult(r);
+  }
+
+  // ─── الدخول بحساب Google ───
+  @Mutation(() => AuthResult, { description: 'دخول السائق عبر Google ID token' })
+  @Throttle({ strict: { limit: 10, ttl: 60000 } })
+  async driverGoogleAuth(
+    @Args('idToken') idToken: string,
+  ): Promise<AuthResult> {
+    const r = await this.authService.googleAuth(idToken);
+    return this.toAuthResult(r);
+  }
+
+  private toAuthResult(r: {
+    success: boolean;
+    needsPhone: boolean;
+    pendingToken?: string;
+    accessToken?: string;
+    driver?: DriverEntity;
+    isNewDriver?: boolean;
+    message?: string;
+  }): AuthResult {
+    return {
+      success: r.success,
+      needsPhone: r.needsPhone,
+      pendingToken: r.pendingToken,
+      accessToken: r.accessToken,
+      driver: r.driver ? toDriverType(r.driver) : undefined,
+      isNewDriver: r.isNewDriver,
+      message: r.message,
     };
   }
 }
