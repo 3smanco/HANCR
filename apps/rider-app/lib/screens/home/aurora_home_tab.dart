@@ -27,7 +27,6 @@ class AuroraHomeTab extends StatefulWidget {
 }
 
 class _AuroraHomeTabState extends State<AuroraHomeTab> {
-  int _tabIndex = 0;
   List<Map<String, dynamic>> _banners = [];
   List<Map<String, dynamic>> _savedPlaces = [];
 
@@ -116,15 +115,8 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
 
             const SizedBox(height: AuroraSpacing.lg),
 
-            // ─── Tab Switcher ───
-            AuroraTabSwitcher(
-              selectedIndex: _tabIndex,
-              onChanged: (i) => setState(() => _tabIndex = i),
-              tabs: const [
-                AuroraTabItem(icon: Icons.directions_car, label: 'رحلات'),
-                AuroraTabItem(icon: Icons.delivery_dining, label: 'توصيل'),
-              ],
-            ),
+            // ─── Animated HANCR brand (بدل مبدّل رحلات/توصيل) ───
+            const Center(child: _HancrBrandShimmer()),
 
             const SizedBox(height: AuroraSpacing.lg),
 
@@ -580,6 +572,81 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
         ],
       ),
     ),
+    );
+  }
+}
+
+/// شعار HANCR متحرّك بلمعان ember يجتاح الحروف (بدل مبدّل رحلات/توصيل).
+class _HancrBrandShimmer extends StatefulWidget {
+  const _HancrBrandShimmer();
+  @override
+  State<_HancrBrandShimmer> createState() => _HancrBrandShimmerState();
+}
+
+class _HancrBrandShimmerState extends State<_HancrBrandShimmer>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2600),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AnimatedBuilder(
+          animation: _c,
+          builder: (context, child) {
+            final t = _c.value; // 0..1 — موضع موجة اللمعان
+            return ShaderMask(
+              blendMode: BlendMode.srcIn,
+              shaderCallback: (rect) => LinearGradient(
+                begin: Alignment(-1.6 + 3.2 * t, 0),
+                end: Alignment(-1.0 + 3.2 * t, 0),
+                colors: const [
+                  Color(0xFF7A4A2A),
+                  Color(0xFFFF7A1A),
+                  Color(0xFFFFE3C2),
+                  Color(0xFFFF7A1A),
+                  Color(0xFF7A4A2A),
+                ],
+                stops: const [0.0, 0.42, 0.5, 0.58, 1.0],
+              ).createShader(rect),
+              child: child,
+            );
+          },
+          child: const Text(
+            'HANCR',
+            style: TextStyle(
+              fontSize: 34,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 8,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          tr('tagline'),
+          style: AuroraText.bodySmall.copyWith(
+            color: AuroraColors.textSecondary,
+            letterSpacing: 1.5,
+          ),
+        ),
+      ],
     );
   }
 }

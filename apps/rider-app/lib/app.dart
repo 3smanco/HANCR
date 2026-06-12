@@ -20,6 +20,7 @@ import 'screens/auth/aurora_otp_screen.dart';
 import 'screens/auth/aurora_phone_screen.dart';
 import 'screens/auth/aurora_email_screen.dart';
 import 'screens/auth/aurora_email_otp_screen.dart';
+import 'screens/ai/ai_assistant_screen.dart';
 import 'core/models/order_model.dart';
 import 'screens/booking/aurora_booking_screen.dart';
 import 'screens/booking/pickup_confirmation_screen.dart';
@@ -141,6 +142,8 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
           },
         ),
         GoRoute(path: '/home', builder: (_, __) => const AuroraMainScreen()),
+        GoRoute(
+            path: '/ai', builder: (_, __) => const AiAssistantScreen()),
         GoRoute(
           path: '/book',
           builder: (_, state) {

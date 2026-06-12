@@ -41,7 +41,7 @@ class _AuroraMainScreenState extends State<AuroraMainScreen> {
       bottomNavigationBar: AuroraBottomNav(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
-        onCenterPressed: () => context.push('/book'),
+        onCenterPressed: () => context.push('/ai'),
         items: [
           AuroraNavItem(
             icon: Icons.home_outlined,
