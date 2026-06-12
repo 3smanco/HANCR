@@ -65,9 +65,13 @@ export class AuthService {
         'محاولات كثيرة. انتظر دقيقة قبل طلب رمز جديد.',
       );
     }
-    // أمن: الأرقام التجريبية (OTP ثابت 123456) مُعطّلة كلياً في الإنتاج —
-    // كانت باباً خلفياً للدخول كحسابات demo من الويب. تعمل في dev فقط.
-    const isTestPhone = isDev && AuthService.TEST_PHONES.has(phone);
+    // الأرقام التجريبية (OTP ثابت 123456) — مُتحكَّم بها عبر ALLOW_TEST_PHONES.
+    // تبقى مُفعَّلة أثناء التطوير/الاختبار (حتى يعمل Twilio الفعلي)؛
+    // اضبط ALLOW_TEST_PHONES=false عند الإطلاق الحقيقي لإغلاق هذا الباب.
+    const allowTestPhones =
+      isDev ||
+      this.configService.get<string>('ALLOW_TEST_PHONES', 'true') !== 'false';
+    const isTestPhone = allowTestPhones && AuthService.TEST_PHONES.has(phone);
 
     const code = isTestPhone
       ? '123456'

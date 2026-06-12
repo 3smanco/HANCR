@@ -83,7 +83,8 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
     if (!_canSubmit) return;
     final phone = '$_dialCode${_phoneCtrl.text.trim()}';
     context.read<AuthBloc>().add(AuthSendOtpRequested(phone));
-    context.go('/auth/otp', extra: phone);
+    // push (لا go) كي يعمل زر الرجوع من شاشة الـ OTP للرجوع لشاشة الهاتف.
+    context.push('/auth/otp', extra: phone);
   }
 
   @override
@@ -154,7 +155,12 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
                         // ─── Phone Number CTA (primary) ───
                         _buildPhoneSection(state),
 
-                        const SizedBox(height: AuroraSpacing.xl),
+                        const SizedBox(height: AuroraSpacing.lg),
+
+                        // ─── Social login (Google · Apple · X) ───
+                        _buildSocialButtons(),
+
+                        const SizedBox(height: AuroraSpacing.lg),
 
                         // ─── Existing account link (نفس تدفق OTP) ───
                         TextButton(
@@ -340,4 +346,65 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
     );
   }
 
+  /// أزرار الدخول الاجتماعي (Google · Apple · X).
+  /// مفعّلة بصرياً؛ التكامل مع OAuth قيد الإعداد — تُظهر إشعاراً صادقاً عند الضغط.
+  Widget _buildSocialButtons() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: Divider(color: AuroraColors.border, height: 1)),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: AuroraSpacing.md),
+              child: Text(
+                tr('orContinueWith'),
+                style: AuroraText.bodySmall
+                    .copyWith(color: AuroraColors.textSecondary),
+              ),
+            ),
+            Expanded(child: Divider(color: AuroraColors.border, height: 1)),
+          ],
+        ),
+        const SizedBox(height: AuroraSpacing.md),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _socialButton(Icons.g_mobiledata_rounded, 'Google'),
+            const SizedBox(width: AuroraSpacing.md),
+            _socialButton(Icons.apple, 'Apple'),
+            const SizedBox(width: AuroraSpacing.md),
+            _socialButton(Icons.close_rounded, 'X'),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _socialButton(IconData icon, String provider) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('$provider — ${tr('comingSoonSocial')}'),
+              backgroundColor: AuroraColors.smoke,
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(AuroraRadius.md),
+        child: Container(
+          width: 64,
+          height: 56,
+          decoration: BoxDecoration(
+            color: AuroraColors.ash,
+            borderRadius: BorderRadius.circular(AuroraRadius.md),
+            border: Border.all(color: AuroraColors.border),
+          ),
+          child: Icon(icon, color: AuroraColors.pearl, size: 30),
+        ),
+      ),
+    );
+  }
 }
