@@ -116,10 +116,23 @@ export class OrderService {
       throw new NotFoundException('الخدمة غير متاحة في هذه المنطقة');
     }
 
-    // حساب مسافة الطريق الفعلية ومدتها عبر Google Directions (مع احتياط haversine)
     const originPoint = input.points[0];
     const destPoint = input.points[input.points.length - 1];
     const waypoints = input.points.slice(1, -1);
+
+    // أمن (تحصين أعمق): اشتق المنطقة من نقطة الالتقاط ورفض إن خالفت المطلوبة —
+    // يمنع المطالبة بمنطقة أرخص بينما الالتقاط فعلياً في منطقة أخرى. حدّ مؤقّت
+    // بـ bounding box (الدول الثلاث متباعدة)؛ يُستبدل بـ PostGIS ST_Contains
+    // متى مُلئت حدود المناطق (hancr_region.boundary حالياً NULL).
+    const derivedRegionId = this.resolveRegionIdFromPoint(
+      originPoint.lat,
+      originPoint.lng,
+    );
+    if (derivedRegionId !== null && derivedRegionId !== input.regionId) {
+      throw new BadRequestException('نقطة الالتقاط خارج المنطقة المحددة');
+    }
+
+    // حساب مسافة الطريق الفعلية ومدتها عبر Google Directions (مع احتياط haversine)
     const route = await this.directionsService.getRoute(
       originPoint,
       destPoint,
@@ -900,6 +913,26 @@ export class OrderService {
       throw new ForbiddenException('Access denied');
     }
     return order;
+  }
+
+  /**
+   * يشتق معرّف المنطقة من إحداثيات الالتقاط.
+   * bounding boxes مرتّبة (الجيوب الصغيرة أولاً لحلّ التداخل مع السعودية).
+   * IDs: 1=قطر · 2=الإمارات · 3=السعودية (تطابق hancr_region).
+   * يعيد null إن كانت النقطة خارج كل المناطق المعروفة (لا نكسر التدفّق).
+   * ملاحظة: حلّ مؤقّت — يُستبدَل بـ PostGIS ST_Contains عند ملء حدود المناطق.
+   */
+  private resolveRegionIdFromPoint(lat: number, lng: number): number | null {
+    const inBox = (
+      la0: number,
+      la1: number,
+      ln0: number,
+      ln1: number,
+    ): boolean => lat >= la0 && lat <= la1 && lng >= ln0 && lng <= ln1;
+    if (inBox(24.4, 26.2, 50.7, 51.7)) return 1; // قطر
+    if (inBox(22.5, 26.2, 51.5, 56.5)) return 2; // الإمارات
+    if (inBox(16.0, 32.2, 34.4, 55.7)) return 3; // السعودية
+    return null;
   }
 
   private estimateDistance(
