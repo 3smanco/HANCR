@@ -76,6 +76,9 @@ export interface RiderProfile {
   totalRides: number;
 }
 
+/** رمز ربط مؤقّت من دخول Google/الإيميل — يُمرَّر مع verifyOtp لربط الهوية. */
+let pendingToken: string | null = null;
+
 export async function verifyOtp(
   phone: string,
   code: string,
@@ -94,10 +97,80 @@ export async function verifyOtp(
         rider { id phoneNumber firstName lastName balance currency rating totalRides }
       }
     }`,
-    { input: { phone, code } },
+    { input: { phone, code, pendingToken } },
   );
+  pendingToken = null; // استُهلك رمز الربط
   setToken(data.verifyOtp.accessToken);
   return data.verifyOtp;
+}
+
+// ─── دخول الإيميل (OTP) + Google ───
+export interface WebAuthResult {
+  success: boolean;
+  needsPhone: boolean;
+  accessToken?: string | null;
+  rider?: RiderProfile | null;
+  isNewUser?: boolean | null;
+  message?: string | null;
+}
+
+const AUTH_RESULT_FIELDS = `
+  success needsPhone pendingToken accessToken isNewUser message
+  rider { id phoneNumber firstName lastName balance currency rating totalRides }
+`;
+
+export async function sendEmailOtp(
+  email: string,
+): Promise<{ success: boolean; message: string }> {
+  const data = await gql<{ sendEmailOtp: { success: boolean; message: string } }>(
+    `mutation SendEmailOtp($input: SendEmailOtpInput!) { sendEmailOtp(input: $input) { success message } }`,
+    { input: { email } },
+  );
+  return data.sendEmailOtp;
+}
+
+/** يعالج AuthResult: دخول كامل (setToken) أو needsPhone (حفظ pendingToken). */
+function handleAuthResult(r: WebAuthResult & { pendingToken?: string | null }): WebAuthResult {
+  if (r.needsPhone) {
+    pendingToken = r.pendingToken ?? null;
+    return r;
+  }
+  if (r.accessToken) setToken(r.accessToken);
+  return r;
+}
+
+export async function verifyEmailOtp(
+  email: string,
+  code: string,
+): Promise<WebAuthResult> {
+  const data = await gql<{ verifyEmailOtp: WebAuthResult & { pendingToken?: string | null } }>(
+    `mutation VerifyEmailOtp($input: VerifyEmailOtpInput!) {
+      verifyEmailOtp(input: $input) { ${AUTH_RESULT_FIELDS} }
+    }`,
+    { input: { email, code } },
+  );
+  return handleAuthResult(data.verifyEmailOtp);
+}
+
+export async function googleAuth(idToken: string): Promise<WebAuthResult> {
+  const data = await gql<{ googleAuth: WebAuthResult & { pendingToken?: string | null } }>(
+    `mutation GoogleAuth($input: GoogleAuthInput!) {
+      googleAuth(input: $input) { ${AUTH_RESULT_FIELDS} }
+    }`,
+    { input: { idToken } },
+  );
+  return handleAuthResult(data.googleAuth);
+}
+
+/** تسجيل الخروج: يُبطل الجلسة على الخادم ثم يمسح التوكن محلياً. */
+export async function logout(): Promise<void> {
+  try {
+    await gql(`mutation { logout }`, {}, true);
+  } catch {
+    // حتى لو فشل الإبطال على الخادم، نمسح محلياً.
+  }
+  pendingToken = null;
+  clearToken();
 }
 
 export interface RiderRide {
