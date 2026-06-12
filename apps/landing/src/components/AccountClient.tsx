@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 import {
   sendOtp,
   verifyOtp,
+  sendEmailOtp,
+  verifyEmailOtp,
+  googleAuth,
+  logout,
   fetchMe,
   getToken,
   clearToken,
@@ -15,10 +19,30 @@ import {
   type WebService,
   type WebSavedPlace,
   type RouteEstimate,
+  type WebAuthResult,
 } from '@/lib/riderAuth';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyWin = any;
+
+/** يحمّل Google Identity Services مرّة واحدة. */
+let gisPromise: Promise<void> | null = null;
+function loadGoogleIdentity(): Promise<void> {
+  if (typeof window === 'undefined') return Promise.resolve();
+  const w = window as AnyWin;
+  if (w.google?.accounts?.id) return Promise.resolve();
+  if (gisPromise) return gisPromise;
+  gisPromise = new Promise<void>((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true;
+    s.defer = true;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('GIS failed to load'));
+    document.head.appendChild(s);
+  });
+  return gisPromise;
+}
 
 /** يحمّل Google Maps JS (مكتبة الأماكن) مرّة واحدة ويُرجع وعداً بالجاهزية. */
 let mapsPromise: Promise<void> | null = null;
@@ -43,13 +67,17 @@ function loadGoogleMaps(): Promise<void> {
   return mapsPromise;
 }
 
-type Step = 'loading' | 'phone' | 'otp' | 'profile';
+type Step = 'loading' | 'phone' | 'otp' | 'email' | 'email-otp' | 'profile';
 
 export function AccountClient({ isAr }: { isAr: boolean }) {
   const t = (ar: string, en: string) => (isAr ? ar : en);
   const [step, setStep] = useState<Step>('loading');
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
+  const [email, setEmail] = useState('');
+  // عند true: شاشة الهاتف لإكمال حساب Google/الإيميل (ربط) لا دخول جديد
+  const [linkMode, setLinkMode] = useState(false);
+  const googleBtnRef = useRef<HTMLDivElement | null>(null);
   const [profile, setProfile] = useState<RiderProfile | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -216,6 +244,7 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
     setBusy(true);
     try {
       const res = await verifyOtp(phone.trim(), code.trim());
+      setLinkMode(false);
       setProfile(res.rider);
       setStep('profile');
     } catch (e) {
@@ -224,11 +253,107 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
     setBusy(false);
   };
 
-  const onLogout = () => {
-    clearToken();
+  // نتيجة موحّدة لدخول الإيميل/Google: دخول كامل أو ربط هاتف
+  const applyAuthResult = (res: WebAuthResult) => {
+    if (!res.success) {
+      setError(
+        res.message ||
+          t('فشل الدخول. حاول مجدداً.', 'Sign-in failed. Try again.'),
+      );
+      return;
+    }
+    if (res.needsPhone) {
+      setLinkMode(true);
+      setCode('');
+      setPhone('');
+      setStep('phone');
+      return;
+    }
+    if (res.rider) {
+      setProfile(res.rider);
+      setStep('profile');
+    }
+  };
+
+  const onSendEmailOtp = async () => {
+    setError(null);
+    const e = email.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) {
+      setError(t('أدخل بريداً صحيحاً', 'Enter a valid email'));
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await sendEmailOtp(e);
+      if (res.success) setStep('email-otp');
+      else setError(res.message || t('تعذّر إرسال الرمز.', 'Could not send the code.'));
+    } catch (err) {
+      setError((err as Error).message);
+    }
+    setBusy(false);
+  };
+
+  const onVerifyEmailOtp = async () => {
+    setError(null);
+    if (!code.trim()) return;
+    setBusy(true);
+    try {
+      const res = await verifyEmailOtp(email.trim().toLowerCase(), code.trim());
+      applyAuthResult(res);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+    setBusy(false);
+  };
+
+  // Google Identity Services — يُهيّأ ويُرسم الزرّ عند شاشة الدخول الأولى
+  useEffect(() => {
+    if (step !== 'phone' || linkMode) return;
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '';
+    if (!clientId) return;
+    let cancelled = false;
+    loadGoogleIdentity()
+      .then(() => {
+        if (cancelled || !googleBtnRef.current) return;
+        const w = window as AnyWin;
+        w.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (resp: { credential: string }) => {
+            setError(null);
+            setBusy(true);
+            try {
+              const res = await googleAuth(resp.credential);
+              applyAuthResult(res);
+            } catch (err) {
+              setError((err as Error).message);
+            }
+            setBusy(false);
+          },
+        });
+        googleBtnRef.current.innerHTML = '';
+        w.google.accounts.id.renderButton(googleBtnRef.current, {
+          theme: 'filled_black',
+          size: 'large',
+          width: 320,
+          text: 'continue_with',
+          shape: 'pill',
+        });
+      })
+      .catch(() => {
+        /* GIS لم يُحمّل — يبقى الهاتف والإيميل متاحين */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [step, linkMode]);
+
+  const onLogout = async () => {
+    await logout();
     setProfile(null);
     setPhone('');
     setCode('');
+    setEmail('');
+    setLinkMode(false);
     setStep('phone');
   };
 
@@ -260,6 +385,14 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
 
       {step === 'phone' && (
         <div className={card}>
+          {linkMode && (
+            <div className="mb-4 rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-3 text-sm text-orange-200">
+              {t(
+                'أضف رقم هاتفك لإكمال إنشاء حسابك',
+                'Add your phone number to complete your account',
+              )}
+            </div>
+          )}
           <label className="mb-2 block text-sm text-white/70">
             {t('رقم الجوال', 'Phone number')}
           </label>
@@ -273,6 +406,88 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
           />
           <button className={`${btn} mt-4`} disabled={busy} onClick={onSendOtp}>
             {busy ? t('جارٍ الإرسال…', 'Sending…') : t('إرسال رمز التحقق', 'Send code')}
+          </button>
+
+          {!linkMode && (
+            <>
+              <div className="my-5 flex items-center gap-3 text-xs text-white/40">
+                <span className="h-px flex-1 bg-white/10" />
+                {t('أو', 'or')}
+                <span className="h-px flex-1 bg-white/10" />
+              </div>
+              {/* زرّ Google (Google Identity Services) */}
+              <div ref={googleBtnRef} className="flex justify-center" />
+              <button
+                className="mt-3 w-full rounded-xl border border-white/15 px-4 py-3 font-semibold text-white transition hover:bg-white/5"
+                onClick={() => {
+                  setError(null);
+                  setCode('');
+                  setStep('email');
+                }}
+              >
+                {t('الدخول عبر البريد الإلكتروني', 'Continue with email')}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {step === 'email' && (
+        <div className={card}>
+          <label className="mb-2 block text-sm text-white/70">
+            {t('البريد الإلكتروني', 'Email')}
+          </label>
+          <input
+            className={input}
+            dir="ltr"
+            type="email"
+            placeholder="name@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && onSendEmailOtp()}
+          />
+          <button
+            className={`${btn} mt-4`}
+            disabled={busy}
+            onClick={onSendEmailOtp}
+          >
+            {busy ? t('جارٍ الإرسال…', 'Sending…') : t('إرسال الرمز', 'Send code')}
+          </button>
+          <button
+            className="mt-3 w-full text-sm text-white/50 hover:text-white"
+            onClick={() => setStep('phone')}
+          >
+            {t('الرجوع', 'Back')}
+          </button>
+        </div>
+      )}
+
+      {step === 'email-otp' && (
+        <div className={card}>
+          <label className="mb-2 block text-sm text-white/70">
+            {t('الرمز المُرسَل إلى', 'Code sent to')} <span dir="ltr">{email}</span>
+          </label>
+          <input
+            className={`${input} text-center tracking-[0.5em]`}
+            dir="ltr"
+            inputMode="numeric"
+            placeholder="------"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && onVerifyEmailOtp()}
+          />
+          <button
+            className={`${btn} mt-4`}
+            disabled={busy}
+            onClick={onVerifyEmailOtp}
+          >
+            {busy ? t('جارٍ التحقق…', 'Verifying…') : t('تأكيد', 'Verify')}
+          </button>
+          <button
+            className="mt-3 w-full text-sm text-white/50 hover:text-white"
+            onClick={() => setStep('email')}
+          >
+            {t('تغيير البريد', 'Change email')}
           </button>
         </div>
       )}
