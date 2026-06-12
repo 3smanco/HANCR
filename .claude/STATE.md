@@ -6,7 +6,31 @@
 
 ---
 
-## 🟦 الموجة G — دخول بالإيميل + Google (مخطّط؛ G1 منجزة)
+## 🛑 سبب جذري حرج (2026-06-12) — لماذا فشل الدخول في كل مرة
+**الـ APK كان يُبنى بـ `flutter build apk --release` المجرّد بدون `--dart-define=ENV=production`.**
+`AppConfig.env` يفترض `development` افتراضياً → `graphqlUrl = http://10.0.2.2:3000` (مُحاكي أندرويد) → على هاتف حقيقي = غير موجود → `TimeoutException after 5s: No stream event`. الخادم سليم تماماً؛ التطبيق كان يكلّم العنوان الخطأ.
+**القاعدة (إلزامي لكل بناء APK):** استخدم دائماً:
+```
+flutter build apk --release --dart-define=ENV=production \
+  --dart-define=MAPS_API_KEY=<key> --dart-define=MAPS_KEY=<key> \
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=<id-or-empty>
+```
+أو سكربت `scripts/build-flutter-release.sh` (يضبط ENV=production افتراضياً، لكنه يستخدم --split-per-abi؛ للنشر كملف واحد hancr-*.apk ابنِ universal كما أعلاه). مفتاح الخرائط: `AIzaSyCwLtWyS6m44JNXWjTRCyOkR83GirSkZ3o`.
+
+## 🔑 حسابات تجريبية (الدخول — OTP ثابت 123456)
+| التطبيق | الرقم/الإيميل | الرمز |
+|---|---|---|
+| راكب | `+97433000001` · `+97433000002` (قطر) | `123456` |
+| راكب (إيميل) | `rider-demo@hancr.com` | `123456` |
+| سائق | `+97433000010` · `+97433000011` (قطر) | `123456` |
+| سائق (إيميل) | `driver-demo@hancr.com` | `123456` |
+
+قديمة (KSA، تعمل): راكب `+966500000001/02` · سائق `+966500000010/11`. كلها OTP `123456`. تُغلق بـ `ALLOW_TEST_PHONES=false` عند الإطلاق.
+
+## 🟦 الموجة G — دخول بالإيميل + Google (مخطّط؛ G1+G2-راكب منجزة)
+- **✅ G2-راكب (PR #82، منشور):** ربط أزرار Google/الإيميل بتدفّقات حقيقية + شاشتا email/email-otp + AuthBloc (email OTP/Google/pendingToken) + google_sign_in. `GOOGLE_SERVER_CLIENT_ID` build-time.
+- **⏭️ G2-سائق:** نفس الواجهة للسائق (لم تُنفَّذ بعد؛ دخول هاتف السائق يعمل بعد بناء ENV=production).
+
 **الطلب:** دخول بالإيميل (OTP) + Google على الأسطح الثلاثة (راكب·موقع·سائق) + 3 تحصينات (توكن الويب: إبطال/CSP/TTL · referral_code unique · اشتقاق منطقة الطلب من PostGIS).
 **القرارات:** الإيميل=OTP · الهاتف يبقى إلزامياً (ربط بعد دخول Google/الإيميل عبر pendingToken) · الأسطح الثلاثة.
 
