@@ -29,9 +29,10 @@ flutter build apk --release --dart-define=ENV=production \
 - **✅ G4 التحصينات (منشورة ومُتحقَّقة حيّاً):**
   - CSP + HSTS + X-Frame-Options + nosniff + Referrer-Policy + Permissions-Policy على hancr.com (`scripts/apply-csp.sh` + snippet `/etc/nginx/snippets/hancr-security.conf`).
   - إبطال جلسة الويب: `JwtStrategy.validate` async — يرفض توكنات صدرت قبل آخر logout (Redis `hancr:revoked:rider:{id}`) + إعادة فحص banned كل طلب. mutation `logout` (PR #87). مُتحقَّق: me يعمل ثم يُرفض بعد logout.
-  - اشتقاق منطقة الطلب من نقطة الالتقاط في createOrder (bbox مرتّب؛ يُستبدل بـ PostGIS ST_Contains عند ملء hancr_region.boundary) — PR #88.
+  - اشتقاق منطقة الطلب من نقطة الالتقاط في createOrder — **PostGIS ST_Contains** على حدود المناطق (PR #88 ثم #92/#93). migration `1781400000000`+`1781400001000` يملأ مضلّعات قطر/الإمارات/السعودية (data-driven، يُنقَّح بتحديث الصف). مُتحقَّق حيّاً: الدوحة→1، الرياض/جدة→3، القاهرة→NULL. (دبي→NULL لأن منطقة الإمارات `enabled=false`؛ المضلّع يحويها فور تفعيلها → 2.)
 - **✅ G3 (دخول Google/الإيميل من الويب) منشور ومُتحقَّق (PR #90):** زرّ Google (GIS) + دخول الإيميل (OTP) على hancr.com/account، مع تدفّق pendingToken لربط الهاتف + mutation logout. `riderAuth.ts` (sendEmailOtp/verifyEmailOtp/googleAuth/logout) + `AccountClient.tsx` (زرّ GIS + شاشتا email/email-otp + link-mode). `NEXT_PUBLIC_GOOGLE_CLIENT_ID` على الخادم. محقَّق حيّاً: الزرّ يُرسَم، GIS مُحمّل، الإيميل والهاتف متاحان. **نشر الموقع:** `scripts/deploy-landing.sh`.
-- **🎉 الموجة G مكتملة بالكامل** (G1 خلفي · G2 موبايل راكب+سائق · G3 ويب · G4 تحصينات) + تفعيل keystore الإصدار + نشر شاشة موافقة Google للإنتاج.
+- **🎉 الموجة G مكتملة بالكامل** (G1 خلفي · G2 موبايل راكب+سائق · G3 ويب · G4 تحصينات الثلاثة) + تفعيل keystore الإصدار + نشر شاشة موافقة Google للإنتاج + PostGIS للمناطق.
+- **📦 Play App Signing — جاهز للرفع (إجراء المالك الوحيد المتبقّي):** بُنيت AABs الإصدار (`apps/{rider,driver}-app/build/app/outputs/bundle/release/app-release.aab`، موقّعة بمفتاح الرفع hancr-upload.jks). خطوات المالك على Play Console: أنشئ التطبيق → فعّل Play App Signing → ارفع الـ AAB → انسخ **SHA-1 لمفتاح توقيع تطبيق Play** → أضِفه على عميلَي Android في Google Cloud (إضافةً لبصمة الرفع B1:E0). لا يمكن للوكيل إتمامه (يتطلّب حساب Play).
 
 ## 🔑 حسابات تجريبية (الدخول — OTP ثابت 123456)
 | التطبيق | الرقم/الإيميل | الرمز |
