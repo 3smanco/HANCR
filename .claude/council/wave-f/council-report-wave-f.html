@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HANCR — مجلس الموجة F (التدقيق العدائي النهائي)</title>
+<style>
+  :root{--bg:#fff;--ink:#1a1a2e;--muted:#6b7280;--line:#e5e7eb;--crit:#dc2626;--high:#ea580c;--med:#d97706;--low:#65a30d;--ok:#16a34a;--accent:#7c3aed;--card:#f9fafb}
+  *{box-sizing:border-box}
+  body{font-family:system-ui,'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--ink);margin:0;line-height:1.7;font-size:15px}
+  .wrap{max-width:980px;margin:0 auto;padding:32px 24px 80px}
+  header{border-bottom:3px solid var(--accent);padding-bottom:18px}
+  h1{font-size:25px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:14px}
+  h2{font-size:19px;margin:32px 0 12px}
+  .pill{display:inline-block;font-size:11px;font-weight:700;color:#fff;border-radius:6px;padding:2px 8px;margin-inline-end:6px}
+  .c-crit{background:var(--crit)}.c-high{background:var(--high)}.c-med{background:var(--med)}.c-low{background:var(--low)}.c-ok{background:var(--ok)}
+  .verdict{background:linear-gradient(135deg,#fef2f2,#f0fdf4);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:18px 0}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:start}
+  th{background:var(--card);font-weight:700}
+  code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12.5px;direction:ltr;display:inline-block}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+  .ag{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px}
+  .ag b{display:block;margin-bottom:4px}
+  li{margin:6px 0}
+  footer{margin-top:46px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+</style>
+</head>
+<body><div class="wrap">
+<header>
+  <h1>🟫 مجلس الموجة F — التدقيق العدائي النهائي</h1>
+  <div class="sub">على الكود الجديد لهذه الجلسة (لوحة التحكم · الأماكن المحفوظة · منصّة الويب) · 3 وكلاء عدائيين · 2026-06-12</div>
+</header>
+
+<div class="grid">
+  <div class="ag"><b>🔴 المعارض (أمن الويب)</b>regionId/serviceId · trustProxy · باب OTP · CORS · token</div>
+  <div class="ag"><b>🧱 المبادئ (المال)</b>تأكيد regionId/serviceId · providerShare سليم · referral_code</div>
+  <div class="ag"><b>🔧 المنفّذ (أدمن+بناء)</b>RBAC سليم · لا حقن · بناء أخضر · DTO validators</div>
+</div>
+
+<div class="verdict">
+  <h2 style="margin-top:0">🎯 خلاصة الرئيس</h2>
+  <p><b>الكود الجديد آمن في جوهره</b> — لا IDOR (كل استعلامات الراكب تعتمد <code>riderId</code> من التوكن)، صلاحيات الأدمن الجديدة محميّة بالكامل، لا حقن SQL، البناء أخضر. لكن المجلس كشف ثغرة <b>حرجة مؤكَّدة من وكيلين مستقلّين</b> + عدّة عوالي، وكلها أُصلحت ونُشرت.</p>
+  <p><b>أُكِّد حيّاً:</b> الباب الخلفي للأرقام التجريبية مُغلق على الإنتاج — <code>sendOtp(+966500000001)</code> يُرجع الآن <code>devOtp: null</code> (كان <code>123456</code>).</p>
+</div>
+
+<h2>📋 النتائج والإصلاحات (كلها مُطبَّقة ومنشورة)</h2>
+<table>
+<tr><th>#</th><th>الثغرة</th><th>الخطورة</th><th>الإصلاح</th></tr>
+<tr><td>1</td><td><code>createOrder</code>/<code>previewRoute</code> يثق بـ regionId+serviceId بلا تحقّق → تسعير من منطقة وهمية/خدمة أرخص أو معطّلة (مؤكَّد من وكيلين)</td><td><span class="pill c-crit">CRIT</span></td><td>ربط الخدمة بـ <code>{id, regionId, enabled:true}</code></td></tr>
+<tr><td>2</td><td>باب خلفي: أرقام تجريبية تُرجع OTP ثابت <code>123456</code> عبر <code>devOtp</code> في الإنتاج</td><td><span class="pill c-high">HIGH</span></td><td>تعطيل TEST_PHONES خارج dev (راكب+سائق)</td></tr>
+<tr><td>3</td><td>تحديد المعدّل لكل IP منهار خلف البروكسي (SMS-bomb/brute-force)</td><td><span class="pill c-high">HIGH</span></td><td><code>trustProxy:true</code> ×3 + حدّ OTP لكل رقم 3/60ث</td></tr>
+<tr><td>4</td><td>CORS <code>origin:true + credentials</code> لو <code>CORS_ORIGINS</code> فارغ</td><td><span class="pill c-high">HIGH</span></td><td>fail-closed: نطاقات hancr افتراضياً</td></tr>
+<tr><td>5</td><td>DTOs إنشاء/تعديل الراكب/السائق بلا تحقّق (هاتف/إيميل/أطوال)</td><td><span class="pill c-med">MED</span></td><td>class-validator (Matches/IsEmail/MaxLength)</td></tr>
+<tr><td>6</td><td><code>addresses[]</code> بلا حدّ حجم/طول؛ serviceId/regionId بلا Min</td><td><span class="pill c-med">MED</span></td><td>ArrayMaxSize(5)+MaxLength(200)+Min(1)</td></tr>
+</table>
+
+<h2>✅ ما برّأه المجلس (لا ثغرة)</h2>
+<ul>
+  <li><span class="pill c-ok">آمن</span> <b>IDOR:</b> <code>me/savedPlaces/createOrder/history</code> تعتمد <code>@CurrentUser().riderId</code> من JWT — العميل لا يمرّر riderId. ملكية الطلب والاشتراك مُتحقَّقة.</li>
+  <li><span class="pill c-ok">آمن</span> <b>صلاحيات الأدمن الجديدة:</b> الأربع mutations + DispatcherDrawer محميّة بـ <code>RequireRole('ops')</code>.</li>
+  <li><span class="pill c-ok">آمن</span> لا حقن SQL (TypeORM مُعامَل)، حدود الإحداثيات مُتحقَّقة، providerShare سليم على طلبات الويب، تخزين throttler على Redis.</li>
+</ul>
+
+<h2>⏳ تحصينات مؤجَّلة (غير حاجبة)</h2>
+<ul>
+  <li>token الويب في localStorage — إبطال جلسة عند الخروج + CSP على الموقع + TTL قصير (يتطلّب تحويل لـ SSR لـ httpOnly cookie).</li>
+  <li><code>referral_code</code> إضافة <code>unique</code> + migration. منطقة الطلب: اشتقاقها من نقطة الالتقاط عبر PostGIS (تحصين أعمق من ربط الخدمة بالمنطقة).</li>
+</ul>
+
+<h2>🌐 التحقّق عبر الأماكن الثلاثة</h2>
+<ul>
+  <li><b>الملف=GitHub:</b> PR #76 مدموج في main (3smanco/HANCR).</li>
+  <li><b>السيرفر:</b> الـ3 APIs أُعيد تشغيلها — <code>/health/ready=200</code> للثلاثة.</li>
+  <li><b>حيّ:</b> الباب الخلفي مُغلق (<code>devOtp:null</code>)؛ الموقع/اللوحة/APK تعمل (200).</li>
+</ul>
+
+<footer>تقرير مجلس LLM (منهجية Karpathy) — الموجة F · 3 وكلاء عدائيين + توليفة الرئيس · التفاصيل في <code>.claude/council/wave-f/01,02,VERDICT.md</code> · 2026-06-12</footer>
+</div></body></html>

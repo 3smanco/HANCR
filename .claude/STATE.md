@@ -33,6 +33,11 @@
     - **✅ E3 الحجز الكامل من المتصفح منشور (PR #75):** Google Places Autocomplete (بحث وجهة حرّ) + اختصارات الأماكن المحفوظة + الموقع الحالي → routePreview → **createOrder** (طلب فعلي). `NEXT_PUBLIC_GOOGLE_MAPS_KEY` مضبوط في `/opt/hancr/apps/landing/.env.production` على الخادم (gitignored؛ يجب إعادة ضبطه إن أُعيد تثبيت الخادم). المفتاح مخبوز في البناء.
     - ⚠️ **للتحقق من المالك:** مفتاح Google يجب أن يكون مُفعَّلاً لـ **Maps JavaScript API + Places API** ويسمح بـ referrer `hancr.com` ليعمل الـ autocomplete في المتصفح.
     - **متبقٍّ E (تحسينات):** متابعة حية للطلب من الويب (subscription) · دفع ويب (مع D) · تحصين httpOnly cookie (يتطلّب تحويل لـ SSR).
+  - **🟫 الموجة F — التدقيق العدائي النهائي منجزة ومنشورة (PR #76):** مجلس 3 وكلاء عدائيين على كل كود الجلسة. التقرير: `.claude/council/wave-f/` (01/02/VERDICT/HTML).
+    - **أُصلح:** 🔴 createOrder/previewRoute يربط serviceId بالمنطقة+enabled (كان يُسعَّر من منطقة وهمية/خدمة معطّلة — مؤكَّد من وكيلين) · 🟠 إلغاء باب OTP الخلفي (123456) في الإنتاج · 🟠 trustProxy:true ×3 + حدّ OTP لكل رقم 3/60ث · 🟠 CORS fail-closed · 🟡 DTO validators للأدمن + addresses[] حدود.
+    - **برّأه المجلس:** IDOR (riderId من JWT)، صلاحيات الأدمن الجديدة (RBAC)، لا حقن، providerShare سليم.
+    - **مُتحقَّق حيّاً:** الباب الخلفي مُغلق على الإنتاج — `sendOtp(+966500000001)` يُرجع `devOtp:null` (كان 123456). الـ3 APIs 200.
+    - **تحصين مؤجَّل:** إبطال جلسة الويب عند الخروج + CSP + referral_code unique + اشتقاق المنطقة من PostGIS.
   - **متبقٍّ عام:** D (دفع ببوابة، مؤجَّل لبيانات التاجر) · متابعة/دفع الويب.
 - **خطة N مكتملة (N1→N11).** آخر إنجاز: N11 — ذكاء اللوحة (PR #63).
 - **🔒 فحص أمني شامل (مجلس LLM) — 2026-06-11:** أُصلحت 13 نقطة حرجة/عالية (أمن+مال)، مُتحقَّقة tsc=0. التفاصيل والمتبقّي المرتّب في `.claude/council/REMEDIATION.md`. تقرير المجلس: `.claude/council/council-report-20260611.html`.
