@@ -24,8 +24,13 @@ flutter build apk --release --dart-define=ENV=production \
 - **✅ شاشة الموافقة منشورة للإنتاج (Production):** أي مستخدم Google يقدر يدخل (النطاقات email/profile غير حسّاسة، لا تحتاج مراجعة). (test user 7bicii@gmail.com مُضاف أيضاً.)
 - **✅ Android client للسائق:** `HANCR Driver Android` (package `com.zancr.hancr_driver` + SHA-1 debug `48:3B:...`).
 - **serverClientId في البناء (راكب + سائق):** أضِف دائماً `--dart-define=GOOGLE_SERVER_CLIENT_ID=390136620892-bkt9ive9las4eqqft40dorpnva676l4l.apps.googleusercontent.com`.
-- **🔑 keystore الإصدار (Play Store) — مُجهَّز لكن غير مُفعَّل:** أُنشئ `keys/hancr-upload.jks` (alias `hancr`، كلمة المرور سُلِّمت للمالك في المحادثة، gitignored؛ SHA-1 `B1:E0:93:51:16:22:D4:ED:F9:64:0A:B0:97:BD:F3:82:CA:5C:19:9D`). **مُعطَّل حالياً** (حُذف key.properties → التواقيع debug للتجربة، أبسط وأكثر اتساقاً). **مفتاح التوقيع الإنتاجي ملك المالك** — عند الإطلاق على Play: المالك يفعّله (يضع key.properties في android/ لكل تطبيق) + يسجّل بصمته B1:E0 على عميلَي Android (أو يستخدم Play App Signing ويسجّل بصمة Play). أنشأ الحارس فجوة هنا عمداً (لا يولّد الوكيل مفتاح الإنتاج تلقائياً).
-- **✅ G2-سائق (PR #85):** واجهة Google/الإيميل للسائق مكتملة.
+- **🔑 keystore الإصدار — ✅ مُفعَّل (بإذن المالك):** `keys/hancr-upload.jks` (alias `hancr`، كلمة المرور `cb8e9ade6a5bfc48f7996b917662b701` سُلِّمت للمالك، gitignored؛ SHA-1 `B1:E0:93:51:16:22:D4:ED:F9:64:0A:B0:97:BD:F3:82:CA:5C:19:9D`). `key.properties` في android/ للتطبيقين → التطبيقان موقّعان بمفتاح الإصدار، وعميلا Android سُجِّلا ببصمة الإصدار B1:E0 (مُتحقَّق apksigner). **APKs المنشورة release-signed.** (للإطلاق على Play: يُفضَّل Play App Signing — حينها سجّل بصمة Play الإضافية.)
+- **✅ G2-سائق (PR #85):** واجهة Google/الإيميل للسائق مكتملة + منشورة (release-signed).
+- **✅ G4 التحصينات (منشورة ومُتحقَّقة حيّاً):**
+  - CSP + HSTS + X-Frame-Options + nosniff + Referrer-Policy + Permissions-Policy على hancr.com (`scripts/apply-csp.sh` + snippet `/etc/nginx/snippets/hancr-security.conf`).
+  - إبطال جلسة الويب: `JwtStrategy.validate` async — يرفض توكنات صدرت قبل آخر logout (Redis `hancr:revoked:rider:{id}`) + إعادة فحص banned كل طلب. mutation `logout` (PR #87). مُتحقَّق: me يعمل ثم يُرفض بعد logout.
+  - اشتقاق منطقة الطلب من نقطة الالتقاط في createOrder (bbox مرتّب؛ يُستبدل بـ PostGIS ST_Contains عند ملء hancr_region.boundary) — PR #88.
+- **⏭️ المتبقّي: G3 (دخول Google/الإيميل من الويب /account).** Web OAuth client + CSP (accounts.google.com) جاهزان؛ يتبقّى ربط GIS + OTP بريد في riderAuth.ts + UI.
 
 ## 🔑 حسابات تجريبية (الدخول — OTP ثابت 123456)
 | التطبيق | الرقم/الإيميل | الرمز |
