@@ -5,6 +5,10 @@ import { SendOtpInput } from './dto/send-otp.input';
 import { VerifyOtpInput } from './dto/verify-otp.input';
 import { SendOtpResponse } from './dto/send-otp-response.type';
 import { AuthPayload } from './dto/auth-payload.type';
+import { AuthResult } from './dto/auth-result.type';
+import { SendEmailOtpInput } from './dto/send-email-otp.input';
+import { VerifyEmailOtpInput } from './dto/verify-email-otp.input';
+import { GoogleAuthInput } from './dto/google-auth.input';
 
 /**
  * Rate limits منفصلة:
@@ -51,5 +55,37 @@ export class AuthResolver {
   @Throttle({ strict: { limit: 10, ttl: 60000 } })
   verifyOtp(@Args('input') input: VerifyOtpInput): Promise<AuthPayload> {
     return this.authService.verifyOtp(input);
+  }
+
+  // ─── الدخول بالإيميل (OTP) ───
+  @Mutation(() => SendOtpResponse, {
+    description: 'إرسال رمز OTP إلى البريد الإلكتروني',
+  })
+  @Throttle({ strict: { limit: 3, ttl: 60000 } })
+  sendEmailOtp(
+    @Args('input') input: SendEmailOtpInput,
+  ): Promise<SendOtpResponse> {
+    return this.authService.sendEmailOtp(input);
+  }
+
+  @Mutation(() => AuthResult, {
+    description:
+      'التحقق من OTP البريد — دخول كامل أو رمز ربط هاتف (needsPhone)',
+  })
+  @Throttle({ strict: { limit: 10, ttl: 60000 } })
+  verifyEmailOtp(
+    @Args('input') input: VerifyEmailOtpInput,
+  ): Promise<AuthResult> {
+    return this.authService.verifyEmailOtp(input);
+  }
+
+  // ─── الدخول بحساب Google ───
+  @Mutation(() => AuthResult, {
+    description:
+      'الدخول عبر Google ID token — دخول كامل أو رمز ربط هاتف (needsPhone)',
+  })
+  @Throttle({ strict: { limit: 10, ttl: 60000 } })
+  googleAuth(@Args('input') input: GoogleAuthInput): Promise<AuthResult> {
+    return this.authService.googleAuth(input);
   }
 }

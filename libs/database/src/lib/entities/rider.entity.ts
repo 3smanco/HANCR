@@ -42,6 +42,10 @@ export class RiderEntity {
   @Column({ nullable: true, unique: true })
   email?: string;
 
+  /** معرّف حساب Google المرتبط (Sign-in with Google) */
+  @Column({ type: 'varchar', length: 255, nullable: true, unique: true, name: 'google_id' })
+  googleId?: string;
+
   /** هل الحساب محظور */
   @Column({ default: false })
   banned!: boolean;
@@ -71,7 +75,7 @@ export class RiderEntity {
   poolId?: number;
 
   /** كود الإحالة الخاص بالراكب (يشاركه لدعوة الأصدقاء) */
-  @Column({ type: 'varchar', length: 12, nullable: true, name: 'referral_code' })
+  @Column({ type: 'varchar', length: 12, nullable: true, unique: true, name: 'referral_code' })
   referralCode?: string;
 
   /** معرّف الراكب الذي أحال هذا الراكب (إن وُجد) */
