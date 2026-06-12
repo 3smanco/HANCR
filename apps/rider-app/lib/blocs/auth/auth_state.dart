@@ -23,6 +23,20 @@ class AuthOtpSent extends AuthState {
   List<Object?> get props => [phone, devOtp];
 }
 
+/// Email OTP was sent successfully
+class AuthEmailOtpSent extends AuthState {
+  final String email;
+  final String? devOtp;
+  const AuthEmailOtpSent({required this.email, this.devOtp});
+  @override
+  List<Object?> get props => [email, devOtp];
+}
+
+/// دخول Google/الإيميل نجح لكن يحتاج ربط هاتف (pendingToken محفوظ في البلوك)
+class AuthNeedsPhone extends AuthState {
+  const AuthNeedsPhone();
+}
+
 /// Fully authenticated — token stored
 class AuthAuthenticated extends AuthState {
   final int riderId;

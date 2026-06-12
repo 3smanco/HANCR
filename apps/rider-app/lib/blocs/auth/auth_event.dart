@@ -30,6 +30,36 @@ class AuthVerifyOtpRequested extends AuthEvent {
   List<Object?> get props => [phone, otp, referralCode];
 }
 
+/// طلب رمز OTP إلى البريد الإلكتروني
+class AuthSendEmailOtpRequested extends AuthEvent {
+  final String email;
+  const AuthSendEmailOtpRequested(this.email);
+  @override
+  List<Object?> get props => [email];
+}
+
+/// التحقق من OTP البريد
+class AuthVerifyEmailOtpRequested extends AuthEvent {
+  final String email;
+  final String otp;
+  final String? referralCode;
+  const AuthVerifyEmailOtpRequested({
+    required this.email,
+    required this.otp,
+    this.referralCode,
+  });
+  @override
+  List<Object?> get props => [email, otp, referralCode];
+}
+
+/// الدخول عبر حساب Google (يبدأ تدفّق google_sign_in)
+class AuthGoogleSignInRequested extends AuthEvent {
+  final String? referralCode;
+  const AuthGoogleSignInRequested({this.referralCode});
+  @override
+  List<Object?> get props => [referralCode];
+}
+
 class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();
 }
