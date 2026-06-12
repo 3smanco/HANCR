@@ -30,7 +30,8 @@ flutter build apk --release --dart-define=ENV=production \
   - CSP + HSTS + X-Frame-Options + nosniff + Referrer-Policy + Permissions-Policy على hancr.com (`scripts/apply-csp.sh` + snippet `/etc/nginx/snippets/hancr-security.conf`).
   - إبطال جلسة الويب: `JwtStrategy.validate` async — يرفض توكنات صدرت قبل آخر logout (Redis `hancr:revoked:rider:{id}`) + إعادة فحص banned كل طلب. mutation `logout` (PR #87). مُتحقَّق: me يعمل ثم يُرفض بعد logout.
   - اشتقاق منطقة الطلب من نقطة الالتقاط في createOrder (bbox مرتّب؛ يُستبدل بـ PostGIS ST_Contains عند ملء hancr_region.boundary) — PR #88.
-- **⏭️ المتبقّي: G3 (دخول Google/الإيميل من الويب /account).** Web OAuth client + CSP (accounts.google.com) جاهزان؛ يتبقّى ربط GIS + OTP بريد في riderAuth.ts + UI.
+- **✅ G3 (دخول Google/الإيميل من الويب) منشور ومُتحقَّق (PR #90):** زرّ Google (GIS) + دخول الإيميل (OTP) على hancr.com/account، مع تدفّق pendingToken لربط الهاتف + mutation logout. `riderAuth.ts` (sendEmailOtp/verifyEmailOtp/googleAuth/logout) + `AccountClient.tsx` (زرّ GIS + شاشتا email/email-otp + link-mode). `NEXT_PUBLIC_GOOGLE_CLIENT_ID` على الخادم. محقَّق حيّاً: الزرّ يُرسَم، GIS مُحمّل، الإيميل والهاتف متاحان. **نشر الموقع:** `scripts/deploy-landing.sh`.
+- **🎉 الموجة G مكتملة بالكامل** (G1 خلفي · G2 موبايل راكب+سائق · G3 ويب · G4 تحصينات) + تفعيل keystore الإصدار + نشر شاشة موافقة Google للإنتاج.
 
 ## 🔑 حسابات تجريبية (الدخول — OTP ثابت 123456)
 | التطبيق | الرقم/الإيميل | الرمز |
