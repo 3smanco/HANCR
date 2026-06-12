@@ -39,11 +39,19 @@ export class AuthService {
     phone: string,
   ): Promise<{ success: boolean; message: string; devOtp?: string }> {
     const key = `hancr:otp:driver:${phone}`;
-    const isTestPhone = AuthService.TEST_DRIVER_PHONES.has(phone);
+    const isDev = this.configService.get<string>('NODE_ENV') === 'development';
+    // أمن: حدّ لكل رقم (3/60ث) — يمنع قصف SMS لرقم واحد عبر IPs متعدّدة.
+    const rlKey = `hancr:otp:rl:driver:${phone}`;
+    const sent = await this.redis.incr(rlKey);
+    if (sent === 1) await this.redis.expire(rlKey, 60);
+    if (sent > 3) {
+      throw new UnauthorizedException('محاولات كثيرة. انتظر دقيقة.');
+    }
+    // أمن: الأرقام التجريبية مُعطّلة في الإنتاج (باب خلفي سابق).
+    const isTestPhone = isDev && AuthService.TEST_DRIVER_PHONES.has(phone);
     const code = isTestPhone
       ? '123456'
       : Math.floor(100000 + Math.random() * 900000).toString();
-    const isDev = this.configService.get<string>('NODE_ENV') === 'development';
 
     await this.redis.setex(
       key,

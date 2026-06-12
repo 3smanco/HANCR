@@ -52,13 +52,25 @@ export class AuthService {
   async sendOtp(input: SendOtpInput): Promise<SendOtpResponse> {
     const { phone } = input;
     const key = `hancr:otp:login:${phone}`;
-    const isTestPhone = AuthService.TEST_PHONES.has(phone);
+    const isDev = this.configService.get<string>('NODE_ENV') === 'development';
 
-    // الأرقام التجريبية: OTP ثابت = 123456. الباقي: 6 خانات عشوائية
+    // أمن: حدّ لكل رقم (يمنع قصف SMS لرقم واحد عبر IPs متعدّدة — تحديد المعدّل
+    // لكل IP وحده لا يكفي). 3 رسائل/60ث لكل رقم.
+    const rlKey = `hancr:otp:rl:${phone}`;
+    const sent = await this.redis.incr(rlKey);
+    if (sent === 1) await this.redis.expire(rlKey, 60);
+    if (sent > 3) {
+      throw new UnauthorizedException(
+        'محاولات كثيرة. انتظر دقيقة قبل طلب رمز جديد.',
+      );
+    }
+    // أمن: الأرقام التجريبية (OTP ثابت 123456) مُعطّلة كلياً في الإنتاج —
+    // كانت باباً خلفياً للدخول كحسابات demo من الويب. تعمل في dev فقط.
+    const isTestPhone = isDev && AuthService.TEST_PHONES.has(phone);
+
     const code = isTestPhone
       ? '123456'
       : Math.floor(100000 + Math.random() * 900000).toString();
-    const isDev = this.configService.get<string>('NODE_ENV') === 'development';
 
     // N1 — TTL يأتي من لوحة التحكم (operationsConfig.otpTtlSeconds)
     const ops = await this.appConfig.getOperations();

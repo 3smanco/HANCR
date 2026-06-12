@@ -17,7 +17,7 @@ const logger = new Logger('DriverAPI');
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(
     DriverApiModule,
-    new FastifyAdapter({ logger: false }),
+    new FastifyAdapter({ logger: false, trustProxy: true }),
   );
 
   // إغلاق رشيق عند SIGTERM (نشر/إعادة تشغيل pm2).

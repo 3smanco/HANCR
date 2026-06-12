@@ -11,6 +11,7 @@ import {
   ArrayMinSize,
   ArrayMaxSize,
   IsString,
+  MaxLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { GeoPointInput } from './geo-point.input';
@@ -30,17 +31,21 @@ export class CreateOrderInput {
   @Field(() => [String])
   @IsArray()
   @ArrayMinSize(2)
+  @ArrayMaxSize(5)
   @IsString({ each: true })
+  @MaxLength(200, { each: true })
   addresses!: string[];
 
   /** معرّف الخدمة (Economy, VIP, ...) */
   @Field(() => Int)
   @IsNumber()
+  @Min(1)
   serviceId!: number;
 
   /** معرّف المنطقة الجغرافية */
   @Field(() => Int)
   @IsNumber()
+  @Min(1)
   regionId!: number;
 
   // ===== Ride Moods =====
