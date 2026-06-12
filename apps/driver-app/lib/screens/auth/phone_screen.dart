@@ -60,6 +60,12 @@ class _PhoneScreenState extends State<PhoneScreen> {
             'devOtp': state.devOtp,
           });
         }
+        if (state is AuthNeedsPhone) {
+          ScaffoldMessenger.of(ctx).showSnackBar(
+            const SnackBar(
+                content: Text('أضف رقم هاتفك لإكمال إنشاء الحساب')),
+          );
+        }
         if (state is AuthError) {
           ScaffoldMessenger.of(ctx).showSnackBar(
             SnackBar(content: Text(state.message)),
@@ -160,6 +166,32 @@ class _PhoneScreenState extends State<PhoneScreen> {
                                 strokeWidth: 2, color: Colors.white),
                           )
                         : Text(tr('sendOtp')),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(children: [
+                    const Expanded(child: Divider(color: HancrColors.surfaceVariant)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('أو',
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ),
+                    const Expanded(child: Divider(color: HancrColors.surfaceVariant)),
+                  ]),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: loading
+                        ? null
+                        : () => ctx
+                            .read<AuthBloc>()
+                            .add(const AuthGoogleSignInRequested()),
+                    icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
+                    label: const Text('الدخول عبر Google'),
+                  ),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: loading ? null : () => ctx.push('/auth/email'),
+                    icon: const Icon(Icons.alternate_email, size: 20),
+                    label: const Text('الدخول عبر البريد'),
                   ),
                 ],
               ),

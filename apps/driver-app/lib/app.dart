@@ -19,6 +19,8 @@ import 'core/theme/aurora_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'screens/auth/otp_screen.dart';
 import 'screens/auth/phone_screen.dart';
+import 'screens/auth/email_screen.dart';
+import 'screens/auth/email_otp_screen.dart';
 import 'screens/home/aurora_driver_home.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/splash/splash_screen.dart';
@@ -88,6 +90,18 @@ class _HancrCaptainAppState extends State<HancrCaptainApp> {
             final extra = state.extra as Map<String, dynamic>?;
             return OtpScreen(
               phone: extra?['phone'] as String? ?? '',
+              devOtp: extra?['devOtp'] as String?,
+            );
+          },
+        ),
+        GoRoute(
+            path: '/auth/email', builder: (ctx, st) => const EmailScreen()),
+        GoRoute(
+          path: '/auth/email-otp',
+          builder: (_, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return EmailOtpScreen(
+              email: extra?['email'] as String? ?? '',
               devOtp: extra?['devOtp'] as String?,
             );
           },

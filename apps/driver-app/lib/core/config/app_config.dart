@@ -38,6 +38,13 @@ class AppConfig {
     defaultValue: 'AIzaSyCwLtWyS6m44JNXWjTRCyOkR83GirSkZ3o',
   );
 
+  // ── Google Sign-In ────────────────────────────────────────────────────────
+  /// Web OAuth client ID — لازم لإرجاع idToken للخادم. فارغ = الزرّ معطّل.
+  static const String googleServerClientId = String.fromEnvironment(
+    'GOOGLE_SERVER_CLIENT_ID',
+    defaultValue: '',
+  );
+
   // ── Defaults ──────────────────────────────────────────────────────────────
   static const int defaultRegionId = 1;
   static const double defaultLat = 24.7136;

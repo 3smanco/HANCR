@@ -34,6 +34,9 @@ dependencies:
   geolocator: ^13.0.2
   url_launcher: ^6.3.0
 
+  # Auth — Google Sign-In
+  google_sign_in: ^6.2.1
+
   # Image upload (driver documents)
   image_picker: ^1.1.2
   http: ^1.2.2

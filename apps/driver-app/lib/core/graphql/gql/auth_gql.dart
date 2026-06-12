@@ -9,8 +9,8 @@ const String driverSendOtpMutation = r'''
 ''';
 
 const String driverVerifyOtpMutation = r'''
-  mutation DriverVerifyOtp($phone: String!, $code: String!) {
-    driverVerifyOtp(phone: $phone, code: $code) {
+  mutation DriverVerifyOtp($phone: String!, $code: String!, $pendingToken: String) {
+    driverVerifyOtp(phone: $phone, code: $code, pendingToken: $pendingToken) {
       accessToken
       isNewDriver
       driver {
@@ -34,6 +34,46 @@ const String driverVerifyOtpMutation = r'''
         currency
         regionId
       }
+    }
+  }
+''';
+
+// ─── دخول الإيميل (OTP) ───
+const String driverSendEmailOtpMutation = r'''
+  mutation DriverSendEmailOtp($email: String!) {
+    driverSendEmailOtp(email: $email) {
+      success
+      message
+      devOtp
+    }
+  }
+''';
+
+const String driverVerifyEmailOtpMutation = r'''
+  mutation DriverVerifyEmailOtp($email: String!, $code: String!) {
+    driverVerifyEmailOtp(email: $email, code: $code) {
+      success
+      needsPhone
+      pendingToken
+      accessToken
+      isNewDriver
+      message
+      driver { id phoneNumber firstName email status active banned currency }
+    }
+  }
+''';
+
+// ─── دخول Google ───
+const String driverGoogleAuthMutation = r'''
+  mutation DriverGoogleAuth($idToken: String!) {
+    driverGoogleAuth(idToken: $idToken) {
+      success
+      needsPhone
+      pendingToken
+      accessToken
+      isNewDriver
+      message
+      driver { id phoneNumber firstName email status active banned currency }
     }
   }
 ''';
