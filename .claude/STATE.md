@@ -17,6 +17,14 @@ flutter build apk --release --dart-define=ENV=production \
 ```
 أو سكربت `scripts/build-flutter-release.sh` (يضبط ENV=production افتراضياً، لكنه يستخدم --split-per-abi؛ للنشر كملف واحد hancr-*.apk ابنِ universal كما أعلاه). مفتاح الخرائط: `AIzaSyCwLtWyS6m44JNXWjTRCyOkR83GirSkZ3o`.
 
+## 🔐 إعداد Google OAuth (2026-06-12 — أُنجز في حساب المالك عبر المتصفّح)
+المشروع: **hancr-494520** (Hancr). أُنشئ في Google Cloud Console:
+- **HANCR Web** (Web application) = `GOOGLE_OAUTH_CLIENT_ID` = `390136620892-bkt9ive9las4eqqft40dorpnva676l4l.apps.googleusercontent.com`. JS origins: hancr.com + www. مضبوط على الخادم في `/opt/hancr/.env` + `.env.prod` (مُتحقَّق: الخلفية تتحقّق من توكنات Google).
+- **HANCR Rider Android** (package `com.zancr.hancr_rider` + SHA-1 `48:3B:B3:F2:50:4E:94:2B:7F:B1:D4:39:F1:B5:91:16:69:1B:CE:22` = توقيع debug، مُتحقَّق أنه نفس موقّع APK المنشور). يمنع DEVELOPER_ERROR على الجهاز.
+- **شاشة الموافقة في وضع Testing** (النشر للإنتاج مرفوض بالحارس). أُضيف `7bicii@gmail.com` كـ test user → يمكنه الدخول بـ Google. لإتاحته لكل المستخدمين: المالك ينشر التطبيق (Audience → Publish app) — النطاقات email/profile غير حسّاسة فلا تحتاج مراجعة Google.
+- **serverClientId في بناء الراكب:** أضِف دائماً `--dart-define=GOOGLE_SERVER_CLIENT_ID=390136620892-bkt9ive9las4eqqft40dorpnva676l4l.apps.googleusercontent.com` لبناء تطبيق الراكب (مع ENV=production + MAPS).
+- **ناقص لـ Android سائق:** عند بناء واجهة Google للسائق، أنشئ Android OAuth client بـ package تطبيق السائق + نفس SHA-1.
+
 ## 🔑 حسابات تجريبية (الدخول — OTP ثابت 123456)
 | التطبيق | الرقم/الإيميل | الرمز |
 |---|---|---|
