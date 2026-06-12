@@ -124,7 +124,7 @@ export class OrderService {
     // يمنع المطالبة بمنطقة أرخص بينما الالتقاط فعلياً في منطقة أخرى. حدّ مؤقّت
     // بـ bounding box (الدول الثلاث متباعدة)؛ يُستبدل بـ PostGIS ST_Contains
     // متى مُلئت حدود المناطق (hancr_region.boundary حالياً NULL).
-    const derivedRegionId = this.resolveRegionIdFromPoint(
+    const derivedRegionId = await this.resolveRegionIdFromPoint(
       originPoint.lat,
       originPoint.lng,
     );
@@ -916,23 +916,27 @@ export class OrderService {
   }
 
   /**
-   * يشتق معرّف المنطقة من إحداثيات الالتقاط.
-   * bounding boxes مرتّبة (الجيوب الصغيرة أولاً لحلّ التداخل مع السعودية).
-   * IDs: 1=قطر · 2=الإمارات · 3=السعودية (تطابق hancr_region).
-   * يعيد null إن كانت النقطة خارج كل المناطق المعروفة (لا نكسر التدفّق).
-   * ملاحظة: حلّ مؤقّت — يُستبدَل بـ PostGIS ST_Contains عند ملء حدود المناطق.
+   * يشتق معرّف المنطقة من إحداثيات الالتقاط عبر PostGIS ST_Contains على
+   * مضلّعات حدود المناطق (hancr_region.boundary، GeoJSON). عند التداخل
+   * (الجيوب داخل امتداد السعودية) يُختار الأصغر مساحةً (ST_Area ASC).
+   * يعيد null إن كانت النقطة خارج كل المناطق المعرّفة (لا نكسر التدفّق).
    */
-  private resolveRegionIdFromPoint(lat: number, lng: number): number | null {
-    const inBox = (
-      la0: number,
-      la1: number,
-      ln0: number,
-      ln1: number,
-    ): boolean => lat >= la0 && lat <= la1 && lng >= ln0 && lng <= ln1;
-    if (inBox(24.4, 26.2, 50.7, 51.7)) return 1; // قطر
-    if (inBox(22.5, 26.2, 51.5, 56.5)) return 2; // الإمارات
-    if (inBox(16.0, 32.2, 34.4, 55.7)) return 3; // السعودية
-    return null;
+  private async resolveRegionIdFromPoint(
+    lat: number,
+    lng: number,
+  ): Promise<number | null> {
+    const rows = await this.dataSource.query<Array<{ id: number }>>(
+      `SELECT id FROM hancr_region
+       WHERE enabled = true AND boundary IS NOT NULL
+         AND ST_Contains(
+           ST_SetSRID(ST_GeomFromGeoJSON(boundary::text), 4326),
+           ST_SetSRID(ST_MakePoint($1, $2), 4326)
+         )
+       ORDER BY ST_Area(ST_GeomFromGeoJSON(boundary::text)) ASC
+       LIMIT 1`,
+      [lng, lat],
+    );
+    return rows[0]?.id ?? null;
   }
 
   private estimateDistance(
