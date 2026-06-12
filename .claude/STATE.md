@@ -6,6 +6,25 @@
 
 ---
 
+## 🟦 الموجة G — دخول بالإيميل + Google (مخطّط؛ G1 منجزة)
+**الطلب:** دخول بالإيميل (OTP) + Google على الأسطح الثلاثة (راكب·موقع·سائق) + 3 تحصينات (توكن الويب: إبطال/CSP/TTL · referral_code unique · اشتقاق منطقة الطلب من PostGIS).
+**القرارات:** الإيميل=OTP · الهاتف يبقى إلزامياً (ربط بعد دخول Google/الإيميل عبر pendingToken) · الأسطح الثلاثة.
+
+- **✅ G1 — الأساس الخلفي (PR #80، منشور+محقَّق حيّاً + migration مُشغَّل):**
+  - معماري: **تدفّق pendingToken** — Google/الإيميل يتحقّق الهوية؛ إن لم يوجد حساب بالإيميل → `needsPhone:true`+`pendingToken` (15د، scope=link-phone) → يُكمل بـ verifyOtp(phone+pendingToken) الذي يُنشئ/يدمج. يُبقي phone_number إلزامياً+فريداً. الدمج لا يستبدل حقلاً موجوداً.
+  - `EmailService` (nodemailer/SMTP) في @hancr/notifications — مُتحكَّم بالبيئة، تسليم صادق، إيميلات تجريبية (rider-demo@/driver-demo@hancr.com → 123456).
+  - تحقّق Google ID token عبر google-auth-library (محلي: توقيع+جمهور؛ env `GOOGLE_OAUTH_CLIENT_ID`).
+  - Mutations: راكب `sendEmailOtp`/`verifyEmailOtp`/`googleAuth`؛ سائق `driverSendEmailOtp`/`driverVerifyEmailOtp`/`driverGoogleAuth`. verifyOtp/driverVerifyOtp يقبلان `pendingToken`.
+  - Entities: rider.googleId · driver.email · driver.googleId (nullable+unique). Migration `1781300000000`: أعمدة + **referral_code UNIQUE** (يزيل التكرار أولاً) — منشور على DB الإنتاج.
+  - محقَّق حيّاً: sendEmailOtp→devOtp 123456 · verifyEmailOtp→needsPhone+pendingToken · googleAuth→فشل صادق · دمج pendingToken لا يستبدل.
+- **⏭️ المتبقّي من G (لم يُنفَّذ بعد):**
+  - **G2 — موبايل (راكب+سائق):** حزمة google_sign_in + شاشة OTP بريد + شاشة ربط هاتف + ربط أزرار Google/الإيميل بالتدفقات الحقيقية.
+  - **G3 — الويب (/account):** Google Identity Services + OTP بريد في riderAuth.ts + UI.
+  - **G4 — تحصينات:** (C) إبطال توكن الويب عند الخروج (Redis jti denylist + فحص banned في JwtStrategy) + CSP على nginx + TTL قصير + refresh. (E) اشتقاق منطقة الطلب من نقطة الالتقاط عبر PostGIS.
+- **🔴 إجراء المالك (حاجب لعمل زر Google فعلياً):** أنشئ **Google OAuth Web Client ID** في Google Cloud Console (+ SHA-1 لتطبيق أندرويد + أصول hancr.com للويب) واضبط `GOOGLE_OAUTH_CLIENT_ID` في `.env.prod`. ولـ بريد OTP حقيقي: `SMTP_HOST/PORT/USER/PASS`+`EMAIL_FROM` (الإيميلات التجريبية تعمل بدونها).
+
+---
+
 ## 🔴 آخر إصلاح (2026-06-12) — regression الدخول (PR #78، منشور+محقَّق حيّاً)
 **المشكلة:** الموجة F عطّلت الأرقام التجريبية في الإنتاج (`isTestPhone = isDev && ...`)، ومع بقاء Twilio تجريبياً → **لا طريق دخول يعمل** للتطبيقين + زر رجوع OTP لا يعمل + أزرار دخول اجتماعي محذوفة.
 - **الدخول:** علم `ALLOW_TEST_PHONES` (افتراضي `true`؛ يُضبط `false` عند ترقية Twilio) في rider-api + driver-api `auth.service.ts`. **محقَّق حيّاً:** `+966500000001/123456` و`+966500000010/123456` (driver: mutation `driverSendOtp`/`driverVerifyOtp` بوسيط `phone`) يُصدران JWT صالحاً.
