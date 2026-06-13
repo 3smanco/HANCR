@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 
 export interface AiTurn {
   role: 'user' | 'assistant';
@@ -37,20 +38,36 @@ const SYSTEM_PROMPT = `أنت "مساعد HANCR" — المساعد الذكي �
 @Injectable()
 export class AiService {
   private readonly logger = new Logger(AiService.name);
-  private readonly client: Anthropic | null;
+  // المزوّد: OpenAI (إن وُجد مفتاحه) وإلا Anthropic.
+  private readonly openai: OpenAI | null;
+  private readonly anthropic: Anthropic | null;
+  private readonly provider: 'openai' | 'anthropic' | null;
   private readonly model: string;
 
   constructor(private readonly config: ConfigService) {
-    const apiKey = config.get<string>('ANTHROPIC_API_KEY');
-    this.model = config.get<string>('ANTHROPIC_MODEL') ?? 'claude-opus-4-8';
-    this.client = apiKey ? new Anthropic({ apiKey }) : null;
-    if (!this.client) {
-      this.logger.warn('ANTHROPIC_API_KEY غير مُهيّأ — المساعد الذكي معطّل.');
+    const openaiKey = config.get<string>('OPENAI_API_KEY');
+    const anthropicKey = config.get<string>('ANTHROPIC_API_KEY');
+    if (openaiKey) {
+      this.openai = new OpenAI({ apiKey: openaiKey });
+      this.anthropic = null;
+      this.provider = 'openai';
+      this.model = config.get<string>('OPENAI_MODEL') ?? 'gpt-4o';
+    } else if (anthropicKey) {
+      this.openai = null;
+      this.anthropic = new Anthropic({ apiKey: anthropicKey });
+      this.provider = 'anthropic';
+      this.model = config.get<string>('ANTHROPIC_MODEL') ?? 'claude-opus-4-8';
+    } else {
+      this.openai = null;
+      this.anthropic = null;
+      this.provider = null;
+      this.model = '';
+      this.logger.warn('لا مفتاح OpenAI/Anthropic — المساعد الذكي معطّل.');
     }
   }
 
   get enabled(): boolean {
-    return this.client !== null;
+    return this.provider !== null;
   }
 
   /**
@@ -58,19 +75,36 @@ export class AiService {
    * message هي رسالة المستخدم الجديدة. يعيد نص رد المساعد.
    */
   async chat(message: string, history: AiTurn[] = []): Promise<string> {
-    if (!this.client) {
+    if (!this.provider) {
       return 'المساعد الذكي غير مُهيّأ بعد. تواصل مع الدعم support@hancr.com أو استخدم الحجز اليدوي.';
     }
 
     // نحافظ على آخر 12 دوراً فقط (سياق معقول + تكلفة أقل)
     const trimmed = history.slice(-12).filter((t) => t.content?.trim());
-    const messages: Anthropic.MessageParam[] = [
-      ...trimmed.map((t) => ({ role: t.role, content: t.content })),
-      { role: 'user' as const, content: message },
-    ];
 
     try {
-      const resp = await this.client.messages.create({
+      if (this.provider === 'openai') {
+        const resp = await this.openai!.chat.completions.create({
+          model: this.model,
+          max_tokens: 1024,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            ...trimmed.map((t) => ({ role: t.role, content: t.content })),
+            { role: 'user', content: message },
+          ],
+        });
+        return (
+          resp.choices[0]?.message?.content?.trim() ||
+          'عذراً، لم أفهم. أعد صياغة سؤالك من فضلك.'
+        );
+      }
+
+      // Anthropic
+      const messages: Anthropic.MessageParam[] = [
+        ...trimmed.map((t) => ({ role: t.role, content: t.content })),
+        { role: 'user' as const, content: message },
+      ];
+      const resp = await this.anthropic!.messages.create({
         model: this.model,
         max_tokens: 1024,
         thinking: { type: 'adaptive' },
@@ -84,7 +118,9 @@ export class AiService {
         .trim();
       return text || 'عذراً، لم أفهم. أعد صياغة سؤالك من فضلك.';
     } catch (e) {
-      this.logger.error(`AI chat failed: ${(e as Error).message}`);
+      this.logger.error(
+        `AI chat failed (${this.provider}): ${(e as Error).message}`,
+      );
       return 'حدث خطأ مؤقّت في المساعد. حاول مجدداً بعد قليل.';
     }
   }
