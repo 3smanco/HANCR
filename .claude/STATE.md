@@ -15,7 +15,16 @@ flutter build apk --release --dart-define=ENV=production \
   --dart-define=MAPS_API_KEY=<key> --dart-define=MAPS_KEY=<key> \
   --dart-define=GOOGLE_SERVER_CLIENT_ID=<id-or-empty>
 ```
-أو سكربت `scripts/build-flutter-release.sh` (يضبط ENV=production افتراضياً، لكنه يستخدم --split-per-abi؛ للنشر كملف واحد hancr-*.apk ابنِ universal كما أعلاه). مفتاح الخرائط: `AIzaSyCwLtWyS6m44JNXWjTRCyOkR83GirSkZ3o`.
+أو سكربت `scripts/build-flutter-release.sh` (يضبط ENV=production افتراضياً، لكنه يستخدم --split-per-abi؛ للنشر كملف واحد hancr-*.apk ابنِ universal كما أعلاه).
+
+## 🗺️ سبب جذري حرج (2026-06-13) — لماذا كانت الخريطة فارغة على أندرويد
+**المانيفست كان يستخدم مفتاح الويب `AIzaSyCwLtWyS6m44JNXWjTRCyOkR83GirSkZ3o` (مقيَّد بـ HTTP referrers لـ hancr.com).** المفاتيح المقيَّدة بالـ referrer **لا تعمل أبداً مع Android Maps SDK** (تطبيقات أندرويد لا ترسل referrer) → بلاطات الخريطة لا تُحمَّل → خريطة فارغة/رمادية.
+**الإصلاح الجذري (مُنجَز عبر المتصفّح في حساب المالك، مشروع hancr-494520):**
+- **مفتاح الخرائط للأندرويد (راكب+سائق) = `AIzaSyBsz0l4Vpb7FYNi6r1ZnlX62F28frgy9ys`** (اسمه "Maps Platform API Key"). قُيِّد إلى **Android apps**: `com.zancr.hancr_rider` + `com.zancr.hancr_driver`، كلاهما ببصمة الإصدار SHA-1 `B1:E0:93:51:16:22:D4:ED:F9:64:0A:B0:97:BD:F3:82:CA:5C:19:9D`. يشمل Maps SDK for Android ضمن 33 API. هذا المفتاح في مانيفست التطبيقين الآن.
+- **مفتاح الويب يبقى منفصلاً:** "HANCR" = `AIzaSyCwLtWyS6m44JNXWjTRCyOkR83GirSkZ3o` (HTTP referrers لـ hancr.com) — للموقع فقط، لم يُمَس.
+- التطبيق لا يجري أي نداء Maps/Places/Directions عبر HTTP (خرائط أصلية فقط)، لذا قيد Android apps يكفي.
+- أُثري نمط `_darkMapStyle` (booking + tracking) لإظهار الشوارع وأسماؤها + الطرق السريعة + المياه + الحدائق + المعالم + الحدود الإدارية (المناطق) + أسماء المدن/الأحياء.
+- **بعد التثبيت:** يجب على المستخدم **إلغاء تثبيت** التطبيق القديم ثم تثبيت APK الجديد (المفتاح في المانيفست يُقرأ عند البناء).
 
 ## 🔐 إعداد Google OAuth (2026-06-12 — أُنجز في حساب المالك عبر المتصفّح)
 المشروع: **hancr-494520** (Hancr). أُنشئ في Google Cloud Console:
