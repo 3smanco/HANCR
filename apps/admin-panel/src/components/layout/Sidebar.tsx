@@ -41,6 +41,7 @@ const NAV_GROUPS = [
     items: [
       { key: 'nav.live', icon: Activity, href: '/live' },
       { key: 'nav.orders', icon: ShoppingBag, href: '/orders' },
+      { key: 'nav.crossCity', icon: MapPin, href: '/cross-city' },
       { key: 'nav.sos', icon: ShieldAlert, href: '/sos' },
       { key: 'nav.complaints', icon: AlertOctagon, href: '/complaints' },
     ],
