@@ -78,6 +78,7 @@ import { AdminNotificationsModule } from './notifications/notifications.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
 import { CurrencyModule } from './currency/currency.module';
 import { ScopeModule } from './scope/scope.module';
+import { GeographyModule } from './geography/geography.module';
 import { NotificationsModule } from '@hancr/notifications';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -181,6 +182,7 @@ import { ObservabilityModule } from '@hancr/observability';
     IntelligenceModule,
     CurrencyModule,
     ScopeModule,
+    GeographyModule,
     UsersModule,
     RegionsModule,
     ServicesModule,
