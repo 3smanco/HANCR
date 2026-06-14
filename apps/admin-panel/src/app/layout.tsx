@@ -4,6 +4,7 @@ import { ApolloProvider } from '@/components/layout/ApolloProvider';
 import { AuthBootstrap } from '@/components/layout/AuthBootstrap';
 import { LocaleProvider } from '@/i18n/LocaleProvider';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { GlobalScopeProvider } from '@/components/global/GlobalScopeProvider';
 import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
@@ -25,6 +26,7 @@ export default function RootLayout({
         <ThemeProvider>
           <LocaleProvider>
           <ApolloProvider>
+            <GlobalScopeProvider>
             <AuthBootstrap>{children}</AuthBootstrap>
             <Toaster
               position="top-right"
@@ -41,6 +43,7 @@ export default function RootLayout({
                 error:   { iconTheme: { primary: '#EF4444', secondary: '#F2E9E4' } },
               }}
             />
+            </GlobalScopeProvider>
           </ApolloProvider>
           </LocaleProvider>
         </ThemeProvider>
