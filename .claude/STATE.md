@@ -58,7 +58,11 @@ flutter build apk --release --dart-define=ENV=production \
   - **✅ 1c-sidebar:** أُعيد تنظيم `Sidebar` من قائمة مسطّحة (24 عنصراً) إلى **7 أقسام مجمَّعة** (العمليات · الذكاء · الأشخاص · الأسطول والخدمات · المالية · النمو · النظام) بعناوين أقسام ثنائية اللغة (`useLocale`). `next build`=ناجح.
   - **🎉 Phase 1 (هيكل command-center) مكتمل أساساً:** ثيم ثنائي + الشريط العلوي الذكي (فلتر دولة/مدينة) + القائمة الجانبية المجمَّعة + مكوّنات أساسية. **لم يُنشَر** (قرار المالك: لا نشر الآن؛ كل شيء على main).
   - **⏭️ متبقّي صغير (يُدمَج لاحقاً):** ربط `useGlobalScope` بالعروض (تمرير countryIso/cityId) + جرس SOS حيّ (FCM) + هجرة بقية المكوّنات للثيم cmd-*.
-  - **⏭️ التالي بالترتيب:** Phase 2 (Geo-Radar/الكرة) · 3 (BI متعدد العملات — يستخدم CurrencyService) · 4 (المالي) · 5 (CRM).
+- **🔵 Phase 2 (غرفة العمليات Geo-Radar) — البنية الأساسية:**
+  - **✅ backend:** `apps/admin-api/.../global-ops/` — query `globalLiveOverview` يجمّع لكل دولة مُفعَّلة: سائقون متصلون (Online/Busy) + طلبات جارية (عبر order→region→country). **scope-aware** (ScopeService.allowedRegionIds؛ المشغّل المُنطقَن يرى دوله فقط) + إجماليات. `tsc`=0.
+  - **✅ frontend:** `GlobalMacroView` — بطاقات لكل دولة (علم + ساعة محلية حيّة `TimeZoneClock` + عدّاد سائقين/طلبات + العملة) + شريط إجماليات، **النقر يقود الفلتر للدولة** (تنقّل عالم→سوق)، poll كل 15ث. مدمج في صفحة `/dashboard` كبطل غرفة العمليات. `next build`=ناجح. queries في `gql.ts`.
+  - **⏭️ تحسين لاحق:** كرة أرضية 3D (deck.gl/Mapbox) فوق البيانات نفسها + التنقّل لخريطة شوارع المدينة.
+  - **⏭️ التالي بالترتيب:** Phase 3 (BI متعدد العملات — يستخدم CurrencyService) · 4 (المالي) · 5 (CRM).
 - **🔴 نشر مؤجَّل (إجراء مالك):** نشر admin-api (migrations الجغرافيا/النطاق `1781500000000`+`1781500001000`) + بناء/نشر admin-panel — ليصبح كل ما سبق حيّاً على `admin.hancr.com`. أمر النشر: `git pull` + `set -a; . .env.prod; set +a; export DATABASE_HOST=127.0.0.1; npm run migration:run` + `pm2 restart admin-api` + بناء/نشر admin-panel.
 
 ## 🔐 إعداد Google OAuth (2026-06-12 — أُنجز في حساب المالك عبر المتصفّح)

@@ -24,6 +24,20 @@ export const LIST_CITIES = gql`
   }
 `;
 
+export const GLOBAL_LIVE_OVERVIEW = gql`
+  query GlobalLiveOverview {
+    globalLiveOverview {
+      totalOnlineDrivers
+      totalActiveOrders
+      activeCountries
+      countries {
+        countryId iso2 name nameEn flag currency timezone
+        centerLat centerLng enabled onlineDrivers activeOrders
+      }
+    }
+  }
+`;
+
 // ─── AUTH ──────────────────────────────────────────────────────────────────
 
 // ─── OPERATORS / RBAC (Phase I5) ──────────────────────────────────────────
