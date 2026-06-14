@@ -606,8 +606,8 @@ export class OrderService {
          AND (
            (polygon IS NOT NULL AND
             ST_Within(
-              ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography,
-              polygon
+              ST_SetSRID(ST_MakePoint($2, $3), 4326),
+              polygon::geometry
             ))
            OR (polygon IS NULL AND region_id = $4)
          )
