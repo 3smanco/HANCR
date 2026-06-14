@@ -80,6 +80,7 @@ import { CurrencyModule } from './currency/currency.module';
 import { ScopeModule } from './scope/scope.module';
 import { GeographyModule } from './geography/geography.module';
 import { GlobalOpsModule } from './global-ops/global-ops.module';
+import { InvoiceModule } from './invoicing/invoice.module';
 import { NotificationsModule } from '@hancr/notifications';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -185,6 +186,7 @@ import { ObservabilityModule } from '@hancr/observability';
     ScopeModule,
     GeographyModule,
     GlobalOpsModule,
+    InvoiceModule,
     UsersModule,
     RegionsModule,
     ServicesModule,
