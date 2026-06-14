@@ -23,6 +23,7 @@ import {
   ORDER_CANDIDATES,
   ASSIGN_DRIVER,
   ORDER_CONVERSATION,
+  TRANSLATE_TEXT,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { formatDate } from '@/lib/utils';
@@ -404,27 +405,72 @@ function ChatTab({
     <div className="space-y-3">
       <ConversationLanguageBanner orderId={orderId} />
       <div className="card p-5 space-y-2 max-h-[600px] overflow-y-auto">
-      {messages.map((m) => {
-        const isRider = m.senderType === 'rider';
-        return (
-          <div
-            key={m.id as number}
-            className={`max-w-[70%] p-3 rounded-2xl ${
-              isRider
-                ? 'bg-gray-100 text-gray-900 me-auto'
-                : 'bg-hancr-violet/10 text-hancr-violet-deep ms-auto'
-            }`}
+        {messages.map((m) => (
+          <MessageBubble key={m.id as number} m={m} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MessageBubble({ m }: { m: Record<string, unknown> }) {
+  const isRider = m.senderType === 'rider';
+  const text = (m.message as string) ?? '';
+  const [translate, { data, loading }] = useLazyQuery(TRANSLATE_TEXT, {
+    fetchPolicy: 'network-only',
+  });
+  const result = data?.translateText;
+
+  return (
+    <div
+      className={`max-w-[70%] p-3 rounded-2xl ${
+        isRider
+          ? 'bg-gray-100 text-gray-900 me-auto'
+          : 'bg-hancr-violet/10 text-hancr-violet-deep ms-auto'
+      }`}
+    >
+      <div className="text-xs font-bold mb-1 opacity-60">
+        {isRider ? 'الراكب' : 'السائق'}
+      </div>
+      <div className="text-sm">{text}</div>
+
+      {result?.translatedText && (
+        <div className="mt-1.5 pt-1.5 border-t border-black/10 text-sm text-emerald-800">
+          <span className="text-[10px] opacity-60">
+            ترجمة
+            {result.detectedSourceLanguage
+              ? ` (من ${result.detectedSourceLanguage})`
+              : ''}
+            :{' '}
+          </span>
+          {result.translatedText}
+        </div>
+      )}
+      {result && !result.configured && (
+        <div className="mt-1 text-[10px] text-amber-600">
+          خدمة الترجمة غير مُفعَّلة (أضف TRANSLATION_API_KEY)
+        </div>
+      )}
+      {result?.error && (
+        <div className="mt-1 text-[10px] text-red-500">
+          تعذّرت الترجمة: {result.error}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mt-1">
+        <div className="text-[10px] text-gray-400">
+          {formatDate(m.sentAt as string)}
+        </div>
+        {text && !result?.translatedText && (
+          <button
+            onClick={() => translate({ variables: { text, target: 'ar' } })}
+            disabled={loading}
+            className="text-[10px] inline-flex items-center gap-0.5 text-hancr-violet hover:underline"
           >
-            <div className="text-xs font-bold mb-1 opacity-60">
-              {isRider ? 'الراكب' : 'السائق'}
-            </div>
-            <div className="text-sm">{m.message as string}</div>
-            <div className="text-[10px] text-gray-400 mt-1">
-              {formatDate(m.sentAt as string)}
-            </div>
-          </div>
-        );
-      })}
+            <Languages className="w-3 h-3" />
+            {loading ? '…' : 'ترجم'}
+          </button>
+        )}
       </div>
     </div>
   );

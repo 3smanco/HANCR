@@ -1,5 +1,32 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 
+/** نتيجة ترجمة نصّ فعلية (عبر المزوّد). */
+@ObjectType()
+export class TranslationResult {
+  /** هل خدمة الترجمة مُفعَّلة (المفتاح موجود)؟ */
+  @Field() configured!: boolean;
+  @Field({ nullable: true }) translatedText?: string;
+  @Field({ nullable: true }) detectedSourceLanguage?: string;
+  @Field() provider!: string;
+  @Field({ nullable: true }) error?: string;
+}
+
+/**
+ * جاهزية المزوّدين الفعلية — يقرأ وجود مفاتيح البيئة الحقيقية (Twilio/Stripe/
+ * HyperPay/Moyasar/Translation) ليؤكّد للمالك أيّ التكاملات صارت حيّة بعد إضافة
+ * المفاتيح. لا يكشف أي قيمة.
+ */
+@ObjectType()
+export class ProviderReadiness {
+  @Field() smsTwilio!: boolean;
+  @Field() paymentStripe!: boolean;
+  @Field() paymentHyperPay!: boolean;
+  @Field() paymentMoyasar!: boolean;
+  @Field() translation!: boolean;
+  /** هل أيّ بوابة دفع مُفعَّلة؟ */
+  @Field() anyPayment!: boolean;
+}
+
 /** نصّ مُكتشَف اللغة (تقريبياً بالنظام الكتابي). */
 export type DetectedScript = 'arabic' | 'latin' | 'other' | 'unknown';
 
