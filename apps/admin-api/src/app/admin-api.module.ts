@@ -85,6 +85,7 @@ import { CrmModule } from './crm/crm.module';
 import { ComplianceModule } from './compliance/compliance.module';
 import { FleetOpsModule } from './fleet-ops/fleet-ops.module';
 import { GrowthModule } from './growth/growth.module';
+import { SosCenterModule } from './sos-center/sos-center.module';
 import { NotificationsModule } from '@hancr/notifications';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -195,6 +196,7 @@ import { ObservabilityModule } from '@hancr/observability';
     ComplianceModule,
     FleetOpsModule,
     GrowthModule,
+    SosCenterModule,
     UsersModule,
     RegionsModule,
     ServicesModule,
