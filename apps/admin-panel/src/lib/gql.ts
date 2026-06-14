@@ -1362,3 +1362,41 @@ export const DISPATCH_CAMPAIGNS = gql`
     dispatchDueCampaigns
   }
 `;
+
+// ─── Phase 5 — CRM عالمي: ملف VIP 360 + كشف احتيال عبر-حدود ───────────────────
+
+export const VIP_PROFILE = gql`
+  query VipProfile($riderId: Int!) {
+    vipProfile(riderId: $riderId) {
+      riderId
+      name
+      phoneNumber
+      tier
+      lifetimeSpendBase
+      baseCurrency
+      totalRides
+      countriesVisited
+      walletBalance
+      walletCurrency
+      byCountry {
+        countryIso
+        countryName
+        flag
+        currency
+        orders
+        spentNative
+        spentBase
+      }
+      fraudSignals {
+        kind
+        severity
+        orderIdA
+        orderIdB
+        countryA
+        countryB
+        minutesApart
+        message
+      }
+    }
+  }
+`;
