@@ -90,6 +90,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
 import { LoyaltyGlobalModule } from './loyalty-global/loyalty-global.module';
 import { CompanyGlobalModule } from './company-global/company-global.module';
 import { CrossCityModule } from './cross-city/cross-city.module';
+import { TranslationModule } from './translation/translation.module';
 import { NotificationsModule } from '@hancr/notifications';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -205,6 +206,7 @@ import { ObservabilityModule } from '@hancr/observability';
     LoyaltyGlobalModule,
     CompanyGlobalModule,
     CrossCityModule,
+    TranslationModule,
     UsersModule,
     RegionsModule,
     ServicesModule,
