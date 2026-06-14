@@ -10,12 +10,15 @@ import {
   Ban,
   CheckCircle2,
   CircleDot,
+  Crown,
+  Globe2,
   Home,
   Loader2,
   MapPin,
   Minus,
   Phone,
   Plus,
+  ShieldAlert,
   ShieldCheck,
   ShoppingBag,
   Star,
@@ -29,12 +32,13 @@ import {
   ADMIN_RIDER_DETAIL,
   ADMIN_RIDER_LOYALTY,
   UPDATE_RIDER,
+  VIP_PROFILE,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { DispatcherDrawer } from '@/components/DispatcherDrawer';
 import { formatDate } from '@/lib/utils';
 
-type Tab = 'overview' | 'orders' | 'loyalty' | 'places';
+type Tab = 'overview' | 'vip' | 'orders' | 'loyalty' | 'places';
 
 export default function RiderDetailPage() {
   const params = useParams<{ id: string }>();
@@ -246,6 +250,7 @@ export default function RiderDetailPage() {
           {(
             [
               ['overview', 'نظرة عامة'],
+              ['vip', 'VIP عالمي'],
               ['orders', 'الرحلات'],
               ['loyalty', 'الولاء'],
               ['places', 'الأماكن'],
@@ -271,6 +276,7 @@ export default function RiderDetailPage() {
             onChanged={refetch}
           />
         )}
+        {tab === 'vip' && <VipTab riderId={rider.id} />}
         {tab === 'orders' && <OrdersTab orders={detail.recentOrders} />}
         {tab === 'loyalty' && <LoyaltyTab riderId={rider.id} />}
         {tab === 'places' && <PlacesTab places={detail.savedPlaces} />}
@@ -426,6 +432,194 @@ function BanControls({
         <Ban className="w-3.5 h-3.5" />
         حظر الراكب
       </button>
+    </div>
+  );
+}
+
+// ── VIP عالمي tab (Phase 5) ──────────────────────────────────────────────────
+
+const TIER_STYLE: Record<string, { label: string; cls: string }> = {
+  platinum: { label: 'بلاتيني', cls: 'bg-slate-200 text-slate-800 border-slate-300' },
+  gold: { label: 'ذهبي', cls: 'bg-amber-100 text-amber-800 border-amber-300' },
+  silver: { label: 'فضّي', cls: 'bg-gray-100 text-gray-700 border-gray-300' },
+  standard: { label: 'عادي', cls: 'bg-gray-50 text-gray-500 border-gray-200' },
+};
+
+function VipTab({ riderId }: { riderId: number }) {
+  const { data, loading } = useQuery(VIP_PROFILE, {
+    variables: { riderId },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  if (loading && !data) {
+    return (
+      <div className="card p-8 text-center text-gray-400">
+        <Loader2 className="w-5 h-5 animate-spin inline" />
+      </div>
+    );
+  }
+
+  const v = data?.vipProfile;
+  if (!v) {
+    return (
+      <div className="card p-10 text-center text-gray-400">
+        تعذّر تحميل ملف VIP
+      </div>
+    );
+  }
+
+  const tier = TIER_STYLE[v.tier] ?? TIER_STYLE.standard;
+
+  return (
+    <div className="space-y-4">
+      {/* Tier + headline KPIs */}
+      <div className="card p-5">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-11 h-11 rounded-2xl bg-hancr-violet/10 text-hancr-violet grid place-items-center shrink-0">
+            <Crown className="w-6 h-6" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-extrabold text-gray-900">ملف VIP 360 عالمي</h3>
+            <p className="text-xs text-gray-500">
+              رؤية موحَّدة عبر كل الدول — الإنفاق مُحوَّل لعملة الأساس
+            </p>
+          </div>
+          <span
+            className={`px-3 py-1 rounded-full text-sm font-extrabold border ${tier.cls}`}
+          >
+            {tier.label}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatTile
+            icon={TrendingUp}
+            label="الإنفاق العالمي (أساس)"
+            value={`${Number(v.lifetimeSpendBase).toFixed(2)} ${v.baseCurrency}`}
+          />
+          <StatTile
+            icon={Globe2}
+            label="دول استُخدمت"
+            value={String(v.countriesVisited)}
+          />
+          <StatTile
+            icon={ShoppingBag}
+            label="إجمالي الرحلات"
+            value={String(v.totalRides)}
+          />
+          <StatTile
+            icon={Wallet}
+            label="رصيد المحفظة"
+            value={`${Number(v.walletBalance).toFixed(2)} ${v.walletCurrency}`}
+          />
+        </div>
+      </div>
+
+      {/* Fraud signals */}
+      {v.fraudSignals.length > 0 && (
+        <div className="card p-5 border-red-200">
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldAlert className="w-5 h-5 text-red-600" />
+            <h3 className="font-bold text-red-700">
+              إشارات احتيال عبر-الحدود ({v.fraudSignals.length})
+            </h3>
+          </div>
+          <div className="space-y-2">
+            {v.fraudSignals.map(
+              (
+                s: {
+                  severity: string;
+                  countryA: string;
+                  countryB: string;
+                  orderIdA: number;
+                  orderIdB: number;
+                  minutesApart: number;
+                  message: string;
+                },
+                i: number,
+              ) => (
+                <div
+                  key={i}
+                  className={`p-3 rounded-lg border text-sm ${
+                    s.severity === 'high'
+                      ? 'bg-red-50 border-red-200 text-red-800'
+                      : 'bg-amber-50 border-amber-200 text-amber-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-extrabold">
+                      {s.countryA} ↔ {s.countryB}
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/60 font-bold uppercase">
+                      {s.severity === 'high' ? 'خطر عالٍ' : 'متوسط'}
+                    </span>
+                    <span className="text-xs opacity-70">
+                      · {Number(s.minutesApart).toFixed(0)}د
+                    </span>
+                  </div>
+                  <div className="text-xs">{s.message}</div>
+                  <div className="text-[10px] font-mono opacity-60 mt-1">
+                    #{s.orderIdA} · #{s.orderIdB}
+                  </div>
+                </div>
+              ),
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Per-country spend */}
+      <div className="card overflow-hidden">
+        <div className="px-5 py-3 border-b border-gray-100 font-bold text-gray-900">
+          الإنفاق لكل دولة
+        </div>
+        {v.byCountry.length === 0 ? (
+          <div className="p-8 text-center text-gray-400">لا يوجد إنفاق مكتمل</div>
+        ) : (
+          <table className="w-full">
+            <thead>
+              <tr>
+                <th>الدولة</th>
+                <th>الرحلات</th>
+                <th>الإنفاق المحلي</th>
+                <th>بعملة الأساس</th>
+              </tr>
+            </thead>
+            <tbody>
+              {v.byCountry.map(
+                (
+                  c: {
+                    countryIso: string;
+                    countryName: string;
+                    flag?: string | null;
+                    currency: string;
+                    orders: number;
+                    spentNative: number;
+                    spentBase: number;
+                  },
+                  i: number,
+                ) => (
+                  <tr key={i}>
+                    <td className="font-bold">
+                      {c.flag ? `${c.flag} ` : ''}
+                      {c.countryName}
+                      <span className="text-xs text-gray-400 mr-1">
+                        {c.countryIso}
+                      </span>
+                    </td>
+                    <td>{c.orders}</td>
+                    <td>
+                      {Number(c.spentNative).toFixed(2)} {c.currency}
+                    </td>
+                    <td className="font-bold">
+                      {Number(c.spentBase).toFixed(2)} {v.baseCurrency}
+                    </td>
+                  </tr>
+                ),
+              )}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }
