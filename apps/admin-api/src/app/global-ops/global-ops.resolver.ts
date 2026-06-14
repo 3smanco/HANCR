@@ -1,10 +1,10 @@
-import { Resolver, Query } from '@nestjs/graphql';
+import { Resolver, Query, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AdminJwtGuard, CurrentAdmin } from '../auth/admin-jwt.guard';
 import type { AdminUser } from '../auth/admin-jwt.strategy';
 import { ScopeService } from '../scope/scope.service';
 import { GlobalOpsService } from './global-ops.service';
-import { GlobalLiveOverview } from './dto/global-ops.types';
+import { GlobalLiveOverview, GlobalRevenueMatrix } from './dto/global-ops.types';
 
 @Resolver()
 export class GlobalOpsResolver {
@@ -26,5 +26,22 @@ export class GlobalOpsResolver {
       role: admin.role,
     });
     return this.ops.globalLiveOverview(allowed);
+  }
+
+  /** مصفوفة الأرباح متعددة العملات (مُقيَّدة بنطاق المشغّل). */
+  @Query(() => GlobalRevenueMatrix, {
+    description: 'أرباح كل دولة بعملة موحّدة + نموّ الأسواق',
+  })
+  @UseGuards(AdminJwtGuard)
+  async globalRevenueMatrix(
+    @CurrentAdmin() admin: AdminUser,
+    @Args('days', { type: () => Int, nullable: true, defaultValue: 30 })
+    days: number,
+  ): Promise<GlobalRevenueMatrix> {
+    const allowed = await this.scope.allowedRegionIds({
+      adminId: admin.adminId,
+      role: admin.role,
+    });
+    return this.ops.globalRevenueMatrix(days, allowed);
   }
 }

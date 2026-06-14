@@ -38,6 +38,18 @@ export const GLOBAL_LIVE_OVERVIEW = gql`
   }
 `;
 
+export const GLOBAL_REVENUE_MATRIX = gql`
+  query GlobalRevenueMatrix($days: Int) {
+    globalRevenueMatrix(days: $days) {
+      baseCurrency totalRevenueBase totalPlatformBase periodDays fxSource fxLastSync
+      countries {
+        countryId iso2 name nameEn flag currency orders
+        revenueNative revenueBase platformNative platformBase growthPct
+      }
+    }
+  }
+`;
+
 // ─── AUTH ──────────────────────────────────────────────────────────────────
 
 // ─── OPERATORS / RBAC (Phase I5) ──────────────────────────────────────────

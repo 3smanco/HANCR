@@ -1,6 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { CountryLiveStats, GlobalLiveOverview } from './dto/global-ops.types';
+import { CurrencyService } from '../currency/currency.service';
+import { ExchangeRateService } from '../currency/exchange-rate.service';
+import {
+  CountryLiveStats,
+  CountryRevenue,
+  GlobalLiveOverview,
+  GlobalRevenueMatrix,
+} from './dto/global-ops.types';
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
 
 // طلبات "قيد التنفيذ" (غير منتهية/ملغاة).
 const ACTIVE_ORDER = [
@@ -30,7 +39,11 @@ interface Row {
  */
 @Injectable()
 export class GlobalOpsService {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly currency: CurrencyService,
+    private readonly fx: ExchangeRateService,
+  ) {}
 
   async globalLiveOverview(
     allowedRegionIds: number[] | null,
@@ -97,6 +110,95 @@ export class GlobalOpsService {
       activeCountries: countries.filter(
         (c) => c.onlineDrivers > 0 || c.activeOrders > 0,
       ).length,
+    };
+  }
+
+  /**
+   * مصفوفة الأرباح متعددة العملات — أرباح كل دولة بعملتها + محوَّلة لعملة الأساس
+   * (CurrencyService) + نموّ مقابل الفترة السابقة. scope-aware.
+   */
+  async globalRevenueMatrix(
+    days: number,
+    allowedRegionIds: number[] | null,
+  ): Promise<GlobalRevenueMatrix> {
+    const d = Math.max(1, Math.min(Math.floor(days) || 30, 365));
+    const params: unknown[] = [d];
+    let regionClause = '';
+    let countryClause = 'c.enabled = true';
+    if (allowedRegionIds) {
+      params.push(allowedRegionIds); // $2
+      regionClause = 'AND r.id = ANY($2)';
+      countryClause =
+        'c.enabled = true AND c.id IN (SELECT country_id FROM hancr_region WHERE id = ANY($2) AND country_id IS NOT NULL)';
+    }
+
+    const cur = `o.created_on >= NOW() - (($1::text) || ' days')::interval`;
+    const prev = `o.created_on >= NOW() - ((($1*2)::text) || ' days')::interval AND o.created_on < NOW() - (($1::text) || ' days')::interval`;
+
+    const rows = await this.dataSource.query<
+      Array<{
+        countryId: number;
+        iso2: string;
+        name: string;
+        nameEn: string;
+        flag: string | null;
+        currency: string;
+        orders: number;
+        revenueNative: string;
+        platformNative: string;
+        revenuePrev: string;
+      }>
+    >(
+      `SELECT
+         c.id AS "countryId", c.iso2, c.name, c.name_en AS "nameEn", c.flag, c.currency,
+         COUNT(o.id) FILTER (WHERE ${cur})::int AS "orders",
+         COALESCE(SUM(o.cost_best) FILTER (WHERE ${cur}), 0) AS "revenueNative",
+         COALESCE(SUM(o.provider_share) FILTER (WHERE ${cur}), 0) AS "platformNative",
+         COALESCE(SUM(o.cost_best) FILTER (WHERE ${prev}), 0) AS "revenuePrev"
+       FROM hancr_country c
+       LEFT JOIN hancr_region r ON r.country_id = c.id ${regionClause}
+       LEFT JOIN hancr_order o ON o.region_id = r.id AND o.status = 'Finished'
+         AND o.created_on >= NOW() - ((($1*2)::text) || ' days')::interval
+       WHERE ${countryClause}
+       GROUP BY c.id, c.iso2, c.name, c.name_en, c.flag, c.currency
+       ORDER BY "revenueNative" DESC`,
+      params,
+    );
+
+    const countries: CountryRevenue[] = rows.map((r) => {
+      const revNative = Number(r.revenueNative);
+      const platNative = Number(r.platformNative);
+      const revPrev = Number(r.revenuePrev);
+      return {
+        countryId: r.countryId,
+        iso2: r.iso2,
+        name: r.name,
+        nameEn: r.nameEn,
+        flag: r.flag ?? undefined,
+        currency: r.currency,
+        orders: Number(r.orders),
+        revenueNative: round2(revNative),
+        revenueBase: this.currency.toBase(revNative, r.currency),
+        platformNative: round2(platNative),
+        platformBase: this.currency.toBase(platNative, r.currency),
+        growthPct:
+          revPrev > 0 ? round2(((revNative - revPrev) / revPrev) * 100) : 0,
+      };
+    });
+
+    const meta = this.fx.meta();
+    return {
+      countries,
+      baseCurrency: this.currency.baseCurrency,
+      totalRevenueBase: round2(
+        countries.reduce((s, c) => s + c.revenueBase, 0),
+      ),
+      totalPlatformBase: round2(
+        countries.reduce((s, c) => s + c.platformBase, 0),
+      ),
+      periodDays: d,
+      fxSource: meta.source,
+      fxLastSync: meta.lastSync ?? undefined,
     };
   }
 }

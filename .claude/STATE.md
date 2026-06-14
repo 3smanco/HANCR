@@ -63,6 +63,11 @@ flutter build apk --release --dart-define=ENV=production \
   - **✅ frontend:** `GlobalMacroView` — بطاقات لكل دولة (علم + ساعة محلية حيّة `TimeZoneClock` + عدّاد سائقين/طلبات + العملة) + شريط إجماليات، **النقر يقود الفلتر للدولة** (تنقّل عالم→سوق)، poll كل 15ث. مدمج في صفحة `/dashboard` كبطل غرفة العمليات. `next build`=ناجح. queries في `gql.ts`.
   - **⏭️ تحسين لاحق:** كرة أرضية 3D (deck.gl/Mapbox) فوق البيانات نفسها + التنقّل لخريطة شوارع المدينة.
   - **⏭️ التالي بالترتيب:** Phase 3 (BI متعدد العملات — يستخدم CurrencyService) · 4 (المالي) · 5 (CRM).
+- **✅ Phase 3 (BI — مصفوفة الأرباح متعددة العملات):**
+  - **backend:** `globalRevenueMatrix(days)` في global-ops — يجمّع أرباح كل دولة (cost_best) + حصة المنصّة (provider_share) بالعملة المحلية للطلبات `Finished`، ويحوّلها لعملة الأساس عبر `CurrencyService.toBase`، + نموّ % مقابل الفترة السابقة + حالة الصرف. **scope-aware**. (تنبيه: عمود وقت الطلب `created_on` لا created_at.) `tsc`=0.
+  - **frontend:** `GlobalRevenueMatrix` — جدول دول (طلبات/أرباح/نمو) + منتقي فترة (7/30/90) + مبدّل موحّد↔محلي + إجماليات + مصدر الصرف. مدمج في صفحة `/analytics`. `next build`=ناجح.
+  - **⏭️ غير منشور** (لا migration جديد — مجرّد resolver + frontend؛ النشر = إعادة تشغيل admin-api + بناء admin-panel).
+  - **⏭️ التالي: Phase 4** (المالي عبر-الحدود: فوترة مُوطَّنة + تحويلات Stripe Connect/Wise) · 5 (CRM).
 - **✅ منشور حيّاً بالكامل (2026-06-14):** Phase 0+1+2 كلها على الإنتاج.
   - **admin-api:** `git pull` + `pm2 restart admin-api` (ts-node). resolvers الجغرافيا/العملات/النطاق/global-ops حيّة. GraphQL سليم.
   - **قاعدة الإنتاج (`hancr_prod` على `hancr_postgres_prod`، 127.0.0.1:5432):** طُبِّق schema الأساس. **مُتحقَّق:** 6 دول (QA/SA مُفعَّلة، AE/GB/US/FR معطّلة)، 8 مدن، 3 مناطق مربوطة، عمود `hancr_admin_user.scope` مُضاف.
