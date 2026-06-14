@@ -8,6 +8,7 @@ import {
   PROVIDER_CONFIG,
   UPDATE_GATEWAY_CONFIG,
   INTEGRATION_MATRIX,
+  PROVIDER_READINESS,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { SettingsTabs } from '../_SettingsTabs';
@@ -113,6 +114,7 @@ export default function GatewaysSettingsPage() {
       <div className="p-6 space-y-5">
         <SettingsTabs />
 
+        <ProviderReadinessBoard />
         <IntegrationMatrixBoard />
 
         {loading ? (
@@ -206,6 +208,70 @@ export default function GatewaysSettingsPage() {
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ── Live provider readiness (actual env keys) ────────────────────────────────
+
+function ProviderReadinessBoard() {
+  const { data } = useQuery(PROVIDER_READINESS, {
+    fetchPolicy: 'cache-and-network',
+    errorPolicy: 'ignore', // غير super → نخفي بدل كسر الصفحة
+  });
+  const r = data?.providerReadiness;
+  if (!r) return null;
+
+  const items: Array<{ label: string; on: boolean; hint: string }> = [
+    { label: 'الرسائل (Twilio)', on: r.smsTwilio, hint: 'TWILIO_ACCOUNT_SID + AUTH_TOKEN + FROM_NUMBER' },
+    { label: 'الدفع (Stripe)', on: r.paymentStripe, hint: 'STRIPE_SECRET_KEY' },
+    { label: 'الدفع (HyperPay)', on: r.paymentHyperPay, hint: 'HYPERPAY_ACCESS_TOKEN' },
+    { label: 'الدفع (Moyasar)', on: r.paymentMoyasar, hint: 'MOYASAR_API_KEY' },
+    { label: 'الترجمة', on: r.translation, hint: 'TRANSLATION_API_KEY' },
+  ];
+
+  return (
+    <div className="card p-5">
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
+        <Plug className="w-5 h-5 text-hancr-violet" />
+        <span className="font-extrabold text-gray-900">
+          الجاهزية الفعلية للمزوّدين
+        </span>
+        <span className="text-xs text-gray-400">
+          أضف المفتاح في .env.prod ثم أعد تشغيل الخدمة → يتحوّل لـ «حيّ» تلقائياً
+        </span>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+        {items.map((it) => (
+          <div
+            key={it.label}
+            className={`rounded-xl border p-3 ${
+              it.on
+                ? 'border-emerald-200 bg-emerald-50'
+                : 'border-gray-100 bg-gray-50'
+            }`}
+            title={it.hint}
+          >
+            <div className="flex items-center gap-1.5 mb-1">
+              {it.on ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              ) : (
+                <Clock className="w-4 h-4 text-gray-400" />
+              )}
+              <span className="text-xs font-bold text-gray-900">
+                {it.label}
+              </span>
+            </div>
+            <span
+              className={`text-[10px] font-bold ${
+                it.on ? 'text-emerald-700' : 'text-gray-500'
+              }`}
+            >
+              {it.on ? 'حيّ' : 'بانتظار المفتاح'}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );

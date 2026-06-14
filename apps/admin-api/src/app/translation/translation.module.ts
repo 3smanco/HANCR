@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TranslationService } from './translation.service';
+import { TranslationProvider } from './translation.provider';
 import { TranslationResolver } from './translation.resolver';
 import { ScopeModule } from '../scope/scope.module';
 
@@ -9,7 +10,7 @@ import { ScopeModule } from '../scope/scope.module';
  */
 @Module({
   imports: [ScopeModule],
-  providers: [TranslationService, TranslationResolver],
-  exports: [TranslationService],
+  providers: [TranslationService, TranslationProvider, TranslationResolver],
+  exports: [TranslationService, TranslationProvider],
 })
 export class TranslationModule {}

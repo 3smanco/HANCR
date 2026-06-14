@@ -1529,6 +1529,31 @@ export const ORDER_CONVERSATION = gql`
   }
 `;
 
+export const TRANSLATE_TEXT = gql`
+  query TranslateText($text: String!, $target: String) {
+    translateText(text: $text, target: $target) {
+      configured
+      translatedText
+      detectedSourceLanguage
+      provider
+      error
+    }
+  }
+`;
+
+export const PROVIDER_READINESS = gql`
+  query ProviderReadiness {
+    providerReadiness {
+      smsTwilio
+      paymentStripe
+      paymentHyperPay
+      paymentMoyasar
+      translation
+      anyPayment
+    }
+  }
+`;
+
 // ─── العمليات عبر-المدن — الحجوزات المسبقة القادمة ────────────────────────────
 
 export const CROSS_CITY_OPS = gql`
