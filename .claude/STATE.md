@@ -87,8 +87,13 @@ flutter build apk --release --dart-define=ENV=production \
   - **frontend:** `FLEET_DOCUMENT_ALERTS` + لوحة تنبيهات أعلى `/fleets`: شارات عدّ لكل خطورة + جدول (رابط السائق/الدولة/الوثيقة/الانتهاء/الخطورة)، وشارة خضراء عند عدم وجود انتهاءات. `next build`=ناجح.
   - **✅ منشور حيّاً (2026-06-14، PR #123):** admin-api restart + admin-panel rebuild (بلا migration — يعيد استخدام `hancr_driver_document`). مُتحقَّق: `fleetDocumentAlerts` يستجيب على الإنتاج (Unauthorized = حقل حيّ).
   - **⏭️ متبقّي Phase 7 (لاحق):** سجل مركبات عالمي مستقل (نقل سيارة بين أساطيل المدن) · سجلات صيانة · ميل/كم حسب الدولة (`CountryEntity.units`).
-  - **⏭️ التالي: Phase 8** (النمو: عروض مُسوَّرة جغرافياً + Hancr Miles عالمي + بثّ omnichannel بالتوقيت المحلي).
-- **📊 حالة البرنامج العالمي:** Phases 0·1·2·3·4·5·6·7 **مبنية ومُختبَرة ومنشورة حيّة** (15 PR #107–#123؛ 41 اختبار jest). التالي: Phase 8 (نمو/ولاء) · 9 (بوابات) · 10 (بنية، محجوبة).
+- **✅ Phase 8 (النمو — محرّك العروض المُسوَّرة جغرافياً):**
+  - **backend:** `apps/admin-api/.../growth/` — دالة نقيّة `evaluateCoupon(coupon, ctx)` تفحص التفعيل/الانتهاء/السياج الجغرافي (`CouponEntity.regionIds`)/أقل أجرة/حدود الاستخدام (كلّي + لكل راكب)، ثم تحسب الخصم (نسبة بسقف أو ثابت، لا يتجاوز الأجرة). `GrowthService.simulateOffer(code, regionId, fare)` محاكاة scope-aware (تحلّ المنطقة→الدولة للعملة) + `offerReach(code)` (تغطية: عالمي vs N منطقة + الدول). queries `simulateOffer`/`offerReach` (AdminJwtGuard، مُقيَّدان بالنطاق). `tsc`=0 · **10 اختبار jest أخضر**. (تنبيه tsc: قارن `String(coupon.type)==='Percent'` لتفادي تضييق enum/union.)
+  - **frontend:** `SIMULATE_OFFER`/`OFFER_REACH` + بطاقة محاكي عروض في `/coupons`: كود/منطقة/أجرة → صلاحية/خصم/أجرة-نهائية + سبب الرفض + ملخّص التغطية الجغرافية. `next build`=ناجح.
+  - **✅ منشور حيّاً (2026-06-14، PR #125):** admin-api restart + admin-panel rebuild (بلا migration — يعيد استخدام `hancr_coupon`). مُتحقَّق: `simulateOffer` يستجيب على الإنتاج (Unauthorized = حقل حيّ).
+  - **⏭️ متبقّي Phase 8 (لاحق):** Hancr Miles ولاء عالمي (استبدال عبر الدول) · بثّ omnichannel بالتوقيت المحلي · CMS متعدد الأقاليم + بانرات موجّهة لدولة.
+  - **⏭️ التالي: Phase 9** (البوابات: لوحة شركات MNC + كونسيرج فنادق + مركز SOS عالمي + عمليات عبر-المدن).
+- **📊 حالة البرنامج العالمي:** Phases 0·1·2·3·4·5·6·7·8 **مبنية ومُختبَرة ومنشورة حيّة** (16 PR #107–#125؛ 51 اختبار jest). التالي: Phase 9 (بوابات/دعم) · 10 (بنية، محجوبة).
 - **✅ منشور حيّاً بالكامل (2026-06-14):** Phase 0+1+2 كلها على الإنتاج.
   - **admin-api:** `git pull` + `pm2 restart admin-api` (ts-node). resolvers الجغرافيا/العملات/النطاق/global-ops حيّة. GraphQL سليم.
   - **قاعدة الإنتاج (`hancr_prod` على `hancr_postgres_prod`، 127.0.0.1:5432):** طُبِّق schema الأساس. **مُتحقَّق:** 6 دول (QA/SA مُفعَّلة، AE/GB/US/FR معطّلة)، 8 مدن، 3 مناطق مربوطة، عمود `hancr_admin_user.scope` مُضاف.
