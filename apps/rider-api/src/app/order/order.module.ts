@@ -12,6 +12,7 @@ import { OrderService } from './order.service';
 import { OrderResolver } from './order.resolver';
 import { MatchingService } from './matching.service';
 import { DirectionsService } from './directions.service';
+import { FareCalculator } from './fare-calculator.service';
 import { CouponService } from './coupon.service';
 import { LoyaltyModule } from '../loyalty/loyalty.module';
 import { BundleModule } from '../bundle/bundle.module';
@@ -37,6 +38,7 @@ import { pubSubProvider } from '../pubsub.provider';
     OrderResolver,
     MatchingService,
     DirectionsService,
+    FareCalculator,
     CouponService,
     pubSubProvider,
   ],

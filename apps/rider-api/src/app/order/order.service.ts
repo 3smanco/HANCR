@@ -35,6 +35,7 @@ import { RateDriverInput } from './dto/rate-driver.input';
 import { OrderType as OrderGqlType } from './dto/order.type';
 import { MatchingService } from './matching.service';
 import { DirectionsService } from './directions.service';
+import { FareCalculator, FareBreakdown } from './fare-calculator.service';
 import { CouponService } from './coupon.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { BundleService } from '../bundle/bundle.service';
@@ -69,6 +70,7 @@ export class OrderService {
     private readonly cronLock: CronLockService,
     private readonly matchingService: MatchingService,
     private readonly directionsService: DirectionsService,
+    private readonly fareCalculator: FareCalculator,
     private readonly couponService: CouponService,
     private readonly loyaltyService: LoyaltyService,
     private readonly bundleService: BundleService,
@@ -141,59 +143,38 @@ export class OrderService {
     const distanceMeters = route.distanceMeters;
     const durationSeconds = route.durationSeconds;
 
-    // I11/L3 — Zone pricing overrides defaults. Priority:
-    //   1. PostGIS polygon containing the pickup, fleet-specific.
-    //   2. PostGIS polygon containing the pickup, general.
-    //   3. Region-based zone, fleet-specific.
-    //   4. Region-based zone, general.
-    // ST_Within on geography is meters-accurate; GiST index keeps it fast.
-    const zoneRow = await this.dataSource.query<
-      Array<{
-        base_fare: string;
-        per_km: string;
-        per_minute: string;
-        multiplier: string;
-      }>
-    >(
-      `SELECT base_fare, per_km, per_minute, multiplier
-       FROM hancr_pricing_zone
-       WHERE service_id = $1 AND active = true
-         AND (starts_at IS NULL OR starts_at <= NOW())
-         AND (ends_at   IS NULL OR ends_at   >= NOW())
-         AND (
-           (polygon IS NOT NULL AND
-            ST_Within(
-              ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography,
-              polygon
-            ))
-           OR (polygon IS NULL AND region_id = $4)
-         )
-       ORDER BY (polygon IS NOT NULL) DESC,
-                (fleet_id IS NOT NULL) DESC,
-                id DESC
-       LIMIT 1`,
-      [input.serviceId, originPoint.lng, originPoint.lat, input.regionId],
+    // تسعير المنطقة (PostGIS pricing zone) عبر مصدر واحد يستدعيه previewRoute أيضاً.
+    const pricing = await this.resolveZonePricing(
+      service,
+      originPoint.lat,
+      originPoint.lng,
+      input.regionId,
     );
 
-    const zone = zoneRow[0];
-    const baseFare = zone ? Number(zone.base_fare) : Number(service.baseFare);
-    const perKm = zone
-      ? Number(zone.per_km)
-      : Number(service.perHundredMeters) * 10;
-    const perMin = zone
-      ? Number(zone.per_minute)
-      : Number(service.perMinuteDrive);
-    const multiplier = zone ? Number(zone.multiplier) : 1;
+    // surge ديناميكي: مضاعف الطلب المُهيَّأ من اللوحة لهذه المنطقة/الوقت.
+    const surgeMultiplier = await this.appConfig.getSurgeMultiplier(
+      input.regionId,
+    );
 
-    // حساب السعر (baseFare + perKm + perMinute) × multiplier
-    let costBest = this.matchingService.estimateFare(
+    // التسعير عبر FareCalculator (مصدر واحد) — نفس منطق previewRoute حرفياً،
+    // فالسعر المعروض للراكب = المفروض. يفرض الحد الأدنى ويطبّق مضاعفات الذروة + surge.
+    const fare = this.fareCalculator.calculate({
       distanceMeters,
       durationSeconds,
-      baseFare,
-      perKm,
-      perMin,
-    );
-    if (multiplier !== 1) costBest = Math.round(costBest * multiplier * 100) / 100;
+      baseFare: pricing.baseFare,
+      perKm: pricing.perKm,
+      perMinute: pricing.perMin,
+      minimumFee: Number(service.minimumFee),
+      perMinuteWait: Number(service.perMinuteWait),
+      zoneMultiplier: pricing.zoneMultiplier,
+      surgeMultiplier,
+      serviceMultipliers: {
+        time: service.timeMultipliers,
+        weekday: service.weekdayMultipliers,
+        dateRange: service.dateRangeMultipliers,
+      },
+    });
+    let costBest = fare.total;
 
     // السائق بالساعة: السعر = hourlyRate × عدد الساعات
     if (input.bookedHours && service.hourlyRate) {
@@ -593,6 +574,58 @@ export class OrderService {
   // =============================================
   // previewRoute — معاينة المسافة والأجرة قبل الطلب (مسافة بالطريق)
   // =============================================
+  /**
+   * يحلّ تسعير المنطقة (PostGIS pricing zone) لنقطة الالتقاط مع السقوط لقيم
+   * الخدمة الافتراضية. مصدر واحد يستدعيه createOrder و previewRoute معاً —
+   * فلا يختلف السعر المعروض عن المفروض.
+   */
+  private async resolveZonePricing(
+    service: ServiceEntity,
+    lat: number,
+    lng: number,
+    regionId: number,
+  ): Promise<{
+    baseFare: number;
+    perKm: number;
+    perMin: number;
+    zoneMultiplier: number;
+  }> {
+    const zoneRow = await this.dataSource.query<
+      Array<{
+        base_fare: string;
+        per_km: string;
+        per_minute: string;
+        multiplier: string;
+      }>
+    >(
+      `SELECT base_fare, per_km, per_minute, multiplier
+       FROM hancr_pricing_zone
+       WHERE service_id = $1 AND active = true
+         AND (starts_at IS NULL OR starts_at <= NOW())
+         AND (ends_at   IS NULL OR ends_at   >= NOW())
+         AND (
+           (polygon IS NOT NULL AND
+            ST_Within(
+              ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography,
+              polygon
+            ))
+           OR (polygon IS NULL AND region_id = $4)
+         )
+       ORDER BY (polygon IS NOT NULL) DESC,
+                (fleet_id IS NOT NULL) DESC,
+                id DESC
+       LIMIT 1`,
+      [service.id, lng, lat, regionId],
+    );
+    const zone = zoneRow[0];
+    return {
+      baseFare: zone ? Number(zone.base_fare) : Number(service.baseFare),
+      perKm: zone ? Number(zone.per_km) : Number(service.perHundredMeters) * 10,
+      perMin: zone ? Number(zone.per_minute) : Number(service.perMinuteDrive),
+      zoneMultiplier: zone ? Number(zone.multiplier) : 1,
+    };
+  }
+
   async previewRoute(
     riderId: number,
     origin: { lat: number; lng: number },
@@ -604,6 +637,7 @@ export class OrderService {
     estimatedFare: number;
     currency: string;
     polyline?: string;
+    breakdown: FareBreakdown;
   }> {
     const service = await this.serviceRepo.findOne({
       where: { id: serviceId, enabled: true },
@@ -612,22 +646,42 @@ export class OrderService {
 
     const route = await this.directionsService.getRoute(origin, destination);
 
-    const estimatedFare = this.matchingService.estimateFare(
-      route.distanceMeters,
-      route.durationSeconds,
-      Number(service.baseFare),
-      Number(service.perHundredMeters) * 10,
-      Number(service.perMinuteDrive),
+    // نفس مصدر التسعير المستخدم في createOrder → التقدير = السعر النهائي.
+    const pricing = await this.resolveZonePricing(
+      service,
+      origin.lat,
+      origin.lng,
+      service.regionId,
     );
+    const surgeMultiplier = await this.appConfig.getSurgeMultiplier(
+      service.regionId,
+    );
+    const fare = this.fareCalculator.calculate({
+      distanceMeters: route.distanceMeters,
+      durationSeconds: route.durationSeconds,
+      baseFare: pricing.baseFare,
+      perKm: pricing.perKm,
+      perMinute: pricing.perMin,
+      minimumFee: Number(service.minimumFee),
+      perMinuteWait: Number(service.perMinuteWait),
+      zoneMultiplier: pricing.zoneMultiplier,
+      surgeMultiplier,
+      serviceMultipliers: {
+        time: service.timeMultipliers,
+        weekday: service.weekdayMultipliers,
+        dateRange: service.dateRangeMultipliers,
+      },
+    });
 
     const rider = await this.riderRepo.findOne({ where: { id: riderId } });
 
     return {
       distanceMeters: route.distanceMeters,
       durationSeconds: route.durationSeconds,
-      estimatedFare: Math.round(estimatedFare * 100) / 100,
+      estimatedFare: fare.total,
       currency: rider?.currency ?? 'SAR',
       polyline: route.polyline,
+      breakdown: fare,
     };
   }
 

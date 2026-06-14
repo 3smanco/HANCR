@@ -1,0 +1,21 @@
+{
+  "run": {
+    "command": "nx test rider-api --testPathPattern=fare-calculator --skip-nx-cache",
+    "startTime": "2026-06-14T05:45:04.413Z",
+    "endTime": "2026-06-14T05:45:28.682Z",
+    "inner": false
+  },
+  "tasks": [
+    {
+      "taskId": "rider-api:test",
+      "target": "test",
+      "projectName": "rider-api",
+      "hash": "16392383071403178744",
+      "startTime": "2026-06-14T05:45:04.436Z",
+      "endTime": "2026-06-14T05:45:28.675Z",
+      "params": "",
+      "cacheStatus": "cache-miss",
+      "status": 0
+    }
+  ]
+}
