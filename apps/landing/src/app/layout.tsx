@@ -26,14 +26,17 @@ export const metadata: Metadata = {
     locale: 'ar_SA',
     alternateLocale: ['en_US'],
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'HANCR' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'HANCR — منصة التنقل الذكي',
     description: 'منصة التنقل الذكي الأولى في الخليج',
+    images: ['/og-image.png'],
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: '/favicon.png',
+    apple: '/apple-icon.png',
   },
 };
 
