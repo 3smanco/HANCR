@@ -1509,6 +1509,38 @@ export const GLOBAL_SOS_CENTER = gql`
   }
 `;
 
+// ─── العمليات عبر-المدن — الحجوزات المسبقة القادمة ────────────────────────────
+
+export const CROSS_CITY_OPS = gql`
+  query CrossCityOps($horizonDays: Int) {
+    crossCityOps(horizonDays: $horizonDays) {
+      total
+      imminentCount
+      byCountry {
+        countryIso
+        countryName
+        flag
+        timezone
+        count
+      }
+      bookings {
+        orderId
+        riderId
+        regionId
+        countryIso
+        countryName
+        flag
+        timezone
+        pickupAt
+        minutesUntil
+        urgency
+        fare
+        currency
+      }
+    }
+  }
+`;
+
 // ─── بوابة الشركات العالمية (MNC) — إنفاق المقرّ عبر الدول ─────────────────────
 
 export const COMPANY_GLOBAL_PROFILE = gql`
