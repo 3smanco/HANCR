@@ -82,8 +82,13 @@ flutter build apk --release --dart-define=ENV=production \
   - **frontend:** `DRIVER_COMPLIANCE` + شريط امتثال أعلى تبويب وثائق السائق (`/users/drivers/[id]`): شارة الحالة + متطلّبات الدولة + شارات ناقص/منتهٍ/ينتهي قريباً. `next build`=ناجح.
   - **✅ منشور حيّاً (2026-06-14، PR #121):** admin-api restart + admin-panel rebuild (بلا migration — يعيد استخدام `hancr_driver_document` + `doc_requirements`). مُتحقَّق: `driverCompliance` يستجيب على الإنتاج (Unauthorized = حقل حيّ).
   - **⏭️ متبقّي Phase 6 (لاحق):** امتثال ساعات العمل (حد قانوني لكل دولة) · بونص إقليمي (مستهدفات/عملة لكل سوق) · مراقبة تقييم <4.7 حسب الإقليم.
-  - **⏭️ التالي: Phase 7** (الأسطول: سجل مركبات عالمي + تنبيهات انتهاء وثائق إقليمية MOT/فحص + ميل/كم حسب الدولة).
-- **📊 حالة البرنامج العالمي:** Phases 0·1·2·3·4·5·6 **مبنية ومُختبَرة ومنشورة حيّة** (14 PR #107–#121؛ 38 اختبار jest). التالي: Phase 7 (أسطول) · 8 (نمو/ولاء) · 9 (بوابات) · 10 (بنية، محجوبة).
+- **✅ Phase 7 (الأسطول — تنبيهات انتهاء وثائق إقليمية):**
+  - **backend:** `apps/admin-api/.../fleet-ops/` — دالة نقيّة `classifyExpiry(days)` (expired / critical ≤7د / soon). `FleetOpsService.documentExpiryAlerts(withinDays, allowed)` يفحص وثائق السائقين المعتمَدة ذات تاريخ انتهاء (المنتهية أو ضمن النافذة)، يربطها بالسائق→المنطقة→الدولة، مُرتَّبة بالإلحاح + عدّادات لكل خطورة. **scope-aware**. query `fleetDocumentAlerts(withinDays=30)`. `tsc`=0 · **3 اختبار jest أخضر**.
+  - **frontend:** `FLEET_DOCUMENT_ALERTS` + لوحة تنبيهات أعلى `/fleets`: شارات عدّ لكل خطورة + جدول (رابط السائق/الدولة/الوثيقة/الانتهاء/الخطورة)، وشارة خضراء عند عدم وجود انتهاءات. `next build`=ناجح.
+  - **✅ منشور حيّاً (2026-06-14، PR #123):** admin-api restart + admin-panel rebuild (بلا migration — يعيد استخدام `hancr_driver_document`). مُتحقَّق: `fleetDocumentAlerts` يستجيب على الإنتاج (Unauthorized = حقل حيّ).
+  - **⏭️ متبقّي Phase 7 (لاحق):** سجل مركبات عالمي مستقل (نقل سيارة بين أساطيل المدن) · سجلات صيانة · ميل/كم حسب الدولة (`CountryEntity.units`).
+  - **⏭️ التالي: Phase 8** (النمو: عروض مُسوَّرة جغرافياً + Hancr Miles عالمي + بثّ omnichannel بالتوقيت المحلي).
+- **📊 حالة البرنامج العالمي:** Phases 0·1·2·3·4·5·6·7 **مبنية ومُختبَرة ومنشورة حيّة** (15 PR #107–#123؛ 41 اختبار jest). التالي: Phase 8 (نمو/ولاء) · 9 (بوابات) · 10 (بنية، محجوبة).
 - **✅ منشور حيّاً بالكامل (2026-06-14):** Phase 0+1+2 كلها على الإنتاج.
   - **admin-api:** `git pull` + `pm2 restart admin-api` (ts-node). resolvers الجغرافيا/العملات/النطاق/global-ops حيّة. GraphQL سليم.
   - **قاعدة الإنتاج (`hancr_prod` على `hancr_postgres_prod`، 127.0.0.1:5432):** طُبِّق schema الأساس. **مُتحقَّق:** 6 دول (QA/SA مُفعَّلة، AE/GB/US/FR معطّلة)، 8 مدن، 3 مناطق مربوطة، عمود `hancr_admin_user.scope` مُضاف.
