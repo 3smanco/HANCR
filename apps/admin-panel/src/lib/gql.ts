@@ -1509,6 +1509,26 @@ export const GLOBAL_SOS_CENTER = gql`
   }
 `;
 
+// ─── تحليل لغة محادثة الرحلة (كشف الحاجة للترجمة) ─────────────────────────────
+
+export const ORDER_CONVERSATION = gql`
+  query OrderConversation($orderId: Int!) {
+    orderConversation(orderId: $orderId) {
+      orderId
+      riderScript
+      driverScript
+      needsTranslation
+      translationReady
+      translationEnvKey
+      messages {
+        id
+        senderType
+        script
+      }
+    }
+  }
+`;
+
 // ─── العمليات عبر-المدن — الحجوزات المسبقة القادمة ────────────────────────────
 
 export const CROSS_CITY_OPS = gql`

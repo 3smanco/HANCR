@@ -15,9 +15,15 @@ import {
   AlertTriangle,
   CheckCircle2,
   ListOrdered,
+  Languages,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { ORDER_DETAIL, ORDER_CANDIDATES, ASSIGN_DRIVER } from '@/lib/gql';
+import {
+  ORDER_DETAIL,
+  ORDER_CANDIDATES,
+  ASSIGN_DRIVER,
+  ORDER_CONVERSATION,
+} from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { formatDate } from '@/lib/utils';
 
@@ -154,7 +160,10 @@ export default function OrderDetailPage() {
           <TimelineTab activities={(o.activities ?? []) as Record<string, unknown>[]} />
         )}
         {tab === 'chat' && (
-          <ChatTab messages={(o.messages ?? []) as Record<string, unknown>[]} />
+          <ChatTab
+            orderId={o.id as number}
+            messages={(o.messages ?? []) as Record<string, unknown>[]}
+          />
         )}
         {tab === 'assign' && (
           <AssignTab
@@ -318,7 +327,71 @@ function TimelineTab({ activities }: { activities: Record<string, unknown>[] }) 
   );
 }
 
-function ChatTab({ messages }: { messages: Record<string, unknown>[] }) {
+const SCRIPT_AR: Record<string, string> = {
+  arabic: 'العربية',
+  latin: 'لاتينية',
+  other: 'أخرى',
+  unknown: 'غير محدَّد',
+};
+
+function ConversationLanguageBanner({ orderId }: { orderId: number }) {
+  const { data } = useQuery(ORDER_CONVERSATION, {
+    variables: { orderId },
+    fetchPolicy: 'cache-and-network',
+    errorPolicy: 'ignore',
+  });
+  const c = data?.orderConversation;
+  if (!c) return null;
+
+  return (
+    <div
+      className={`card p-3 flex items-center gap-2 flex-wrap text-sm ${
+        c.needsTranslation
+          ? 'bg-amber-50 border border-amber-200'
+          : 'bg-gray-50'
+      }`}
+    >
+      <Languages className="w-4 h-4 text-hancr-violet" />
+      <span className="text-gray-600">
+        الراكب: <b>{SCRIPT_AR[c.riderScript ?? ''] ?? '—'}</b>
+      </span>
+      <span className="text-gray-600">
+        · السائق: <b>{SCRIPT_AR[c.driverScript ?? ''] ?? '—'}</b>
+      </span>
+      {c.needsTranslation ? (
+        <span className="mr-auto inline-flex items-center gap-2">
+          <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-800 text-xs font-bold">
+            تحتاج ترجمة فورية
+          </span>
+          <span
+            className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+              c.translationReady
+                ? 'bg-emerald-100 text-emerald-700'
+                : 'bg-gray-200 text-gray-600'
+            }`}
+            title={c.translationEnvKey}
+          >
+            {c.translationReady
+              ? 'خدمة الترجمة جاهزة'
+              : `بانتظار ${c.translationEnvKey}`}
+          </span>
+        </span>
+      ) : (
+        <span className="mr-auto text-xs text-gray-400">
+          الطرفان بنفس اللغة
+        </span>
+      )}
+    </div>
+  );
+}
+
+function ChatTab({
+  orderId,
+  messages,
+}: {
+  orderId: number;
+  messages: Record<string, unknown>[];
+}) {
   if (messages.length === 0) {
     return (
       <div className="card p-12 text-center text-gray-400">
@@ -328,7 +401,9 @@ function ChatTab({ messages }: { messages: Record<string, unknown>[] }) {
     );
   }
   return (
-    <div className="card p-5 space-y-2 max-h-[600px] overflow-y-auto">
+    <div className="space-y-3">
+      <ConversationLanguageBanner orderId={orderId} />
+      <div className="card p-5 space-y-2 max-h-[600px] overflow-y-auto">
       {messages.map((m) => {
         const isRider = m.senderType === 'rider';
         return (
@@ -350,6 +425,7 @@ function ChatTab({ messages }: { messages: Record<string, unknown>[] }) {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
