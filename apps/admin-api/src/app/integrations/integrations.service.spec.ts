@@ -1,5 +1,9 @@
 import { describe, it, expect } from '@jest/globals';
-import { providerStatus, recommendProvider } from './integrations.service';
+import {
+  providerStatus,
+  recommendProvider,
+  routeFor,
+} from './integrations.service';
 
 describe('recommendProvider', () => {
   it('دفع الخليج → Checkout.com', () => {
@@ -45,5 +49,27 @@ describe('providerStatus', () => {
   it('pending عند مفتاح فارغ أو فراغات', () => {
     expect(providerStatus('X', { X: '' })).toBe('pending');
     expect(providerStatus('X', { X: '   ' })).toBe('pending');
+  });
+});
+
+describe('routeFor', () => {
+  it('ready=true عند توفّر مفتاح المزوّد الموصى به', () => {
+    const r = routeFor('payment', 'GB', { STRIPE_SECRET_KEY: 'sk_x' });
+    expect(r.provider).toBe('Stripe');
+    expect(r.status).toBe('live');
+    expect(r.ready).toBe(true);
+  });
+
+  it('ready=false عند غياب المفتاح', () => {
+    const r = routeFor('sms', 'SA', {});
+    expect(r.provider).toBe('Unifonic');
+    expect(r.envKey).toBe('UNIFONIC_API_KEY');
+    expect(r.ready).toBe(false);
+  });
+
+  it('يوجّه دفع الخليج لـ Checkout.com', () => {
+    const r = routeFor('payment', 'QA', { CHECKOUT_SECRET_KEY: 'sk' });
+    expect(r.provider).toBe('Checkout.com');
+    expect(r.ready).toBe(true);
   });
 });

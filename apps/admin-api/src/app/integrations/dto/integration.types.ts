@@ -28,6 +28,23 @@ export class IntegrationCountryRow {
 }
 
 /**
+ * قرار توجيه طلب واحد (دفع/رسالة) لمزوّد فعلي حسب منطقة الطلب — الطبقة التي
+ * يستدعيها كود الدفع/الرسائل ليعرف «أيّ مزوّد، وهل هو جاهز» قبل التنفيذ.
+ */
+@ObjectType()
+export class ProviderRoute {
+  @Field() channel!: string;
+  @Field(() => Int) regionId!: number;
+  @Field({ nullable: true }) countryIso?: string;
+  @Field() provider!: string;
+  @Field() envKey!: string;
+  /** live = جاهز للتنفيذ؛ pending = ينتظر مفتاح المالك. */
+  @Field() status!: string;
+  /** اختصار: هل يمكن التنفيذ فعلياً الآن؟ */
+  @Field() ready!: boolean;
+}
+
+/**
  * مصفوفة جاهزية التكامل — لكل دولة مُفعَّلة، المزوّد الموصى به لكل قناة
  * (دفع/رسائل/خرائط) وحالة تجهيزه. طبقة تجريد للمالك: تُظهر بالضبط ما يلزم
  * توفيره لكل سوق دون كشف أي مفاتيح.
