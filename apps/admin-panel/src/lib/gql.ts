@@ -1509,6 +1509,25 @@ export const GLOBAL_SOS_CENTER = gql`
   }
 `;
 
+// ─── Hancr Miles عالمي — نظرة على برنامج الولاء (super فقط) ────────────────────
+
+export const GLOBAL_LOYALTY_OVERVIEW = gql`
+  query GlobalLoyaltyOverview {
+    globalLoyaltyOverview {
+      totalMembers
+      totalAvailableMiles
+      liabilityBase
+      baseCurrency
+      mileValueBase
+      tiers {
+        tier
+        members
+        availableMiles
+      }
+    }
+  }
+`;
+
 // ─── Phase 10 — مصفوفة جاهزية التكامل (طبقة التجريد، super فقط) ────────────────
 
 export const INTEGRATION_MATRIX = gql`
