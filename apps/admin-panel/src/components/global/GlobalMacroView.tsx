@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { Maximize2 } from 'lucide-react';
 import { useQuery } from '@apollo/client';
 import { GLOBAL_LIVE_OVERVIEW } from '@/lib/gql';
 import { useGlobalScope } from './GlobalScopeProvider';
@@ -64,7 +66,17 @@ export function GlobalMacroView() {
               >
                 <div className="flex items-center justify-between">
                   <CountryFlag flag={c.flag} name={c.nameEn} size={22} />
-                  <TimeZoneClock timezone={c.timezone} />
+                  <span className="flex items-center gap-2">
+                    <TimeZoneClock timezone={c.timezone} />
+                    <Link
+                      href={`/live?country=${c.iso2}`}
+                      onClick={(e) => e.stopPropagation()}
+                      title={`بثّ مباشر مسطّح — ${c.nameEn}`}
+                      className="rounded-lg border cmd-border p-1.5 hover:cmd-ember-bg transition"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    </Link>
+                  </span>
                 </div>
                 <div className="mt-3 flex items-center gap-4">
                   <Metric
