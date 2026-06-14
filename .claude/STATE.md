@@ -63,7 +63,12 @@ flutter build apk --release --dart-define=ENV=production \
   - **✅ frontend:** `GlobalMacroView` — بطاقات لكل دولة (علم + ساعة محلية حيّة `TimeZoneClock` + عدّاد سائقين/طلبات + العملة) + شريط إجماليات، **النقر يقود الفلتر للدولة** (تنقّل عالم→سوق)، poll كل 15ث. مدمج في صفحة `/dashboard` كبطل غرفة العمليات. `next build`=ناجح. queries في `gql.ts`.
   - **⏭️ تحسين لاحق:** كرة أرضية 3D (deck.gl/Mapbox) فوق البيانات نفسها + التنقّل لخريطة شوارع المدينة.
   - **⏭️ التالي بالترتيب:** Phase 3 (BI متعدد العملات — يستخدم CurrencyService) · 4 (المالي) · 5 (CRM).
-- **🔴 نشر مؤجَّل (إجراء مالك):** نشر admin-api (migrations الجغرافيا/النطاق `1781500000000`+`1781500001000`) + بناء/نشر admin-panel — ليصبح كل ما سبق حيّاً على `admin.hancr.com`. أمر النشر: `git pull` + `set -a; . .env.prod; set +a; export DATABASE_HOST=127.0.0.1; npm run migration:run` + `pm2 restart admin-api` + بناء/نشر admin-panel.
+- **✅ منشور حيّاً بالكامل (2026-06-14):** Phase 0+1+2 كلها على الإنتاج.
+  - **admin-api:** `git pull` + `pm2 restart admin-api` (ts-node). resolvers الجغرافيا/العملات/النطاق/global-ops حيّة. GraphQL سليم.
+  - **قاعدة الإنتاج (`hancr_prod` على `hancr_postgres_prod`، 127.0.0.1:5432):** طُبِّق schema الأساس. **مُتحقَّق:** 6 دول (QA/SA مُفعَّلة، AE/GB/US/FR معطّلة)، 8 مدن، 3 مناطق مربوطة، عمود `hancr_admin_user.scope` مُضاف.
+  - **admin-panel:** `next build` + `pm2 restart admin-panel` (يعمل `npx next start -p 3003`، cwd `/opt/hancr/apps/admin-panel`). `admin.hancr.com` يستجيب (307→login).
+  - **⚠️ درس migration حرج:** `npm run migration:run` **مكسور على الإنتاج** (typeorm CLI + ts-node ESM لا يحلّ استيرادات `.ts` بلا امتداد في data-source.ts). **الحل المُعتمَد: طبّق SQL مباشرة عبر psql:** `set -a; . /opt/hancr/.env.prod; set +a; PGPASSWORD=$DATABASE_PASSWORD psql -h 127.0.0.1 -p 5432 -U $DATABASE_USER -d $DATABASE_NAME -v ON_ERROR_STOP=1 -f <ملف.sql>`. اكتب SQL الـ up() من ملف الـ migration يدوياً (idempotent: IF NOT EXISTS/ON CONFLICT). DB user/name=`hancr_prod`.
+  - **مهم للجلسة الجديدة:** لكل migration جديد لاحقاً → طبّقه عبر psql بنفس الطريقة (لا تعتمد على migration:run).
 
 ## 🔐 إعداد Google OAuth (2026-06-12 — أُنجز في حساب المالك عبر المتصفّح)
 المشروع: **hancr-494520** (Hancr). أُنشئ في Google Cloud Console:
