@@ -12,6 +12,7 @@ import {
 import { REVENUE_CHART, DASHBOARD_STATS } from '@/lib/gql';
 import { RevenueChart } from '@/components/charts/RevenueChart';
 import { Topbar } from '@/components/layout/Topbar';
+import { GlobalRevenueMatrix } from '@/components/global/GlobalRevenueMatrix';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import { useT } from '@/i18n/LocaleProvider';
 
@@ -47,6 +48,14 @@ export default function AnalyticsPage() {
       />
 
       <div className="p-6 space-y-6">
+        {/* ── مصفوفة الأرباح متعددة العملات (الذكاء التجاري العالمي) ── */}
+        <section className="rounded-2xl border cmd-border cmd-surface-2 p-5">
+          <h2 className="mb-4 text-base font-extrabold cmd-text">
+            💱 مصفوفة الأرباح العالمية
+          </h2>
+          <GlobalRevenueMatrix />
+        </section>
+
         {/* ── Period Selector ── */}
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-bold text-gray-700">{t('analytics.period')}</span>
