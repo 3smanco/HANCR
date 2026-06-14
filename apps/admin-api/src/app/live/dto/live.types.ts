@@ -13,6 +13,10 @@ export class LiveDriverType {
   @Field(() => Float) heading!: number;
   @Field() status!: string;
   @Field(() => Int) currentOrderId!: number;
+  /** منطقة السائق (إن عُرِفت) — للفلترة بالنطاق. */
+  @Field(() => Int, { nullable: true }) regionId?: number;
+  /** دولة السائق (iso2) — لفلترة الخريطة المسطّحة لكل دولة. */
+  @Field({ nullable: true }) countryIso?: string;
 }
 
 @ObjectType()
