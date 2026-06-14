@@ -45,6 +45,11 @@ flutter build apk --release --dart-define=ENV=production \
   - **⚠️ درس ارتداد (PR #105 أصلحه):** فحص الكود الميت في #103 **استثنى ملفات `aurora_` من البحث عن المستوردين** + أخطأ في حرف grep للأخطاء → حذف `driver_emergency_contacts_screen` + `add_driver_contact_sheet` بينما `aurora_driver_profile_tab`/`aurora_driver_sos_button` يستوردانهما (استيراد نفس-المجلد بلا شرطة). **القاعدة: عند فحص الميتة لا تستثنِ aurora_، وتحقّق بالبناء لا بـ grep وحده.**
 - **🟥 متبقٍّ من المرحلة 5 (مؤجَّل بطلب المالك):** أدوات AI للحجز (يحتاج رصيد Anthropic) · الدفع بالبطاقة (يحتاج تاجر).
 
+## 🌍 إعادة بناء لوحة التحكم العالمية (2026-06-14) — `.claude/plans/zesty-wiggling-ritchie.md` (مُعتمد)
+برنامج متعدد المراحل لتحويل لوحة التحكم من إقليمية إلى **غرفة عمليات عالمية**. القرارات: منصّة جاهزة عالمياً · تجديد واجهة + طبقة عالمية (إبقاء الـ backend) · ثيم ثنائي داكن-افتراضي · البدء بالأساس+العمليات والمالي+CRM.
+- **✅ Phase 0a (الأساس الجغرافي):** `CountryEntity` (iso2/عملة/توقيت/علم/نظام قياس/قاعدة ضريبية/متطلبات وثائق/رقم طوارئ) + `CityEntity` (دولة/توقيت/مركز/bbox) + توسعة `RegionEntity` (country_id/city_id/timezone). migration `1781500000000` يُنشئ الجدولين + يبذر **الخليج مُفعَّل** (قطر/السعودية + الإمارات معطّلة) و**لندن/نيويورك/باريس جاهزة معطّلة**، ويربط المناطق الحالية بالدولة عبر العملة. مُسجَّلة في `HANCR_ENTITIES` + index. `tsc` (database)=0. **لم تُنشَر بعد** (migration يُشغَّل عند النشر).
+- **⏭️ التالي:** Phase 0b (محرك العملات: ExchangeRateService + CurrencyService) ثم 0c (RBAC مُنطقَن: operator.scope + guard).
+
 ## 🔐 إعداد Google OAuth (2026-06-12 — أُنجز في حساب المالك عبر المتصفّح)
 المشروع: **hancr-494520** (Hancr). أُنشئ في Google Cloud Console:
 - **HANCR Web** (Web application) = `GOOGLE_OAUTH_CLIENT_ID` = `390136620892-bkt9ive9las4eqqft40dorpnva676l4l.apps.googleusercontent.com`. JS origins: hancr.com + www. مضبوط على الخادم في `/opt/hancr/.env` + `.env.prod` (مُتحقَّق: الخلفية تتحقّق من توكنات Google).
