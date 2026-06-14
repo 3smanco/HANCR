@@ -413,21 +413,40 @@ function MapCanvas({
         styles: [{ featureType: 'poi', stylers: [{ visibility: 'off' }] }],
       }}
     >
-      {drivers.map((d) => (
-        <MarkerF
-          key={d.driverId as number}
-          position={{ lat: d.lat as number, lng: d.lng as number }}
-          icon={{
-            path: 0, // CIRCLE
-            scale: 8,
-            fillColor: d.status === 'in_ride' ? '#3B82F6' : '#10B981',
-            fillOpacity: 0.9,
-            strokeColor: '#ffffff',
-            strokeWeight: 2,
-          }}
-          onClick={() => onSelect(d)}
-        />
-      ))}
+      {drivers.map((d) => {
+        const heading = Number(d.heading) || 0;
+        const color = d.status === 'in_ride' ? '#3B82F6' : '#10B981';
+        // سهم اتجاهي يدور حسب heading ليُظهر وجهة سير السيارة؛ نقطة ثابتة عند
+        // غياب الاتجاه (سيارة متوقّفة).
+        const icon =
+          heading > 0
+            ? {
+                path: 3, // FORWARD_CLOSED_ARROW
+                scale: 5,
+                rotation: heading,
+                fillColor: color,
+                fillOpacity: 0.95,
+                strokeColor: '#ffffff',
+                strokeWeight: 1.5,
+              }
+            : {
+                path: 0, // CIRCLE
+                scale: 7,
+                fillColor: color,
+                fillOpacity: 0.9,
+                strokeColor: '#ffffff',
+                strokeWeight: 2,
+              };
+        return (
+          <MarkerF
+            key={d.driverId as number}
+            position={{ lat: d.lat as number, lng: d.lng as number }}
+            icon={icon}
+            title={(d.driverName as string) ?? `سائق #${d.driverId as number}`}
+            onClick={() => onSelect(d)}
+          />
+        );
+      })}
     </GoogleMap>
   );
 }
