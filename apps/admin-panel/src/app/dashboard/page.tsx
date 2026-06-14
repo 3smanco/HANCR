@@ -19,6 +19,7 @@ import { DASHBOARD_STATS, REVENUE_CHART } from '@/lib/gql';
 import { formatNumber, formatCurrency } from '@/lib/utils';
 import { RevenueChart } from '@/components/charts/RevenueChart';
 import { Topbar } from '@/components/layout/Topbar';
+import { GlobalMacroView } from '@/components/global/GlobalMacroView';
 import { useT } from '@/i18n/LocaleProvider';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -157,6 +158,17 @@ export default function DashboardPage() {
       />
 
       <div className="p-6 space-y-6">
+        {/* ── Geo-Radar: العرض الكلّي العالمي (غرفة العمليات) ── */}
+        <section className="rounded-2xl border cmd-border cmd-surface-2 p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-base font-extrabold cmd-text">
+              🌍 العمليات العالمية الحيّة
+            </h2>
+            <span className="cmd-muted text-xs">تحديث كل 15 ثانية</span>
+          </div>
+          <GlobalMacroView />
+        </section>
+
         {/* ── Pending approvals banner ── */}
         {stats?.pendingDriverApprovals > 0 && (
           <Link
