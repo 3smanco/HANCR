@@ -1475,3 +1475,36 @@ export const OFFER_REACH = gql`
     }
   }
 `;
+
+// ─── Phase 9 — مركز SOS العالمي (إثراء بالدولة + رقم الطوارئ السيادي) ──────────
+
+export const GLOBAL_SOS_CENTER = gql`
+  query GlobalSosCenter {
+    globalSosCenter {
+      totalActive
+      criticalCount
+      byCountry {
+        countryIso
+        countryName
+        flag
+        emergencyNumber
+        activeCount
+      }
+      incidents {
+        id
+        triggeredBy
+        triggeredById
+        orderId
+        status
+        priority
+        ageMinutes
+        hasLiveLocation
+        policeNotified
+        countryIso
+        countryName
+        flag
+        emergencyNumber
+      }
+    }
+  }
+`;

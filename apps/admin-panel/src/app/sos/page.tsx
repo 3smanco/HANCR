@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { AlertTriangle, MapPin, Phone, CheckCircle, Shield, Clock, X } from 'lucide-react';
-import { SOS_INCIDENTS, RESOLVE_SOS, ESCALATE_SOS } from '@/lib/gql';
+import { AlertTriangle, MapPin, Phone, CheckCircle, Shield, Clock, X, Globe2 } from 'lucide-react';
+import { SOS_INCIDENTS, RESOLVE_SOS, ESCALATE_SOS, GLOBAL_SOS_CENTER } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 
 type SosStatus = 'Active' | 'Resolved' | 'Cancelled' | 'Escalated';
@@ -90,6 +90,9 @@ export default function SosDashboardPage() {
           </div>
         </div>
 
+        {/* ─── Global SOS center (Phase 9) ─── */}
+        <GlobalSosStrip />
+
         {/* ─── Filter tabs ─── */}
         <div className="flex gap-2 mb-4 flex-wrap">
           {STATUS_FILTERS.map((f, idx) => (
@@ -147,6 +150,67 @@ export default function SosDashboardPage() {
           onRefresh={refetch}
         />
       )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Global SOS center strip (Phase 9) — per-country + sovereign emergency numbers
+// ─────────────────────────────────────────────────────────────────────────────
+
+type SosCountry = {
+  countryIso?: string | null;
+  countryName?: string | null;
+  flag?: string | null;
+  emergencyNumber?: string | null;
+  activeCount: number;
+};
+
+function GlobalSosStrip() {
+  const { data } = useQuery(GLOBAL_SOS_CENTER, { pollInterval: 10000 });
+  const center = data?.globalSosCenter;
+  if (!center || center.totalActive === 0) return null;
+
+  return (
+    <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm mb-6">
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
+        <Globe2 className="w-5 h-5 text-hancr-violet" />
+        <span className="font-bold text-gray-900">مركز SOS العالمي</span>
+        <span className="text-xs text-gray-400">
+          توزيع الحوادث النشطة حسب الدولة + رقم الطوارئ السيادي
+        </span>
+        {center.criticalCount > 0 && (
+          <span className="mr-auto text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-bold">
+            {center.criticalCount} حرجة
+          </span>
+        )}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        {(center.byCountry as SosCountry[]).map((c, i) => (
+          <div
+            key={c.countryIso ?? `unknown-${i}`}
+            className="border border-gray-100 rounded-xl p-3 flex items-center gap-3"
+          >
+            <div className="text-2xl shrink-0">{c.flag ?? '🏳️'}</div>
+            <div className="min-w-0">
+              <div className="font-bold text-gray-900 truncate">
+                {c.countryName ?? 'غير محدَّد'}
+              </div>
+              <div className="text-xs text-gray-500 flex items-center gap-2">
+                <span className="text-red-600 font-bold">
+                  {c.activeCount} نشطة
+                </span>
+                {c.emergencyNumber && (
+                  <span className="inline-flex items-center gap-0.5 text-emerald-700">
+                    <Phone className="w-3 h-3" />
+                    {c.emergencyNumber}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
