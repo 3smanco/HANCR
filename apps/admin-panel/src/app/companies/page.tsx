@@ -12,6 +12,7 @@ import {
   FileDown,
   UserPlus,
   UserMinus,
+  Globe2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -23,6 +24,7 @@ import {
   ADD_COMPANY_EMPLOYEE,
   REVOKE_COMPANY_EMPLOYEE,
   COMPANY_ORDERS_CSV,
+  COMPANY_GLOBAL_PROFILE,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 
@@ -33,6 +35,7 @@ export default function CompaniesPage() {
   const [creating, setCreating] = useState(false);
   const [toppingUp, setToppingUp] = useState<Company | null>(null);
   const [showEmployees, setShowEmployees] = useState<Company | null>(null);
+  const [showGlobal, setShowGlobal] = useState<Company | null>(null);
   const { data, loading, refetch } = useQuery(LIST_COMPANIES);
 
   const [deleteCompany] = useMutation(DELETE_COMPANY, {
@@ -163,6 +166,13 @@ export default function CompaniesPage() {
                       الموظفون
                     </button>
                     <button
+                      onClick={() => setShowGlobal(c)}
+                      className="btn-sm btn-outline"
+                    >
+                      <Globe2 className="w-3.5 h-3.5" />
+                      عالمي
+                    </button>
+                    <button
                       onClick={() => exportCsv(c)}
                       className="btn-sm btn-outline"
                     >
@@ -214,7 +224,111 @@ export default function CompaniesPage() {
           onClose={() => setShowEmployees(null)}
         />
       )}
+
+      {showGlobal && (
+        <CompanyGlobalDrawer
+          company={showGlobal}
+          onClose={() => setShowGlobal(null)}
+        />
+      )}
     </div>
+  );
+}
+
+// ── MNC global-spend drawer (improvement) ────────────────────────────────────
+
+type CountrySpend = {
+  countryIso?: string | null;
+  countryName: string;
+  flag?: string | null;
+  currency: string;
+  orders: number;
+  spentNative: number;
+  spentBase: number;
+};
+
+function CompanyGlobalDrawer({
+  company,
+  onClose,
+}: {
+  company: Company;
+  onClose: () => void;
+}) {
+  const { data, loading } = useQuery(COMPANY_GLOBAL_PROFILE, {
+    variables: { companyId: company.id },
+    fetchPolicy: 'cache-and-network',
+  });
+  const p = data?.companyGlobalProfile;
+
+  return (
+    <ModalShell title={`الملف العالمي — ${company.name as string}`} onClose={onClose} wide>
+      {loading && !p ? (
+        <div className="p-8 text-center text-gray-400">جارٍ التحميل…</div>
+      ) : !p ? (
+        <div className="p-8 text-center text-gray-400">تعذّر التحميل</div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 flex-wrap">
+            {p.multinational ? (
+              <span className="px-2.5 py-1 rounded-full bg-hancr-violet/10 text-hancr-violet text-xs font-extrabold inline-flex items-center gap-1">
+                <Globe2 className="w-3.5 h-3.5" />
+                شركة متعددة الجنسيات · {p.countriesActive} دول
+              </span>
+            ) : (
+              <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-bold">
+                {p.countriesActive === 1 ? 'سوق واحد' : 'لا إنفاق بعد'}
+              </span>
+            )}
+            <span className="text-sm text-gray-500 mr-auto">
+              الرصيد: {Number(p.balance).toFixed(2)} {p.currency}
+            </span>
+          </div>
+
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 p-4">
+            <div className="text-xs text-emerald-700">
+              إجمالي إنفاق الفروع (عملة الأساس)
+            </div>
+            <div className="text-3xl font-extrabold text-emerald-800">
+              {Number(p.totalSpentBase).toLocaleString()} {p.baseCurrency}
+            </div>
+          </div>
+
+          {p.byCountry.length === 0 ? (
+            <div className="p-6 text-center text-gray-400">
+              لا توجد رحلات مكتملة لهذه الشركة
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th>الدولة</th>
+                  <th>الرحلات</th>
+                  <th>الإنفاق المحلي</th>
+                  <th>بعملة الأساس</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(p.byCountry as CountrySpend[]).map((c, i) => (
+                  <tr key={c.countryIso ?? i}>
+                    <td className="font-bold">
+                      {c.flag ? `${c.flag} ` : ''}
+                      {c.countryName}
+                    </td>
+                    <td>{c.orders}</td>
+                    <td>
+                      {Number(c.spentNative).toFixed(2)} {c.currency}
+                    </td>
+                    <td className="font-bold">
+                      {Number(c.spentBase).toFixed(2)} {p.baseCurrency}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+    </ModalShell>
   );
 }
 

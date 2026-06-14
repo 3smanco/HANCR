@@ -1509,6 +1509,33 @@ export const GLOBAL_SOS_CENTER = gql`
   }
 `;
 
+// ─── بوابة الشركات العالمية (MNC) — إنفاق المقرّ عبر الدول ─────────────────────
+
+export const COMPANY_GLOBAL_PROFILE = gql`
+  query CompanyGlobalProfile($companyId: Int!) {
+    companyGlobalProfile(companyId: $companyId) {
+      companyId
+      name
+      status
+      currency
+      balance
+      totalSpentBase
+      baseCurrency
+      countriesActive
+      multinational
+      byCountry {
+        countryIso
+        countryName
+        flag
+        currency
+        orders
+        spentNative
+        spentBase
+      }
+    }
+  }
+`;
+
 // ─── Hancr Miles عالمي — نظرة على برنامج الولاء (super فقط) ────────────────────
 
 export const GLOBAL_LOYALTY_OVERVIEW = gql`
