@@ -8,6 +8,41 @@
  * HANCR Aurora — Admin Panel (cinematic dark + ember glow)
  * ============================================================ */
 
+/* ─── Command-Center theme tokens (ثنائي: داكن افتراضي + فاتح) ───
+ * مكوّنات الطبقة العالمية الجديدة تستهلك هذه المتغيّرات عبر cmd-* utilities،
+ * فتعمل في الوضعين. الصفحات القديمة تبقى داكنة وتُهاجَر تدريجياً. */
+:root {
+  --cmd-bg: #0A0807;
+  --cmd-surface: #13100E;
+  --cmd-surface-2: #1F1A17;
+  --cmd-border: rgba(255, 255, 255, 0.10);
+  --cmd-text: #FFF5EE;
+  --cmd-muted: #A89B96;
+  --cmd-ember: #FF7A1A;
+  --cmd-ember-soft: rgba(255, 122, 26, 0.14);
+}
+html.light {
+  --cmd-bg: #F7F6F4;
+  --cmd-surface: #FFFFFF;
+  --cmd-surface-2: #F1EFEC;
+  --cmd-border: rgba(10, 8, 7, 0.12);
+  --cmd-text: #1A1410;
+  --cmd-muted: #6F635E;
+  --cmd-ember: #E55F00;
+  --cmd-ember-soft: rgba(229, 95, 0, 0.10);
+}
+
+@layer utilities {
+  .cmd-bg { background-color: var(--cmd-bg); }
+  .cmd-surface { background-color: var(--cmd-surface); }
+  .cmd-surface-2 { background-color: var(--cmd-surface-2); }
+  .cmd-border { border-color: var(--cmd-border); }
+  .cmd-text { color: var(--cmd-text); }
+  .cmd-muted { color: var(--cmd-muted); }
+  .cmd-ember { color: var(--cmd-ember); }
+  .cmd-ember-bg { background-color: var(--cmd-ember-soft); }
+}
+
 @layer base {
   * { box-sizing: border-box; }
 

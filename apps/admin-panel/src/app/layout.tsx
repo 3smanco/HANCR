@@ -3,6 +3,7 @@ import './globals.css';
 import { ApolloProvider } from '@/components/layout/ApolloProvider';
 import { AuthBootstrap } from '@/components/layout/AuthBootstrap';
 import { LocaleProvider } from '@/i18n/LocaleProvider';
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
@@ -21,7 +22,8 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body>
-        <LocaleProvider>
+        <ThemeProvider>
+          <LocaleProvider>
           <ApolloProvider>
             <AuthBootstrap>{children}</AuthBootstrap>
             <Toaster
@@ -40,7 +42,8 @@ export default function RootLayout({
               }}
             />
           </ApolloProvider>
-        </LocaleProvider>
+          </LocaleProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
