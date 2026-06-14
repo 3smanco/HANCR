@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../motion/haptics.dart';
 import '../../theme/aurora_theme.dart';
 
 /// AuroraButton — primary CTA مع orange glow.
@@ -128,7 +129,17 @@ class AuroraButton extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: isDisabled ? null : onPressed,
+          onTap: isDisabled
+              ? null
+              : () {
+                  // ردّ فعل لمسي موحّد عبر كل أزرار Aurora (N6 Haptics).
+                  if (isDanger) {
+                    Haptics.warning();
+                  } else {
+                    Haptics.selection();
+                  }
+                  onPressed!();
+                },
           borderRadius: BorderRadius.circular(_radius),
           splashColor: Colors.white.withValues(alpha: 0.1),
           highlightColor: Colors.white.withValues(alpha: 0.05),

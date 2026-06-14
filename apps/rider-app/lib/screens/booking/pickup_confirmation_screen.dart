@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../core/models/order_model.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/aurora_map_style.dart';
 import '../../core/widgets/hancr_widgets.dart';
 
 /// PickupConfirmationScreen — تأكيد نقطة الالتقاء (Uber-style)
@@ -71,6 +72,7 @@ class _PickupConfirmationScreenState extends State<PickupConfirmationScreen>
         children: [
           // ── Map ──
           GoogleMap(
+            style: AuroraMapStyle.dark,
             initialCameraPosition: CameraPosition(
               target: _pickupPin,
               zoom: 16,
