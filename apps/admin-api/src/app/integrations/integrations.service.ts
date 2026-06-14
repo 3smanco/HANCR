@@ -5,6 +5,7 @@ import {
   IntegrationChannel,
   IntegrationCountryRow,
   IntegrationMatrix,
+  ProviderRoute,
   ProviderStatus,
 } from './dto/integration.types';
 
@@ -46,6 +47,26 @@ export function providerStatus(
 ): ProviderStatus {
   const v = env[envKey];
   return v && v.trim().length > 0 ? 'live' : 'pending';
+}
+
+/**
+ * يحلّ قرار توجيه قناة لدولة إلى {مزوّد، مفتاح، حالة، جاهز}. دالة نقيّة قابلة
+ * للاختبار — الطبقة التي يستدعيها كود الدفع/الرسائل ليختار المزوّد ويتحقّق من
+ * جاهزيته قبل التنفيذ الفعلي.
+ */
+export function routeFor(
+  channel: IntegrationChannel,
+  iso2: string,
+  env: Record<string, string | undefined>,
+): { provider: string; envKey: string; status: ProviderStatus; ready: boolean } {
+  const rule = recommendProvider(channel, iso2);
+  const status = providerStatus(rule.envKey, env);
+  return {
+    provider: rule.provider,
+    envKey: rule.envKey,
+    status,
+    ready: status === 'live',
+  };
 }
 
 const CHANNELS: IntegrationChannel[] = ['payment', 'sms', 'maps'];
@@ -108,5 +129,32 @@ export class IntegrationsService {
     });
 
     return { countries, liveCount, pendingCount };
+  }
+
+  /**
+   * يحلّ قرار توجيه قناة (دفع/رسالة) لمنطقة طلب فعلية: المنطقة→الدولة→المزوّد
+   * وحالته. يُمكِّن أنظمة الدفع/الرسائل من اختيار المزوّد الصحيح حسب السوق.
+   */
+  async routeForRegion(
+    regionId: number,
+    channel: IntegrationChannel,
+  ): Promise<ProviderRoute> {
+    const rows = await this.dataSource.query<Array<{ iso2: string | null }>>(
+      `SELECT c.iso2 FROM hancr_region r
+       LEFT JOIN hancr_country c ON c.id = r.country_id
+       WHERE r.id = $1`,
+      [regionId],
+    );
+    const iso2 = rows[0]?.iso2 ?? '';
+    const r = routeFor(channel, iso2, process.env);
+    return {
+      channel,
+      regionId,
+      countryIso: iso2 || undefined,
+      provider: r.provider,
+      envKey: r.envKey,
+      status: r.status,
+      ready: r.ready,
+    };
   }
 }

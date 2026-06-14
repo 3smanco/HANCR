@@ -1,4 +1,4 @@
-import { Resolver, Query } from '@nestjs/graphql';
+import { Resolver, Query, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AdminJwtGuard, CurrentAdmin } from '../auth/admin-jwt.guard';
 import { AdminRolesGuard } from '../auth/admin-roles.guard';
@@ -6,7 +6,8 @@ import { RequireRole } from '../auth/roles.decorator';
 import type { AdminUser } from '../auth/admin-jwt.strategy';
 import { ScopeService } from '../scope/scope.service';
 import { IntegrationsService } from './integrations.service';
-import { IntegrationMatrix } from './dto/integration.types';
+import { IntegrationChannel } from './dto/integration.types';
+import { IntegrationMatrix, ProviderRoute } from './dto/integration.types';
 
 @Resolver()
 export class IntegrationsResolver {
@@ -29,5 +30,19 @@ export class IntegrationsResolver {
       role: admin.role,
     });
     return this.integrations.matrix(allowed);
+  }
+
+  /** قرار توجيه قناة (payment/sms/maps) لمنطقة طلب → المزوّد وحالة جاهزيته. */
+  @Query(() => ProviderRoute, {
+    description: 'قرار توجيه مزوّد لمنطقة طلب (دفع/رسائل)',
+  })
+  @UseGuards(AdminJwtGuard)
+  providerRoute(
+    @Args('regionId', { type: () => Int }) regionId: number,
+    @Args('channel') channel: string,
+  ): Promise<ProviderRoute> {
+    const ch: IntegrationChannel =
+      channel === 'sms' || channel === 'maps' ? channel : 'payment';
+    return this.integrations.routeForRegion(regionId, ch);
   }
 }
