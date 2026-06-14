@@ -8,6 +8,8 @@ import { join } from 'path';
 // Entities (all registered so relations resolve)
 import {
   RegionEntity,
+  CountryEntity,
+  CityEntity,
   ServiceEntity,
   RiderEntity,
   DriverEntity,
@@ -74,6 +76,7 @@ import { DriverApplicationsModule } from './driver-applications/driver-applicati
 import { LoyaltyAdminModule } from './loyalty/loyalty-admin.module';
 import { AdminNotificationsModule } from './notifications/notifications.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
+import { CurrencyModule } from './currency/currency.module';
 import { NotificationsModule } from '@hancr/notifications';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -107,6 +110,8 @@ import { ObservabilityModule } from '@hancr/observability';
         database: cfg.get<string>('DATABASE_NAME') ?? 'hancr',
         entities: [
           RegionEntity,
+          CountryEntity,
+          CityEntity,
           ServiceEntity,
           RiderEntity,
           DriverEntity,
@@ -173,6 +178,7 @@ import { ObservabilityModule } from '@hancr/observability';
     AuthModule,
     AppConfigModule,
     IntelligenceModule,
+    CurrencyModule,
     UsersModule,
     RegionsModule,
     ServicesModule,
