@@ -16,6 +16,9 @@ import {
   Wallet,
   ListOrdered,
   ExternalLink,
+  ShieldCheck,
+  ShieldAlert,
+  ShieldQuestion,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -23,6 +26,7 @@ import {
   SET_DRIVER_STATUS,
   REVIEW_DRIVER_DOCUMENT,
   UPDATE_DRIVER,
+  DRIVER_COMPLIANCE,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { formatDate } from '@/lib/utils';
@@ -278,7 +282,10 @@ export default function DriverDetailPage() {
         {/* Tab content */}
         {tab === 'details' && <DetailsTab d={d as Record<string, unknown>} />}
         {tab === 'documents' && (
-          <DocumentsTab docs={docs} onReview={reviewDoc} />
+          <div className="space-y-4">
+            <ComplianceBanner driverId={d.id as number} />
+            <DocumentsTab docs={docs} onReview={reviewDoc} />
+          </div>
         )}
         {tab === 'orders' && <OrdersTab orders={orders} />}
         {tab === 'financials' && (
@@ -348,6 +355,87 @@ function DetailsTab({ d }: { d: Record<string, unknown> }) {
         <Row label="اللون" value={(d.carColor as string) ?? '—'} />
         <Row label="السنة" value={`${d.carYear ?? '—'}`} />
         <Row label="رقم اللوحة" value={(d.plateNumber as string) ?? '—'} />
+      </div>
+    </div>
+  );
+}
+
+// ── Compliance banner (Phase 6) — امتثال تكيّفي لكل دولة ──────────────────────
+
+const DOC_LABEL: Record<string, string> = {
+  national_id: 'الهوية',
+  license: 'الرخصة',
+  vehicle_registration: 'الاستمارة',
+  insurance: 'التأمين',
+  criminal_record: 'العدلية',
+  pco_license: 'رخصة PCO',
+  dbs_check: 'فحص DBS',
+};
+const docLabel = (t: string) => DOC_LABEL[t] ?? t;
+
+function ComplianceBanner({ driverId }: { driverId: number }) {
+  const { data, loading } = useQuery(DRIVER_COMPLIANCE, {
+    variables: { driverId },
+    fetchPolicy: 'cache-and-network',
+  });
+  if (loading && !data) return null;
+  const c = data?.driverCompliance;
+  if (!c) return null;
+
+  const map = {
+    compliant: {
+      cls: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+      Icon: ShieldCheck,
+      label: 'مُمتثِل',
+    },
+    pending: {
+      cls: 'bg-amber-50 border-amber-200 text-amber-800',
+      Icon: ShieldQuestion,
+      label: 'قيد المراجعة',
+    },
+    non_compliant: {
+      cls: 'bg-red-50 border-red-200 text-red-800',
+      Icon: ShieldAlert,
+      label: 'غير مُمتثِل',
+    },
+  } as const;
+  const s = map[c.status as keyof typeof map] ?? map.pending;
+
+  return (
+    <div className={`card p-4 border ${s.cls}`}>
+      <div className="flex items-center gap-2 mb-1.5">
+        <s.Icon className="w-5 h-5" />
+        <span className="font-extrabold">الامتثال: {s.label}</span>
+        {c.countryName ? (
+          <span className="text-xs opacity-70">
+            · متطلّبات {c.countryName}
+            {c.countryIso ? ` (${c.countryIso})` : ''}
+          </span>
+        ) : (
+          <span className="text-xs opacity-70">· متطلّبات افتراضية</span>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-1.5 text-xs">
+        {c.missing.length > 0 && (
+          <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+            ناقص: {c.missing.map(docLabel).join('، ')}
+          </span>
+        )}
+        {c.expired.length > 0 && (
+          <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+            منتهٍ: {c.expired.map(docLabel).join('، ')}
+          </span>
+        )}
+        {c.expiringSoon.length > 0 && (
+          <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+            ينتهي قريباً: {c.expiringSoon.map(docLabel).join('، ')}
+          </span>
+        )}
+        {c.missing.length === 0 &&
+          c.expired.length === 0 &&
+          c.expiringSoon.length === 0 && (
+            <span className="opacity-70">كل الوثائق المطلوبة سارية ✓</span>
+          )}
       </div>
     </div>
   );

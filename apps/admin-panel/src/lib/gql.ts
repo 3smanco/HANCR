@@ -1400,3 +1400,27 @@ export const VIP_PROFILE = gql`
     }
   }
 `;
+
+// ─── Phase 6 — امتثال السائق المتكيّف لكل دولة ────────────────────────────────
+
+export const DRIVER_COMPLIANCE = gql`
+  query DriverCompliance($driverId: Int!) {
+    driverCompliance(driverId: $driverId) {
+      driverId
+      driverName
+      countryIso
+      countryName
+      status
+      missing
+      expired
+      expiringSoon
+      items {
+        type
+        state
+        required
+        expiresAt
+        daysToExpiry
+      }
+    }
+  }
+`;

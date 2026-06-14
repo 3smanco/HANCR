@@ -82,6 +82,7 @@ import { GeographyModule } from './geography/geography.module';
 import { GlobalOpsModule } from './global-ops/global-ops.module';
 import { InvoiceModule } from './invoicing/invoice.module';
 import { CrmModule } from './crm/crm.module';
+import { ComplianceModule } from './compliance/compliance.module';
 import { NotificationsModule } from '@hancr/notifications';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -189,6 +190,7 @@ import { ObservabilityModule } from '@hancr/observability';
     GlobalOpsModule,
     InvoiceModule,
     CrmModule,
+    ComplianceModule,
     UsersModule,
     RegionsModule,
     ServicesModule,
