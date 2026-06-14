@@ -38,6 +38,7 @@ export { DriverDocumentEntity } from './lib/entities/driver-document.entity';
 export { ComplaintEntity } from './lib/entities/complaint.entity';
 export { ComplaintActivityEntity } from './lib/entities/complaint-activity.entity';
 export { AdminUserEntity } from './lib/entities/admin-user.entity';
+export type { OperatorScope } from './lib/entities/admin-user.entity';
 export { AnnouncementEntity } from './lib/entities/announcement.entity';
 export { GiftBatchEntity } from './lib/entities/gift-batch.entity';
 export { GiftCodeEntity } from './lib/entities/gift-code.entity';

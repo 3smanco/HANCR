@@ -77,6 +77,7 @@ import { LoyaltyAdminModule } from './loyalty/loyalty-admin.module';
 import { AdminNotificationsModule } from './notifications/notifications.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
 import { CurrencyModule } from './currency/currency.module';
+import { ScopeModule } from './scope/scope.module';
 import { NotificationsModule } from '@hancr/notifications';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -179,6 +180,7 @@ import { ObservabilityModule } from '@hancr/observability';
     AppConfigModule,
     IntelligenceModule,
     CurrencyModule,
+    ScopeModule,
     UsersModule,
     RegionsModule,
     ServicesModule,
