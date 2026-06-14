@@ -53,7 +53,8 @@ flutter build apk --release --dart-define=ENV=production \
 - **🎉 Phase 0 (الأساس العالمي) مكتمل بالكامل** (جغرافيا + عملات + RBAC مُنطقَن). **لم يُنشَر بعد** (migrations تُشغَّل عند نشر admin-api؛ الكود في ts-node).
 - **🔵 Phase 1 (هيكل command-center + الشريط العلوي) — جارية:**
   - **✅ 1a (resolver الجغرافيا):** `apps/admin-api/.../geography/` — query `countries(onlyEnabled)` + `cities(filter,onlyEnabled)` (+ عدّ المدن المُفعَّلة لكل دولة) + mutations `setCountryEnabled/setCityEnabled` (super). يغذّي فلتر الدولة/المدينة. مُسجَّل `GeographyModule`. `tsc`=0.
-  - **⏭️ التالي:** 1b (tokens ثيم ثنائي داكن + ThemeProvider + مكوّنات CountryFlag/CurrencyAmount/TimeZoneClock) ثم 1c (الشريط العلوي الذكي + الهيكل + إعادة تنظيم القائمة الجانبية).
+  - **✅ 1b (ثيم ثنائي + مكوّنات):** اكتُشِف أن admin-panel **داكن Aurora أصلاً** (tailwind+globals مُهاجَران؛ `design-tokens.ts` ملف قديم غير مستخدم في الـ UI)، و**polyglot RTL/LTR موجود** (`LocaleProvider.dir`). أُضيف **ثيم ثنائي** عبر متغيّرات CSS `--cmd-*` (`:root` داكن + `html.light` فاتح) + utilities `cmd-*` في `globals.css`، و`ThemeProvider`/`ThemeToggle` (يبدّل صنف `light` + يحفظ، داكن افتراضي، مربوط في `layout.tsx`). الطبقة الجديدة تعمل في الوضعين؛ الصفحات القديمة تبقى داكنة وتُهاجَر تدريجياً. مكوّنات أساسية: `CountryFlag` · `CurrencyAmount` (Intl) · `TimeZoneClock` (حيّة). tsc لملفاتي=0 (خطأ cancel-reasons قديم غير حاجب — `ignoreBuildErrors:true`).
+  - **⏭️ التالي:** 1c (الشريط العلوي الذكي: فلتر دولة/مدينة عبر query الجغرافيا + جرس SOS + ThemeToggle + مبدّل اللغة؛ + إعادة تنظيم القائمة الجانبية للأقسام الـ16).
 
 ## 🔐 إعداد Google OAuth (2026-06-12 — أُنجز في حساب المالك عبر المتصفّح)
 المشروع: **hancr-494520** (Hancr). أُنشئ في Google Cloud Console:
