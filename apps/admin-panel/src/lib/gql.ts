@@ -6,6 +6,24 @@
  */
 import { gql } from '@apollo/client';
 
+// ─── GEOGRAPHY (الطبقة العالمية — فلتر الدولة/المدينة) ───────────────────────
+
+export const LIST_COUNTRIES = gql`
+  query Countries($onlyEnabled: Boolean) {
+    countries(onlyEnabled: $onlyEnabled) {
+      id iso2 name nameEn currency timezone flag dialCode units enabled cityCount
+    }
+  }
+`;
+
+export const LIST_CITIES = gql`
+  query Cities($filter: CitiesFilterInput, $onlyEnabled: Boolean) {
+    cities(filter: $filter, onlyEnabled: $onlyEnabled) {
+      id countryId name nameEn timezone enabled
+    }
+  }
+`;
+
 // ─── AUTH ──────────────────────────────────────────────────────────────────
 
 // ─── OPERATORS / RBAC (Phase I5) ──────────────────────────────────────────
