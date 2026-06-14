@@ -36,7 +36,8 @@ flutter build apk --release --dart-define=ENV=production \
   - **ملاحظة:** الأجرة المعروضة في التطبيق صارت صحيحة فوراً دون تعديل موبايل (التطبيق يعرض estimatedFare المُصحَّح). عرض التفصيل في الواجهة + surge ديناميكي حسب العرض/الطلب = تحسين لاحق.
   - **✅ منشور حيّاً على السيرفر (2026-06-14):** `git pull` + `pm2 restart rider-api`. التطبيق يعمل عبر **ts-node** مباشرة (`ecosystem.config.js` → `ts-node --transpile-only`) — **لا خطوة بناء؛ النشر = pull + restart فقط**. مُتحقَّق: `Nest application successfully started` + `api.hancr.com/rider/graphql` → HTTP 200.
   - **⚠️ درس نشر:** `.nx/cache` و`.nx/workspace-data` كانا متعقَّبَين في الريبو فكسرا كل `git pull` على السيرفر. أُصلِح: أُضيفا لـ `.gitignore` وأُزيلا من التتبّع. عند نشر قديم بمشكلة مشابهة: `rm -rf .nx && git checkout -- .nx && git pull`.
-- **⏭️ التالي: المرحلة 4** (تطوير الموجود — موبايل). **بناء APK مؤجَّل** ليجمع المراحل 1+2+4.
+- **✅ المرحلة 4 (تطوير الموجود — موبايل):** تبيّن أن الشاشات **الحيّة (aurora)** في التطبيقين مكتملة فعلاً — كل "قريباً"/زر ميت كان في **كود قديم ميت**. حُذف عنقود السائق القديم (8 ملفات: home_screen/earnings_tab/profile_tab/stars_tab/driver_wallet_screen/driver_sos_button/driver_emergency_contacts_screen/add_driver_contact_sheet) + شاشة الراكب الميتة service_picker_screen. مُتحقَّق: صفر "قريباً"/زر ميت في الكود الحيّ (عدا تأجيل Apple Sign-In الصادق). `flutter analyze` (السائق) = 0 أخطاء.
+- **⏭️ التالي: المرحلة 5** (ميزات جديدة — دفع/ويب/أدوات AI؛ بعضها محجوب بإجراء المالك). **بناء APK مؤجَّل** ليجمع المراحل 1+2+4.
 
 ## 🔐 إعداد Google OAuth (2026-06-12 — أُنجز في حساب المالك عبر المتصفّح)
 المشروع: **hancr-494520** (Hancr). أُنشئ في Google Cloud Console:
