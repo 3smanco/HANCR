@@ -2,9 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
-import { CreditCard, Save } from 'lucide-react';
+import { CreditCard, Save, Plug, CheckCircle2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { PROVIDER_CONFIG, UPDATE_GATEWAY_CONFIG } from '@/lib/gql';
+import {
+  PROVIDER_CONFIG,
+  UPDATE_GATEWAY_CONFIG,
+  INTEGRATION_MATRIX,
+} from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { SettingsTabs } from '../_SettingsTabs';
 
@@ -109,6 +113,8 @@ export default function GatewaysSettingsPage() {
       <div className="p-6 space-y-5">
         <SettingsTabs />
 
+        <IntegrationMatrixBoard />
+
         {loading ? (
           <div className="card p-10 text-center text-gray-400">
             جارٍ التحميل…
@@ -200,6 +206,108 @@ export default function GatewaysSettingsPage() {
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ── Integration readiness matrix (Phase 10) ──────────────────────────────────
+
+const CHANNEL_LABEL: Record<string, string> = {
+  payment: 'الدفع',
+  sms: 'الرسائل',
+  maps: 'الخرائط',
+};
+
+type Cell = { channel: string; provider: string; status: string; envKey: string };
+type Row = {
+  countryIso?: string | null;
+  countryName: string;
+  flag?: string | null;
+  cells: Cell[];
+};
+
+function IntegrationMatrixBoard() {
+  const { data, loading } = useQuery(INTEGRATION_MATRIX, {
+    fetchPolicy: 'cache-and-network',
+  });
+  if (loading && !data) return null;
+  const m = data?.integrationMatrix;
+  if (!m) return null;
+
+  return (
+    <div className="card overflow-hidden">
+      <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2 flex-wrap">
+        <Plug className="w-5 h-5 text-hancr-violet" />
+        <span className="font-extrabold text-gray-900">
+          مصفوفة جاهزية التكامل
+        </span>
+        <span className="text-xs text-gray-400">
+          المزوّد الموصى به لكل سوق وحالة تجهيزه (طبقة تجريد — لا تكشف مفاتيح)
+        </span>
+        <div className="mr-auto flex gap-1.5 text-xs">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">
+            <CheckCircle2 className="w-3 h-3" /> {m.liveCount} جاهزة
+          </span>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold">
+            <Clock className="w-3 h-3" /> {m.pendingCount} بانتظار المالك
+          </span>
+        </div>
+      </div>
+      <table className="w-full">
+        <thead>
+          <tr>
+            <th>الدولة</th>
+            <th>الدفع</th>
+            <th>الرسائل</th>
+            <th>الخرائط</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(m.countries as Row[]).map((c, i) => (
+            <tr key={c.countryIso ?? i}>
+              <td className="font-bold whitespace-nowrap">
+                {c.flag ? `${c.flag} ` : ''}
+                {c.countryName}
+              </td>
+              {['payment', 'sms', 'maps'].map((ch) => {
+                const cell = c.cells.find((x) => x.channel === ch);
+                if (!cell) return <td key={ch}>—</td>;
+                return (
+                  <td key={ch}>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-medium">{cell.provider}</span>
+                      <span
+                        className={`text-[10px] inline-flex items-center gap-1 ${
+                          cell.status === 'live'
+                            ? 'text-emerald-600'
+                            : 'text-amber-600'
+                        }`}
+                        title={cell.envKey}
+                      >
+                        {cell.status === 'live' ? (
+                          <>
+                            <CheckCircle2 className="w-3 h-3" /> جاهز
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="w-3 h-3" /> {cell.envKey}
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="px-5 py-2 text-[11px] text-gray-400 border-t border-gray-50">
+        {/* تلميح للمالك */}
+        التفعيل: أضف متغيّر البيئة المعروض في <code>.env.prod</code> ثم أعد تشغيل
+        الخدمة — تتحوّل الحالة تلقائياً إلى «جاهز».
+        <span className="sr-only">{Object.values(CHANNEL_LABEL).join(' ')}</span>
       </div>
     </div>
   );

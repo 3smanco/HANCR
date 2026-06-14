@@ -1508,3 +1508,26 @@ export const GLOBAL_SOS_CENTER = gql`
     }
   }
 `;
+
+// ─── Phase 10 — مصفوفة جاهزية التكامل (طبقة التجريد، super فقط) ────────────────
+
+export const INTEGRATION_MATRIX = gql`
+  query IntegrationMatrix {
+    integrationMatrix {
+      liveCount
+      pendingCount
+      countries {
+        countryIso
+        countryName
+        flag
+        enabled
+        cells {
+          channel
+          provider
+          status
+          envKey
+        }
+      }
+    }
+  }
+`;
