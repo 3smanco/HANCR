@@ -4,6 +4,9 @@
 
 // Entities
 export { RegionEntity } from './lib/entities/region.entity';
+export { CountryEntity } from './lib/entities/country.entity';
+export type { CountryTaxRule } from './lib/entities/country.entity';
+export { CityEntity } from './lib/entities/city.entity';
 export { ServiceEntity } from './lib/entities/service.entity';
 export { RiderEntity } from './lib/entities/rider.entity';
 export { DriverEntity } from './lib/entities/driver.entity';

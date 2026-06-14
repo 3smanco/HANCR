@@ -6,6 +6,8 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 import { RegionEntity } from './entities/region.entity';
+import { CountryEntity } from './entities/country.entity';
+import { CityEntity } from './entities/city.entity';
 import { ServiceEntity } from './entities/service.entity';
 import { RiderEntity } from './entities/rider.entity';
 import { DriverEntity } from './entities/driver.entity';
@@ -55,6 +57,8 @@ import { DriverApplicationEntity } from './entities/driver-application.entity';
  */
 export const HANCR_ENTITIES = [
   RegionEntity,
+  CountryEntity,
+  CityEntity,
   ServiceEntity,
   RiderEntity,
   DriverEntity,

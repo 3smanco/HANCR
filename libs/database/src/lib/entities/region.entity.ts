@@ -50,6 +50,18 @@ export class RegionEntity {
   @Column({ default: 5000, name: 'default_search_radius' })
   defaultSearchRadius!: number;
 
+  /** الدولة الأم في التسلسل العالمي (nullable للتوافق الرجعي). */
+  @Column({ nullable: true, name: 'country_id' })
+  countryId?: number;
+
+  /** المدينة الأم (nullable). */
+  @Column({ nullable: true, name: 'city_id' })
+  cityId?: number;
+
+  /** التوقيت المحلي (IANA tz) — يُورَّث من المدينة/الدولة افتراضياً. */
+  @Column({ length: 64, nullable: true })
+  timezone?: string;
+
   /** الخدمات المتاحة في هذه المنطقة */
   @OneToMany(() => ServiceEntity, (service) => service.region)
   services!: ServiceEntity[];
