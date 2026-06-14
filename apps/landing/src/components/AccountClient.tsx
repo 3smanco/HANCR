@@ -58,7 +58,7 @@ function loadGoogleMaps(): Promise<void> {
       return;
     }
     const s = document.createElement('script');
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places&language=ar`;
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places,geometry&language=ar`;
     s.async = true;
     s.onload = () => resolve();
     s.onerror = () => reject(new Error('Maps failed to load'));
@@ -66,6 +66,17 @@ function loadGoogleMaps(): Promise<void> {
   });
   return mapsPromise;
 }
+
+// نمط خريطة داكن مطابق لهوية HANCR (ember/obsidian).
+const DARK_MAP_STYLE = [
+  { elementType: 'geometry', stylers: [{ color: '#13100E' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#C9BDB6' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#0A0807' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#332C28' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#4A4039' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#16243A' }] },
+  { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+];
 
 type Step = 'loading' | 'phone' | 'otp' | 'email' | 'email-otp' | 'profile';
 
@@ -96,6 +107,14 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
   const [orderStatus, setOrderStatus] = useState<string | null>(null);
   const [mapsError, setMapsError] = useState(false);
   const destInputRef = useRef<HTMLInputElement | null>(null);
+  // الخريطة البصرية
+  const mapRef = useRef<HTMLDivElement | null>(null);
+  const mapObjRef = useRef<AnyWin>(null);
+  const originMarkerRef = useRef<AnyWin>(null);
+  const destMarkerRef = useRef<AnyWin>(null);
+  const routeLineRef = useRef<AnyWin>(null);
+  const orderIdRef = useRef<number | null>(null);
+  orderIdRef.current = orderId;
 
   function loadEstimateData() {
     fetchServices().then((s) => {
@@ -147,6 +166,93 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
       // لا نبتلع الفشل: نُظهر للمستخدم أن بحث الوجهة غير متاح (مفتاح خرائط/شبكة).
       .catch(() => setMapsError(true));
   }, [step]);
+
+  // خريطة بصرية: علامتا الانطلاق (A أخضر) والوجهة (برتقالي) + خط المسار +
+  // النقر على الخريطة يحدّد الوجهة. تُحدَّث عند تغيّر النقاط أو التقدير.
+  useEffect(() => {
+    if (step !== 'profile') return;
+    let cancelled = false;
+    loadGoogleMaps()
+      .then(() => {
+        if (cancelled) return;
+        const g = (window as AnyWin).google?.maps;
+        if (!g || !mapRef.current) return;
+
+        if (!mapObjRef.current) {
+          mapObjRef.current = new g.Map(mapRef.current, {
+            center: origin ?? { lat: 25.2854, lng: 51.531 }, // الدوحة افتراضياً
+            zoom: 12,
+            disableDefaultUI: true,
+            zoomControl: true,
+            clickableIcons: false,
+            styles: DARK_MAP_STYLE,
+          });
+          mapObjRef.current.addListener('click', (e: AnyWin) => {
+            if (orderIdRef.current) return;
+            const lat = e.latLng.lat();
+            const lng = e.latLng.lng();
+            setDestCoord({ lat, lng });
+            setDestAddress(`${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+            if (destInputRef.current)
+              destInputRef.current.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            setEstimate(null);
+            setOrderId(null);
+          });
+        }
+        const map = mapObjRef.current;
+
+        const dot = (color: string) => ({
+          path: g.SymbolPath.CIRCLE,
+          scale: 7,
+          fillColor: color,
+          fillOpacity: 1,
+          strokeColor: '#FFFFFF',
+          strokeWeight: 2,
+        });
+
+        if (origin) {
+          if (!originMarkerRef.current)
+            originMarkerRef.current = new g.Marker({ map, position: origin, icon: dot('#10B981') });
+          else originMarkerRef.current.setPosition(origin);
+        }
+        if (destCoord) {
+          if (!destMarkerRef.current)
+            destMarkerRef.current = new g.Marker({ map, position: destCoord, icon: dot('#FF7A1A') });
+          else destMarkerRef.current.setPosition(destCoord);
+        }
+
+        if (routeLineRef.current) {
+          routeLineRef.current.setMap(null);
+          routeLineRef.current = null;
+        }
+        if (estimate?.polyline && g.geometry?.encoding) {
+          routeLineRef.current = new g.Polyline({
+            map,
+            path: g.geometry.encoding.decodePath(estimate.polyline),
+            strokeColor: '#FF7A1A',
+            strokeWeight: 4,
+            strokeOpacity: 0.9,
+          });
+        }
+
+        if (origin && destCoord) {
+          const b = new g.LatLngBounds();
+          b.extend(origin);
+          b.extend(destCoord);
+          map.fitBounds(b, 60);
+        } else if (origin) {
+          map.setCenter(origin);
+          map.setZoom(14);
+        } else if (destCoord) {
+          map.setCenter(destCoord);
+          map.setZoom(14);
+        }
+      })
+      .catch(() => setMapsError(true));
+    return () => {
+      cancelled = true;
+    };
+  }, [step, origin, destCoord, estimate]);
 
   const pickSavedPlace = (p: WebSavedPlace) => {
     setDestCoord({ lat: p.lat, lng: p.lng });
@@ -553,10 +659,22 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
           <h2 className="mb-1 text-lg font-bold text-white">
             {t('احجز رحلة', 'Book a ride')}
           </h2>
-          <p className="mb-4 text-xs text-white/50">
+          <p className="mb-3 text-xs text-white/50">
             {t('من موقعك الحالي إلى أي وجهة — احسب الأجرة ثم احجز.',
                'From your location to any destination — estimate then book.')}
           </p>
+
+          <div
+            ref={mapRef}
+            className="mb-2 h-56 w-full overflow-hidden rounded-xl border border-white/10 bg-black/30"
+            aria-label={t('خريطة الحجز', 'Booking map')}
+          />
+          {!orderId && (
+            <p className="mb-3 text-[11px] text-white/40">
+              {t('انقر على الخريطة لتحديد الوجهة، أو ابحث عنها بالأسفل.',
+                 'Tap the map to set the destination, or search below.')}
+            </p>
+          )}
 
           {orderId ? (
             (() => {

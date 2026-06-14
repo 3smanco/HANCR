@@ -228,6 +228,7 @@ export interface RouteEstimate {
   durationSeconds: number;
   estimatedFare: number;
   currency: string;
+  polyline?: string | null;
 }
 
 export async function routePreview(
@@ -238,7 +239,7 @@ export async function routePreview(
   const data = await gql<{ routePreview: RouteEstimate }>(
     `query RoutePreview($input: RoutePreviewInput!) {
       routePreview(input: $input) {
-        distanceMeters durationSeconds estimatedFare currency
+        distanceMeters durationSeconds estimatedFare currency polyline
       }
     }`,
     { input: { origin, destination, serviceId } },
