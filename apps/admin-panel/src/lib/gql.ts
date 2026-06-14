@@ -1447,3 +1447,31 @@ export const FLEET_DOCUMENT_ALERTS = gql`
     }
   }
 `;
+
+// ─── Phase 8 — النمو: محاكاة العروض المُسوَّرة جغرافياً ─────────────────────────
+
+export const SIMULATE_OFFER = gql`
+  query SimulateOffer($code: String!, $regionId: Int!, $fare: Float!) {
+    simulateOffer(code: $code, regionId: $regionId, fare: $fare) {
+      code
+      valid
+      reason
+      discount
+      finalFare
+      currency
+      countryIso
+      countryName
+    }
+  }
+`;
+
+export const OFFER_REACH = gql`
+  query OfferReach($code: String!) {
+    offerReach(code: $code) {
+      code
+      global
+      regionCount
+      countries
+    }
+  }
+`;

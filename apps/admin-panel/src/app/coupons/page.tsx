@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation, useLazyQuery } from '@apollo/client';
 import {
   Ticket,
   Plus,
@@ -11,6 +11,10 @@ import {
   Percent,
   BadgeDollarSign,
   X,
+  FlaskConical,
+  Globe2,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -18,6 +22,8 @@ import {
   CREATE_COUPON,
   TOGGLE_COUPON_ACTIVE,
   DELETE_COUPON,
+  SIMULATE_OFFER,
+  OFFER_REACH,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 
@@ -64,6 +70,8 @@ export default function CouponsPage() {
             كوبون جديد
           </button>
         </div>
+
+        <OfferSimulator />
 
         {loading ? (
           <div className="text-center py-16 text-gray-400">
@@ -197,6 +205,156 @@ export default function CouponsPage() {
           onClose={() => setCreating(false)}
           onSave={(input) => createCoupon({ variables: { input } })}
         />
+      )}
+    </div>
+  );
+}
+
+// ── Offer simulator (Phase 8) — اختبار العرض المُسوَّر جغرافياً ────────────────
+
+const OFFER_REASON: Record<string, string> = {
+  inactive: 'الكوبون معطّل',
+  expired: 'انتهت صلاحيته',
+  region: 'خارج السياج الجغرافي لهذه المنطقة',
+  min_fare: 'الأجرة أقل من الحد الأدنى',
+  max_uses: 'استُنفِد حد الاستخدام الكلّي',
+  per_user_limit: 'تجاوز حد الراكب الواحد',
+};
+
+function OfferSimulator() {
+  const [code, setCode] = useState('');
+  const [regionId, setRegionId] = useState('');
+  const [fare, setFare] = useState('');
+
+  const [simulate, { data, loading }] = useLazyQuery(SIMULATE_OFFER, {
+    fetchPolicy: 'network-only',
+    onError: (e) => toast.error(e.message),
+  });
+  const [reach, { data: reachData }] = useLazyQuery(OFFER_REACH, {
+    fetchPolicy: 'network-only',
+    onError: () => undefined,
+  });
+
+  const run = () => {
+    const c = code.trim().toUpperCase();
+    const r = Number(regionId);
+    const f = Number(fare);
+    if (!c || !r || !f) {
+      toast.error('أدخل الكود ورقم المنطقة والأجرة');
+      return;
+    }
+    simulate({ variables: { code: c, regionId: r, fare: f } });
+    reach({ variables: { code: c } });
+  };
+
+  const sim = data?.simulateOffer;
+  const rch = reachData?.offerReach;
+
+  return (
+    <div className="card p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <FlaskConical className="w-5 h-5 text-hancr-violet" />
+        <h3 className="font-extrabold text-gray-900">محاكي العروض الجغرافي</h3>
+        <span className="text-xs text-gray-400">
+          اختبر الخصم والسياج الجغرافي على طلب افتراضي
+        </span>
+      </div>
+      <div className="grid sm:grid-cols-4 gap-3 items-end">
+        <div>
+          <label className="label">كود الكوبون</label>
+          <input
+            className="input ltr uppercase"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="WELCOME20"
+          />
+        </div>
+        <div>
+          <label className="label">رقم المنطقة</label>
+          <input
+            className="input ltr"
+            type="number"
+            value={regionId}
+            onChange={(e) => setRegionId(e.target.value)}
+            placeholder="1"
+          />
+        </div>
+        <div>
+          <label className="label">الأجرة</label>
+          <input
+            className="input ltr"
+            type="number"
+            value={fare}
+            onChange={(e) => setFare(e.target.value)}
+            placeholder="100"
+          />
+        </div>
+        <button onClick={run} disabled={loading} className="btn-primary">
+          {loading ? 'جارٍ…' : 'محاكاة'}
+        </button>
+      </div>
+
+      {sim && (
+        <div
+          className={`mt-4 p-4 rounded-lg border ${
+            sim.valid
+              ? 'bg-emerald-50 border-emerald-200'
+              : 'bg-red-50 border-red-200'
+          }`}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            {sim.valid ? (
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+            ) : (
+              <XCircle className="w-5 h-5 text-red-600" />
+            )}
+            <span className="font-extrabold">
+              {sim.valid ? 'ينطبق العرض' : 'لا ينطبق'}
+            </span>
+            {!sim.valid && sim.reason && (
+              <span className="text-xs text-red-700">
+                · {OFFER_REASON[sim.reason] ?? sim.reason}
+              </span>
+            )}
+            {sim.countryName && (
+              <span className="text-xs text-gray-500 mr-auto">
+                {sim.countryName}
+                {sim.countryIso ? ` (${sim.countryIso})` : ''}
+              </span>
+            )}
+          </div>
+          {sim.valid && (
+            <div className="flex flex-wrap gap-4 text-sm">
+              <span>
+                الخصم:{' '}
+                <b className="text-emerald-700">
+                  {Number(sim.discount).toFixed(2)} {sim.currency}
+                </b>
+              </span>
+              <span>
+                الأجرة بعد الخصم:{' '}
+                <b>
+                  {Number(sim.finalFare).toFixed(2)} {sim.currency}
+                </b>
+              </span>
+            </div>
+          )}
+          {rch && (
+            <div className="mt-2 pt-2 border-t border-black/5 flex items-center gap-2 text-xs text-gray-600">
+              <Globe2 className="w-3.5 h-3.5" />
+              {rch.global ? (
+                <span>تغطية عالمية (بلا سياج جغرافي)</span>
+              ) : (
+                <span>
+                  يسري في {rch.regionCount} منطقة
+                  {rch.countries.length > 0
+                    ? ` · ${rch.countries.join('، ')}`
+                    : ''}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
