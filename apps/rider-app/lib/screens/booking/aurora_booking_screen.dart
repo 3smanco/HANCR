@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme/aurora_map_style.dart';
 import '../../blocs/order/order_bloc.dart';
 import '../../blocs/order/order_event.dart';
 import '../../blocs/order/order_state.dart';
@@ -115,29 +116,6 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     return (_routeFare ?? 0).round();
   }
 
-  // نمط داكن غنيّ بالتفاصيل: شوارع + طرق سريعة + مياه + حدائق + معالم + مناطق إدارية + أسماء المدن.
-  static const String _darkMapStyle = '''
-[
-  {"elementType":"geometry","stylers":[{"color":"#13100E"}]},
-  {"elementType":"labels.text.fill","stylers":[{"color":"#C9BDB6"}]},
-  {"elementType":"labels.text.stroke","stylers":[{"color":"#0A0807"}]},
-  {"featureType":"road","elementType":"geometry","stylers":[{"color":"#332C28"}]},
-  {"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#B9ADA6"}]},
-  {"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#3D352F"}]},
-  {"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#4A4039"}]},
-  {"featureType":"road.highway","elementType":"labels.text.fill","stylers":[{"color":"#E0CFC2"}]},
-  {"featureType":"water","elementType":"geometry","stylers":[{"color":"#16243A"}]},
-  {"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#7FA0C8"}]},
-  {"featureType":"poi","elementType":"geometry","stylers":[{"color":"#1B2A1C"}]},
-  {"featureType":"poi","elementType":"labels.text.fill","stylers":[{"color":"#9DB39B"}]},
-  {"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#16301A"}]},
-  {"featureType":"poi.business","elementType":"labels.icon","stylers":[{"saturation":-40}]},
-  {"featureType":"transit","elementType":"labels.text.fill","stylers":[{"color":"#B0A8C0"}]},
-  {"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#5A4F47"}]},
-  {"featureType":"administrative.locality","elementType":"labels.text.fill","stylers":[{"color":"#F0DECF"}]},
-  {"featureType":"administrative.neighborhood","elementType":"labels.text.fill","stylers":[{"color":"#C2B3A6"}]}
-]
-''';
 
   @override
   void initState() {
@@ -671,7 +649,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               // ─── Map ───
               Positioned.fill(
                 child: GoogleMap(
-                  style: _darkMapStyle,
+                  style: AuroraMapStyle.dark,
                   initialCameraPosition: CameraPosition(
                     target: LatLng(_destination.lat, _destination.lng),
                     zoom: 14,

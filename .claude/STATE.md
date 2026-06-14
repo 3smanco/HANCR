@@ -28,6 +28,12 @@ flutter build apk --release --dart-define=ENV=production \
 - **✅ مبني + منشور (2026-06-13):** أُعيد بناء APK الراكب (94.6MB، release-signed) والسائق (90.5MB) بالمفتاح الجديد (مُتحقَّق بـ `aapt dump xmltree` → القيمة `AIzaSyBsz0...`)، ورُفعا حيّاً: `hancr.com/downloads/hancr-rider.apk` (HTTP 200) و`hancr-driver.apk` (HTTP 200).
 - **⚠️ درس بناء مهم على هذا الجهاز:** بناء release واحد يأخذ **~33 دقيقة** (Gradle assembleRelease ~1995s) ويُشبع الذاكرة. Flutter **يحجز مخرجاته في buffer عند الكتابة لملف** فيبدو السجل فارغاً = ليس تعليقاً. **لا تُوقف البناء** — إيقافه يترك Gradle daemon يتيماً (1.3GB) يخنق الجهاز. اضبط `org.gradle.daemon=false` مؤقتاً عند الحاجة، وابنِ تطبيقاً واحداً في كل مرة (بناءان متوازيان يُفسدان كاش Kotlin).
 
+## 🎨 خطة التطوير الشاملة (2026-06-13) — `.claude/plans/zesty-wiggling-ritchie.md`
+5 مراحل: (1) هوية/لوجو · (2) صقل Aurora · (3) محرّك التسعير · (4) تطوير الموجود · (5) ميزات جديدة. القرارات: خطة مرحلية · تطوير الهوية الحالية · صقل (لا إعادة تصميم) · تصحيح تسعير + surge ذكي.
+- **✅ المرحلة 1 (PR #99، مدموج):** لوجو **"Orbit"** (حرف H + قوس مداري + وميض على obsidian، لوحة Aurora). وُلِّدت أيقونات التطبيقين (adaptive+iOS+legacy+splash) عبر `flutter_launcher_icons`/`flutter_native_splash` (السائق بقوس ذهبي للتمييز)، وخلفية الأيقونة navy→obsidian، وأصول الموقع (favicon/apple-icon/og-image موصولة بـ metadata). مولّد الأصول: `~/hancr-logo-gen/gen.js` + `gen-web.js` (resvg-js؛ يُعاد تشغيله لتعديل اللوجو). **إعادة بناء APK مؤجَّلة لتُجمَّع مع المرحلة 2.**
+- **✅ المرحلة 2 (صقل Aurora):** حُذفت **11 شاشة قديمة ميتة** (51→40، عنقود مغلق بلا مراجع حيّة — مُتحقَّق). رُبط `Haptics` بزرّ `AuroraButton` المشترك (نبضة لمسية لكل الأزرار: selection للعادي، warning للخطر). أُنشئ `core/theme/aurora_map_style.dart` (مصدر واحد) وطُبِّق على `pickup_confirmation` (كان بنمط افتراضي فاتح) + booking؛ tracking يبقى بنمطه المميَّز (طريق سريع ember). `flutter analyze` = 0 أخطاء.
+- **⏭️ التالي: المرحلة 3** — محرّك التسعير (backend، لا يحتاج بناء APK). **بناء APK مؤجَّل** ليجمع المرحلة 1+2 (+4 لاحقاً).
+
 ## 🔐 إعداد Google OAuth (2026-06-12 — أُنجز في حساب المالك عبر المتصفّح)
 المشروع: **hancr-494520** (Hancr). أُنشئ في Google Cloud Console:
 - **HANCR Web** (Web application) = `GOOGLE_OAUTH_CLIENT_ID` = `390136620892-bkt9ive9las4eqqft40dorpnva676l4l.apps.googleusercontent.com`. JS origins: hancr.com + www. مضبوط على الخادم في `/opt/hancr/.env` + `.env.prod` (مُتحقَّق: الخلفية تتحقّق من توكنات Google).
