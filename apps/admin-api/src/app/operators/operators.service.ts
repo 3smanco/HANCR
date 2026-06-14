@@ -13,12 +13,14 @@ import {
   ResetOperatorPasswordInput,
   UpdateOperatorInput,
 } from './dto/operator.types';
+import { ScopeService } from '../scope/scope.service';
 
 @Injectable()
 export class OperatorsService {
   constructor(
     @InjectRepository(AdminUserEntity)
     private readonly repo: Repository<AdminUserEntity>,
+    private readonly scope: ScopeService,
   ) {}
 
   async list(): Promise<AdminOperatorType[]> {
@@ -39,6 +41,7 @@ export class OperatorsService {
         passwordHash,
         fullName: input.fullName,
         role: input.role,
+        scope: input.scope ?? undefined,
         active: true,
       }),
     );
@@ -51,7 +54,9 @@ export class OperatorsService {
     if (input.fullName !== undefined) row.fullName = input.fullName;
     if (input.role !== undefined) row.role = input.role;
     if (input.active !== undefined) row.active = input.active;
+    if (input.scope !== undefined) row.scope = input.scope ?? undefined;
     const saved = await this.repo.save(row);
+    this.scope.invalidate(input.id); // النطاق تغيّر → أبطل الكاش
     return this.toType(saved);
   }
 
@@ -92,6 +97,7 @@ export class OperatorsService {
       email: r.email,
       fullName: r.fullName,
       role: r.role,
+      scope: r.scope ?? undefined,
       active: r.active,
       lastLoginAt: r.lastLoginAt,
       createdAt: r.createdAt,
