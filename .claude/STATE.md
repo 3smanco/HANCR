@@ -77,8 +77,13 @@ flutter build apk --release --dart-define=ENV=production \
   - **frontend:** `VIP_PROFILE` query + تبويب **VIP عالمي** في `/users/riders/[id]` — شارة المستوى + KPIs (إنفاق عالمي/دول/رحلات/محفظة) + تنبيهات احتيال عبر-حدود + جدول الإنفاق لكل دولة (محلي + أساس). `next build`=ناجح.
   - **✅ منشور حيّاً (2026-06-14، PR #119):** admin-api restart + admin-panel rebuild (بلا migration — يعيد استخدام الجداول الموجودة). مُتحقَّق: `vipProfile` يستجيب على الإنتاج (Unauthorized = الحقل حيّ في schema، لا "Cannot query field").
   - **⏭️ متبقّي Phase 5 (لاحق):** محفظة متعددة الدول فعلية (دفع في أي دولة) · تفضيلات/ذكاء ثقافي (°م/°ف، بثّ موسيقي).
-  - **⏭️ التالي: Phase 6** (السائقون والامتثال: تحقّق وثائق تكيّفي لكل دولة `docRequirements` + امتثال ساعات + بونص إقليمي).
-- **📊 حالة البرنامج العالمي:** Phases 0·1·2·3·4·5 **مبنية ومُختبَرة ومنشورة حيّة** (13 PR #107–#119؛ 29 اختبار jest). التالي: Phase 6 (امتثال السائقين) · 7 (أسطول) · 8 (نمو/ولاء) · 9 (بوابات) · 10 (بنية، محجوبة).
+- **✅ Phase 6 (السائقون والامتثال — تحقّق وثائق تكيّفي لكل دولة):**
+  - **backend:** `apps/admin-api/.../compliance/` — دالة نقيّة `evaluateDriverCompliance(requirements, docs, now)` تطابق متطلّبات الدولة (`CountryEntity.docRequirements: string[]`) مع وثائق السائق (`hancr_driver_document`: type/status/expiresAt)، تصنّف كل وثيقة (ok/expiring≤30د/expired/pending/rejected/missing)، تختار الأفضل لكل نوع، وتشتقّ الحالة الكلّية (compliant/pending/non_compliant). **تكيّفية**: رخصة قطرية vs PCO لندن vs DMV. `ComplianceService.driverCompliance` يحمّل السائق→المنطقة→الدولة + وثائقه (متطلّبات افتراضية `national_id/license/vehicle_registration` عند غياب ضبط الدولة). **scope-aware**. query `driverCompliance(driverId)`. `tsc`=0 · **9 اختبار jest أخضر**.
+  - **frontend:** `DRIVER_COMPLIANCE` + شريط امتثال أعلى تبويب وثائق السائق (`/users/drivers/[id]`): شارة الحالة + متطلّبات الدولة + شارات ناقص/منتهٍ/ينتهي قريباً. `next build`=ناجح.
+  - **✅ منشور حيّاً (2026-06-14، PR #121):** admin-api restart + admin-panel rebuild (بلا migration — يعيد استخدام `hancr_driver_document` + `doc_requirements`). مُتحقَّق: `driverCompliance` يستجيب على الإنتاج (Unauthorized = حقل حيّ).
+  - **⏭️ متبقّي Phase 6 (لاحق):** امتثال ساعات العمل (حد قانوني لكل دولة) · بونص إقليمي (مستهدفات/عملة لكل سوق) · مراقبة تقييم <4.7 حسب الإقليم.
+  - **⏭️ التالي: Phase 7** (الأسطول: سجل مركبات عالمي + تنبيهات انتهاء وثائق إقليمية MOT/فحص + ميل/كم حسب الدولة).
+- **📊 حالة البرنامج العالمي:** Phases 0·1·2·3·4·5·6 **مبنية ومُختبَرة ومنشورة حيّة** (14 PR #107–#121؛ 38 اختبار jest). التالي: Phase 7 (أسطول) · 8 (نمو/ولاء) · 9 (بوابات) · 10 (بنية، محجوبة).
 - **✅ منشور حيّاً بالكامل (2026-06-14):** Phase 0+1+2 كلها على الإنتاج.
   - **admin-api:** `git pull` + `pm2 restart admin-api` (ts-node). resolvers الجغرافيا/العملات/النطاق/global-ops حيّة. GraphQL سليم.
   - **قاعدة الإنتاج (`hancr_prod` على `hancr_postgres_prod`، 127.0.0.1:5432):** طُبِّق schema الأساس. **مُتحقَّق:** 6 دول (QA/SA مُفعَّلة، AE/GB/US/FR معطّلة)، 8 مدن، 3 مناطق مربوطة، عمود `hancr_admin_user.scope` مُضاف.
