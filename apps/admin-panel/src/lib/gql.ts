@@ -1424,3 +1424,26 @@ export const DRIVER_COMPLIANCE = gql`
     }
   }
 `;
+
+// ─── Phase 7 — تنبيهات انتهاء وثائق الأسطول الإقليمية ─────────────────────────
+
+export const FLEET_DOCUMENT_ALERTS = gql`
+  query FleetDocumentAlerts($withinDays: Int) {
+    fleetDocumentAlerts(withinDays: $withinDays) {
+      withinDays
+      expiredCount
+      criticalCount
+      soonCount
+      alerts {
+        driverId
+        driverName
+        countryIso
+        countryName
+        docType
+        expiresAt
+        daysToExpiry
+        severity
+      }
+    }
+  }
+`;

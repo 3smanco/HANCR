@@ -12,8 +12,10 @@ import {
   UserPlus,
   UserMinus,
   Edit3,
+  AlertTriangle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 import {
   LIST_FLEETS,
   CREATE_FLEET,
@@ -23,6 +25,7 @@ import {
   FLEET_DRIVERS,
   ASSIGN_DRIVER_TO_FLEET,
   UNASSIGN_DRIVER_FROM_FLEET,
+  FLEET_DOCUMENT_ALERTS,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 
@@ -83,6 +86,8 @@ export default function FleetsPage() {
             أسطول جديد
           </button>
         </div>
+
+        <FleetDocAlertsBoard />
 
         {loading ? (
           <div className="card p-12 text-center text-gray-400">جارٍ التحميل…</div>
@@ -222,6 +227,130 @@ export default function FleetsPage() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+// ── Fleet document-expiry alerts board (Phase 7) ─────────────────────────────
+
+const FLEET_DOC_LABEL: Record<string, string> = {
+  national_id: 'الهوية',
+  license: 'الرخصة',
+  vehicle_registration: 'الاستمارة',
+  insurance: 'التأمين',
+  criminal_record: 'العدلية',
+  pco_license: 'رخصة PCO',
+  dbs_check: 'فحص DBS',
+};
+
+type DocAlert = {
+  driverId: number;
+  driverName: string;
+  countryIso?: string | null;
+  countryName?: string | null;
+  docType: string;
+  expiresAt: string;
+  daysToExpiry: number;
+  severity: string;
+};
+
+function FleetDocAlertsBoard() {
+  const { data, loading } = useQuery(FLEET_DOCUMENT_ALERTS, {
+    variables: { withinDays: 30 },
+    fetchPolicy: 'cache-and-network',
+  });
+  if (loading && !data) return null;
+  const board = data?.fleetDocumentAlerts;
+  if (!board) return null;
+
+  const total = board.expiredCount + board.criticalCount + board.soonCount;
+  if (total === 0) {
+    return (
+      <div className="card p-4 flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200">
+        <AlertTriangle className="w-4 h-4" />
+        كل وثائق سائقي الأسطول سارية خلال الـ30 يوماً القادمة ✓
+      </div>
+    );
+  }
+
+  const sevStyle = (s: string) =>
+    s === 'expired'
+      ? 'bg-red-100 text-red-700'
+      : s === 'critical'
+        ? 'bg-orange-100 text-orange-700'
+        : 'bg-amber-100 text-amber-700';
+  const sevLabel = (s: string) =>
+    s === 'expired' ? 'منتهٍ' : s === 'critical' ? 'حرج' : 'قريباً';
+
+  return (
+    <div className="card overflow-hidden">
+      <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2 flex-wrap">
+        <AlertTriangle className="w-5 h-5 text-amber-500" />
+        <span className="font-extrabold text-gray-900">
+          تنبيهات انتهاء وثائق الأسطول
+        </span>
+        <span className="text-xs text-gray-400">(خلال 30 يوماً)</span>
+        <div className="flex gap-1.5 mr-auto text-xs">
+          {board.expiredCount > 0 && (
+            <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-bold">
+              {board.expiredCount} منتهٍ
+            </span>
+          )}
+          {board.criticalCount > 0 && (
+            <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 font-bold">
+              {board.criticalCount} حرج
+            </span>
+          )}
+          {board.soonCount > 0 && (
+            <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold">
+              {board.soonCount} قريباً
+            </span>
+          )}
+        </div>
+      </div>
+      <table className="w-full">
+        <thead>
+          <tr>
+            <th>السائق</th>
+            <th>الدولة</th>
+            <th>الوثيقة</th>
+            <th>تنتهي</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(board.alerts as DocAlert[]).slice(0, 50).map((a, i) => (
+            <tr key={`${a.driverId}-${a.docType}-${i}`}>
+              <td className="font-bold">
+                <Link
+                  href={`/users/drivers/${a.driverId}`}
+                  className="text-hancr-violet hover:underline"
+                >
+                  {a.driverName}
+                </Link>
+              </td>
+              <td className="text-xs">
+                {a.countryName
+                  ? `${a.countryName}${a.countryIso ? ` (${a.countryIso})` : ''}`
+                  : '—'}
+              </td>
+              <td>{FLEET_DOC_LABEL[a.docType] ?? a.docType}</td>
+              <td className="text-xs text-gray-500">
+                {a.daysToExpiry < 0
+                  ? `منذ ${Math.abs(a.daysToExpiry)} يوم`
+                  : `بعد ${a.daysToExpiry} يوم`}
+              </td>
+              <td>
+                <span
+                  className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${sevStyle(a.severity)}`}
+                >
+                  {sevLabel(a.severity)}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
