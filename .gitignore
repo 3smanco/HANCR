@@ -51,3 +51,7 @@ deliverables/
 # graphify knowledge graph (~16MB) + installed skills — large, regenerable
 graphify-out/
 .claude/skills/
+
+# Nx local cache — regenerable, must NOT be tracked (kept breaking server pulls)
+.nx/cache/
+.nx/workspace-data/
