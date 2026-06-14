@@ -70,8 +70,10 @@ flutter build apk --release --dart-define=ENV=production \
   - **✅ منشور حيّاً (2026-06-14):** admin-api restart + admin-panel rebuild (بلا migration). على `admin.hancr.com/analytics`.
 - **🔵 Phase 4 (المالية عبر-الحدود) — الفوترة المُوطَّنة (backend):**
   - `apps/admin-api/.../invoicing/` — `InvoiceService.buildInvoice(orderId)` + دالة نقيّة `computeInvoice` تطبّق ضريبة دولة الطلب (`CountryEntity.taxRule`: VAT خليج/GST أوروبا/Sales أمريكا) باستخراج شامل (`tax = total − total/(1+rate/100)`) + بند خصم. query `orderInvoice(orderId)` **scope-aware**. `tsc`=0 · **4 اختبارات jest خضراء**. **غير منشور** (resolver فقط، بلا واجهة بعد).
+  - **✅ منشور حيّاً (admin-api restart، بلا migration/frontend).** query `orderInvoice` متاح.
   - **⏭️ متبقّي Phase 4:** واجهة معاينة الفاتورة (زر في تفاصيل الطلب) · **محجوب بإجراء مالك:** تحويلات Stripe Connect/Wise (حسابات تاجر) — نبني التجريد لاحقاً.
   - **⏭️ التالي: Phase 5** (CRM عالمي: ملف VIP 360 + محفظة متعددة الدول + كشف احتيال عبر-حدود).
+- **📊 حالة البرنامج العالمي:** Phases 0·1·2·3·4 **مبنية ومُختبَرة ومنشورة حيّة** (11 PR #107–#117؛ 18 اختبار jest). التالي: Phase 5 (CRM) · 6 (امتثال السائقين) · 7 (أسطول) · 8 (نمو/ولاء) · 9 (بوابات) · 10 (بنية، محجوبة).
 - **✅ منشور حيّاً بالكامل (2026-06-14):** Phase 0+1+2 كلها على الإنتاج.
   - **admin-api:** `git pull` + `pm2 restart admin-api` (ts-node). resolvers الجغرافيا/العملات/النطاق/global-ops حيّة. GraphQL سليم.
   - **قاعدة الإنتاج (`hancr_prod` على `hancr_postgres_prod`، 127.0.0.1:5432):** طُبِّق schema الأساس. **مُتحقَّق:** 6 دول (QA/SA مُفعَّلة، AE/GB/US/FR معطّلة)، 8 مدن، 3 مناطق مربوطة، عمود `hancr_admin_user.scope` مُضاف.
