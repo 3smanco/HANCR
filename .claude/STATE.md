@@ -2,7 +2,15 @@
 
 > هذا الملف هو **المصدر الحي لحالة المشروع**. يُحدَّث بعد كل خطوة عمل.
 > ابدأ أي محادثة جديدة بقراءته (وحده يكفي للسياق) بدل تحميل المهارة الضخمة أو قراءة عشرات الملفات.
-> آخر تحديث: 2026-06-12
+> آخر تحديث: 2026-06-15
+
+## 🔍 فحص شامل للوحة التحكم (2026-06-15) — كل شيء سليم + إصلاح واحد
+- **البناء/التحويل:** `tsc` لـ admin-api + **rider-api + driver-api** = 0 أخطاء (تغييرات `@hancr/database` المشتركة متوافقة مع الأبّات — إعادة تشغيلها آمنة). `next build` للوحة = نظيف (45 صفحة).
+- **الاختبارات:** **93/93 jest** أخضر (14 suite).
+- **عقد GraphQL:** **126 حقل** يستدعيها الـpanel كلها لها resolver في admin-api (0 مكسور؛ `scripts/audit-gql-contract.mjs`). مُتحقَّق عبر المسار العام الفعلي `api.hancr.com/admin/graphql` (أحدث resolver `providerReadiness` يستجيب).
+- **الإنتاج:** الخدمات الأربع online؛ النقاط العامة سليمة (admin.hancr.com 307→login · hancr.com 200 · api.hancr.com/rider+/admin 200). الـURL الصحيح مخبوز في bundle المتصفّح (`NEXT_PUBLIC_ADMIN_API_URL=https://api.hancr.com/admin/graphql`؛ localhost مجرّد fallback literal). `settings/system` = redirect مقصود لـ`/settings` (لا stub مكسور).
+- **🐞 خطأ وُجد وأُصلح ونُشِر (PR #143):** `function st_within(geography, geography) does not exist` في rider-api — استعلام مطابقة منطقة التسعير المضلّعة كان يحوّل النقطة `::geography` و`ST_Within` لا يدعم geography → **مناطق التسعير المضلّعة من اللوحة لم تكن تُطبَّق فعلياً** (تسقط على تسعير المنطقة). أُصلح بالمطابقة في فضاء geometry (`polygon::geometry`، نقطة بلا cast). مُتحقَّق: rider-api أُعيد تشغيله نظيفاً، api 200.
+- **ℹ️ محجوب بالمالك (ليست أخطاء برمجية):** فشل AI (رصيد Anthropic/OpenAI) · فشل OTP SMS (أكواد Twilio التجريبي 21608/21211 — أرقام غير مُفعَّلة). أخطاء redis/postgres في السجل من 06/11 (إقلاع مؤقت، الخدمات مستقرّة منذها).
 
 ---
 
