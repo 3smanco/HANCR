@@ -22,7 +22,7 @@ import 'screens/auth/aurora_phone_screen.dart';
 import 'screens/auth/aurora_email_screen.dart';
 import 'screens/auth/aurora_email_otp_screen.dart';
 import 'screens/home/aurora_driver_home.dart';
-import 'screens/onboarding/onboarding_screen.dart';
+import 'screens/onboarding/aurora_onboarding_screen.dart';
 import 'screens/splash/splash_screen.dart';
 
 class HancrCaptainApp extends StatefulWidget {
@@ -109,7 +109,9 @@ class _HancrCaptainAppState extends State<HancrCaptainApp> {
             );
           },
         ),
-        GoRoute(path: '/onboarding', builder: (ctx, st) => const OnboardingScreen()),
+        GoRoute(
+            path: '/onboarding',
+            builder: (ctx, st) => const AuroraOnboardingScreen()),
         GoRoute(path: '/home', builder: (ctx, st) => const AuroraDriverHome()),
       ],
     );
