@@ -10,8 +10,11 @@ import '../../blocs/driver/driver_state.dart';
 import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/driver_gql.dart';
 import '../../core/models/driver_model.dart';
+import '../../core/services/document_upload_service.dart';
 import '../../core/utils/external_launch.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../core/motion/motion.dart';
 import '../sos/driver_emergency_contacts_screen.dart';
 import '../wallet/aurora_driver_wallet_screen.dart';
 import '../wallet/aurora_payout_methods_screen.dart';
@@ -173,23 +176,9 @@ class AuroraDriverProfileTab extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              gradient: AuroraColors.emberGradient,
-              borderRadius: BorderRadius.circular(AuroraRadius.md),
-              boxShadow: AuroraShadows.iconGlow,
-            ),
-            child: Center(
-              child: Text(
-                name.isNotEmpty ? name[0].toUpperCase() : '?',
-                style: AuroraText.displayMedium.copyWith(
-                  color: AuroraColors.pearl,
-                  fontSize: 28,
-                ),
-              ),
-            ),
+          _ProfileAvatar(
+            avatarUrl: state is DriverLoaded ? state.driver.avatarUrl : null,
+            initial: name.isNotEmpty ? name[0].toUpperCase() : '?',
           ),
           const SizedBox(width: AuroraSpacing.md),
           Expanded(
@@ -563,4 +552,146 @@ void _showCarEditSheet(BuildContext context, DriverModel d) {
       ),
     ),
   );
+}
+
+// ─── صورة الملف الشخصي (التقاط + رفع + تحديث avatarUrl) ───────────────────────
+class _ProfileAvatar extends StatefulWidget {
+  const _ProfileAvatar({required this.avatarUrl, required this.initial});
+  final String? avatarUrl;
+  final String initial;
+
+  @override
+  State<_ProfileAvatar> createState() => _ProfileAvatarState();
+}
+
+class _ProfileAvatarState extends State<_ProfileAvatar> {
+  bool _busy = false;
+
+  Future<void> _change() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: AuroraColors.coal,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AuroraRadius.xl)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: AuroraSpacing.md),
+            ListTile(
+              leading: Icon(Icons.camera_alt, color: AuroraColors.ember),
+              title: Text(tr('takePhoto'), style: AuroraText.bodyLarge),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+            ListTile(
+              leading: Icon(Icons.photo_library, color: AuroraColors.ember),
+              title: Text(tr('fromGallery'), style: AuroraText.bodyLarge),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+            const SizedBox(height: AuroraSpacing.sm),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+    final file = await DocumentUploadService.capture(
+        source: source, frontCamera: source == ImageSource.camera);
+    if (file == null) return;
+    setState(() => _busy = true);
+    try {
+      final res = await DocumentUploadService.upload(type: 'avatar', file: file);
+      final client = await GraphQLClientManager.get();
+      await client.mutate(MutationOptions(
+        document: gql(updateDriverProfileMutation),
+        variables: {
+          'input': {'avatarUrl': res.publicUrl},
+        },
+      ));
+      if (!mounted) return;
+      context.read<DriverBloc>().add(const DriverLoadRequested());
+      Haptics.success();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(tr('photoUpdated')),
+        backgroundColor: AuroraColors.smoke,
+      ));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: AuroraColors.danger,
+        ));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final url = widget.avatarUrl;
+    return GestureDetector(
+      onTap: _busy ? null : _change,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              gradient: url == null ? AuroraColors.emberGradient : null,
+              color: url != null ? AuroraColors.ash : null,
+              borderRadius: BorderRadius.circular(AuroraRadius.md),
+              boxShadow: AuroraShadows.iconGlow,
+              image: url != null
+                  ? DecorationImage(
+                      image: NetworkImage(url), fit: BoxFit.cover)
+                  : null,
+            ),
+            child: url == null
+                ? Center(
+                    child: Text(
+                      widget.initial,
+                      style: AuroraText.displayMedium
+                          .copyWith(color: AuroraColors.pearl, fontSize: 28),
+                    ),
+                  )
+                : null,
+          ),
+          if (_busy)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AuroraColors.obsidian.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(AuroraRadius.md),
+                ),
+                child: Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: AuroraColors.ember),
+                  ),
+                ),
+              ),
+            ),
+          Positioned(
+            right: -4,
+            bottom: -4,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: AuroraColors.ember,
+                shape: BoxShape.circle,
+                border: Border.all(color: AuroraColors.coal, width: 2),
+              ),
+              child: const Icon(Icons.camera_alt,
+                  color: Color(0xFFFFF5EE), size: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

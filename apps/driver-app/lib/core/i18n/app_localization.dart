@@ -171,6 +171,7 @@ const Map<String, Map<String, String>> _t = {
   // ─── Registration / document capture ───
   'takePhoto': {'ar': 'التقاط بالكاميرا', 'en': 'Take a photo'},
   'fromGallery': {'ar': 'من المعرض', 'en': 'From gallery'},
+  'photoUpdated': {'ar': 'تم تحديث الصورة', 'en': 'Photo updated'},
   'uploaded': {'ar': 'تم الرفع ✓', 'en': 'Uploaded ✓'},
   'tapToCapture': {'ar': 'اضغط للالتقاط', 'en': 'Tap to capture'},
   'identitySelfie': {'ar': 'صورة شخصية (سيلفي)', 'en': 'Identity selfie'},
