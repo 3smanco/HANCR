@@ -505,6 +505,47 @@ export class OrderService {
     return orders.map((o) => this.toType(o));
   }
 
+  // ─────────────────────────────────────────────
+  // rateRider — تقييم السائق للراكب بعد الرحلة
+  // ─────────────────────────────────────────────
+  async rateRider(
+    driverId: number,
+    orderId: number,
+    stars: number,
+  ): Promise<DriverOrderType> {
+    const order = await this.orderRepo.findOne({ where: { id: orderId } });
+    if (!order || order.driverId !== driverId) {
+      throw new NotFoundException('Order not found');
+    }
+    if (order.status !== OrderStatus.Finished) {
+      throw new BadRequestException('الرحلة غير مكتملة بعد');
+    }
+    if (order.riderRating != null) {
+      throw new BadRequestException('سبق تقييم هذه الرحلة');
+    }
+    const s = Math.max(1, Math.min(5, Math.round(stars)));
+
+    const rider = await this.riderRepo.findOne({
+      where: { id: order.riderId },
+    });
+    if (rider) {
+      const newCount = rider.ratingCount + 1;
+      const newRating =
+        (Number(rider.rating) * rider.ratingCount + s) / newCount;
+      await this.riderRepo.update(rider.id, {
+        rating: Math.round(newRating * 100) / 100,
+        ratingCount: newCount,
+      });
+    }
+    await this.orderRepo.update(orderId, { riderRating: s });
+
+    const updated = await this.orderRepo.findOne({
+      where: { id: orderId },
+      relations: ['rider'],
+    });
+    return this.toType(updated!);
+  }
+
   // =============================================
   // Helpers
   // =============================================

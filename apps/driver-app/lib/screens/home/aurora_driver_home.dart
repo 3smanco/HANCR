@@ -13,6 +13,7 @@ import '../../blocs/order/order_bloc.dart';
 import '../../blocs/order/order_event.dart';
 import '../../blocs/order/order_state.dart';
 import '../../core/models/order_model.dart';
+import 'rate_rider_sheet.dart';
 import '../../blocs/sos/sos_bloc.dart';
 import '../../blocs/sos/sos_event.dart';
 import '../../core/graphql/graphql_client.dart';
@@ -47,11 +48,23 @@ class _AuroraDriverHomeState extends State<AuroraDriverHome> {
   Widget build(BuildContext context) {
     return BlocProvider<SosBloc>(
       create: (_) => SosBloc()..add(const SosLoadRequested()),
-      child: Scaffold(
-        backgroundColor: AuroraColors.obsidian,
-        extendBody: true,
-        body: IndexedStack(index: _tab, children: _tabs),
-        bottomNavigationBar: _buildNav(),
+      child: BlocListener<OrderBloc, OrderState>(
+        listenWhen: (prev, curr) => curr is OrderCompleted,
+        listener: (ctx, state) {
+          if (state is OrderCompleted && state.order.riderId != 0) {
+            RateRiderSheet.show(
+              ctx,
+              orderId: state.order.id,
+              riderName: state.order.riderName ?? tr('rider'),
+            );
+          }
+        },
+        child: Scaffold(
+          backgroundColor: AuroraColors.obsidian,
+          extendBody: true,
+          body: IndexedStack(index: _tab, children: _tabs),
+          bottomNavigationBar: _buildNav(),
+        ),
       ),
     );
   }

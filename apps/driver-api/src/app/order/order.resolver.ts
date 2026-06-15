@@ -32,6 +32,17 @@ export class OrderResolver {
     return this.orderService.getCompletedOrders(driver.driverId, limit, offset);
   }
 
+  /** تقييم السائق للراكب بعد انتهاء الرحلة (1..5) */
+  @Mutation(() => DriverOrderType, { description: 'تقييم الراكب بعد الرحلة' })
+  @UseGuards(JwtAuthGuard)
+  rateRider(
+    @CurrentDriver() driver: AuthDriver,
+    @Args('orderId', { type: () => Int }) orderId: number,
+    @Args('stars', { type: () => Int }) stars: number,
+  ): Promise<DriverOrderType> {
+    return this.orderService.rateRider(driver.driverId, orderId, stars);
+  }
+
   /** قبول طلب جديد */
   @Mutation(() => DriverOrderType, { description: 'قبول طلب رحلة' })
   @UseGuards(JwtAuthGuard)

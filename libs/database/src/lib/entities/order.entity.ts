@@ -248,6 +248,10 @@ export class OrderEntity {
   @Column({ nullable: true, name: 'booked_hours' })
   bookedHours?: number;
 
+  /** تقييم السائق للراكب (1..5) — null = لم يُقيَّم بعد (يمنع التكرار) */
+  @Column({ type: 'smallint', nullable: true, name: 'rider_rating' })
+  riderRating?: number;
+
   /** ===== طرق الدفع ===== */
 
   @Column({ type: 'enum', enum: PaymentMode, nullable: true, name: 'payment_mode' })
