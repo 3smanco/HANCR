@@ -14,6 +14,13 @@
 - **✅ Phase 6 — صقل + بناء ونشر APK (منشور):** `flutter analyze` كامل = 0 أخطاء (10 لِنتات قديمة فقط في ملفات لم تُمَس). بُني APK إنتاج **arm64 موقّع، 42.4MB** (ENV=production + مفتاح Maps أندرويد `AIzaSyBsz0l4...` في المانيفست + GOOGLE_SERVER_CLIENT_ID فارغ). **منشور حيّاً:** `hancr.com/downloads/hancr-driver.apk` (HTTP 200، 42,385,116 بايت). النشر: scp لـ`/tmp` ثم `sudo cp` لـ`/var/www/hancr-landing/downloads/` (ملك www-data، sudo بلا كلمة سر يعمل).
   - **⚠️ درس بناء:** ذاكرة الجهاز محدودة → خفّض `gradle.properties` مؤقّتاً لـ`-Xmx2g`+`daemon=false`+`parallel=false`+`workers.max=1`، اقتل عمليات java/gradle/dart/gen_snapshot أولاً، ابنِ arm64 فقط (~223ث assembleRelease)، ثم `git checkout -- gradle.properties` للعودة لـ4g/parallel.
   - **للمستخدم:** ألغِ تثبيت التطبيق القديم ثم ثبّت الجديد (المفتاح/ENV يُقرآن عند البناء). دخول بهاتف اختبار `+966500000010`←`123456` (Twilio تجريبي لا يرسل لأرقام حقيقية حتى ترقية المالك).
+- **✅ تسجيل Uber-style + Google (2026-06-15، PR #149):** أُعيد بناء الـonboarding كاملاً (`aurora_onboarding_screen`): 5 خطوات (شخصية→مركبة→مستندات بالتقاط كاميرا/معرض فعلي→سيلفي تحقّق هوية→مراجعة). `DocumentUploadService` (التقاط→presigned PUT→تسجيل) + `DocumentCaptureCard`. الـAPK أُعيد بناؤه بـ`GOOGLE_SERVER_CLIENT_ID=390136620892-bkt9...` (الـWeb client). **عميل Google OAuth للسائق موجود وصحيح في Google Cloud** (package `com.zancr.hancr_driver` + SHA-1 إصدار `B1:E0:93:51:...` — مُتحقَّق عبر المتصفّح)، فزرّ Google يعمل بالـAPK الجديد.
+- **✅ 4 ميزات سائق جديدة (2026-06-15، PRs #150–#153):**
+  - **(A) صورة الملف الشخصي (#150):** أفتار قابل للتعديل (كاميرا/معرض→DocumentUploadService→`updateDriverProfile(avatarUrl)`). app-only.
+  - **(B) تقييم الراكب (#151، منشور):** backend `rateRider(orderId, stars)` + عمودان (`hancr_rider.rating_count` + `hancr_order.rider_rating` — مُطبَّقان عبر psql) + متوسط مرجّح + منع تكرار. `RateRiderSheet` يظهر تلقائياً عند `OrderCompleted`.
+  - **(C) مركز الأخبار/الإعلانات (#152، منشور):** backend `driverAnnouncements` (إعلانات نشطة target all|driver، من `AnnouncementEntity`) + `AuroraAnnouncementsScreen`.
+  - **(D) مركز المساعدة (#153):** دعوة كباتن (مشاركة رابط APK واتساب/نسخ) + FAQ + تواصل. app-only (إحالة بمكافآت تحتاج backend — مؤجَّلة).
+  - الباك منشور (driver-api restart؛ `rateRider`+`driverAnnouncements` حيّان). APK نهائي يُعاد بناؤه بكل الميزات + Google ID.
 
 ## 🔍 فحص شامل للوحة التحكم (2026-06-15) — كل شيء سليم + إصلاح واحد
 - **البناء/التحويل:** `tsc` لـ admin-api + **rider-api + driver-api** = 0 أخطاء (تغييرات `@hancr/database` المشتركة متوافقة مع الأبّات — إعادة تشغيلها آمنة). `next build` للوحة = نظيف (45 صفحة).
