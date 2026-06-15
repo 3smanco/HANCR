@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_event.dart';
 import '../../blocs/driver/driver_bloc.dart';
 import '../../blocs/driver/driver_event.dart';
 import '../../core/i18n/app_localization.dart';
@@ -101,6 +103,7 @@ class _AuroraOnboardingScreenState extends State<AuroraOnboardingScreen> {
     await Future<void>.delayed(const Duration(milliseconds: 600));
     if (!mounted) return;
     Haptics.success();
+    context.read<AuthBloc>().add(const AuthOnboardingCompleted());
     context.go('/home');
   }
 

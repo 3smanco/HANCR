@@ -47,3 +47,9 @@ class AuthGoogleSignInRequested extends AuthEvent {
 class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();
 }
+
+/// يُبعث عند إنهاء تسجيل سائق جديد (onboarding) — يحوّل isNewDriver إلى false
+/// فلا يعيد الموجّه (redirect) توجيهه إلى /onboarding بعد /home.
+class AuthOnboardingCompleted extends AuthEvent {
+  const AuthOnboardingCompleted();
+}

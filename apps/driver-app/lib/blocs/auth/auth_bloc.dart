@@ -20,6 +20,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthVerifyEmailOtpRequested>(_onVerifyEmailOtp);
     on<AuthGoogleSignInRequested>(_onGoogleSignIn);
     on<AuthLogoutRequested>(_onLogout);
+    on<AuthOnboardingCompleted>(_onOnboardingCompleted);
   }
 
   Future<void> _onCheck(
@@ -250,5 +251,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await StorageService.clearAll();
     await GraphQLClientManager.reset();
     emit(const AuthUnauthenticated());
+  }
+
+  Future<void> _onOnboardingCompleted(
+    AuthOnboardingCompleted event,
+    Emitter<AuthState> emit,
+  ) async {
+    final current = state;
+    if (current is AuthAuthenticated) {
+      emit(AuthAuthenticated(driverId: current.driverId, isNewDriver: false));
+    }
   }
 }

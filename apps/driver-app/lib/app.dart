@@ -72,7 +72,9 @@ class _HancrCaptainAppState extends State<HancrCaptainApp> {
           return '/auth/phone';
         }
         if (auth is AuthAuthenticated) {
-          if (auth.isNewDriver && loc != '/onboarding') return '/onboarding';
+          if (auth.isNewDriver) {
+            return loc == '/onboarding' ? null : '/onboarding';
+          }
           if (loc == '/splash' || loc.startsWith('/auth') ||
               loc == '/onboarding') {
             return '/home';
