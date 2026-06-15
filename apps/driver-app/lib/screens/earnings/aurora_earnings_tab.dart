@@ -9,6 +9,7 @@ import '../../core/widgets/aurora/aurora.dart';
 import '../wallet/aurora_driver_wallet_screen.dart';
 import '../wallet/aurora_payout_methods_screen.dart';
 import 'earnings_insights.dart';
+import 'earnings_summary_strip.dart';
 
 /// AuroraEarningsTab — صفحة الأرباح بنمط Aurora.
 class AuroraEarningsTab extends StatefulWidget {
@@ -88,6 +89,11 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
                         )),
                       ],
                     ),
+
+                    const SizedBox(height: AuroraSpacing.lg),
+
+                    // متاح / معلّق / إجمالي العمر (myEarningsSummary)
+                    const EarningsSummaryStrip(),
 
                     const SizedBox(height: AuroraSpacing.lg),
 
