@@ -113,3 +113,9 @@ const String myStarsQuery = r'''
     }
   }
 ''';
+
+const String driverAnnouncementsQuery = r'''
+  query DriverAnnouncements {
+    driverAnnouncements { id title body url createdAt }
+  }
+''';

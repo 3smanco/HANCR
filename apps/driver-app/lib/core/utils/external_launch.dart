@@ -84,6 +84,12 @@ Future<void> _launch(BuildContext context, Uri uri) async {
   }
 }
 
+/// يفتح رابطاً خارجياً (أخبار/إعلانات) في المتصفّح.
+Future<void> launchExternalUrl(BuildContext context, String url) async {
+  final fixed = url.startsWith('http') ? url : 'https://$url';
+  await _launch(context, Uri.parse(fixed));
+}
+
 /// يفتح بريد الدعم (support@hancr.com) لمراسلة فريق الدعم.
 Future<void> launchSupportEmail(BuildContext context, {String? subject}) async {
   final uri = Uri(
