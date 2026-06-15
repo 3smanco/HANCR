@@ -90,6 +90,10 @@ export class RiderEntity {
   @Column({ type: 'decimal', precision: 3, scale: 2, default: 5.0 })
   rating!: number;
 
+  /** عدد مرات تقييم السائقين للراكب (لحساب المتوسط المرجّح) */
+  @Column({ type: 'int', default: 0, name: 'rating_count' })
+  ratingCount!: number;
+
   /** الجنس — لتفعيل وضع women_only في Carpool والتفضيلات */
   @Column({ length: 1, nullable: true })
   gender?: string;

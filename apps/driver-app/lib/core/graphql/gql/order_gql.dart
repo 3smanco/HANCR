@@ -57,6 +57,12 @@ const String completedOrdersQuery = '''
   }
 ''';
 
+const String rateRiderMutation = r'''
+  mutation RateRider($orderId: Int!, $stars: Int!) {
+    rateRider(orderId: $orderId, stars: $stars) { id }
+  }
+''';
+
 const String acceptOrderMutation = '''
   $_orderFragment
   mutation AcceptOrder(\$orderId: Int!) {
