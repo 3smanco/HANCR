@@ -60,6 +60,7 @@ import { SosModule } from './sos/sos.module';
 import { ChatModule } from './chat/chat.module';
 import { DriverAppConfigModule } from './app-config/app-config.module';
 import { DriverToolsModule } from './driver-tools/driver-tools.module';
+import { AnnouncementsModule } from './announcements/announcements.module';
 
 // PubSub
 import { pubSubProvider } from './pubsub.provider';
@@ -131,6 +132,7 @@ import { pubSubProvider } from './pubsub.provider';
     PayoutsModule,
     DriverAppConfigModule,
     DriverToolsModule,
+    AnnouncementsModule,
   ],
   providers: [pubSubProvider],
   exports: [pubSubProvider],

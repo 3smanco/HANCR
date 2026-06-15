@@ -20,6 +20,7 @@ import '../wallet/aurora_driver_wallet_screen.dart';
 import '../wallet/aurora_payout_methods_screen.dart';
 import 'aurora_driver_documents_screen.dart';
 import 'language_screen.dart';
+import '../announcements/aurora_announcements_screen.dart';
 
 class AuroraDriverProfileTab extends StatelessWidget {
   const AuroraDriverProfileTab({super.key});
@@ -141,6 +142,17 @@ class AuroraDriverProfileTab extends StatelessWidget {
                             MaterialPageRoute(
                               builder: (_) =>
                                   const AuroraPayoutMethodsScreen(),
+                            ),
+                          ),
+                        ),
+                        const Divider(height: 1, color: AuroraColors.divider),
+                        _menuItem(
+                          icon: Icons.campaign_outlined,
+                          label: tr('announcements'),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const AuroraAnnouncementsScreen(),
                             ),
                           ),
                         ),
