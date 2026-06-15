@@ -10,6 +10,7 @@ import '../wallet/aurora_driver_wallet_screen.dart';
 import '../wallet/aurora_payout_methods_screen.dart';
 import 'earnings_insights.dart';
 import 'earnings_summary_strip.dart';
+import '../history/aurora_trip_history_screen.dart';
 
 /// AuroraEarningsTab — صفحة الأرباح بنمط Aurora.
 class AuroraEarningsTab extends StatefulWidget {
@@ -123,6 +124,19 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
                       padding: EdgeInsets.zero,
                       child: Column(
                         children: [
+                          _menuRow(
+                            icon: Icons.history,
+                            label: tr('tripHistory'),
+                            subtitle: tr('pastTrips'),
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    const AuroraTripHistoryScreen(),
+                              ),
+                            ),
+                          ),
+                          const Divider(
+                              height: 1, color: AuroraColors.divider),
                           _menuRow(
                             icon: Icons.receipt_long,
                             label: tr('statement'),

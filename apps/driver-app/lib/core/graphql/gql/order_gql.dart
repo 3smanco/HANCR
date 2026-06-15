@@ -48,6 +48,15 @@ const String driverActiveOrderQuery = '''
   }
 ''';
 
+const String completedOrdersQuery = '''
+  $_orderFragment
+  query CompletedOrders(\$limit: Int, \$offset: Int) {
+    completedOrders(limit: \$limit, offset: \$offset) {
+      ...OrderFields
+    }
+  }
+''';
+
 const String acceptOrderMutation = '''
   $_orderFragment
   mutation AcceptOrder(\$orderId: Int!) {
