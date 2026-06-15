@@ -485,6 +485,26 @@ export class OrderService {
     return null;
   }
 
+  // ─────────────────────────────────────────────
+  // completedOrders — سجل رحلات السائق المكتملة
+  // ─────────────────────────────────────────────
+  async getCompletedOrders(
+    driverId: number,
+    limit = 20,
+    offset = 0,
+  ): Promise<DriverOrderType[]> {
+    const take = Math.max(1, Math.min(Math.floor(limit) || 20, 50));
+    const skip = Math.max(0, Math.floor(offset) || 0);
+    const orders = await this.orderRepo.find({
+      where: { driverId, status: OrderStatus.Finished },
+      relations: ['rider'],
+      order: { createdOn: 'DESC' },
+      take,
+      skip,
+    });
+    return orders.map((o) => this.toType(o));
+  }
+
   // =============================================
   // Helpers
   // =============================================

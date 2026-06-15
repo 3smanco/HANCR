@@ -21,6 +21,17 @@ export class OrderResolver {
     return this.orderService.getActiveOrder(driver.driverId);
   }
 
+  /** سجل رحلات السائق المكتملة (الأحدث أولاً) */
+  @Query(() => [DriverOrderType], { description: 'سجل رحلات السائق المكتملة' })
+  @UseGuards(JwtAuthGuard)
+  completedOrders(
+    @CurrentDriver() driver: AuthDriver,
+    @Args('limit', { type: () => Int, defaultValue: 20 }) limit: number,
+    @Args('offset', { type: () => Int, defaultValue: 0 }) offset: number,
+  ): Promise<DriverOrderType[]> {
+    return this.orderService.getCompletedOrders(driver.driverId, limit, offset);
+  }
+
   /** قبول طلب جديد */
   @Mutation(() => DriverOrderType, { description: 'قبول طلب رحلة' })
   @UseGuards(JwtAuthGuard)
