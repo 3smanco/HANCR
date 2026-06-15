@@ -15,6 +15,7 @@ import {
   fetchSavedPlaces,
   routePreview,
   createOrder,
+  nearestRegion,
   type RiderProfile,
   type WebService,
   type WebSavedPlace,
@@ -80,6 +81,42 @@ const DARK_MAP_STYLE = [
 
 type Step = 'loading' | 'phone' | 'otp' | 'email' | 'email-otp' | 'profile';
 
+// مؤشّر تقدّم من 3 خطوات (دخول → رمز → ملف). loading/profile خارج المؤشّر.
+const TOTAL_STEPS = 3;
+const STEP_INDEX: Record<Step, number> = {
+  loading: 0,
+  phone: 1,
+  email: 1,
+  otp: 2,
+  'email-otp': 2,
+  profile: 3,
+};
+
+const RESEND_COOLDOWN = 30; // ثانية
+
+/**
+ * يحوّل خطأ `gql()` المُصنَّف (NETWORK_ERROR / SERVER_ERROR:status / VALIDATION:msg)
+ * إلى رسالة عربية/إنجليزية مفهومة للمستخدم بدل تسريب نص تقني خام.
+ */
+function describeError(e: unknown, isAr: boolean): string {
+  const msg = e instanceof Error ? e.message : String(e);
+  if (msg === 'NETWORK_ERROR') {
+    return isAr
+      ? 'تعذّر الاتصال بالخادم. تحقّق من اتصالك بالإنترنت وحاول مجدداً.'
+      : 'Could not reach the server. Check your connection and try again.';
+  }
+  if (msg.startsWith('SERVER_ERROR')) {
+    return isAr
+      ? 'حدث خطأ في الخادم. حاول بعد قليل.'
+      : 'A server error occurred. Please try again shortly.';
+  }
+  if (msg.startsWith('VALIDATION:')) {
+    // رسالة الخادم بعد البادئة — قابلة للعرض مباشرةً.
+    return msg.slice('VALIDATION:'.length);
+  }
+  return msg;
+}
+
 export function AccountClient({ isAr }: { isAr: boolean }) {
   const t = (ar: string, en: string) => (isAr ? ar : en);
   const [step, setStep] = useState<Step>('loading');
@@ -92,10 +129,14 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
   const [profile, setProfile] = useState<RiderProfile | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // عدّاد تنازلي لإعادة إرسال رمز التحقق (هاتف/إيميل).
+  const [cooldown, setCooldown] = useState(0);
 
   // ── الحجز من الويب (E3) ──
   const [services, setServices] = useState<WebService[]>([]);
   const [places, setPlaces] = useState<WebSavedPlace[]>([]);
+  const [regionId, setRegionId] = useState<number | null>(null);
+  const [regionCurrency, setRegionCurrency] = useState<string | null>(null);
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
   const [destCoord, setDestCoord] = useState<{ lat: number; lng: number } | null>(null);
   const [destAddress, setDestAddress] = useState('');
@@ -116,12 +157,27 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
   const orderIdRef = useRef<number | null>(null);
   orderIdRef.current = orderId;
 
-  function loadEstimateData() {
-    fetchServices().then((s) => {
-      setServices(s);
-      if (s.length) setServiceId(s[0].id);
-    }).catch(() => {});
+  // مؤقّت العدّ التنازلي لإعادة الإرسال.
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setInterval(() => setCooldown((c) => (c <= 1 ? 0 : c - 1)), 1000);
+    return () => clearInterval(id);
+  }, [cooldown]);
+
+  function loadSavedPlaces() {
     fetchSavedPlaces().then(setPlaces).catch(() => {});
+  }
+
+  /** يجلب خدمات المنطقة بعد تحديد regionId عبر nearestRegion. */
+  async function loadServicesForRegion(rid: number) {
+    try {
+      const s = await fetchServices(rid);
+      setServices(s);
+      setServiceId(s.length ? s[0].id : null);
+    } catch {
+      setServices([]);
+      setServiceId(null);
+    }
   }
 
   useEffect(() => {
@@ -130,7 +186,7 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
         .then((p) => {
           setProfile(p);
           setStep('profile');
-          loadEstimateData();
+          loadSavedPlaces();
         })
         .catch(() => {
           clearToken();
@@ -269,7 +325,31 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => setOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setOrigin({ lat, lng });
+        nearestRegion(lat, lng)
+          .then((region) => {
+            if (region) {
+              setRegionId(region.id);
+              setRegionCurrency(region.currency);
+              loadServicesForRegion(region.id);
+            } else {
+              setRegionId(null);
+              setRegionCurrency(null);
+              setServices([]);
+              setServiceId(null);
+              setError(
+                t('عذراً، الخدمة غير متاحة في موقعك حالياً.',
+                  'Sorry, service is not yet available at your location.'),
+              );
+            }
+          })
+          .catch(() => {
+            setError(t('تعذّر تحديد منطقة الخدمة', 'Could not determine your service area'));
+          });
+      },
       () => setError(t('تعذّر الحصول على موقعك', 'Could not get your location')),
     );
   };
@@ -290,14 +370,14 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
       const r = await routePreview(origin, destCoord, serviceId);
       setEstimate(r);
     } catch (e) {
-      setError((e as Error).message);
+      setError(describeError(e, isAr));
     }
     setEstimating(false);
   };
 
   const doBook = async () => {
     setError(null);
-    if (!origin || !destCoord || !serviceId) {
+    if (!origin || !destCoord || !serviceId || !regionId) {
       setError(t('أكمل بيانات الرحلة أولاً', 'Complete the trip details first'));
       return;
     }
@@ -309,11 +389,12 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
         originAddress: t('موقعي الحالي', 'My current location'),
         destinationAddress: destAddress || t('وجهة', 'Destination'),
         serviceId,
+        regionId,
       });
       setOrderId(order.id);
       setOrderStatus(order.status);
     } catch (e) {
-      setError((e as Error).message);
+      setError(describeError(e, isAr));
     }
     setBooking(false);
   };
@@ -330,6 +411,7 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
       const res = await sendOtp(p);
       if (res.success) {
         setStep('otp');
+        setCooldown(RESEND_COOLDOWN);
       } else {
         // الـ backend صادق الآن: success=false يعني لم يُرسَل (لا ننتقل لشاشة الرمز).
         setError(
@@ -339,7 +421,7 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
         );
       }
     } catch (e) {
-      setError((e as Error).message);
+      setError(describeError(e, isAr));
     }
     setBusy(false);
   };
@@ -354,7 +436,7 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
       setProfile(res.rider);
       setStep('profile');
     } catch (e) {
-      setError((e as Error).message);
+      setError(describeError(e, isAr));
     }
     setBusy(false);
   };
@@ -391,10 +473,14 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
     setBusy(true);
     try {
       const res = await sendEmailOtp(e);
-      if (res.success) setStep('email-otp');
-      else setError(res.message || t('تعذّر إرسال الرمز.', 'Could not send the code.'));
+      if (res.success) {
+        setStep('email-otp');
+        setCooldown(RESEND_COOLDOWN);
+      } else {
+        setError(res.message || t('تعذّر إرسال الرمز.', 'Could not send the code.'));
+      }
     } catch (err) {
-      setError((err as Error).message);
+      setError(describeError(err, isAr));
     }
     setBusy(false);
   };
@@ -407,7 +493,7 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
       const res = await verifyEmailOtp(email.trim().toLowerCase(), code.trim());
       applyAuthResult(res);
     } catch (err) {
-      setError((err as Error).message);
+      setError(describeError(err, isAr));
     }
     setBusy(false);
   };
@@ -431,7 +517,7 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
               const res = await googleAuth(resp.credential);
               applyAuthResult(res);
             } catch (err) {
-              setError((err as Error).message);
+              setError(describeError(err, isAr));
             }
             setBusy(false);
           },
@@ -475,9 +561,26 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
       <h1 className="mb-2 text-center text-3xl font-extrabold text-white">
         {t('حسابي', 'My account')}
       </h1>
-      <p className="mb-8 text-center text-white/60">
+      <p className="mb-6 text-center text-white/60">
         {t('سجّل دخولك برقم جوالك عبر رمز التحقق', 'Sign in with your phone via a verification code')}
       </p>
+
+      {STEP_INDEX[step] >= 1 && STEP_INDEX[step] <= TOTAL_STEPS && step !== 'profile' && (
+        <div className="mx-auto mb-6 flex max-w-md items-center gap-2" aria-hidden>
+          {Array.from({ length: TOTAL_STEPS }).map((_, i) => {
+            const n = i + 1;
+            const active = STEP_INDEX[step] >= n;
+            return (
+              <div
+                key={n}
+                className={`h-1.5 flex-1 rounded-full transition ${
+                  active ? 'bg-orange-500' : 'bg-white/10'
+                }`}
+              />
+            );
+          })}
+        </div>
+      )}
 
       {error && (
         <div className="mx-auto mb-4 max-w-md rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
@@ -493,10 +596,16 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
         <div className={card}>
           {linkMode && (
             <div className="mb-4 rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-3 text-sm text-orange-200">
-              {t(
-                'أضف رقم هاتفك لإكمال إنشاء حسابك',
-                'Add your phone number to complete your account',
-              )}
+              <div className="font-bold">
+                {t('خطوة أخيرة: أضف رقم هاتفك',
+                   'One last step: add your phone number')}
+              </div>
+              <p className="mt-1 text-orange-200/80">
+                {t(
+                  'نربط رقم هاتفك بحسابك لتأمينه، ولنتمكّن من التواصل معك والسائق أثناء الرحلة. سنرسل لك رمز تحقق لمرّة واحدة.',
+                  'We link a phone number to your account to secure it and to connect you with your driver during trips. We\'ll send a one-time verification code.',
+                )}
+              </p>
             </div>
           )}
           <label className="mb-2 block text-sm text-white/70">
@@ -590,8 +699,17 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
             {busy ? t('جارٍ التحقق…', 'Verifying…') : t('تأكيد', 'Verify')}
           </button>
           <button
-            className="mt-3 w-full text-sm text-white/50 hover:text-white"
-            onClick={() => setStep('email')}
+            className="mt-3 w-full text-sm text-white/50 hover:text-white disabled:opacity-40"
+            disabled={busy || cooldown > 0}
+            onClick={onSendEmailOtp}
+          >
+            {cooldown > 0
+              ? t(`إعادة الإرسال خلال ${cooldown} ث`, `Resend in ${cooldown}s`)
+              : t('إعادة إرسال الرمز', 'Resend code')}
+          </button>
+          <button
+            className="mt-1 w-full text-sm text-white/50 hover:text-white"
+            onClick={() => { setCooldown(0); setStep('email'); }}
           >
             {t('تغيير البريد', 'Change email')}
           </button>
@@ -600,6 +718,12 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
 
       {step === 'otp' && (
         <div className={card}>
+          {linkMode && (
+            <div className="mb-3 rounded-xl border border-orange-500/30 bg-orange-500/10 px-3 py-2 text-xs text-orange-200">
+              {t('نؤكّد رقم هاتفك لربطه بحسابك.',
+                 'We\'re confirming your phone to link it to your account.')}
+            </div>
+          )}
           <label className="mb-2 block text-sm text-white/70">
             {t('رمز التحقق المُرسَل إلى', 'Code sent to')} <span dir="ltr">{phone}</span>
           </label>
@@ -616,8 +740,17 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
             {busy ? t('جارٍ التحقق…', 'Verifying…') : t('تأكيد', 'Verify')}
           </button>
           <button
-            className="mt-3 w-full text-sm text-white/50 hover:text-white"
-            onClick={() => setStep('phone')}
+            className="mt-3 w-full text-sm text-white/50 hover:text-white disabled:opacity-40"
+            disabled={busy || cooldown > 0}
+            onClick={onSendOtp}
+          >
+            {cooldown > 0
+              ? t(`إعادة الإرسال خلال ${cooldown} ث`, `Resend in ${cooldown}s`)
+              : t('إعادة إرسال الرمز', 'Resend code')}
+          </button>
+          <button
+            className="mt-1 w-full text-sm text-white/50 hover:text-white"
+            onClick={() => { setCooldown(0); setStep('phone'); }}
           >
             {t('تغيير الرقم', 'Change number')}
           </button>
@@ -755,26 +888,38 @@ export function AccountClient({ isAr }: { isAr: boolean }) {
               <label className="mb-1 block text-xs text-white/60">
                 {t('الخدمة', 'Service')}
               </label>
-              {services.length === 0 ? (
+              {!origin ? (
+                <p className="mb-4 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white/50">
+                  {t('حدّد موقعك لعرض الخدمات المتاحة.',
+                     'Set your location to see available services.')}
+                </p>
+              ) : services.length === 0 ? (
                 <p className="mb-4 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white/50">
                   {t('لا خدمات متاحة في منطقتك حالياً.',
                      'No services available in your area right now.')}
                 </p>
               ) : (
-                <select
-                  className={`${input} mb-4`}
-                  value={serviceId ?? ''}
-                  onChange={(e) => setServiceId(Number(e.target.value) || null)}
-                >
-                  {services.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {isAr ? s.name : s.nameEn ?? s.name}
-                    </option>
-                  ))}
-                </select>
+                <>
+                  <select
+                    className={`${input} mb-2`}
+                    value={serviceId ?? ''}
+                    onChange={(e) => setServiceId(Number(e.target.value) || null)}
+                  >
+                    {services.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {isAr ? s.name : s.nameEn ?? s.name}
+                      </option>
+                    ))}
+                  </select>
+                  {regionCurrency && (
+                    <p className="mb-2 text-[11px] text-white/40">
+                      {t(`الأسعار بعملة ${regionCurrency}`, `Prices shown in ${regionCurrency}`)}
+                    </p>
+                  )}
+                </>
               )}
 
-              <button className={btn} disabled={estimating || !destCoord} onClick={calcEstimate}>
+              <button className={btn} disabled={estimating || !destCoord || !serviceId} onClick={calcEstimate}>
                 {estimating ? t('جارٍ الحساب…', 'Calculating…') : t('احسب الأجرة', 'Estimate fare')}
               </button>
 

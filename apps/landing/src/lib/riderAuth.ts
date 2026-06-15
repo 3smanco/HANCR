@@ -42,16 +42,31 @@ async function gql<T>(
     const t = getToken();
     if (t) headers['authorization'] = `Bearer ${t}`;
   }
-  const res = await fetch(RIDER_API_URL, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ query, variables }),
-  });
-  const json = (await res.json()) as GqlResult<T>;
-  if (json.errors?.length) {
-    throw new Error(json.errors[0].message);
+  let res: Response;
+  try {
+    res = await fetch(RIDER_API_URL, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ query, variables }),
+    });
+  } catch {
+    // فشل الشبكة (لا اتصال / DNS / CORS) — لا استجابة من الخادم أصلاً.
+    throw new Error('NETWORK_ERROR');
   }
-  if (!json.data) throw new Error('No data');
+  if (!res.ok && res.status >= 500) {
+    throw new Error(`SERVER_ERROR:${res.status}`);
+  }
+  let json: GqlResult<T>;
+  try {
+    json = (await res.json()) as GqlResult<T>;
+  } catch {
+    throw new Error(`SERVER_ERROR:${res.status}`);
+  }
+  if (json.errors?.length) {
+    // أخطاء GraphQL (تحقّق/منطق أعمال) — رسالة الخادم قابلة للعرض.
+    throw new Error(`VALIDATION:${json.errors[0].message}`);
+  }
+  if (!json.data) throw new Error(`SERVER_ERROR:${res.status}`);
   return json.data;
 }
 
@@ -197,13 +212,45 @@ export interface WebService {
   nameEn?: string | null;
 }
 
-export async function fetchServices(regionId = 1): Promise<WebService[]> {
+export async function fetchServices(regionId: number): Promise<WebService[]> {
   const data = await gql<{ services: WebService[] }>(
     `query Services($regionId: Int!) { services(regionId: $regionId) { id name nameEn } }`,
     { regionId },
     true,
   );
   return data.services ?? [];
+}
+
+export interface RegionLookup {
+  id: number;
+  name: string;
+  nameEn: string;
+  currency: string;
+  countryId?: number | null;
+  cityId?: number | null;
+}
+
+/** يحدّد المنطقة المخدومة عند نقطة جغرافية (عام، بلا مصادقة). */
+export async function nearestRegion(
+  lat: number,
+  lng: number,
+): Promise<RegionLookup | null> {
+  const data = await gql<{ nearestRegion: RegionLookup | null }>(
+    `query NearestRegion($lat: Float!, $lng: Float!) {
+      nearestRegion(lat: $lat, lng: $lng) { id name nameEn currency countryId cityId }
+    }`,
+    { lat, lng },
+  );
+  return data.nearestRegion;
+}
+
+/** قائمة المناطق المفعّلة عالمياً (عام، بلا مصادقة) — لصفحة /cities. */
+export async function activeRegions(): Promise<RegionLookup[]> {
+  const data = await gql<{ activeRegions: RegionLookup[] }>(
+    `query ActiveRegions { activeRegions { id name nameEn currency countryId cityId } }`,
+    {},
+  );
+  return data.activeRegions ?? [];
 }
 
 export interface WebSavedPlace {
@@ -255,7 +302,7 @@ export async function createOrder(input: {
   originAddress: string;
   destinationAddress: string;
   serviceId: number;
-  regionId?: number;
+  regionId: number;
 }): Promise<{ id: number; status: string }> {
   const data = await gql<{ createOrder: { id: number; status: string } }>(
     `mutation CreateOrder($input: CreateOrderInput!) {
@@ -266,7 +313,7 @@ export async function createOrder(input: {
         points: [input.origin, input.destination],
         addresses: [input.originAddress, input.destinationAddress],
         serviceId: input.serviceId,
-        regionId: input.regionId ?? 1,
+        regionId: input.regionId,
       },
     },
     true,

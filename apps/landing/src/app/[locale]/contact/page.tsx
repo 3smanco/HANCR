@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Mail, Phone, MessageCircle, MapPin } from 'lucide-react';
+import { Mail, MessageCircle, MapPin } from 'lucide-react';
 import {
   DEFAULT_LOCALE,
   SUPPORTED_LOCALES,
@@ -54,10 +54,10 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
       href: 'mailto:drivers@hancr.com',
     },
     {
-      icon: Phone,
-      label: isAr ? 'مكتب الرياض' : 'Riyadh office',
-      value: '+966 11 000 0000',
-      href: 'tel:+966110000000',
+      icon: MessageCircle,
+      label: isAr ? 'الشراكات والأعمال' : 'Partnerships & business',
+      value: 'business@hancr.com',
+      href: 'mailto:business@hancr.com',
     },
   ];
 

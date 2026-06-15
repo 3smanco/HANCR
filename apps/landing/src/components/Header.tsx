@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { type Locale, translator } from '@/i18n/messages';
 import { localizedHref, swapLocaleInPath } from '@/lib/locale';
+import { HancrMark } from '@/components/HancrMark';
 
 export function Header({ locale }: { locale: Locale }) {
   const tt = translator(locale);
@@ -32,8 +33,8 @@ export function Header({ locale }: { locale: Locale }) {
           className="flex items-center gap-3 shrink-0"
           aria-label="HANCR home"
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-ember to-ember-deep flex items-center justify-center font-bold text-pearl text-lg shadow-ember">
-            H
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-coal to-obsidian flex items-center justify-center shadow-ember p-1">
+            <HancrMark idSuffix="hdr" />
           </div>
           <span className="font-bold text-xl text-pearl tracking-wide">
             HANCR

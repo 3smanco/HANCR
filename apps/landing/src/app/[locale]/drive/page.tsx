@@ -9,6 +9,7 @@ import {
 import Link from 'next/link';
 import { Hero } from '@/components/Hero';
 import { ValuePropsGrid } from '@/components/ValuePropsGrid';
+import { FeatureSplit } from '@/components/FeatureSplit';
 import { HowItWorks } from '@/components/HowItWorks';
 import { FAQAccordion } from '@/components/FAQAccordion';
 import { localizedHref } from '@/lib/locale';
@@ -84,8 +85,8 @@ export default function DrivePage({ params }: { params: { locale: string } }) {
             icon: DollarSign,
             title: isAr ? 'عمولة 15% فقط' : '15% commission',
             description: isAr
-              ? 'الأقل في الخليج. كل دينار تكسبه يَبقى في جيبك.'
-              : 'Lowest in the Gulf. Keep more of what you earn.',
+              ? 'من بين الأقل في السوق. المزيد من أرباحك يبقى في جيبك.'
+              : 'Among the lowest in the industry. Keep more of what you earn.',
           },
           {
             icon: Clock,
@@ -123,6 +124,32 @@ export default function DrivePage({ params }: { params: { locale: string } }) {
               : 'Drive when you want — no mandatory shifts, no targets.',
           },
         ]}
+      />
+
+      <FeatureSplit
+        accent="coal"
+        icon={DollarSign}
+        eyebrow={isAr ? 'شفافية كاملة' : 'Full transparency'}
+        title={isAr ? 'تعرف بالضبط كم تكسب — دائماً.' : 'Know exactly what you earn — always.'}
+        description={
+          isAr
+            ? 'لا رسوم خفية ولا مفاجآت. عمولة ثابتة، أرباح فورية، وتقرير أسبوعي واضح لكل ريال تكسبه.'
+            : 'No hidden fees, no surprises. A flat commission, instant payouts, and a clear weekly report on every penny you earn.'
+        }
+        bullets={
+          isAr
+            ? [
+                'عمولة ثابتة 15% — معلنة مقدماً بلا اقتطاعات مفاجئة',
+                'سحب فوري لأرباحك في أي وقت',
+                'تقرير أرباح أسبوعي مفصَّل داخل التطبيق',
+              ]
+            : [
+                'Flat 15% commission — stated upfront, no surprise cuts',
+                'Instant payouts whenever you want',
+                'Detailed weekly earnings report in the app',
+              ]
+        }
+        cta={{ href: localizedHref(locale, '/drive/apply'), label: isAr ? 'ابدأ التسجيل' : 'Start your application' }}
       />
 
       <HowItWorks
@@ -195,7 +222,7 @@ export default function DrivePage({ params }: { params: { locale: string } }) {
                 },
                 {
                   q: 'كم سأكسب شهرياً؟',
-                  a: 'السائق المتفرغ يربح ما بين 5,000 و 9,000 ر.س شهرياً في الرياض. السائق الجزئي 1,500–3,000 ر.س. الأرقام تعتمد على ساعات العمل والمنطقة.',
+                  a: 'يعتمد ذلك على ساعات عملك ومدينتك — السائقون المتفرغون يحقِّقون دخلاً يعادل دواماً كاملاً، والجزئيون يحقِّقون دخلاً إضافياً مرناً. يعرض لك التطبيق تقدير أرباحك الأسبوعي.',
                 },
                 {
                   q: 'هل العمولة 15% حقاً نهائية؟',
@@ -203,11 +230,11 @@ export default function DrivePage({ params }: { params: { locale: string } }) {
                 },
                 {
                   q: 'كيف يتم السحب؟',
-                  a: 'مباشرة لحسابك البنكي أو Mada أو STC Pay. التحويل خلال ساعات.',
+                  a: 'مباشرة إلى حسابك البنكي أو محفظتك الرقمية المدعومة. التحويل خلال ساعات.',
                 },
                 {
-                  q: 'هل أستطيع العمل في الإمارات أو قطر؟',
-                  a: 'حالياً نعمل في السعودية فقط. توسُّعنا الإقليمي مخطَّط له خلال 2026.',
+                  q: 'هل القيادة متاحة في مدينتي؟',
+                  a: 'نعمل حالياً في مدن مختارة ونتوسَّع باستمرار — راجع صفحة المدن لمعرفة آخر التحديثات.',
                 },
               ]
             : [
@@ -217,7 +244,7 @@ export default function DrivePage({ params }: { params: { locale: string } }) {
                 },
                 {
                   q: 'How much can I earn monthly?',
-                  a: 'A full-time driver earns SAR 5,000–9,000 monthly in Riyadh. Part-time SAR 1,500–3,000. Numbers depend on hours and area.',
+                  a: "It depends on your hours and city — full-time drivers typically earn a solid full-time income, and part-timers earn flexible extra income. The app shows you a weekly earnings estimate.",
                 },
                 {
                   q: 'Is the 15% commission really all-in?',
@@ -225,11 +252,11 @@ export default function DrivePage({ params }: { params: { locale: string } }) {
                 },
                 {
                   q: 'How do I withdraw earnings?',
-                  a: 'Direct to your bank, Mada, or STC Pay. Transfer in hours.',
+                  a: 'Direct to your bank account or a supported digital wallet. Transfer in hours.',
                 },
                 {
-                  q: 'Can I work in UAE or Qatar?',
-                  a: "We're currently in Saudi only. Regional expansion is planned for 2026.",
+                  q: 'Is driving available in my city?',
+                  a: "We're currently live in select cities and expanding continuously — check the Cities page for the latest.",
                 },
               ]
         }

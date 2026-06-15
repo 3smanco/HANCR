@@ -176,7 +176,7 @@ export default function BusinessPage({ params }: { params: { locale: string } })
                 },
                 {
                   q: 'هل توفِّرون فواتير ضريبية؟',
-                  a: 'نعم، فواتير ضريبية مطابقة لمتطلبات ZATCA في السعودية و VAT في الإمارات.',
+                  a: 'نعم، فواتير ضريبية مطابقة لمتطلبات الجهات الضريبية المحلية في كل سوق نعمل فيه.',
                 },
                 {
                   q: 'هل يستطيع الموظف الدفع نقداً؟',
@@ -194,7 +194,7 @@ export default function BusinessPage({ params }: { params: { locale: string } })
                 },
                 {
                   q: 'Do you provide VAT invoices?',
-                  a: 'Yes — VAT-compliant invoices for ZATCA (Saudi) and FTA (UAE).',
+                  a: 'Yes — tax-compliant invoices that meet local tax authority requirements in every market we operate in.',
                 },
                 {
                   q: 'Can employees pay cash?',

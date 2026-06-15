@@ -15,7 +15,7 @@ export const messages: Messages = {
   ar: {
     // ── Meta ──
     'meta.siteName': 'HANCR',
-    'meta.tagline': 'منصة التنقل الذكي الأولى في الخليج',
+    'meta.tagline': 'منصة التنقل الذكي لكل مكان',
 
     // ── Nav ──
     'nav.ride': 'الركوب',
@@ -65,7 +65,7 @@ export const messages: Messages = {
     'footer.help': 'مركز المساعدة',
     'footer.cities': 'المدن المتاحة',
     'footer.sitemap': 'خريطة الموقع',
-    'footer.tagline': 'منصة التنقل الذكي الأولى في الخليج. صُنعت بشغف لخدمة المنطقة العربية.',
+    'footer.tagline': 'منصة التنقل الذكي لكل مكان. صُنعت بشغف لخدمة الناس في كل مكان.',
     'footer.rights': 'كل الحقوق محفوظة.',
     'footer.adminPanel': 'لوحة الإدارة',
 
@@ -84,7 +84,7 @@ export const messages: Messages = {
   en: {
     // ── Meta ──
     'meta.siteName': 'HANCR',
-    'meta.tagline': 'The Gulf\'s smart mobility platform',
+    'meta.tagline': 'The smart mobility platform for everywhere',
 
     // ── Nav ──
     'nav.ride': 'Ride',
@@ -134,7 +134,7 @@ export const messages: Messages = {
     'footer.help': 'Help Center',
     'footer.cities': 'Cities',
     'footer.sitemap': 'Sitemap',
-    'footer.tagline': 'The Gulf\'s smart mobility platform. Built with passion for the MENA region.',
+    'footer.tagline': 'The smart mobility platform for everywhere. Built with passion to serve people, wherever they are.',
     'footer.rights': 'All rights reserved.',
     'footer.adminPanel': 'Admin Panel',
 

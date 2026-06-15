@@ -41,26 +41,26 @@ export default function InvestorsPage({ params }: { params: { locale: string } }
         title={
           isAr ? (
             <>
-              نبني منصة التنقل
+              نبني منصة
               <br />
               <span className="bg-gradient-to-r from-ember to-ember-light bg-clip-text text-transparent">
-                الإقليمية الرائدة.
+                للتنقل العالمي.
               </span>
             </>
           ) : (
             <>
-              Building the region&apos;s leading
+              Building a platform
               <br />
               <span className="bg-gradient-to-r from-ember to-ember-light bg-clip-text text-transparent">
-                mobility platform.
+                for global mobility.
               </span>
             </>
           )
         }
         subtitle={
           isAr
-            ? 'سوق التنقل في الخليج يقدَّر بـ 12 مليار دولار سنوياً وينمو بـ 18% — وHANCR في موقع فريد للاستحواذ على حصة كبيرة.'
-            : 'The Gulf mobility market is valued at $12B annually, growing at 18% — and HANCR is uniquely positioned to capture significant share.'
+            ? 'يُتوقَّع أن يتجاوز سوق النقل التشاركي العالمي 300 مليار دولار بحلول 2030 — وHANCR في موقع فريد للاستحواذ على حصة في الأسواق التي تفتقر إلى خيارات تنقل عادلة.'
+            : 'The global ride-hailing market is projected to surpass $300 billion by 2030 — and HANCR is uniquely positioned to capture share in markets that lack fair mobility options.'
         }
         primaryCta={{
           href: 'mailto:investors@hancr.com',
@@ -72,8 +72,8 @@ export default function InvestorsPage({ params }: { params: { locale: string } }
       <section className="py-12 px-6">
         <div className="max-w-5xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { value: '$12B', label: isAr ? 'حجم السوق السنوي' : 'Annual market size' },
-            { value: '18%', label: isAr ? 'نمو السوق' : 'Market growth' },
+            { value: '10,000+', label: isAr ? 'رحلة مكتملة' : 'Rides completed' },
+            { value: '4', label: isAr ? 'مدن خلال 18 شهراً' : 'Cities in 18 months' },
             { value: '15%', label: isAr ? 'عمولتنا' : 'Our commission' },
             { value: '2026', label: isAr ? 'تأسسنا' : 'Founded' },
           ].map((s) => (
@@ -97,8 +97,8 @@ export default function InvestorsPage({ params }: { params: { locale: string } }
             icon: MapPin,
             title: isAr ? 'سوق منخفض الاختراق' : 'Underserved market',
             description: isAr
-              ? 'منطقة الخليج تعتمد على لاعبين عالميين لا يفهمون احتياجاتها المحلية.'
-              : 'The Gulf relies on global players that don\'t understand local needs.',
+              ? 'كثير من الأسواق حول العالم تعتمد على لاعبين عالميين لا يفهمون احتياجاتها المحلية.'
+              : 'Many markets around the world rely on global players that don\'t understand local needs.',
           },
           {
             icon: DollarSign,

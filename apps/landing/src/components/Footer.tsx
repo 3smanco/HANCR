@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { type Locale, translator } from '@/i18n/messages';
 import { localizedHref } from '@/lib/locale';
+import { HancrMark } from '@/components/HancrMark';
 
 export function Footer({ locale }: { locale: Locale }) {
   const tt = translator(locale);
@@ -52,8 +53,8 @@ export function Footer({ locale }: { locale: Locale }) {
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-6">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-ember to-ember-deep flex items-center justify-center font-bold text-pearl text-lg shadow-ember">
-                H
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-coal to-obsidian flex items-center justify-center shadow-ember p-1">
+                <HancrMark idSuffix="ftr" />
               </div>
               <span className="font-bold text-xl text-pearl">HANCR</span>
             </div>

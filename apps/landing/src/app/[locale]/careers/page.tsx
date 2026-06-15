@@ -20,8 +20,8 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
     title: t(locale, 'nav.help') + ' — ' + (locale === 'ar' ? 'الوظائف' : 'Careers'),
     description:
       locale === 'ar'
-        ? 'انضم لفريق HANCR. نبني مستقبل التنقل في المنطقة العربية.'
-        : 'Join the HANCR team. We are building the future of mobility in MENA.',
+        ? 'انضم لفريق HANCR. نبني مستقبل التنقل حول العالم.'
+        : 'Join the HANCR team. We are building the future of mobility, everywhere.',
   };
 }
 

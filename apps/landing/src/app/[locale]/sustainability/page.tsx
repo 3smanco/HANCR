@@ -44,7 +44,7 @@ export default function SustainabilityPage({ params }: { params: { locale: strin
               تنقُّل أنظف
               <br />
               <span className="bg-gradient-to-r from-ember to-ember-light bg-clip-text text-transparent">
-                لخليجٍ أخضر.
+                لكوكبٍ أفضل.
               </span>
             </>
           ) : (
@@ -52,15 +52,15 @@ export default function SustainabilityPage({ params }: { params: { locale: strin
               Cleaner mobility
               <br />
               <span className="bg-gradient-to-r from-ember to-ember-light bg-clip-text text-transparent">
-                for a greener Gulf.
+                for a better planet.
               </span>
             </>
           )
         }
         subtitle={
           isAr
-            ? 'نتبنَّى رؤية المملكة 2030 ومبادرة الشرق الأوسط الأخضر. هدفنا 30% من رحلاتنا بسيارات كهربائية أو هجينة بحلول 2028.'
-            : 'We align with Vision 2030 and the Saudi Green Initiative. Our goal: 30% of trips on EVs or hybrids by 2028.'
+            ? 'نلتزم بأهداف الاستدامة العالمية وخفض الانبعاثات. هدفنا أن تكون 30% من رحلاتنا بسيارات كهربائية أو هجينة بحلول 2028.'
+            : "We're committed to global sustainability goals and cutting emissions. Our goal: 30% of trips on EVs or hybrids by 2028."
         }
         primaryCta={{
           href: '#commitments',

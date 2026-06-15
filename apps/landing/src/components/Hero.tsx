@@ -11,6 +11,33 @@ interface HeroProps {
   align?: 'center' | 'start';
 }
 
+// Same-page hash anchors (#section) must use a plain <a>, not next/link's
+// <Link>, which can mishandle hash-only navigation on a static export build.
+const isHash = (href: string) => href.startsWith('#');
+
+function CtaLink({
+  href,
+  className,
+  children,
+}: {
+  href: string;
+  className: string;
+  children: ReactNode;
+}) {
+  if (isHash(href)) {
+    return (
+      <a href={href} className={className}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  );
+}
+
 export function Hero({
   eyebrow,
   title,
@@ -48,19 +75,19 @@ export function Hero({
               align === 'center' ? 'justify-center' : ''
             }`}
           >
-            <Link
+            <CtaLink
               href={primaryCta.href}
               className="inline-flex items-center justify-center gap-2 bg-ember hover:bg-ember-deep transition px-7 py-3.5 rounded-xl font-bold text-base text-pearl shadow-ember-lg"
             >
               {primaryCta.label}
-            </Link>
+            </CtaLink>
             {secondaryCta ? (
-              <Link
+              <CtaLink
                 href={secondaryCta.href}
                 className="inline-flex items-center justify-center gap-2 border-2 border-stone hover:border-ember hover:bg-ember/10 transition px-7 py-3.5 rounded-xl font-bold text-base text-pearl"
               >
                 {secondaryCta.label}
-              </Link>
+              </CtaLink>
             ) : null}
           </div>
         </div>

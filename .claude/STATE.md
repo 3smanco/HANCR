@@ -4,6 +4,39 @@
 > ابدأ أي محادثة جديدة بقراءته (وحده يكفي للسياق) بدل تحميل المهارة الضخمة أو قراءة عشرات الملفات.
 > آخر تحديث: 2026-06-15
 
+## ✨ L6: أقسام "أفضل من Uber" (2026-06-15)
+- **✅ الرئيسية:** أُضيف `FeatureSplit` "أمانك أولاً" بين شبكة الخدمات الأربع و`ValuePropsGrid` (أيقونة Shield، `reverse`، `accent=coal`): توثيق السائقين + مشاركة الرحلة المباشرة + SOS/دعم 24/7، CTA→`/safety`.
+- **✅ `/drive`:** أُضيف `FeatureSplit` "شفافية كاملة" بين `ValuePropsGrid` و`HowItWorks` (أيقونة DollarSign، `accent=coal`): عمولة ثابتة 15% + سحب فوري + تقرير أرباح أسبوعي، CTA→`/drive/apply`.
+- **ℹ️ `/about` "أثرنا":** اختياري بالخطة — تُرك (البندان الأساسيان كافيان).
+- **✅ التحقق:** `tsc`=0 · `next build`=ناجح (70 صفحة).
+- **🎉 خطة موقع الهبوط (L1–L6) مكتملة بالكامل.** غير منشورة بعد — النشر عبر `scripts/deploy-landing.sh` عند رغبة المالك. قرارات بانتظار المالك (TODO معلّمة): جنسية الفصل 8 القانوني · رقم هاتف `/contact` · رقم TAM عالمي في `/investors`.
+
+## 🎨 L5: تحديث شعار الموقع إلى "HA + سهم" (2026-06-15)
+- **✅ مكوّن مشترك:** أُنشئ `apps/landing/src/components/HancrMark.tsx` (مسارات علامة HA+arrow من `~/hancr-logo-gen/hancr-mark.svg`، تدرّجا ember/gloss inline، `viewBox` مقصوص `274 219 560 560`، prop `idSuffix` لتجنّب تعارض المعرّفات). استبدل حرف "H" القديم في `Header.tsx` (idSuffix=hdr) و`Footer.tsx` (idSuffix=ftr)؛ الحاوية صارت خلفية coal→obsidian + padding.
+- **✅ مولّد الأصول `~/hancr-logo-gen/gen-web.js`:** استُبدلت علامة "Orbit" القديمة (حلقة+نقطة+H) بـmark() الجديد في favicon() وog() + أُضيفت تدرّجات ember/gloss للـdefs. وسم og() النصّي `'Smart mobility in the Gulf'` → `'Smart mobility, everywhere'`. أُعيد توليد `favicon.png`/`icon-512.png`/`apple-icon.png`/`og-image.png` في `apps/landing/public/` — **مُتحقَّق بصرياً** (الأيقونة مطابقة لشعار التطبيق، صورة OG متّسقة).
+- **✅ التحقق:** `tsc`=0 · `next build`=ناجح (70 صفحة).
+- **▶️ التالي:** L6 (أقسام "أفضل من Uber").
+
+## 🔐 L2: صقل تجربة المصادقة (2026-06-15)
+- **✅ `riderAuth.ts` — أخطاء مُصنَّفة:** `gql()` يلفّ `fetch` بـtry/catch ويرمي بادئات: `NETWORK_ERROR` (فشل شبكة) · `SERVER_ERROR:${status}` (5xx/json تالف/لا data) · `VALIDATION:${msg}` (أخطاء GraphQL). الـhappy path بلا تغيير.
+- **✅ `AccountClient.tsx`:** (1) دالة `describeError(e, isAr)` تترجم البادئات لرسائل عربية/إنجليزية مفهومة، حلّت محل كل `setError((e as Error).message)` (7 مواضع). (2) مؤشّر تقدّم 3 خطوات عبر `STEP_INDEX` (دخول→رمز→ملف) أعلى البطاقة. (3) عدّاد `cooldown` (30ث) + زرّ «إعادة إرسال الرمز» على شاشتي otp وemail-otp (يُعاد ضبطه عند «تغيير الرقم/البريد»). (4) توسيع لافتة `linkMode` لشرح **سبب** طلب رقم الهاتف عند ربط حساب Google/إيميل + تذكير مصغّر على شاشة otp.
+- **✅ التحقق:** `tsc`=0 · `next build`=ناجح (70 صفحة). (لم يُنشَر — الموقع يُبنى ويُنشر يدوياً عبر `scripts/deploy-landing.sh` لاحقاً.)
+- **▶️ التالي:** L5 (الشعار HA+arrow) ثم L6 (أقسام "أفضل من Uber").
+
+## 🔗 L4: إصلاح أزرار CTA المرساة + تدقيق الروابط الميتة (2026-06-15)
+- **✅ إصلاح `Hero.tsx`:** أُضيفت دالة `isHash(href)` ومكوّن `CtaLink` — روابط `#section` تُرسَم الآن بـ`<a>` عادي بدل `next/link` (الذي يعطب ملاحة المرساة في الـexport الثابت). يُطبَّق على primaryCta وsecondaryCta.
+- **✅ تدقيق الروابط (لا روابط ميتة):** كل وجهات `localizedHref`/Header/Footer/sitemap تطابق المسارات الـ27 الفعلية. مواضيع `/help/[topic]` الخمسة (rider/driver/payments/safety/business) مولّدة فعلاً عبر `generateStaticParams` فروابط sitemap لها سليمة. كل أزرار `#` (`#contact`/`#openings`/`#form`/`#apply`/`#commitments`) تطابق عنصر `id` موجوداً في صفحتها. الرابط الخارجي `admin.hancr.com` صحيح. مبدّل اللغة `swapLocaleInPath` سليم. ملفات `downloads/*.apk` منشورة على السيرفر (ليست في الريبو، ليست خطأً).
+- **✅ التحقق:** `tsc`=0 · `next build`=ناجح (70 صفحة ثابتة).
+- **▶️ التالي:** L2 (تحسينات auth) ثم L5 (الشعار) ثم L6 (أقسام "أفضل من Uber").
+
+## 🌍 L1: إزالة الطابع "الخليجي" من موقع الهبوط — عالمي بالكامل (2026-06-15) — `.claude/plans/synchronous-jingling-stream.md`
+- **السياق:** خطة 6 مراحل (L1-L6)، الترتيب L3→L1→L4→L2→L5→L6. L3 (إصلاح region-aware booking) أُنجز في جلسة سابقة. هذه الجلسة أنجزت **L1 بالكامل**.
+- **✅ التغييرات النصية:** `messages.ts` (tagline/footer.tagline ar+en) · `layout.tsx` (description/keywords/OG/Twitter) · `/about` (hero+قصة+"طموح إقليمي"→"طموح عالمي") · `/investors` (hero+subtitle+stats+TODO رقم TAM عالمي) · الرئيسية (hero subtitle + ValuePropsGrid) · `/sustainability` (hero+subtitle، إزالة Vision 2030/مبادرة السعودية الخضراء) · `/drive`+`/deliver`+`/business`+`/help/[topic]` (FAQ: أرباح SAR→وصف نسبي، Mada/STC Pay→"محفظتك الرقمية المدعومة"، ZATCA/FTA→"الجهات الضريبية المحلية"، "هل تعمل بالإمارات/قطر؟"→"هل القيادة متاحة في مدينتي؟") · `/careers` (metadata) · `/contact` ("مكتب الرياض"→"المقر الرئيسي" + TODO للهاتف) · `/legal/terms` (تعليق TODO قانوني فقط فوق الفصل 8، بلا تعديل النص).
+- **✅ `/cities` (أكبر بند):** أُنشئ `apps/landing/src/components/CitiesLive.tsx` (`'use client'`) يستهلك `activeRegions()` (من L3، `lib/riderAuth.ts`) لعرض قسم "متاح الآن" **مباشرةً من قاعدة البيانات** (مع حالة تحميل/فراغ). القائمة المُنسَّقة "قريباً" أصبحت بلا حقل `status` (كل عناصرها قادمة)، والرياض أُزيلت منها لأنها تُعرض تلقائياً عبر `CitiesLive` إن كانت مفعّلة. `liveCount`/`soonCount` استُبدلا بـ`soonCount = cities.length`.
+- **✅ التحقق:** `npx tsc --noEmit -p apps/landing/tsconfig.json` = 0 أخطاء. `next build` (export ثابت) = ناجح (`/cities` 2.72kB). تحقّق نهائي: `grep -riE "الخليج|gulf|zatca|fta|mada|stc pay|vision 2030|green initiative|saudi only|in uae or qatar"` على `apps/landing/src` = **بلا نتائج** (عدا `/newsroom` التاريخي، مُستبعَد بالخطة كسجل أخبار وقائعي). فحص "ر.س/SAR" = بلا نتائج.
+- **⏭️ قرارات بانتظار المالك (مُعلَّمة TODO، لا تحجب):** نص الفصل 8 في `/legal/terms` (الاختصاص القضائي) · رقم هاتف `+966 11 000 0000` في `/contact` · رقم TAM عالمي حقيقي في `/investors`.
+- **▶️ التالي (بالترتيب المعتمَد):** L4 (دالة `isHash()` في `Hero.tsx` لأزرار CTA + تدقيق نقر فعلي عبر 27 مساراً×لغتين) ثم L2 (تحسينات `riderAuth.ts`/`AccountClient.tsx`: أخطاء مُصنَّفة، إعادة إرسال OTP، مؤشر خطوات) ثم L5 (شعار HA+arrow في Header/Footer + `gen-web.js`) ثم L6 (أقسام "أفضل من Uber").
+
 ## 🐛 إصلاح تعليق تطبيق السائق بعد الدخول + لوجو السائق (2026-06-15)
 - **✅ السبب الجذري (التعليق على شاشة اللوجو):** حلقة redirect لا نهائية في `app.dart` منذ PR #149 — سائق جديد (`isNewDriver=true`) يصل `/onboarding`، الشرط الثاني يطابق `loc=='/onboarding'` ويُعيد `/home`، فيُعاد تطابق الشرط الأول (`isNewDriver && loc!='/onboarding'`) ويُعيد `/onboarding`... → GoRouter يرمي استثناء تجاوز حد redirect ويتجمّد التنقّل بعد أي تسجيل دخول لسائق جديد.
 - **✅ الإصلاح (PR #156، مدموج):** `redirect` في `app.dart` صار بوّابة صارمة: `if (auth.isNewDriver) return loc=='/onboarding' ? null : '/onboarding';`. + حدث جديد `AuthOnboardingCompleted` (`auth_event.dart`/`auth_bloc.dart`) يُحوّل `isNewDriver→false` عند إنهاء التسجيل، يُبعث من `aurora_onboarding_screen._submit()` قبل `context.go('/home')`. `flutter analyze`=10 (قديمة فقط، كما PRs السابقة).

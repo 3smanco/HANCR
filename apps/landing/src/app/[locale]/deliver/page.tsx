@@ -183,7 +183,7 @@ export default function DeliverPage({ params }: { params: { locale: string } }) 
                 },
                 {
                   q: 'متى تصلني الأرباح؟',
-                  a: 'فوراً عند انتهاء الطلب. يمكنك السحب أي وقت لحسابك البنكي أو Mada أو STC Pay.',
+                  a: 'فوراً عند انتهاء الطلب. يمكنك السحب أي وقت إلى حسابك البنكي أو محفظتك الرقمية المدعومة.',
                 },
               ]
             : [
@@ -197,7 +197,7 @@ export default function DeliverPage({ params }: { params: { locale: string } }) 
                 },
                 {
                   q: 'When do earnings arrive?',
-                  a: 'Immediately on order completion. Withdraw anytime to bank, Mada, or STC Pay.',
+                  a: 'Immediately on order completion. Withdraw anytime to your bank account or a supported digital wallet.',
                 },
               ]
         }

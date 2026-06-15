@@ -42,7 +42,7 @@ const TOPICS: Record<string, { ar: TopicContent; en: TopicContent }> = {
       faqs: [
         { q: 'كيف أنضم كسائق؟', a: 'املأ نموذج /drive، حمِّل وثائقك، وانتظر اعتماد فريقنا خلال 48 ساعة.' },
         { q: 'ما متطلبات السيارة؟', a: 'موديل 2014 أو أحدث، استمارة سارية، وتأمين شامل.' },
-        { q: 'كيف أسحب أرباحي؟', a: 'من تبويب "المحفظة" → "سحب" → اختر طريقة (بنك / Mada / STC Pay).' },
+        { q: 'كيف أسحب أرباحي؟', a: 'من تبويب "المحفظة" → "سحب" → اختر طريقة (حسابك البنكي أو محفظتك الرقمية المدعومة).' },
         { q: 'كيف أُعدِّل ساعات عملي؟', a: 'فعِّل أو أوقف وضعك "متاح" من الشاشة الرئيسية في أي وقت.' },
         { q: 'ماذا أفعل إذا تأخر الراكب؟', a: 'انتظر 5 دقائق ثم يمكنك الإلغاء برسوم تُحتسَب لك.' },
       ],
@@ -53,7 +53,7 @@ const TOPICS: Record<string, { ar: TopicContent; en: TopicContent }> = {
       faqs: [
         { q: 'How do I join as a driver?', a: 'Fill the /drive form, upload your documents, wait for approval within 48 hours.' },
         { q: 'What are the vehicle requirements?', a: '2014 model or newer, valid registration, and comprehensive insurance.' },
-        { q: 'How do I withdraw earnings?', a: 'Wallet tab → Withdraw → pick method (bank / Mada / STC Pay).' },
+        { q: 'How do I withdraw earnings?', a: 'Wallet tab → Withdraw → pick a method (your bank account or a supported digital wallet).' },
         { q: 'How do I adjust my working hours?', a: 'Toggle your "Available" status from the home screen anytime.' },
         { q: 'What if the rider is late?', a: 'Wait 5 minutes, then you can cancel with a fee credited to you.' },
       ],
@@ -65,7 +65,7 @@ const TOPICS: Record<string, { ar: TopicContent; en: TopicContent }> = {
       intro: 'إدارة طرق الدفع والفواتير.',
       faqs: [
         { q: 'كيف أضيف بطاقة جديدة؟', a: 'الحساب → طرق الدفع → "إضافة بطاقة". نستخدم HyperPay و Moyasar للتشفير الكامل.' },
-        { q: 'هل تقبلون STC Pay و Apple Pay؟', a: 'نعم، كلاهما مدعوم.' },
+        { q: 'هل تقبلون المحافظ الرقمية مثل Apple Pay؟', a: 'نعم، إضافة إلى بطاقات الدفع الرئيسية.' },
         { q: 'متى تُخصم تكلفة الرحلة؟', a: 'فور انتهاء الرحلة وقبول السعر النهائي.' },
         { q: 'كيف أحصل على فاتورة؟', a: 'الفواتير ترسَل تلقائياً للبريد المسجَّل + متاحة في تبويب "الرحلات السابقة".' },
       ],
@@ -75,7 +75,7 @@ const TOPICS: Record<string, { ar: TopicContent; en: TopicContent }> = {
       intro: 'Manage payment methods and invoices.',
       faqs: [
         { q: 'How do I add a new card?', a: 'Account → Payment methods → "Add card". We use HyperPay and Moyasar with full encryption.' },
-        { q: 'Do you accept STC Pay and Apple Pay?', a: 'Yes, both are supported.' },
+        { q: 'Do you accept digital wallets like Apple Pay?', a: 'Yes, along with major debit and credit cards.' },
         { q: 'When is the ride cost charged?', a: 'Right after the ride ends and the final price is accepted.' },
         { q: 'How do I get an invoice?', a: 'Invoices are auto-sent to your registered email + available in the "Past trips" tab.' },
       ],

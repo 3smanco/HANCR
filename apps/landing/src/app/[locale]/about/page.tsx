@@ -20,8 +20,8 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
     title: t(locale, 'nav.about'),
     description:
       locale === 'ar'
-        ? 'مهمتنا في HANCR — تبسيط التنقل في المنطقة العربية، بكفاءة وأمان.'
-        : 'Our mission at HANCR — simplifying mobility across MENA with efficiency and safety.',
+        ? 'مهمتنا في HANCR — تبسيط التنقل حول العالم، بكفاءة وأمان.'
+        : 'Our mission at HANCR — simplifying mobility everywhere, with efficiency and safety.',
   };
 }
 
@@ -45,7 +45,7 @@ export default function AboutPage({ params }: { params: { locale: string } }) {
               نُيسِّر التنقل
               <br />
               <span className="bg-gradient-to-r from-ember to-ember-light bg-clip-text text-transparent">
-                لكل من في الخليج.
+                لكل شخص، في كل مكان.
               </span>
             </>
           ) : (
@@ -53,7 +53,7 @@ export default function AboutPage({ params }: { params: { locale: string } }) {
               Making mobility easier
               <br />
               <span className="bg-gradient-to-r from-ember to-ember-light bg-clip-text text-transparent">
-                for everyone in the Gulf.
+                for everyone, everywhere.
               </span>
             </>
           )
@@ -81,8 +81,8 @@ export default function AboutPage({ params }: { params: { locale: string } }) {
           </h2>
           <p>
             {isAr
-              ? 'بدأت HANCR من ملاحظة بسيطة: السائقون في المنطقة العربية يدفعون عمولات مرتفعة لمنصات عالمية لا تفهم احتياجاتهم، والركاب يدفعون أسعاراً متذبذبة بلا وضوح. أردنا أن نبني بديلاً محلياً، يحترم الجميع.'
-              : 'HANCR started from a simple observation: drivers in the Arab region pay high commissions to global platforms that don\'t understand their needs, and riders pay opaque, fluctuating prices. We wanted to build a local alternative that respects everyone.'}
+              ? 'بدأت HANCR من ملاحظة بسيطة: السائقون حول العالم يدفعون عمولات مرتفعة لمنصات لا تفهم احتياجاتهم المحلية، والركاب يدفعون أسعاراً متذبذبة بلا وضوح. أردنا أن نبني بديلاً يحترم الجميع، في كل مدينة نعمل بها.'
+              : 'HANCR started from a simple observation: drivers everywhere pay high commissions to platforms that don\'t understand their local needs, and riders pay opaque, fluctuating prices. We wanted to build an alternative that respects everyone, in every city we operate in.'}
           </p>
           <p>
             {isAr
@@ -123,10 +123,10 @@ export default function AboutPage({ params }: { params: { locale: string } }) {
           },
           {
             icon: Globe2,
-            title: isAr ? 'طموح إقليمي' : 'Regional ambition',
+            title: isAr ? 'طموح عالمي' : 'Global ambition',
             description: isAr
-              ? 'هدفنا أن نكون منصة التنقل الأولى في كل دولة عربية.'
-              : 'Our goal is to be the leading mobility platform in every Arab country.',
+              ? 'هدفنا أن نكون منصة التنقل المفضّلة في كل مدينة نعمل بها، حول العالم.'
+              : 'Our goal is to be the preferred mobility platform in every city we operate in, around the world.',
           },
         ]}
         columns={4}

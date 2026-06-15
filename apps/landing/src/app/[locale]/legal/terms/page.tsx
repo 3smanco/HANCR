@@ -82,8 +82,8 @@ export default function TermsPage({ params }: { params: { locale: string } }) {
 
       <LegalSection title={isAr ? '8. القانون الحاكم' : '8. Governing law'}>
         {isAr
-          ? 'تخضع هذه الشروط لأنظمة المملكة العربية السعودية. أي نزاع يحلُّ أمام محاكم الرياض.'
-          : 'These terms are governed by the laws of the Kingdom of Saudi Arabia. Any dispute is resolved in Riyadh courts.'}
+          ? 'تخضع هذه الشروط لقوانين الدولة التي تُقدَّم فيها الخدمة إليك، ويُحلُّ أي نزاع أمام المحاكم المختصة في تلك الدولة، دون الإخلال بأي حقوق إلزامية يكفلها لك قانون بلد إقامتك.'
+          : 'These terms are governed by the laws of the country in which the service is provided to you, and any dispute is resolved before the competent courts of that country, without prejudice to any mandatory rights granted to you under the laws of your country of residence.'}
       </LegalSection>
 
       <LegalSection title={isAr ? '9. التواصل' : '9. Contact'}>

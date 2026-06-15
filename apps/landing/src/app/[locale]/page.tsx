@@ -20,6 +20,7 @@ import {
 import { localizedHref } from '@/lib/locale';
 import { Hero } from '@/components/Hero';
 import { ValuePropsGrid } from '@/components/ValuePropsGrid';
+import { FeatureSplit } from '@/components/FeatureSplit';
 import { AppDownloadCTA } from '@/components/AppDownloadCTA';
 
 export default function HomePage({ params }: { params: { locale: string } }) {
@@ -55,8 +56,8 @@ export default function HomePage({ params }: { params: { locale: string } }) {
         }
         subtitle={
           isAr
-            ? 'منصة التنقل الذكي الأولى في الخليج. رحلات، توصيل، ومشاركة سيارات — في تطبيق واحد آمن وسهل.'
-            : "The Gulf's leading smart mobility platform. Rides, delivery, and carpooling — in one safe and easy app."
+            ? 'منصة التنقل الذكي لكل مكان. رحلات، توصيل، ومشاركة سيارات — في تطبيق واحد آمن وسهل.'
+            : 'The smart mobility platform for everywhere. Rides, delivery, and carpooling — in one safe and easy app.'
         }
         primaryCta={{
           href: localizedHref(locale, '/ride'),
@@ -113,13 +114,41 @@ export default function HomePage({ params }: { params: { locale: string } }) {
         </div>
       </section>
 
+      {/* ── Safety differentiator ── */}
+      <FeatureSplit
+        accent="coal"
+        reverse
+        icon={Shield}
+        eyebrow={isAr ? 'أمانك أولاً' : 'Your safety first'}
+        title={isAr ? 'مصمَّمة لتحميك في كل رحلة.' : 'Built to protect you on every trip.'}
+        description={
+          isAr
+            ? 'الأمان ليس ميزة إضافية لدينا — إنه أساس المنصّة. كل سائق موثَّق، وكل رحلة قابلة للمشاركة والتتبُّع لحظياً.'
+            : "Safety isn't an add-on for us — it's the foundation of the platform. Every driver is verified, and every trip is shareable and tracked in real time."
+        }
+        bullets={
+          isAr
+            ? [
+                'توثيق هوية + خلفية لكل سائق قبل قبوله',
+                'مشاركة الرحلة المباشرة مع جهاتك الموثوقة',
+                'زر SOS مدمج ودعم بشري 24/7',
+              ]
+            : [
+                'ID + background verification for every driver',
+                'Live trip-sharing with your trusted contacts',
+                'Built-in SOS button and 24/7 human support',
+              ]
+        }
+        cta={{ href: localizedHref(locale, '/safety'), label: isAr ? 'اعرف المزيد عن الأمان' : 'Learn about safety' }}
+      />
+
       {/* ── Value props ── */}
       <ValuePropsGrid
         heading={isAr ? 'لماذا HANCR؟' : 'Why HANCR?'}
         subheading={
           isAr
-            ? 'صُمِّمت لتُلبّي احتياجات الخليج، بمعايير عالمية.'
-            : 'Designed for the Gulf, built to world-class standards.'
+            ? 'صُمِّمت لتُلبّي احتياجاتك، بمعايير عالمية.'
+            : 'Designed for you, built to world-class standards.'
         }
         items={[
           {

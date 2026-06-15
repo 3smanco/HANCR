@@ -7,6 +7,7 @@ import {
   t,
 } from '@/i18n/messages';
 import { Hero } from '@/components/Hero';
+import { CitiesLive } from '@/components/CitiesLive';
 
 export function generateStaticParams() {
   return SUPPORTED_LOCALES.map((locale) => ({ locale }));
@@ -18,8 +19,8 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
     title: t(locale, 'footer.cities'),
     description:
       locale === 'ar'
-        ? 'المدن التي تخدمها HANCR — السعودية، الإمارات، وقطر.'
-        : 'Cities served by HANCR — Saudi Arabia, UAE, and Qatar.',
+        ? 'المدن التي تخدمها HANCR، وخطة التوسُّع القادمة.'
+        : "Cities HANCR serves today, and what's coming next.",
   };
 }
 
@@ -32,7 +33,6 @@ function pick(value: string): Locale {
 interface City {
   name: string;
   country: string;
-  status: 'live' | 'soon';
 }
 
 export default function CitiesPage({ params }: { params: { locale: string } }) {
@@ -41,36 +41,33 @@ export default function CitiesPage({ params }: { params: { locale: string } }) {
 
   const cities: City[] = isAr
     ? [
-        { name: 'الرياض', country: 'السعودية', status: 'live' },
-        { name: 'جدة', country: 'السعودية', status: 'soon' },
-        { name: 'الدمام', country: 'السعودية', status: 'soon' },
-        { name: 'الخبر', country: 'السعودية', status: 'soon' },
-        { name: 'مكة المكرمة', country: 'السعودية', status: 'soon' },
-        { name: 'المدينة المنورة', country: 'السعودية', status: 'soon' },
-        { name: 'الدوحة', country: 'قطر', status: 'soon' },
-        { name: 'دبي', country: 'الإمارات', status: 'soon' },
-        { name: 'أبوظبي', country: 'الإمارات', status: 'soon' },
-        { name: 'الكويت', country: 'الكويت', status: 'soon' },
-        { name: 'المنامة', country: 'البحرين', status: 'soon' },
-        { name: 'مسقط', country: 'عُمان', status: 'soon' },
+        { name: 'جدة', country: 'السعودية' },
+        { name: 'الدمام', country: 'السعودية' },
+        { name: 'الخبر', country: 'السعودية' },
+        { name: 'مكة المكرمة', country: 'السعودية' },
+        { name: 'المدينة المنورة', country: 'السعودية' },
+        { name: 'الدوحة', country: 'قطر' },
+        { name: 'دبي', country: 'الإمارات' },
+        { name: 'أبوظبي', country: 'الإمارات' },
+        { name: 'الكويت', country: 'الكويت' },
+        { name: 'المنامة', country: 'البحرين' },
+        { name: 'مسقط', country: 'عُمان' },
       ]
     : [
-        { name: 'Riyadh', country: 'Saudi Arabia', status: 'live' },
-        { name: 'Jeddah', country: 'Saudi Arabia', status: 'soon' },
-        { name: 'Dammam', country: 'Saudi Arabia', status: 'soon' },
-        { name: 'Khobar', country: 'Saudi Arabia', status: 'soon' },
-        { name: 'Makkah', country: 'Saudi Arabia', status: 'soon' },
-        { name: 'Madinah', country: 'Saudi Arabia', status: 'soon' },
-        { name: 'Doha', country: 'Qatar', status: 'soon' },
-        { name: 'Dubai', country: 'UAE', status: 'soon' },
-        { name: 'Abu Dhabi', country: 'UAE', status: 'soon' },
-        { name: 'Kuwait City', country: 'Kuwait', status: 'soon' },
-        { name: 'Manama', country: 'Bahrain', status: 'soon' },
-        { name: 'Muscat', country: 'Oman', status: 'soon' },
+        { name: 'Jeddah', country: 'Saudi Arabia' },
+        { name: 'Dammam', country: 'Saudi Arabia' },
+        { name: 'Khobar', country: 'Saudi Arabia' },
+        { name: 'Makkah', country: 'Saudi Arabia' },
+        { name: 'Madinah', country: 'Saudi Arabia' },
+        { name: 'Doha', country: 'Qatar' },
+        { name: 'Dubai', country: 'UAE' },
+        { name: 'Abu Dhabi', country: 'UAE' },
+        { name: 'Kuwait City', country: 'Kuwait' },
+        { name: 'Manama', country: 'Bahrain' },
+        { name: 'Muscat', country: 'Oman' },
       ];
 
-  const liveCount = cities.filter((c) => c.status === 'live').length;
-  const soonCount = cities.filter((c) => c.status === 'soon').length;
+  const soonCount = cities.length;
 
   return (
     <>
@@ -95,8 +92,8 @@ export default function CitiesPage({ params }: { params: { locale: string } }) {
         }
         subtitle={
           isAr
-            ? `${liveCount} مدينة تعمل الآن · ${soonCount} مدينة قريباً.`
-            : `${liveCount} city live · ${soonCount} cities coming soon.`
+            ? `متاحة الآن، و${soonCount} مدينة قادمة قريباً — ونتوسَّع باستمرار.`
+            : `Live now, with ${soonCount} more cities coming soon — and we're expanding continuously.`
         }
         primaryCta={{
           href: '/downloads/hancr-rider.apk',
@@ -104,41 +101,35 @@ export default function CitiesPage({ params }: { params: { locale: string } }) {
         }}
       />
 
+      <section className="py-8 px-6">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-lg font-bold text-pearl mb-4">
+            {isAr ? 'متاح الآن' : 'Live now'}
+          </h2>
+          <CitiesLive locale={locale} />
+        </div>
+      </section>
+
       <section className="py-12 px-6">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {cities.map((c) => (
-            <div
-              key={c.name}
-              className={`bg-ash/60 border rounded-2xl p-5 transition ${
-                c.status === 'live'
-                  ? 'border-ember/40 shadow-ember'
-                  : 'border-stone/60 hover:border-ember/30'
-              }`}
-            >
-              <MapPin
-                className={`w-7 h-7 mb-3 ${
-                  c.status === 'live' ? 'text-ember' : 'text-muted'
-                }`}
-              />
-              <h3 className="font-bold text-pearl text-base mb-1">{c.name}</h3>
-              <p className="text-muted text-xs mb-3">{c.country}</p>
-              <span
-                className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                  c.status === 'live'
-                    ? 'bg-success/20 text-success'
-                    : 'bg-ember/15 text-ember'
-                }`}
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-lg font-bold text-pearl mb-4">
+            {isAr ? 'قريباً' : 'Coming soon'}
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {cities.map((c) => (
+              <div
+                key={c.name}
+                className="bg-ash/60 border border-stone/60 hover:border-ember/30 rounded-2xl p-5 transition"
               >
-                {c.status === 'live'
-                  ? isAr
-                    ? 'متاح الآن'
-                    : 'Live now'
-                  : isAr
-                    ? 'قريباً'
-                    : 'Coming soon'}
-              </span>
-            </div>
-          ))}
+                <MapPin className="w-7 h-7 mb-3 text-muted" />
+                <h3 className="font-bold text-pearl text-base mb-1">{c.name}</h3>
+                <p className="text-muted text-xs mb-3">{c.country}</p>
+                <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-ember/15 text-ember">
+                  {isAr ? 'قريباً' : 'Coming soon'}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
