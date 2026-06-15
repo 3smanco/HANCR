@@ -11,7 +11,6 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/driver_gql.dart';
 import '../../core/models/driver_model.dart';
 import '../../core/services/document_upload_service.dart';
-import '../../core/utils/external_launch.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/motion/motion.dart';
@@ -21,6 +20,7 @@ import '../wallet/aurora_payout_methods_screen.dart';
 import 'aurora_driver_documents_screen.dart';
 import 'language_screen.dart';
 import '../announcements/aurora_announcements_screen.dart';
+import '../help/aurora_help_center_screen.dart';
 
 class AuroraDriverProfileTab extends StatelessWidget {
   const AuroraDriverProfileTab({super.key});
@@ -87,8 +87,11 @@ class AuroraDriverProfileTab extends StatelessWidget {
                       Expanded(child: _quickTile(
                         icon: Icons.support_agent,
                         label: tr('support'),
-                        onTap: () =>
-                            launchSupportEmail(context, subject: 'دعم السائق'),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) =>
+                                  const AuroraHelpCenterScreen()),
+                        ),
                       )),
                     ],
                   ),
