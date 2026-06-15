@@ -4,6 +4,17 @@
 > ابدأ أي محادثة جديدة بقراءته (وحده يكفي للسياق) بدل تحميل المهارة الضخمة أو قراءة عشرات الملفات.
 > آخر تحديث: 2026-06-15
 
+## 🚖 تطوير تطبيق السائق (2026-06-15) — `.claude/plans/zesty-wiggling-ritchie.md`
+خطة 6 مراحل لتطوير `apps/driver-app` (Flutter + BLoC + go_router). **اكتشاف مهم:** التطبيق أكمل ممّا بدا — نجوم الكابتن + المزايدة + الوثائق + خريطة الطلب الحرارية + رسم أرباح 7 أيام **كانت مبنية ومربوطة بالباك أصلاً**. الفجوات الحقيقية: الدخول القبيح + سجل الرحلات.
+- **✅ سبب «لا يعمل» (تشخيص):** الكود سليم (AuthBloc/AppConfig صحيحان؛ زر Google يفشل بلطف بلا انهيار). السبب تشغيلي: APK قديم بُني بلا `ENV=production` (يكلّم محاكي `10.0.2.2:3001`) و/أو OTP لا يصل (Twilio تجريبي 21211/21608). الحل: APK إنتاج جديد + هواتف اختبار (`+966500000010`←`123456`).
+- **✅ Phase 1 — دخول Aurora فاخر (PR #145):** 4 شاشات `aurora_{phone,otp,email,email_otp}_screen` تستبدل القديمة (HancrColors): خلفية سينمائية + هالات ember + هوية HANCR + هيرو الكابتن + كشف دولة تلقائي (`country_detect` منسوخ من الراكب) + هابتيك. اجتماعي: بريد (حيّ) + Google (يظهر فقط عند `GOOGLE_SERVER_CLIENT_ID`). Apple مؤجَّل (يحتاج حزمة+`driverAppleAuth`+Apple Developer). موصول بـ`AuthBloc` (verify بـ`code`). `flutter analyze`=0.
+- **✅ Phase 2 — تحليلات الأرباح (PR #146):** خريطة الطلب الحرارية (`demandZones`→Circles) + رسم 7 أيام (`myDailyEarnings`) موجودان أصلاً؛ أُضيف شريط `myEarningsSummary` (متاح/معلّق/إجمالي) في تبويب الأرباح.
+- **✅ Phase 3+4 — موجودة أصلاً:** `aurora_stars_tab`(`myStars`) + `driver_bids_screen`(`availableBids`/`submitBidOffer`) + `aurora_driver_documents_screen`(`myDocuments`/upload + `approvalStatus`). مربوطة بالكامل.
+- **✅ Phase 5 — سجل الرحلات (PR #147، منشور):** **backend جديد** `completedOrders(limit,offset)` في `driver-api/order.resolver` + `OrderService.getCompletedOrders` (رحلات `Finished` scoped للسائق). `tsc`=0. **منشور** (`pm2 restart driver-api`، api 200، الحقل حيّ). App: `AuroraTripHistoryScreen` (قائمة مُرقّمة، تمرير لانهائي) من تبويب الأرباح.
+- **✅ Phase 6 — صقل + بناء ونشر APK (منشور):** `flutter analyze` كامل = 0 أخطاء (10 لِنتات قديمة فقط في ملفات لم تُمَس). بُني APK إنتاج **arm64 موقّع، 42.4MB** (ENV=production + مفتاح Maps أندرويد `AIzaSyBsz0l4...` في المانيفست + GOOGLE_SERVER_CLIENT_ID فارغ). **منشور حيّاً:** `hancr.com/downloads/hancr-driver.apk` (HTTP 200، 42,385,116 بايت). النشر: scp لـ`/tmp` ثم `sudo cp` لـ`/var/www/hancr-landing/downloads/` (ملك www-data، sudo بلا كلمة سر يعمل).
+  - **⚠️ درس بناء:** ذاكرة الجهاز محدودة → خفّض `gradle.properties` مؤقّتاً لـ`-Xmx2g`+`daemon=false`+`parallel=false`+`workers.max=1`، اقتل عمليات java/gradle/dart/gen_snapshot أولاً، ابنِ arm64 فقط (~223ث assembleRelease)، ثم `git checkout -- gradle.properties` للعودة لـ4g/parallel.
+  - **للمستخدم:** ألغِ تثبيت التطبيق القديم ثم ثبّت الجديد (المفتاح/ENV يُقرآن عند البناء). دخول بهاتف اختبار `+966500000010`←`123456` (Twilio تجريبي لا يرسل لأرقام حقيقية حتى ترقية المالك).
+
 ## 🔍 فحص شامل للوحة التحكم (2026-06-15) — كل شيء سليم + إصلاح واحد
 - **البناء/التحويل:** `tsc` لـ admin-api + **rider-api + driver-api** = 0 أخطاء (تغييرات `@hancr/database` المشتركة متوافقة مع الأبّات — إعادة تشغيلها آمنة). `next build` للوحة = نظيف (45 صفحة).
 - **الاختبارات:** **93/93 jest** أخضر (14 suite).
