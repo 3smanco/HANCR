@@ -122,6 +122,10 @@ export class RiderEntity {
   @Column({ type: 'jsonb', nullable: true, name: 'two_factor_recovery' })
   twoFactorRecovery?: string[];
 
+  /** تاريخ طلب حذف الحساب (soft-delete) — null = الحساب فعّال */
+  @Column({ type: 'timestamp', nullable: true, name: 'deleted_at' })
+  deletedAt?: Date;
+
   /** الرحلات */
   @OneToMany(() => OrderEntity, (order) => order.rider)
   orders!: OrderEntity[];

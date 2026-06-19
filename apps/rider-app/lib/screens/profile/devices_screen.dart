@@ -81,6 +81,34 @@ class _DevicesScreenState extends State<DevicesScreen> {
     await _load();
   }
 
+  Future<void> _revokeOthers() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.coal,
+        content:
+            Text(tr('signOutOthersConfirm'), style: AuroraText.bodyMedium),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(tr('cancel'),
+                style: TextStyle(color: AuroraColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(tr('confirm'),
+                style: TextStyle(color: AuroraColors.danger)),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final client = await GraphQLClientManager.get();
+    await client.mutate(
+        MutationOptions(document: gql(revokeOtherDevicesMutation)));
+    await _load();
+  }
+
   IconData _platformIcon(String? p) {
     switch (p) {
       case 'ios':
@@ -128,7 +156,16 @@ class _DevicesScreenState extends State<DevicesScreen> {
                         Text(tr('devicesInfo'),
                             style:
                                 AuroraText.bodySmall.copyWith(height: 1.5)),
-                        const SizedBox(height: AuroraSpacing.lg),
+                        const SizedBox(height: AuroraSpacing.md),
+                        if (_devices.where((d) => d['current'] != true)
+                            .isNotEmpty) ...[
+                          AuroraButton.secondary(
+                            label: tr('signOutOthers'),
+                            icon: Icons.logout,
+                            onPressed: _revokeOthers,
+                          ),
+                          const SizedBox(height: AuroraSpacing.lg),
+                        ],
                         ..._devices.map(_deviceTile),
                         if (_devices.isEmpty)
                           Padding(

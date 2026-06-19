@@ -1,0 +1,35 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "rider-api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "rider-api"],
+      "port": 3000
+    },
+    {
+      "name": "driver-api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "driver-api"],
+      "port": 3001
+    },
+    {
+      "name": "admin-api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "admin-api"],
+      "port": 3002
+    },
+    {
+      "name": "admin-panel",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev", "apps/admin-panel", "-p", "3003"],
+      "port": 3003
+    },
+    {
+      "name": "landing",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev", "apps/landing", "-p", "4000"],
+      "port": 4000
+    }
+  ]
+}

@@ -831,4 +831,50 @@ const Map<String, Map<String, String>> _t = {
     'en': "You'll be signed out to add another account (your current account stays saved for switching)."
   },
   'accountSwitched': {'ar': 'تم تبديل الحساب', 'en': 'Account switched'},
+
+  // ─── الدفعة الثالثة: المظهر ───
+  'appearanceCurrent': {'ar': 'داكن', 'en': 'Dark'},
+  'appearanceSystem': {'ar': 'حسب إعدادات النظام', 'en': 'System default'},
+  'appearanceSystemSub': {'ar': 'يتبع مظهر هاتفك تلقائياً', 'en': "Follows your phone's appearance"},
+  'appearanceLight': {'ar': 'الوضع الفاتح', 'en': 'Light mode'},
+  'appearanceLightSub': {'ar': 'خلفية فاتحة ونصوص داكنة', 'en': 'Light background, dark text'},
+  'appearanceDarkSub': {'ar': 'خلفية داكنة ونصوص فاتحة (موصى)', 'en': 'Dark background, light text (recommended)'},
+  'appearanceLightSoon': {'ar': 'الوضع الفاتح قيد التطوير — يبقى التطبيق داكناً حالياً بهوية HANCR، وسيُحفظ اختيارك.', 'en': 'Light mode is in development — the app stays dark in HANCR identity for now, and your choice is saved.'},
+
+  // ─── الدفعة الثالثة: طرق الدخول ───
+  'loginMethods': {'ar': 'طرق تسجيل الدخول', 'en': 'Login methods'},
+  'loginMethodsSub': {'ar': 'الهاتف · Google · البيومترية', 'en': 'Phone · Google · biometric'},
+  'verified': {'ar': 'موثَّق', 'en': 'Verified'},
+  'linked': {'ar': 'مرتبط', 'en': 'Linked'},
+  'notLinked': {'ar': 'غير مرتبط', 'en': 'Not linked'},
+  'link': {'ar': 'ربط', 'en': 'Link'},
+  'biometric': {'ar': 'الدخول بالبصمة', 'en': 'Biometric unlock'},
+  'biometricSub': {'ar': 'بصمة/الوجه لفتح التطبيق (هذا الجهاز)', 'en': 'Fingerprint/Face to unlock (this device)'},
+  'phoneVerified': {'ar': 'رقم هاتفك موثَّق', 'en': 'Your phone number is verified'},
+
+  // ─── الدفعة الثالثة: حذف الحساب + الخصوصية ───
+  'locationSharing': {'ar': 'مشاركة الموقع', 'en': 'Location sharing'},
+  'locationSharingSub': {'ar': 'مشاركة موقعك أثناء الرحلات', 'en': 'Share your location during trips'},
+  'thirdPartyData': {'ar': 'بيانات الطرف الثالث', 'en': 'Third-party data'},
+  'thirdPartyDataSub': {'ar': 'مشاركة بيانات مع خدمات مرتبطة', 'en': 'Share data with connected services'},
+  'personalizedAds': {'ar': 'إعلانات مخصّصة', 'en': 'Personalized ads'},
+  'personalizedAdsSub': {'ar': 'عروض بناءً على استخدامك', 'en': 'Offers based on your usage'},
+  'deleteAccount': {'ar': 'حذف الحساب', 'en': 'Delete account'},
+  'deleteAccountSub': {'ar': 'طلب حذف حسابك نهائياً', 'en': 'Request permanent account deletion'},
+  'deleteAccountConfirm1': {'ar': 'سيؤدي هذا إلى تعطيل حسابك وإبطال كل جلساتك. هل تريد المتابعة؟', 'en': 'This will deactivate your account and end all your sessions. Continue?'},
+  'deleteAccountConfirm2': {'ar': 'تأكيد أخير: لا يمكن التراجع عن طلب الحذف من التطبيق. احذف الحساب؟', 'en': 'Final confirmation: account deletion cannot be undone from the app. Delete account?'},
+
+  // ─── الدفعة الثالثة: لوحة فحص الأمان ───
+  'securityCheckup': {'ar': 'فحص الأمان', 'en': 'Security check-up'},
+  'checkupTasks': {'ar': 'مهام الأمان', 'en': 'Security tasks'},
+  'checkupAllGood': {'ar': 'حسابك محميّ بالكامل', 'en': 'Your account is fully protected'},
+  'checkupHasGaps': {'ar': 'هناك خطوات لتعزيز حمايتك', 'en': 'There are steps to strengthen your protection'},
+  'taskEnable2fa': {'ar': 'فعّل التحقق بخطوتين', 'en': 'Enable two-factor authentication'},
+  'taskAddEmail': {'ar': 'أضف بريداً إلكترونياً للاسترداد', 'en': 'Add an email for recovery'},
+  'taskTrustedContact': {'ar': 'أضف جهة اتصال موثوقة للطوارئ', 'en': 'Add a trusted emergency contact'},
+  'taskReviewDevices': {'ar': 'راجع أجهزتك النشطة', 'en': 'Review your active devices'},
+
+  // ─── الدفعة الثالثة: الأجهزة ───
+  'signOutOthers': {'ar': 'تسجيل الخروج من كل الأجهزة الأخرى', 'en': 'Sign out of all other devices'},
+  'signOutOthersConfirm': {'ar': 'إنهاء كل الجلسات عدا هذا الجهاز؟', 'en': 'End all sessions except this device?'},
 };

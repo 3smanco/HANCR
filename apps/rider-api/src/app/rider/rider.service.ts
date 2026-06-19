@@ -88,6 +88,7 @@ export class RiderService {
       createdAt: rider.createdAt,
       teamCode: rider.teamCode,
       twoFactorEnabled: rider.twoFactorEnabled,
+      googleLinked: !!rider.googleId,
     };
   }
 }

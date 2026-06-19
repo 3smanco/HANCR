@@ -275,6 +275,15 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
+- **🟩 قسم "الحساب" — الدفعة الثالثة (الخصوصية + الأمان + المظهر + فحص الأمان) — الكود مكتمل ومُتحقَّق (2026-06-19).** الخطة: `C:\Users\7bici\.claude\plans\gleaming-snuggling-wind.md`.
+  - **التحقق:** rider/driver/admin-api `tsc=0` · rider-app `flutter analyze=0 errors`.
+  - **المظهر:** `ThemeController.appearanceMode` (system/light/dark) + `StorageService.saveAppearance` + ربط `themeMode` في `app.dart` + شاشة `appearance_screen.dart` (راديو، تطبيق فوري). **الهوية داكنة محفوظة:** الثيمان داكنان فالعرض يبقى داكناً (الفاتح "قريباً"، التفضيل يُحفظ). صف المظهر في الإعدادات يفتح الشاشة.
+  - **تعديل البيانات كمودال:** `edit_profile_sheet.dart` (`showEditProfileSheet`) — زر "تعديل" في تبويب Personal يفتحه بدل شاشة كاملة + شارة "موثَّق" مشتقة محلياً (الهاتف بعد OTP، البريد إن وُجد).
+  - **الخصوصية + حذف الحساب:** تبويب Privacy أُثري بمفاتيح محلية (مشاركة موقع/طرف ثالث/إعلانات) + صف "حذف الحساب" (danger، تأكيد مزدوج). **backend حقيقي:** عمود `hancr_rider.deleted_at` + migration `1781700000000` + mutation `requestAccountDeletion` (deletedAt+active=false+إبطال الجلسات) + `jwt.strategy` يرفض `!active`.
+  - **الأمان:** `login_methods_screen.dart` (الهاتف موثَّق · Google مرتبط/ربط حقيقي عبر `googleLinked` المكشوف الآن في RiderType/me · بيومترية محلية · Apple "قريباً") + صف في تبويب Security. زر "تسجيل الخروج من كل الأجهزة الأخرى" في `devices_screen` ← mutation `revokeOtherDevices` (denylist كل jti عدا الحالي).
+  - **فحص الأمان:** `security_checkup_screen.dart` (حلقة حالة خضراء/برتقالية + قائمة مهام مشتقة: 2FA/بريد/جهة طوارئ/مراجعة أجهزة). بطاقة "ابدأ الفحص" في Home تفتحها (بدل Safety Hub الذي يبقى لأدوات السلامة).
+  - **⏭️ النشر المطلوب:** backend عبر PR→merge→ `git pull`+`migration:run` (deleted_at)+`pm2 restart rider-api` + إعادة بناء APK الراكب. **لم يُنشر بعد.**
+
 - **🟢 إنجاز كل المؤجَّل (الدفعة الثانية) — الكود مكتمل ومُتحقَّق (2026-06-19)، بانتظار النشر.**
   - **التحقق:** rider/driver/admin-api `tsc=0` · rider-app `flutter analyze=0 errors` (97 info/warning تجميلية).
   - **1) مزامنة الفريق مع السيرفر:** عمود `hancr_rider.team_code` + `teamCode` في `updateProfile`/`me` + `RiderModel`. `ChooseTeamScreen` يحفظ محلياً **و** يدفع للخادم.
@@ -284,7 +293,15 @@ flutter build apk --release --dart-define=ENV=production \
   - **5) الأجهزة/الجلسات:** جدول `hancr_rider_device` (jti لكل توكن) + `jti` في الـJWT + denylist Redis (`revokedJtiKey`) في `jwt.strategy`. mutations `myDevices/revokeDevice`. كل مسارات الدخول تُصدر جلسة عبر `issueSession`. شاشة `devices_screen.dart` في تبويب الأمان.
   - **6) تبديل حسابات متعدد فعلي (app-only):** `StorageService` يحفظ قائمة حسابات (token/riderId/phone/name) تبقى بعد الخروج · `activateAccount` للتبديل · مبدّل حسابات (bottom sheet) في الإعدادات + "إضافة حساب". الحسابات تُحفظ عند كل دخول ناجح.
   - **🗄️ migration:** `libs/database/src/lib/migrations/1781600000000-AddTeamTwoFactorAndDevices.ts` (idempotent، `IF NOT EXISTS`) — يُطبَّق بـ`npm run migration:run` على الخادم.
-  - **⏭️ النشر المطلوب:** (أ) backend: push→PR→merge→ `git pull`+`npm ci`+build+**`npm run migration:run`**+`pm2 restart rider-api` (driver/admin لا تتأثران سلوكياً، لا حاجة لإعادة تشغيلهما). (ب) APK الراكب: إعادة بناء arm64 ونشر. **لم يُنشر بعد.**
+  - **✅ Backend منشور ومُتحقَّق حيّاً (2026-06-19، PR #158 مدموج، main=8dae337):**
+    - الخادم: `git pull` ff (كان f917e19 خلف origin بـ2). **مهم:** pm2 يشغّل الـAPIs عبر **ts-node على المصدر مباشرة** (`ecosystem.config.js` → `node_modules/.bin/ts-node ... main.ts`) — **لا خطوة build**؛ `git pull`+`pm2 restart` يكفي. تجاهل drift في `schema.gql` (مولَّد) بـ`git checkout --` قبل السحب.
+    - migration: نجح عبر `set -a; . ./.env.prod; set +a; export DATABASE_HOST=127.0.0.1; TS_NODE_PROJECT=tsconfig.base.json node --require ts-node/register/transpile-only ./node_modules/typeorm/cli.js migration:run -d libs/database/src/lib/data-source.ts` (طبّق أيضاً migratيتين سابقتين معلّقتين: GlobalGeography + OperatorScope).
+    - `pm2 restart rider-api` → online، `api.hancr.com/rider/health/ready=200`.
+    - **مُتحقَّق حيّاً:** الحقول الجديدة في الـschema (`myDevices`/`inviteFamilyMember`→Unauthorized لا "field not found")، ودخول الاختبار `+966500000001/123456` يُصدر توكناً + `twoFactorRequired:false` + `rider{teamCode,twoFactorEnabled}` + سجّل جهازاً. **لا انحدار على الدخول.**
+    - driver/admin-api لم تُعَد تشغيلهما (لا تغيّر سلوكي).
+  - **✅ APK الراكب منشور ومُتحقَّق (2026-06-19):** arm64 إنتاجي release-signed، **46,812,411 بايت**، مفتاح Maps مُتحقَّق بـaapt. رُفع بـscp ثم `sudo cp` لـ`/var/www/hancr-landing/downloads/hancr-rider.apk`. `hancr.com/downloads/hancr-rider.apk` HTTP 200 + content-length مطابق. **بعد التثبيت: المستخدم يلغي تثبيت القديم ثم يثبّت الجديد.**
+  - **🟢 الدفعة كاملة منشورة (backend + APK) ومُتحقَّقة حيّاً.**
+- **🛠️ launch.json للخوادم المحلية (2026-06-19):** أُنشئ `HANCR/.claude/launch.json` (5 خوادم: rider-api:3000·driver-api:3001·admin-api:3002·admin-panel:3003·landing:4000). **تنبيه:** أداة المعاينة (Claude Preview MCP) جذرها `E:\` لا `E:\HANCR`، فأُنشئت نسخة بأوامر `cmd /c "cd /d E:\HANCR && ..."` في `E:\.claude\launch.json` ليعمل `preview_start`. الخمسة شُغّلت (المنافذ مربوطة؛ الـAPIs تحتاج Postgres/Redis محليين للعمل الوظيفي).
 
 
 - **🟩 قسم "الحساب" — الدفعة الثانية (Settings + Account mgmt + Family + Team) — مكتملة الكود (2026-06-19).**

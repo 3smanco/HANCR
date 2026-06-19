@@ -20,6 +20,7 @@ import '../../core/widgets/rider_avatar.dart';
 import '../rides/aurora_rides.dart';
 import 'aurora_saved_places_screen.dart';
 import 'account_management_screen.dart';
+import 'appearance_screen.dart';
 import 'choose_team_screen.dart';
 
 /// Scaffold موحّد لصفحات الحساب الفرعية بنمط Aurora.
@@ -663,11 +664,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ))),
           _navRow(Icons.light_mode_outlined, tr('appearance'),
-              subtitle: tr('appearanceDark'),
-              onTap: () => _open(_SettingsDetailScreen(
-                    title: tr('appearance'),
-                    infoText: tr('appearanceInfo'),
-                  ))),
+              subtitle: tr('appearanceCurrent'),
+              onTap: () => _open(const AppearanceScreen())),
           const SizedBox(height: AuroraSpacing.lg),
 
           // ─── تفضيلات الركوب ───

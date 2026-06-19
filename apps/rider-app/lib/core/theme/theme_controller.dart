@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql/graphql_client.dart';
 import '../graphql/gql/rider_gql.dart';
@@ -26,10 +26,44 @@ class ThemeController extends ChangeNotifier {
 
   bool _bootstrapped = false;
 
+  /// تفضيل المظهر المختار محلياً: 'system' | 'light' | 'dark'.
+  /// ملاحظة: الهوية الداكنة محفوظة — حتى يُصمَّم وضع فاتح، يبقى العرض داكناً
+  /// (theme و darkTheme كلاهما AuroraTheme.dark)، والتفضيل يُخزَّن للمستقبل.
+  String _appearanceMode = 'dark';
+  String get appearanceMode => _appearanceMode;
+
+  ThemeMode get themeMode {
+    switch (_appearanceMode) {
+      case 'light':
+        return ThemeMode.light;
+      case 'system':
+        return ThemeMode.system;
+      default:
+        return ThemeMode.dark;
+    }
+  }
+
+  /// يغيّر تفضيل المظهر ويحفظه ويعيد بناء MaterialApp.
+  Future<void> setAppearanceMode(String mode) async {
+    if (mode != 'system' && mode != 'light' && mode != 'dark') return;
+    if (mode == _appearanceMode) return;
+    _appearanceMode = mode;
+    await StorageService.saveAppearance(mode);
+    _version++;
+    notifyListeners();
+  }
+
   /// يُستدعى مرة واحدة قبل runApp. يطبّق الكاش ثم يجلب من الخادم (بدون حجب).
   Future<void> bootstrap() async {
     if (_bootstrapped) return;
     _bootstrapped = true;
+
+    // 0) تحميل تفضيل المظهر المخزَّن.
+    try {
+      _appearanceMode = await StorageService.getAppearance() ?? 'dark';
+    } catch (_) {
+      _appearanceMode = 'dark';
+    }
 
     // 1) تطبيق الكاش المحلي فوراً (إن وُجد) — لا ننتظر الشبكة.
     try {

@@ -16,6 +16,7 @@ class RiderModel extends Equatable {
   final bool active;
   final String? teamCode;
   final bool twoFactorEnabled;
+  final bool googleLinked;
 
   const RiderModel({
     required this.id,
@@ -33,6 +34,7 @@ class RiderModel extends Equatable {
     required this.active,
     this.teamCode,
     this.twoFactorEnabled = false,
+    this.googleLinked = false,
   });
 
   String get displayName {
@@ -57,6 +59,7 @@ class RiderModel extends Equatable {
         active: json['active'] as bool? ?? true,
         teamCode: json['teamCode'] as String?,
         twoFactorEnabled: json['twoFactorEnabled'] as bool? ?? false,
+        googleLinked: json['googleLinked'] as bool? ?? false,
       );
 
   RiderModel copyWith({
@@ -66,6 +69,7 @@ class RiderModel extends Equatable {
     String? avatarUrl,
     String? teamCode,
     bool? twoFactorEnabled,
+    bool? googleLinked,
   }) =>
       RiderModel(
         id: id,
@@ -83,6 +87,7 @@ class RiderModel extends Equatable {
         active: active,
         teamCode: teamCode ?? this.teamCode,
         twoFactorEnabled: twoFactorEnabled ?? this.twoFactorEnabled,
+        googleLinked: googleLinked ?? this.googleLinked,
       );
 
   @override
