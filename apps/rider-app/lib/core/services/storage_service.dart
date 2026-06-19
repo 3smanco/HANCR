@@ -47,6 +47,19 @@ class StorageService {
       _storage.write(key: _keyLang, value: code);
   static Future<String?> getLanguage() => _storage.read(key: _keyLang);
 
+  // ── تفضيل المظهر (system/light/dark) ────────────────────────────────────────
+  static const _keyAppearance = 'hancr_appearance';
+  static Future<void> saveAppearance(String mode) =>
+      _storage.write(key: _keyAppearance, value: mode);
+  static Future<String?> getAppearance() => _storage.read(key: _keyAppearance);
+
+  // ── تفضيل البيومترية (محلي على الجهاز) ──────────────────────────────────────
+  static const _keyBiometric = 'hancr_biometric';
+  static Future<void> saveBiometric(bool on) =>
+      _storage.write(key: _keyBiometric, value: on ? '1' : '0');
+  static Future<bool> getBiometric() async =>
+      (await _storage.read(key: _keyBiometric)) == '1';
+
   // ── الفريق المختار (تجميلي، محلي) ───────────────────────────────────────────
   static const _keyTeam = 'hancr_team';
   static Future<void> saveTeam(String code) =>
@@ -117,10 +130,14 @@ class StorageService {
   static Future<void> clearAll() async {
     final theme = await _storage.read(key: _keyTheme);
     final accounts = await _storage.read(key: _keyAccounts);
+    final appearance = await _storage.read(key: _keyAppearance);
     await _storage.deleteAll();
     if (theme != null) await _storage.write(key: _keyTheme, value: theme);
     if (accounts != null) {
       await _storage.write(key: _keyAccounts, value: accounts);
+    }
+    if (appearance != null) {
+      await _storage.write(key: _keyAppearance, value: appearance);
     }
   }
 }

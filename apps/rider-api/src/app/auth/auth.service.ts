@@ -303,6 +303,7 @@ export class AuthService {
       createdAt: rider.createdAt,
       teamCode: rider.teamCode,
       twoFactorEnabled: rider.twoFactorEnabled,
+      googleLinked: !!rider.googleId,
     };
   }
 
@@ -732,6 +733,36 @@ export class AuthService {
     if (!device) return false;
     await this.redis.setex(revokedJtiKey(device.jti), 7 * 24 * 3600, '1');
     await this.deviceRepo.update(device.id, { revoked: true });
+    return true;
+  }
+
+  /** يُبطل كل الأجهزة عدا الجلسة الحالية (تسجيل خروج من بقية الأجهزة) */
+  async revokeOtherDevices(riderId: number, currentJti?: string): Promise<boolean> {
+    const devices = await this.deviceRepo.find({
+      where: { riderId, revoked: false },
+    });
+    for (const d of devices) {
+      if (currentJti && d.jti === currentJti) continue;
+      await this.redis.setex(revokedJtiKey(d.jti), 7 * 24 * 3600, '1');
+      await this.deviceRepo.update(d.id, { revoked: true });
+    }
+    return true;
+  }
+
+  // =============================================
+  // حذف الحساب (soft-delete)
+  // =============================================
+  /**
+   * طلب حذف الحساب: يضع علامة حذف، يعطّل الحساب، ويُبطل كل الجلسات فوراً.
+   * (حذف منطقي قابل للاسترجاع إدارياً — لا حذف فيزيائي للبيانات هنا.)
+   */
+  async requestAccountDeletion(riderId: number): Promise<boolean> {
+    await this.riderRepo.update(riderId, {
+      deletedAt: new Date(),
+      active: false,
+    });
+    await this.logout(riderId); // إبطال كل التوكنات الصادرة
+    this.logger.log(`Account deletion requested: rider #${riderId}`);
     return true;
   }
 

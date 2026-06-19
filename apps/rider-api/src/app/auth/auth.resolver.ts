@@ -176,4 +176,21 @@ export class AuthResolver {
   ): Promise<boolean> {
     return this.authService.revokeDevice(user.riderId, deviceId);
   }
+
+  @Mutation(() => Boolean, {
+    description: 'تسجيل الخروج من كل الأجهزة الأخرى (عدا الحالي)',
+  })
+  @UseGuards(JwtAuthGuard)
+  revokeOtherDevices(@CurrentUser() user: AuthUser): Promise<boolean> {
+    return this.authService.revokeOtherDevices(user.riderId, user.jti);
+  }
+
+  // ─── حذف الحساب (soft-delete) ───
+  @Mutation(() => Boolean, {
+    description: 'طلب حذف الحساب — يعطّله ويُبطل كل الجلسات',
+  })
+  @UseGuards(JwtAuthGuard)
+  requestAccountDeletion(@CurrentUser() user: AuthUser): Promise<boolean> {
+    return this.authService.requestAccountDeletion(user.riderId);
+  }
 }

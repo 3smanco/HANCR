@@ -54,4 +54,8 @@ export class RiderType {
   /** هل التحقق بخطوتين مُفعَّل */
   @Field({ defaultValue: false })
   twoFactorEnabled!: boolean;
+
+  /** هل حساب Google مرتبط */
+  @Field({ defaultValue: false })
+  googleLinked!: boolean;
 }

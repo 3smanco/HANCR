@@ -83,10 +83,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     // إعادة فحص الحظر: حساب محظور يتوقف توكنه فوراً (لا ينتظر انتهاء الصلاحية).
     const rider = await this.riderRepo.findOne({
       where: { id: payload.sub },
-      select: ['id', 'banned'],
+      select: ['id', 'banned', 'active'],
     });
     if (!rider) throw new UnauthorizedException('Account not found');
     if (rider.banned) throw new UnauthorizedException('Account is banned');
+    // حساب محذوف (soft-delete) أو معطّل: يُرفض توكنه فوراً.
+    if (!rider.active) {
+      throw new UnauthorizedException('Account is deactivated');
+    }
 
     return { riderId: payload.sub, phone: payload.phone, jti: payload.jti };
   }

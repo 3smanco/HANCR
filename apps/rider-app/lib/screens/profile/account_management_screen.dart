@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/rider/rider_bloc.dart';
 import '../../blocs/rider/rider_state.dart';
+import '../../core/graphql/graphql_client.dart';
+import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../../core/widgets/rider_avatar.dart';
-import '../sos/aurora_safety_hub_screen.dart';
-import 'profile_pages.dart';
 import 'two_factor_screen.dart';
 import 'devices_screen.dart';
+import 'login_methods_screen.dart';
+import 'security_checkup_screen.dart';
+import 'edit_profile_sheet.dart';
 
 /// AccountManagementScreen — "إدارة الحساب" بتبويبات أفقية (مستوحى من Uber Account).
 class AccountManagementScreen extends StatefulWidget {
@@ -23,6 +27,12 @@ class AccountManagementScreen extends StatefulWidget {
 
 class _AccountManagementScreenState extends State<AccountManagementScreen> {
   int _tab = 0;
+
+  // مفاتيح خصوصية محلية/إعلامية (لا بنية مشاركة بيانات فعلية في HANCR بعد)
+  bool _locationSharing = true;
+  bool _personalizedAds = false;
+  bool _thirdPartyData = false;
+  bool _deleting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +193,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                       fullWidth: false,
                       onPressed: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (_) => const AuroraSafetyHubScreen()),
+                            builder: (_) => const SecurityCheckupScreen()),
                       ),
                     ),
                   ],
@@ -223,19 +233,42 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
 
   // ─── Personal info ───
   Widget _personal(String name, String email, String phone) {
+    final hasEmail = email.isNotEmpty;
     return ListView(
       padding: const EdgeInsets.all(AuroraSpacing.lg),
       children: [
+        // شارة التوثيق (مشتقة محلياً: الهاتف موثَّق دائماً بعد OTP)
+        Container(
+          margin: const EdgeInsets.only(bottom: AuroraSpacing.md),
+          padding: const EdgeInsets.all(AuroraSpacing.md),
+          decoration: BoxDecoration(
+            color: AuroraColors.success.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(AuroraRadius.md),
+            border: Border.all(
+                color: AuroraColors.success.withValues(alpha: 0.4)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.verified, color: AuroraColors.success, size: 20),
+              const SizedBox(width: AuroraSpacing.sm),
+              Expanded(
+                child: Text(tr('phoneVerified'),
+                    style: AuroraText.bodySmall
+                        .copyWith(color: AuroraColors.pearl)),
+              ),
+            ],
+          ),
+        ),
         _infoTile(tr('fullName'), name.isEmpty ? '—' : name),
-        _infoTile(tr('email'), email.isEmpty ? '—' : email),
-        _infoTile(tr('phoneNumber'), phone.isEmpty ? '—' : phone),
+        _infoTile(tr('email'), email.isEmpty ? '—' : email,
+            verified: hasEmail),
+        _infoTile(tr('phoneNumber'), phone.isEmpty ? '—' : phone,
+            verified: phone.isNotEmpty),
         const SizedBox(height: AuroraSpacing.md),
         AuroraButton.primary(
           label: tr('edit'),
           icon: Icons.edit_outlined,
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const EditProfileScreen()),
-          ),
+          onPressed: () => showEditProfileSheet(context),
         ),
       ],
     );
@@ -259,6 +292,13 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
               .then((_) => setState(() {})),
         ),
         _secNavRow(
+          Icons.password_outlined,
+          tr('loginMethods'),
+          tr('loginMethodsSub'),
+          () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const LoginMethodsScreen())),
+        ),
+        _secNavRow(
           Icons.devices_outlined,
           tr('myDevices'),
           tr('manageDevices'),
@@ -280,21 +320,29 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
   }
 
   Widget _secNavRow(
-      IconData icon, String title, String subtitle, VoidCallback onTap) {
+      IconData icon, String title, String subtitle, VoidCallback onTap,
+      {bool danger = false}) {
+    final accent = danger ? AuroraColors.danger : AuroraColors.ember;
     return Container(
       margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
       decoration: BoxDecoration(
         color: AuroraColors.ash,
         borderRadius: BorderRadius.circular(AuroraRadius.md),
-        border: Border.all(color: AuroraColors.border),
+        border: Border.all(
+            color: danger
+                ? AuroraColors.danger.withValues(alpha: 0.4)
+                : AuroraColors.border),
       ),
       child: ListTile(
-        leading: Icon(icon, color: AuroraColors.ember),
+        leading: Icon(icon, color: accent),
         title: Text(title,
-            style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl)),
+            style: AuroraText.bodyMedium.copyWith(
+                color: danger ? AuroraColors.danger : AuroraColors.pearl)),
         subtitle: Text(subtitle, style: AuroraText.caption),
-        trailing: const Icon(Icons.chevron_left,
-            color: AuroraColors.textSecondary),
+        trailing: Icon(Icons.chevron_left,
+            color: danger
+                ? AuroraColors.danger.withValues(alpha: 0.7)
+                : AuroraColors.textSecondary),
         onTap: onTap,
       ),
     );
@@ -308,6 +356,29 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
         Text(tr('privacyDataInfo'),
             style: AuroraText.bodySmall.copyWith(height: 1.5)),
         const SizedBox(height: AuroraSpacing.lg),
+        // ─── التحكم في مشاركة البيانات (مفاتيح محلية) ───
+        _privacyToggle(
+          Icons.my_location_outlined,
+          tr('locationSharing'),
+          tr('locationSharingSub'),
+          _locationSharing,
+          (v) => setState(() => _locationSharing = v),
+        ),
+        _privacyToggle(
+          Icons.hub_outlined,
+          tr('thirdPartyData'),
+          tr('thirdPartyDataSub'),
+          _thirdPartyData,
+          (v) => setState(() => _thirdPartyData = v),
+        ),
+        _privacyToggle(
+          Icons.campaign_outlined,
+          tr('personalizedAds'),
+          tr('personalizedAdsSub'),
+          _personalizedAds,
+          (v) => setState(() => _personalizedAds = v),
+        ),
+        const SizedBox(height: AuroraSpacing.md),
         AuroraButton.secondary(
           label: tr('privacyPolicy'),
           icon: Icons.open_in_new,
@@ -315,11 +386,121 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
               Uri.parse('https://hancr.com/ar/legal/privacy'),
               mode: LaunchMode.externalApplication),
         ),
+        const SizedBox(height: AuroraSpacing.xl),
+        // ─── أدوات الخصوصية المتقدمة: حذف الحساب ───
+        _secNavRow(
+          Icons.delete_forever_outlined,
+          tr('deleteAccount'),
+          tr('deleteAccountSub'),
+          _deleting ? () {} : _confirmDeleteAccount,
+          danger: true,
+        ),
       ],
     );
   }
 
-  Widget _infoTile(String label, String value) {
+  Widget _privacyToggle(IconData icon, String title, String sub, bool value,
+      ValueChanged<bool> onChanged) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AuroraSpacing.lg, vertical: 4),
+      decoration: BoxDecoration(
+        color: AuroraColors.ash,
+        borderRadius: BorderRadius.circular(AuroraRadius.md),
+        border: Border.all(color: AuroraColors.border),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: AuroraColors.ember, size: 22),
+          const SizedBox(width: AuroraSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: AuroraText.bodyMedium
+                        .copyWith(color: AuroraColors.pearl)),
+                Text(sub, style: AuroraText.caption),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            activeThumbColor: AuroraColors.ember,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteAccount() async {
+    // تأكيد مزدوج لخطورة الإجراء
+    final first = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.coal,
+        title: Text(tr('deleteAccount'), style: AuroraText.titleSmall),
+        content: Text(tr('deleteAccountConfirm1'), style: AuroraText.bodyMedium),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(tr('cancel'),
+                style: TextStyle(color: AuroraColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(tr('continue_'),
+                style: TextStyle(color: AuroraColors.danger)),
+          ),
+        ],
+      ),
+    );
+    if (first != true || !mounted) return;
+    final second = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.coal,
+        title: Text(tr('deleteAccount'), style: AuroraText.titleSmall),
+        content: Text(tr('deleteAccountConfirm2'), style: AuroraText.bodyMedium),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(tr('cancel'),
+                style: TextStyle(color: AuroraColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(tr('deleteAccount'),
+                style: TextStyle(color: AuroraColors.danger)),
+          ),
+        ],
+      ),
+    );
+    if (second != true || !mounted) return;
+    setState(() => _deleting = true);
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.mutate(MutationOptions(
+        document: gql(requestAccountDeletionMutation),
+      ));
+      if (res.hasException) throw res.exception!;
+      if (!mounted) return;
+      // عند النجاح: تسجيل خروج كامل
+      context.read<AuthBloc>().add(const AuthLogoutRequested());
+    } catch (_) {
+      if (mounted) {
+        setState(() => _deleting = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(tr('loadError')),
+          backgroundColor: AuroraColors.danger,
+        ));
+      }
+    }
+  }
+
+  Widget _infoTile(String label, String value, {bool verified = false}) {
     return Container(
       margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
       padding: const EdgeInsets.all(AuroraSpacing.lg),
@@ -328,12 +509,20 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
         borderRadius: BorderRadius.circular(AuroraRadius.md),
         border: Border.all(color: AuroraColors.border),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(label, style: AuroraText.caption),
-          const SizedBox(height: 4),
-          Text(value, style: AuroraText.bodyMedium),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: AuroraText.caption),
+                const SizedBox(height: 4),
+                Text(value, style: AuroraText.bodyMedium),
+              ],
+            ),
+          ),
+          if (verified)
+            Icon(Icons.check_circle, color: AuroraColors.success, size: 18),
         ],
       ),
     );

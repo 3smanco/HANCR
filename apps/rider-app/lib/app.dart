@@ -231,7 +231,9 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
                   title: 'HANCR',
                   theme: AuroraTheme.dark,
                   darkTheme: AuroraTheme.dark,
-                  themeMode: ThemeMode.dark,
+                  // الهوية داكنة: كلا الثيمين داكن، فالعرض يبقى داكناً مهما كان
+                  // الاختيار (الوضع الفاتح "قريباً")؛ التفضيل يُحفظ ويُطبَّق هنا.
+                  themeMode: ThemeController.instance.themeMode,
                   routerConfig: _router,
                   debugShowCheckedModeBanner: false,
                   locale: locale,

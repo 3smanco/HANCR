@@ -18,6 +18,7 @@ const String meQuery = r'''
       createdAt
       teamCode
       twoFactorEnabled
+      googleLinked
     }
   }
 ''';
@@ -247,5 +248,18 @@ const String myDevicesQuery = r'''
 const String revokeDeviceMutation = r'''
   mutation RevokeDevice($deviceId: Int!) {
     revokeDevice(deviceId: $deviceId)
+  }
+''';
+
+const String revokeOtherDevicesMutation = r'''
+  mutation RevokeOtherDevices {
+    revokeOtherDevices
+  }
+''';
+
+// ─── حذف الحساب (soft-delete) ───
+const String requestAccountDeletionMutation = r'''
+  mutation RequestAccountDeletion {
+    requestAccountDeletion
   }
 ''';
