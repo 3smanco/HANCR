@@ -6,7 +6,11 @@ import '../../blocs/rider/rider_bloc.dart';
 import '../../blocs/rider/rider_state.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
-import '../sos/aurora_emergency_contacts_screen.dart';
+import '../../core/widgets/rider_avatar.dart';
+import '../sos/aurora_safety_hub_screen.dart';
+import '../inbox/aurora_inbox_screen.dart';
+import '../family/aurora_family_manage_screen.dart';
+import 'co2_details_screen.dart';
 import '../wallet/aurora_wallet_screen.dart';
 import '../rides/aurora_rides.dart';
 import '../loyalty/loyalty_tab.dart';
@@ -32,7 +36,16 @@ class AuroraProfileTab extends StatelessWidget {
         child: BlocBuilder<RiderBloc, RiderState>(
           builder: (context, state) {
             return ListView(
-              padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.lg),
+              // حشوة سفلية تتجاوز الشريط السفلي العائم (extendBody:true) + الـ safe-area
+              // حتى لا تختفي آخر بطاقة (ادعُ أصدقاءك) خلفه.
+              padding: EdgeInsets.fromLTRB(
+                AuroraSpacing.lg,
+                0,
+                AuroraSpacing.lg,
+                AuroraBottomNav.height +
+                    MediaQuery.of(context).viewPadding.bottom +
+                    AuroraSpacing.lg,
+              ),
               children: [
                 const SizedBox(height: AuroraSpacing.md),
 
@@ -56,7 +69,7 @@ class AuroraProfileTab extends StatelessWidget {
 
                 const SizedBox(height: AuroraSpacing.lg),
 
-                // ─── Quick actions ───
+                // ─── Quick actions (2×2 grid) ───
                 Row(
                   children: [
                     Expanded(
@@ -77,12 +90,24 @@ class AuroraProfileTab extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: AuroraSpacing.md),
+                  ],
+                ),
+                const SizedBox(height: AuroraSpacing.md),
+                Row(
+                  children: [
                     Expanded(
                       child: _quickTile(
                         icon: Icons.receipt_long_outlined,
                         label: tr('nav_activity'),
                         onTap: () => _open(context, const RidesHistoryScreen()),
+                      ),
+                    ),
+                    const SizedBox(width: AuroraSpacing.md),
+                    Expanded(
+                      child: _quickTile(
+                        icon: Icons.mail_outline,
+                        label: tr('inbox'),
+                        onTap: () => _open(context, const AuroraInboxScreen()),
                       ),
                     ),
                   ],
@@ -105,11 +130,7 @@ class AuroraProfileTab extends StatelessWidget {
                   subtitle: tr('safetyCheckSub'),
                   progress: 1,
                   total: 7,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (_) =>
-                            const AuroraEmergencyContactsScreen()),
-                  ),
+                  onTap: () => _open(context, const AuroraSafetyHubScreen()),
                 ),
                 const SizedBox(height: AuroraSpacing.md),
 
@@ -129,11 +150,21 @@ class AuroraProfileTab extends StatelessWidget {
                 ),
                 const SizedBox(height: AuroraSpacing.md),
 
+                _simpleCard(
+                  title: tr('family'),
+                  subtitle: tr('familySub'),
+                  icon: Icons.family_restroom_outlined,
+                  onTap: () =>
+                      _open(context, const AuroraFamilyManageScreen()),
+                ),
+                const SizedBox(height: AuroraSpacing.md),
+
                 _statCard(
                   title: tr('co2Saved'),
-                  trailing: '0 ج',
+                  trailing: tr('viewDetails'),
                   icon: Icons.eco_outlined,
                   iconColor: AuroraColors.success,
+                  onTap: () => _open(context, const Co2DetailsScreen()),
                 ),
                 const SizedBox(height: AuroraSpacing.md),
 
@@ -143,8 +174,6 @@ class AuroraProfileTab extends StatelessWidget {
                   icon: Icons.card_giftcard,
                   onTap: () => _open(context, const InviteFriendsScreen()),
                 ),
-
-                const SizedBox(height: AuroraSpacing.huge),
               ],
             );
           },
@@ -157,11 +186,13 @@ class AuroraProfileTab extends StatelessWidget {
   Widget _userCard(RiderState state, BuildContext context) {
     String name = tr('hancrUser');
     String email = 'user@hancr.com';
+    String? avatarUrl;
     if (state is RiderLoaded) {
       final r = state.rider;
       name = [r.firstName, r.lastName].where((s) => s != null && s.isNotEmpty).join(' ');
       if (name.isEmpty) name = r.phoneNumber;
       email = r.email ?? r.phoneNumber;
+      avatarUrl = r.avatarUrl;
     }
     return Container(
       padding: const EdgeInsets.all(AuroraSpacing.lg),
@@ -179,24 +210,10 @@ class AuroraProfileTab extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Avatar
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AuroraRadius.md),
-              gradient: AuroraColors.emberGradient,
-              boxShadow: AuroraShadows.iconGlow,
-            ),
-            child: Center(
-              child: Text(
-                name.isNotEmpty ? name[0].toUpperCase() : '?',
-                style: AuroraText.displayMedium.copyWith(
-                  color: AuroraColors.pearl,
-                  fontSize: 28,
-                ),
-              ),
-            ),
+          // Avatar (عرض الصورة + التقاط/رفع صورة جديدة)
+          RiderAvatar(
+            avatarUrl: avatarUrl,
+            initial: name.isNotEmpty ? name[0].toUpperCase() : '?',
           ),
           const SizedBox(width: AuroraSpacing.md),
           // Info
@@ -497,8 +514,10 @@ class AuroraProfileTab extends StatelessWidget {
     required String trailing,
     required IconData icon,
     required Color iconColor,
+    VoidCallback? onTap,
   }) {
     return AuroraCard(
+      onTap: onTap,
       child: Row(
         children: [
           Expanded(child: Text(title, style: AuroraText.titleSmall)),
@@ -506,8 +525,11 @@ class AuroraProfileTab extends StatelessWidget {
           const SizedBox(width: AuroraSpacing.sm),
           Text(
             trailing,
-            style: AuroraText.titleSmall.copyWith(color: AuroraColors.pearl),
+            style: AuroraText.caption.copyWith(color: AuroraColors.ember),
           ),
+          if (onTap != null)
+            const Icon(Icons.chevron_left,
+                color: AuroraColors.textSecondary, size: 18),
         ],
       ),
     );

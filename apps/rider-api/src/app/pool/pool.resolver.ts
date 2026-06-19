@@ -1,52 +1,77 @@
-import { Resolver, Query } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, Float } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { PoolEntity, PoolMemberEntity } from '@hancr/database';
 import { PoolType } from './dto/pool.type';
+import { PoolService } from './pool.service';
 import { JwtAuthGuard, CurrentUser } from '../auth/jwt-auth.guard';
 import { AuthUser } from '../auth/jwt.strategy';
 
 @Resolver(() => PoolType)
 export class PoolResolver {
-  constructor(
-    @InjectRepository(PoolEntity)
-    private readonly poolRepo: Repository<PoolEntity>,
+  constructor(private readonly poolService: PoolService) {}
 
-    @InjectRepository(PoolMemberEntity)
-    private readonly memberRepo: Repository<PoolMemberEntity>,
-  ) {}
-
-  /**
-   * المجموعة التي ينتمي إليها الراكب
-   */
+  /** المجموعة العائلية/المؤسسية للراكب (مملوكة أو عضوية) */
   @Query(() => PoolType, {
     nullable: true,
-    description: 'المجموعة العائلية/المؤسسية للراكب',
+    description: 'المجموعة العائلية للراكب',
   })
   @UseGuards(JwtAuthGuard)
-  async myPool(@CurrentUser() user: AuthUser): Promise<PoolType | null> {
-    // البحث عن المجموعة التي يملكها الراكب
-    const pool = await this.poolRepo.findOne({
-      where: { ownerId: user.riderId, active: true },
-      relations: ['members'],
-    });
+  myPool(@CurrentUser() user: AuthUser): Promise<PoolType | null> {
+    return this.poolService.getMyPool(user.riderId);
+  }
 
-    if (!pool) return null;
+  @Mutation(() => PoolType, { description: 'إنشاء مجموعة عائلية' })
+  @UseGuards(JwtAuthGuard)
+  createFamily(
+    @CurrentUser() user: AuthUser,
+    @Args('name') name: string,
+  ): Promise<PoolType> {
+    return this.poolService.createFamily(user.riderId, name);
+  }
 
-    return {
-      id: pool.id,
-      name: pool.name,
-      type: pool.poolType,
-      ownerId: pool.ownerId,
-      active: pool.active,
-      members: (pool.members ?? []).map((m) => ({
-        id: m.id,
-        riderId: m.riderId,
-        role: m.riderId === pool.ownerId ? 'owner' : 'member',
-        joinedAt: m.createdAt,
-      })),
-      createdAt: pool.createdAt,
-    };
+  @Mutation(() => PoolType, { description: 'دعوة عضو للعائلة بالهاتف' })
+  @UseGuards(JwtAuthGuard)
+  inviteFamilyMember(
+    @CurrentUser() user: AuthUser,
+    @Args('phone') phone: string,
+    @Args('monthlySpendLimit', { type: () => Float, nullable: true })
+    monthlySpendLimit?: number,
+  ): Promise<PoolType> {
+    return this.poolService.inviteMember(user.riderId, phone, monthlySpendLimit);
+  }
+
+  @Mutation(() => PoolType, { description: 'تعديل حدّ إنفاق عضو' })
+  @UseGuards(JwtAuthGuard)
+  updateFamilyMemberLimit(
+    @CurrentUser() user: AuthUser,
+    @Args('memberId', { type: () => Int }) memberId: number,
+    @Args('monthlySpendLimit', { type: () => Float, nullable: true })
+    monthlySpendLimit?: number,
+  ): Promise<PoolType> {
+    return this.poolService.updateMemberLimit(
+      user.riderId,
+      memberId,
+      monthlySpendLimit,
+    );
+  }
+
+  @Mutation(() => PoolType, { description: 'إزالة عضو من العائلة' })
+  @UseGuards(JwtAuthGuard)
+  removeFamilyMember(
+    @CurrentUser() user: AuthUser,
+    @Args('memberId', { type: () => Int }) memberId: number,
+  ): Promise<PoolType> {
+    return this.poolService.removeMember(user.riderId, memberId);
+  }
+
+  @Mutation(() => Boolean, { description: 'مغادرة المجموعة العائلية' })
+  @UseGuards(JwtAuthGuard)
+  leaveFamily(@CurrentUser() user: AuthUser): Promise<boolean> {
+    return this.poolService.leaveFamily(user.riderId);
+  }
+
+  @Mutation(() => Boolean, { description: 'حذف المجموعة العائلية (المالك)' })
+  @UseGuards(JwtAuthGuard)
+  deleteFamily(@CurrentUser() user: AuthUser): Promise<boolean> {
+    return this.poolService.deleteFamily(user.riderId);
   }
 }

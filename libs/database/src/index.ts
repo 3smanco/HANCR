@@ -9,6 +9,7 @@ export type { CountryTaxRule } from './lib/entities/country.entity';
 export { CityEntity } from './lib/entities/city.entity';
 export { ServiceEntity } from './lib/entities/service.entity';
 export { RiderEntity } from './lib/entities/rider.entity';
+export { RiderDeviceEntity } from './lib/entities/rider-device.entity';
 export { DriverEntity } from './lib/entities/driver.entity';
 export { OrderEntity } from './lib/entities/order.entity';
 export { LoyaltyEntity } from './lib/entities/loyalty.entity';

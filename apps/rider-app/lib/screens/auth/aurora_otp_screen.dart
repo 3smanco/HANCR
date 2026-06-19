@@ -26,6 +26,7 @@ class AuroraOtpScreen extends StatefulWidget {
 class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
   final _otpCtrl = TextEditingController();
   final _referralCtrl = TextEditingController();
+  final _twoFaCtrl = TextEditingController();
   int _resendIn = 30;
 
   @override
@@ -67,11 +68,64 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
     _tickResend();
   }
 
+  void _submitTwoFa() {
+    final code = _twoFaCtrl.text.trim();
+    if (code.length < 6) return;
+    context.read<AuthBloc>().add(AuthTwoFactorSubmitted(code));
+  }
+
   @override
   void dispose() {
     _otpCtrl.dispose();
     _referralCtrl.dispose();
+    _twoFaCtrl.dispose();
     super.dispose();
+  }
+
+  Widget _twoFactorView(BuildContext context, AuthTwoFactorRequired state) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.xxl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: AuroraSpacing.xxl),
+            Icon(Icons.verified_user, color: AuroraColors.ember, size: 56),
+            const SizedBox(height: AuroraSpacing.lg),
+            Text(tr('twoFactor'),
+                textAlign: TextAlign.center,
+                style: AuroraText.displayMedium),
+            const SizedBox(height: AuroraSpacing.sm),
+            Text(tr('enterAuthCode'),
+                textAlign: TextAlign.center, style: AuroraText.bodyMedium),
+            const SizedBox(height: AuroraSpacing.xl),
+            TextField(
+              controller: _twoFaCtrl,
+              keyboardType: TextInputType.number,
+              maxLength: 10,
+              textAlign: TextAlign.center,
+              autofocus: true,
+              style: AuroraText.titleLarge.copyWith(
+                  color: AuroraColors.pearl, letterSpacing: 4),
+              decoration: const InputDecoration(
+                  counterText: '', hintText: '000000'),
+              onSubmitted: (_) => _submitTwoFa(),
+            ),
+            const SizedBox(height: AuroraSpacing.lg),
+            AuroraButton.primary(
+              label: tr('confirm'),
+              onPressed: _submitTwoFa,
+            ),
+            const SizedBox(height: AuroraSpacing.md),
+            TextButton(
+              onPressed: () => context.go('/auth/phone'),
+              child: Text(tr('cancel'),
+                  style: TextStyle(color: AuroraColors.textSecondary)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -94,6 +148,9 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
             }
           },
           builder: (context, state) {
+            if (state is AuthTwoFactorRequired) {
+              return _twoFactorView(context, state);
+            }
             return SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.xxl),

@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Query, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
@@ -12,6 +12,11 @@ import { AuthResult } from './dto/auth-result.type';
 import { SendEmailOtpInput } from './dto/send-email-otp.input';
 import { VerifyEmailOtpInput } from './dto/verify-email-otp.input';
 import { GoogleAuthInput } from './dto/google-auth.input';
+import { DeviceType } from './dto/device.type';
+import {
+  TwoFactorSetupType,
+  TwoFactorRecoveryType,
+} from './dto/two-factor.type';
 
 /**
  * Rate limits منفصلة:
@@ -99,5 +104,76 @@ export class AuthResolver {
   @UseGuards(JwtAuthGuard)
   logout(@CurrentUser() user: AuthUser): Promise<boolean> {
     return this.authService.logout(user.riderId);
+  }
+
+  // ═══════════════════════════════════════════════
+  // التحقق بخطوتين (2FA / TOTP)
+  // ═══════════════════════════════════════════════
+  @Mutation(() => AuthPayload, {
+    description: 'إكمال الدخول بعد التحقق بخطوتين (TOTP أو كود استرداد)',
+  })
+  @Throttle({ strict: { limit: 10, ttl: 60000 } })
+  verifyTwoFactor(
+    @Args('pendingToken') pendingToken: string,
+    @Args('code') code: string,
+    @Args('deviceName', { nullable: true }) deviceName?: string,
+    @Args('platform', { nullable: true }) platform?: string,
+  ): Promise<AuthPayload> {
+    return this.authService.verifyTwoFactor(pendingToken, code, {
+      deviceName,
+      platform,
+    });
+  }
+
+  @Mutation(() => TwoFactorSetupType, {
+    description: 'بدء إعداد 2FA — يعيد السرّ وotpauth URI',
+  })
+  @UseGuards(JwtAuthGuard)
+  startTwoFactorSetup(
+    @CurrentUser() user: AuthUser,
+  ): Promise<TwoFactorSetupType> {
+    return this.authService.startTwoFactorSetup(user.riderId);
+  }
+
+  @Mutation(() => TwoFactorRecoveryType, {
+    description: 'تفعيل 2FA بالتحقق من رمز — يعيد أكواد الاسترداد مرّة واحدة',
+  })
+  @UseGuards(JwtAuthGuard)
+  async enableTwoFactor(
+    @CurrentUser() user: AuthUser,
+    @Args('code') code: string,
+  ): Promise<TwoFactorRecoveryType> {
+    const recoveryCodes = await this.authService.enableTwoFactor(
+      user.riderId,
+      code,
+    );
+    return { recoveryCodes };
+  }
+
+  @Mutation(() => Boolean, { description: 'تعطيل 2FA بالتحقق من رمز' })
+  @UseGuards(JwtAuthGuard)
+  disableTwoFactor(
+    @CurrentUser() user: AuthUser,
+    @Args('code') code: string,
+  ): Promise<boolean> {
+    return this.authService.disableTwoFactor(user.riderId, code);
+  }
+
+  // ═══════════════════════════════════════════════
+  // الأجهزة / الجلسات
+  // ═══════════════════════════════════════════════
+  @Query(() => [DeviceType], { description: 'أجهزة الراكب النشطة' })
+  @UseGuards(JwtAuthGuard)
+  myDevices(@CurrentUser() user: AuthUser): Promise<DeviceType[]> {
+    return this.authService.listDevices(user.riderId, user.jti);
+  }
+
+  @Mutation(() => Boolean, { description: 'إبطال جهاز/جلسة بعينها' })
+  @UseGuards(JwtAuthGuard)
+  revokeDevice(
+    @CurrentUser() user: AuthUser,
+    @Args('deviceId', { type: () => Int }) deviceId: number,
+  ): Promise<boolean> {
+    return this.authService.revokeDevice(user.riderId, deviceId);
   }
 }

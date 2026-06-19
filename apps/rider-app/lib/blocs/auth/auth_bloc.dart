@@ -12,14 +12,37 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   /// رمز ربط مؤقّت من دخول Google/الإيميل — يُمرَّر مع verifyOtp لربط الهوية.
   String? _pendingToken;
 
+  /// رمز مؤقّت للتحقق بخطوتين (بين verifyOtp وverifyTwoFactor).
+  String? _twoFactorPendingToken;
+  String? _twoFactorPhone;
+
   AuthBloc() : super(const AuthInitial()) {
     on<AuthCheckRequested>(_onCheck);
     on<AuthSendOtpRequested>(_onSendOtp);
     on<AuthVerifyOtpRequested>(_onVerifyOtp);
+    on<AuthTwoFactorSubmitted>(_onVerifyTwoFactor);
     on<AuthSendEmailOtpRequested>(_onSendEmailOtp);
     on<AuthVerifyEmailOtpRequested>(_onVerifyEmailOtp);
     on<AuthGoogleSignInRequested>(_onGoogleSignIn);
     on<AuthLogoutRequested>(_onLogout);
+  }
+
+  /// يحفظ الحساب في قائمة الحسابات المتعددة (للتبديل لاحقاً)
+  Future<void> _persistAccount(
+    String token,
+    Map<String, dynamic>? rider,
+  ) async {
+    final riderId = rider?['id'] as int? ?? 0;
+    if (riderId == 0) return;
+    final name = [rider?['firstName'], rider?['lastName']]
+        .where((s) => s != null && (s as String).isNotEmpty)
+        .join(' ');
+    await StorageService.saveAccount(
+      token: token,
+      riderId: riderId,
+      phone: rider?['phoneNumber'] as String? ?? '',
+      name: name.isEmpty ? null : name,
+    );
   }
 
   Future<void> _onCheck(
@@ -102,7 +125,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final riderData = payload?['rider'] as Map<String, dynamic>?;
       final riderId = riderData?['id'] as int? ?? 0;
 
-      if (token == null) {
+      // تحقّق بخطوتين مطلوب: لم تُصدر جلسة بعد — نطلب رمز TOTP.
+      if (payload?['twoFactorRequired'] == true) {
+        _twoFactorPendingToken = payload?['pendingToken'] as String?;
+        _twoFactorPhone = event.phone;
+        emit(AuthTwoFactorRequired(phone: event.phone));
+        return;
+      }
+
+      if (token == null || token.isEmpty) {
         emit(const AuthError('Authentication failed.'));
         return;
       }
@@ -110,9 +141,56 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       _pendingToken = null; // استُهلك رمز الربط
       await StorageService.saveToken(token);
       await StorageService.saveRiderId(riderId);
+      await _persistAccount(token, riderData);
       await GraphQLClientManager.reset(); // rebuild client with new token
 
       emit(AuthAuthenticated(riderId: riderId, isNewUser: isNewUser));
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+
+  Future<void> _onVerifyTwoFactor(
+    AuthTwoFactorSubmitted event,
+    Emitter<AuthState> emit,
+  ) async {
+    final pending = _twoFactorPendingToken;
+    if (pending == null) {
+      emit(const AuthError('انتهت صلاحية جلسة التحقق. أعد الدخول.'));
+      return;
+    }
+    emit(const AuthLoading());
+    try {
+      final client = await GraphQLClientManager.get();
+      final result = await client.mutate(MutationOptions(
+        document: gql(verifyTwoFactorMutation),
+        variables: {'pendingToken': pending, 'code': event.code},
+      ));
+      if (result.hasException) {
+        emit(AuthError(result.exception?.graphqlErrors.firstOrNull?.message ??
+            'رمز غير صحيح.'));
+        // أبقِ المستخدم على شاشة التحقق
+        if (_twoFactorPhone != null) {
+          emit(AuthTwoFactorRequired(phone: _twoFactorPhone!));
+        }
+        return;
+      }
+      final payload =
+          result.data?['verifyTwoFactor'] as Map<String, dynamic>?;
+      final token = payload?['accessToken'] as String?;
+      final riderData = payload?['rider'] as Map<String, dynamic>?;
+      final riderId = riderData?['id'] as int? ?? 0;
+      if (token == null || token.isEmpty) {
+        emit(const AuthError('فشل الدخول.'));
+        return;
+      }
+      _twoFactorPendingToken = null;
+      _twoFactorPhone = null;
+      await StorageService.saveToken(token);
+      await StorageService.saveRiderId(riderId);
+      await _persistAccount(token, riderData);
+      await GraphQLClientManager.reset();
+      emit(AuthAuthenticated(riderId: riderId, isNewUser: false));
     } catch (e) {
       emit(AuthError(e.toString()));
     }
@@ -256,6 +334,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _pendingToken = null;
     await StorageService.saveToken(token);
     await StorageService.saveRiderId(riderId);
+    await _persistAccount(token, riderData);
     await GraphQLClientManager.reset();
     emit(AuthAuthenticated(riderId: riderId, isNewUser: isNewUser));
   }

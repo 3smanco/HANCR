@@ -25,4 +25,10 @@ export class UpdateRiderInput {
   @Field({ nullable: true })
   @IsOptional()
   avatarUrl?: string;
+
+  /** رمز "الفريق" (الدولة) المختار — تجميلي، يُزامن مع الخادم */
+  @Field({ nullable: true })
+  @IsOptional()
+  @MaxLength(4)
+  teamCode?: string;
 }

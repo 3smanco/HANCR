@@ -37,6 +37,14 @@ class AuthNeedsPhone extends AuthState {
   const AuthNeedsPhone();
 }
 
+/// نجح OTP لكن الحساب يتطلّب تحقّقاً بخطوتين (TOTP) لإكمال الدخول
+class AuthTwoFactorRequired extends AuthState {
+  final String phone;
+  const AuthTwoFactorRequired({required this.phone});
+  @override
+  List<Object?> get props => [phone];
+}
+
 /// Fully authenticated — token stored
 class AuthAuthenticated extends AuthState {
   final int riderId;

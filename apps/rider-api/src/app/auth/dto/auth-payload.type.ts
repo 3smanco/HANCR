@@ -14,4 +14,12 @@ export class AuthPayload {
   /** هل هذا حساب جديد (أول تسجيل) */
   @Field()
   isNewUser!: boolean;
+
+  /** هل يلزم تحقّق بخطوتين قبل إصدار الجلسة (accessToken يكون فارغاً حينها) */
+  @Field({ defaultValue: false })
+  twoFactorRequired!: boolean;
+
+  /** رمز مؤقّت يُمرَّر إلى verifyTwoFactor لإكمال الدخول */
+  @Field({ nullable: true })
+  pendingToken?: string;
 }

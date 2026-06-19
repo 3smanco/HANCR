@@ -4,12 +4,20 @@ import { RiderService } from './rider.service';
 import { RiderType } from './dto/rider.type';
 import { ReferralType } from './dto/referral.type';
 import { UpdateRiderInput } from './dto/update-rider.input';
+import { UploadUrlService } from './upload-url.service';
+import {
+  GenerateRiderUploadUrlInput,
+  RiderUploadUrlType,
+} from './dto/upload-url.type';
 import { JwtAuthGuard, CurrentUser } from '../auth/jwt-auth.guard';
 import { AuthUser } from '../auth/jwt.strategy';
 
 @Resolver(() => RiderType)
 export class RiderResolver {
-  constructor(private readonly riderService: RiderService) {}
+  constructor(
+    private readonly riderService: RiderService,
+    private readonly uploadUrlService: UploadUrlService,
+  ) {}
 
   /**
    * جلب بيانات الراكب الحالي
@@ -58,5 +66,20 @@ export class RiderResolver {
   @UseGuards(JwtAuthGuard)
   clearFcmToken(@CurrentUser() user: AuthUser): Promise<boolean> {
     return this.riderService.clearFcmToken(user.riderId);
+  }
+
+  /**
+   * رابط رفع موقّع لصورة الملف الشخصي. بعد الرفع المباشر (PUT) يستدعي العميل
+   * updateProfile(avatarUrl: publicUrl) لحفظ الرابط.
+   */
+  @Mutation(() => RiderUploadUrlType, {
+    description: 'رابط رفع موقّع لصورة الملف الشخصي',
+  })
+  @UseGuards(JwtAuthGuard)
+  generateRiderUploadUrl(
+    @CurrentUser() user: AuthUser,
+    @Args('input') input: GenerateRiderUploadUrlInput,
+  ): Promise<RiderUploadUrlType> {
+    return this.uploadUrlService.generate(user.riderId, input);
   }
 }

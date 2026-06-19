@@ -106,6 +106,22 @@ export class RiderEntity {
   @Column({ nullable: true, name: 'last_login_at' })
   lastLoginAt?: Date;
 
+  /** رمز "الفريق" (الدولة) المختار — يُزامن مع التطبيق (تجميلي) */
+  @Column({ type: 'varchar', length: 4, nullable: true, name: 'team_code' })
+  teamCode?: string;
+
+  /** هل التحقق بخطوتين (TOTP) مُفعَّل */
+  @Column({ default: false, name: 'two_factor_enabled' })
+  twoFactorEnabled!: boolean;
+
+  /** سرّ TOTP (base32) — يُولَّد عند الإعداد */
+  @Column({ type: 'varchar', length: 64, nullable: true, name: 'two_factor_secret' })
+  twoFactorSecret?: string;
+
+  /** أكواد الاسترداد (مُجزّأة sha256) لاستعادة الدخول عند فقد المُصادِق */
+  @Column({ type: 'jsonb', nullable: true, name: 'two_factor_recovery' })
+  twoFactorRecovery?: string[];
+
   /** الرحلات */
   @OneToMany(() => OrderEntity, (order) => order.rider)
   orders!: OrderEntity[];

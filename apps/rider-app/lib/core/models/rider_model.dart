@@ -14,6 +14,8 @@ class RiderModel extends Equatable {
   final int totalRides;
   final bool banned;
   final bool active;
+  final String? teamCode;
+  final bool twoFactorEnabled;
 
   const RiderModel({
     required this.id,
@@ -29,6 +31,8 @@ class RiderModel extends Equatable {
     required this.totalRides,
     required this.banned,
     required this.active,
+    this.teamCode,
+    this.twoFactorEnabled = false,
   });
 
   String get displayName {
@@ -51,6 +55,8 @@ class RiderModel extends Equatable {
         totalRides: json['totalRides'] as int? ?? 0,
         banned: json['banned'] as bool? ?? false,
         active: json['active'] as bool? ?? true,
+        teamCode: json['teamCode'] as String?,
+        twoFactorEnabled: json['twoFactorEnabled'] as bool? ?? false,
       );
 
   RiderModel copyWith({
@@ -58,6 +64,8 @@ class RiderModel extends Equatable {
     String? lastName,
     String? email,
     String? avatarUrl,
+    String? teamCode,
+    bool? twoFactorEnabled,
   }) =>
       RiderModel(
         id: id,
@@ -73,6 +81,8 @@ class RiderModel extends Equatable {
         totalRides: totalRides,
         banned: banned,
         active: active,
+        teamCode: teamCode ?? this.teamCode,
+        twoFactorEnabled: twoFactorEnabled ?? this.twoFactorEnabled,
       );
 
   @override

@@ -10,9 +10,15 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRedis } from '@songkeys/nestjs-redis';
 import Redis from 'ioredis';
 import { OAuth2Client } from 'google-auth-library';
-import { RiderEntity } from '@hancr/database';
+import { createHash, randomUUID } from 'crypto';
+import { RiderEntity, RiderDeviceEntity } from '@hancr/database';
 import { SmsService, EmailService } from '@hancr/notifications';
 import { captureException } from '@hancr/observability';
+import {
+  generateTotpSecret,
+  buildOtpAuthUri,
+  verifyTotp,
+} from './totp.util';
 import { SendOtpInput } from './dto/send-otp.input';
 import { VerifyOtpInput } from './dto/verify-otp.input';
 import { SendOtpResponse } from './dto/send-otp-response.type';
@@ -22,7 +28,7 @@ import { SendEmailOtpInput } from './dto/send-email-otp.input';
 import { VerifyEmailOtpInput } from './dto/verify-email-otp.input';
 import { GoogleAuthInput } from './dto/google-auth.input';
 import { RiderType } from '../rider/dto/rider.type';
-import { JwtPayload, revokedKey } from './jwt.strategy';
+import { JwtPayload, revokedKey, revokedJtiKey } from './jwt.strategy';
 import { AppConfigReader } from '../app-config/app-config-reader.service';
 
 // N1 — defaults preserved as fallback; live values come from AppConfigReader.
@@ -45,6 +51,9 @@ export class AuthService {
   constructor(
     @InjectRepository(RiderEntity)
     private readonly riderRepo: Repository<RiderEntity>,
+
+    @InjectRepository(RiderDeviceEntity)
+    private readonly deviceRepo: Repository<RiderDeviceEntity>,
 
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -248,12 +257,27 @@ export class AuthService {
       await this.applyPendingIdentity(rider, pending);
     }
 
-    const accessToken = this.signToken(rider);
+    // تحقّق بخطوتين: إن كان مفعّلاً لا نُصدر جلسة بعد — نعيد رمزاً مؤقّتاً.
+    if (rider.twoFactorEnabled) {
+      return {
+        accessToken: '',
+        rider: this.toRiderType(rider),
+        isNewUser,
+        twoFactorRequired: true,
+        pendingToken: this.signTwoFactorPending(rider.id),
+      };
+    }
+
+    const accessToken = await this.issueSession(rider, {
+      deviceName: input.deviceName,
+      platform: input.platform,
+    });
 
     return {
       accessToken,
       rider: this.toRiderType(rider),
       isNewUser,
+      twoFactorRequired: false,
     };
   }
 
@@ -277,6 +301,8 @@ export class AuthService {
       totalRides: rider.totalRides,
       lastLoginAt: rider.lastLoginAt,
       createdAt: rider.createdAt,
+      teamCode: rider.teamCode,
+      twoFactorEnabled: rider.twoFactorEnabled,
     };
   }
 
@@ -426,7 +452,7 @@ export class AuthService {
       return {
         success: true,
         needsPhone: false,
-        accessToken: this.signToken(rider),
+        accessToken: await this.issueSession(rider, { platform: 'web' }),
         rider: this.toRiderType(rider),
         isNewUser: false,
       };
@@ -538,13 +564,175 @@ export class AuthService {
   // Helpers
   // =============================================
 
-  private signToken(rider: RiderEntity): string {
+  private signToken(rider: RiderEntity, jti?: string): string {
     const payload: JwtPayload = {
       sub: rider.id,
       phone: rider.phoneNumber,
       type: 'rider',
+      jti,
     };
     return this.jwtService.sign(payload);
+  }
+
+  /**
+   * يُصدر جلسة جديدة: يولّد jti، يسجّل الجهاز، ويعيد توكناً يحمل الـjti.
+   * يُستخدم في كل مسارات الدخول (هاتف/إيميل/Google) لتتبّع الأجهزة.
+   */
+  private async issueSession(
+    rider: RiderEntity,
+    meta?: { deviceName?: string; platform?: string },
+  ): Promise<string> {
+    const jti = randomUUID();
+    try {
+      await this.deviceRepo.save(
+        this.deviceRepo.create({
+          jti,
+          riderId: rider.id,
+          deviceName: meta?.deviceName?.slice(0, 120),
+          platform: meta?.platform?.slice(0, 16),
+          revoked: false,
+          lastActiveAt: new Date(),
+        }),
+      );
+    } catch (e) {
+      // تسجيل الجهاز ليس حاجباً للدخول — سجّل وتابع.
+      this.logger.warn(`device record failed for rider ${rider.id}: ${e}`);
+    }
+    return this.signToken(rider, jti);
+  }
+
+  // =============================================
+  // التحقق بخطوتين (TOTP) — رمز مؤقّت بين الخطوتين
+  // =============================================
+  /** يوقّع رمزاً مؤقّتاً (5 دقائق) يثبت اجتياز عامل الهاتف، بانتظار TOTP */
+  private signTwoFactorPending(riderId: number): string {
+    return this.jwtService.sign(
+      { sub: riderId, type: 'rider', twofa: true } as Record<string, unknown>,
+      { expiresIn: '5m' },
+    );
+  }
+
+  private verifyTwoFactorPending(token: string): number {
+    try {
+      const p = this.jwtService.verify<{ sub: number; twofa?: boolean }>(token);
+      if (!p?.twofa || !p.sub) throw new Error('not a 2fa token');
+      return p.sub;
+    } catch {
+      throw new UnauthorizedException('انتهت صلاحية جلسة التحقق. أعد الدخول.');
+    }
+  }
+
+  private hashRecovery(code: string): string {
+    return createHash('sha256').update(code.trim().toUpperCase()).digest('hex');
+  }
+
+  /** يبدأ إعداد 2FA: يولّد سرّاً (غير مفعّل بعد) ويعيد otpauth URI لعرض QR */
+  async startTwoFactorSetup(
+    riderId: number,
+  ): Promise<{ secret: string; otpauthUri: string }> {
+    const rider = await this.riderRepo.findOne({ where: { id: riderId } });
+    if (!rider) throw new UnauthorizedException('Account not found');
+    const secret = generateTotpSecret();
+    await this.riderRepo.update(riderId, { twoFactorSecret: secret });
+    const account = rider.email || rider.phoneNumber;
+    return { secret, otpauthUri: buildOtpAuthUri(secret, account) };
+  }
+
+  /** يفعّل 2FA بعد التحقق من رمز من المُصادِق، ويعيد أكواد استرداد لمرّة واحدة */
+  async enableTwoFactor(riderId: number, code: string): Promise<string[]> {
+    const rider = await this.riderRepo.findOne({ where: { id: riderId } });
+    if (!rider?.twoFactorSecret) {
+      throw new UnauthorizedException('ابدأ الإعداد أولاً.');
+    }
+    if (!verifyTotp(rider.twoFactorSecret, code)) {
+      throw new UnauthorizedException('رمز غير صحيح.');
+    }
+    // أكواد استرداد (10) — تُعرض مرّة واحدة وتُخزَّن مُجزّأة
+    const plain = Array.from({ length: 10 }, () =>
+      randomUUID().replace(/-/g, '').slice(0, 10).toUpperCase(),
+    );
+    await this.riderRepo.update(riderId, {
+      twoFactorEnabled: true,
+      twoFactorRecovery: plain.map((c) => this.hashRecovery(c)),
+    });
+    return plain;
+  }
+
+  /** يعطّل 2FA بعد التحقق من رمز حالي */
+  async disableTwoFactor(riderId: number, code: string): Promise<boolean> {
+    const rider = await this.riderRepo.findOne({ where: { id: riderId } });
+    if (!rider?.twoFactorEnabled || !rider.twoFactorSecret) return true;
+    if (!verifyTotp(rider.twoFactorSecret, code)) {
+      throw new UnauthorizedException('رمز غير صحيح.');
+    }
+    await this.riderRepo.update(riderId, {
+      twoFactorEnabled: false,
+      twoFactorSecret: undefined,
+      twoFactorRecovery: undefined,
+    });
+    return true;
+  }
+
+  /** يُكمل الدخول بعد التحقق بخطوتين (TOTP أو كود استرداد) */
+  async verifyTwoFactor(
+    pendingToken: string,
+    code: string,
+    meta?: { deviceName?: string; platform?: string },
+  ): Promise<AuthPayload> {
+    const riderId = this.verifyTwoFactorPending(pendingToken);
+    const rider = await this.riderRepo.findOne({ where: { id: riderId } });
+    if (!rider?.twoFactorEnabled || !rider.twoFactorSecret) {
+      throw new UnauthorizedException('التحقق بخطوتين غير مفعّل.');
+    }
+    let ok = verifyTotp(rider.twoFactorSecret, code);
+    if (!ok && rider.twoFactorRecovery?.length) {
+      // محاولة ككود استرداد (يُستهلك عند النجاح)
+      const h = this.hashRecovery(code);
+      if (rider.twoFactorRecovery.includes(h)) {
+        ok = true;
+        await this.riderRepo.update(riderId, {
+          twoFactorRecovery: rider.twoFactorRecovery.filter((x) => x !== h),
+        });
+      }
+    }
+    if (!ok) throw new UnauthorizedException('رمز غير صحيح.');
+    const accessToken = await this.issueSession(rider, meta);
+    return {
+      accessToken,
+      rider: this.toRiderType(rider),
+      isNewUser: false,
+      twoFactorRequired: false,
+    };
+  }
+
+  // =============================================
+  // الأجهزة/الجلسات
+  // =============================================
+  async listDevices(riderId: number, currentJti?: string) {
+    const rows = await this.deviceRepo.find({
+      where: { riderId, revoked: false },
+      order: { lastActiveAt: 'DESC', createdAt: 'DESC' },
+      take: 50,
+    });
+    return rows.map((d) => ({
+      id: d.id,
+      deviceName: d.deviceName ?? undefined,
+      platform: d.platform ?? undefined,
+      lastActiveAt: d.lastActiveAt ?? d.createdAt,
+      current: !!currentJti && d.jti === currentJti,
+      createdAt: d.createdAt,
+    }));
+  }
+
+  /** يُبطل جهازاً بعينه (يضيف jti لقائمة الإبطال في Redis) */
+  async revokeDevice(riderId: number, deviceId: number): Promise<boolean> {
+    const device = await this.deviceRepo.findOne({
+      where: { id: deviceId, riderId },
+    });
+    if (!device) return false;
+    await this.redis.setex(revokedJtiKey(device.jti), 7 * 24 * 3600, '1');
+    await this.deviceRepo.update(device.id, { revoked: true });
+    return true;
   }
 
   /** يولّد كود إحالة فريداً من 6 محارف (أحرف كبيرة + أرقام) */

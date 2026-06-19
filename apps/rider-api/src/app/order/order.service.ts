@@ -40,6 +40,7 @@ import { CouponService } from './coupon.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { BundleService } from '../bundle/bundle.service';
 import { CompanyService } from '../company/company.service';
+import { PoolService } from '../pool/pool.service';
 import { AppConfigReader } from '../app-config/app-config-reader.service';
 
 // GraphQL Subscription events
@@ -77,6 +78,7 @@ export class OrderService {
     private readonly companyService: CompanyService,
     private readonly walletService: WalletService,
     private readonly sosService: SosService,
+    private readonly poolService: PoolService,
     private readonly dataSource: DataSource,
     private readonly pushNotifications: PushNotificationService,
     private readonly appConfig: AppConfigReader,
@@ -246,6 +248,12 @@ export class OrderService {
       companyId = link.company.id;
     }
 
+    // حدّ الإنفاق العائلي: يمنع عضو العائلة من تجاوز حدّه الشهري.
+    // لا أثر على غير الأعضاء أو من بلا حدّ مضبوط أو المالك. (يُحجَز عند الإنشاء.)
+    if (costAfterCoupon > 0) {
+      await this.poolService.assertWithinSpendLimit(riderId, costAfterCoupon);
+    }
+
     // عمولة المنصة: تُحسَب وتُحفظ على الطلب وقت الإنشاء (كانت دائماً 0 — تسريب إيراد).
     // تُحسب على السعر النهائي بعد الكوبون؛ رحلات الحزمة (cost=0) عمولتها 0.
     const providerSharePercent = Number(service.providerSharePercent ?? 20);
@@ -330,6 +338,11 @@ export class OrderService {
       // زيادة عدّاد استخدام الكوبون بعد نجاح الإنشاء
       if (appliedCouponId) {
         await this.couponService.incrementUsage(appliedCouponId);
+      }
+
+      // حدّ الإنفاق العائلي: حجز المبلغ على إنفاق العضو الشهري (يُعاد عند الإلغاء)
+      if (costAfterCoupon > 0) {
+        await this.poolService.recordSpend(riderId, costAfterCoupon);
       }
 
       // F1 — خصم رحلة من الحزمة بعد نجاح الإنشاء
@@ -710,6 +723,12 @@ export class OrderService {
     await this.orderRepo.update(orderId, {
       status: OrderStatus.RiderCanceled,
     });
+
+    // حدّ الإنفاق العائلي: إعادة المبلغ المحجوز عند الإلغاء (refund للحجز)
+    const reserved = Number(order.costAfterCoupon ?? 0);
+    if (reserved > 0) {
+      await this.poolService.recordSpend(riderId, -reserved);
+    }
 
     // تحرير السائق المُسنَد (كان يبقى Busy للأبد بعد الإلغاء) — يعيده للتوفّر.
     // ملاحظة: حالة Redis الفورية يملكها driver-api ويعيد ضبطها عند استقبال ORDER_UPDATED.

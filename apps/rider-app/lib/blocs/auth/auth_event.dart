@@ -30,6 +30,14 @@ class AuthVerifyOtpRequested extends AuthEvent {
   List<Object?> get props => [phone, otp, referralCode];
 }
 
+/// إكمال الدخول بإدخال رمز التحقق بخطوتين (TOTP أو كود استرداد)
+class AuthTwoFactorSubmitted extends AuthEvent {
+  final String code;
+  const AuthTwoFactorSubmitted(this.code);
+  @override
+  List<Object?> get props => [code];
+}
+
 /// طلب رمز OTP إلى البريد الإلكتروني
 class AuthSendEmailOtpRequested extends AuthEvent {
   final String email;

@@ -86,7 +86,15 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
       child: SafeArea(
         bottom: false,
         child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.lg),
+          // حشوة سفلية تتجاوز الشريط السفلي العائم (extendBody:true).
+          padding: EdgeInsets.fromLTRB(
+            AuroraSpacing.lg,
+            0,
+            AuroraSpacing.lg,
+            AuroraBottomNav.height +
+                MediaQuery.of(context).viewPadding.bottom +
+                AuroraSpacing.lg,
+          ),
           children: [
             const SizedBox(height: AuroraSpacing.md),
 

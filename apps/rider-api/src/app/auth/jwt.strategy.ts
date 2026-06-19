@@ -12,6 +12,10 @@ import { RiderEntity } from '@hancr/database';
 export const revokedKey = (riderId: number): string =>
   `hancr:revoked:rider:${riderId}`;
 
+/** مفتاح Redis لإبطال جلسة/جهاز واحد عبر jti (تسجيل خروج جهاز بعينه) */
+export const revokedJtiKey = (jti: string): string =>
+  `hancr:revoked:jti:${jti}`;
+
 /**
  * أمن: يجبر وجود سرّ قوي (≥32 محرفاً) ويرفض الإقلاع بقيمة ضعيفة/افتراضية.
  * لا قيم احتياطية مزروعة في الكود إطلاقاً.
@@ -31,6 +35,7 @@ export interface JwtPayload {
   sub: number;       // rider ID
   phone: string;
   type: 'rider';
+  jti?: string;      // معرّف الجلسة/الجهاز (لإبطال جهاز بعينه)
   iat?: number;
   exp?: number;
 }
@@ -38,6 +43,7 @@ export interface JwtPayload {
 export interface AuthUser {
   riderId: number;
   phone: string;
+  jti?: string;
 }
 
 @Injectable()
@@ -66,6 +72,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException('Session revoked. Please sign in again.');
     }
 
+    // إبطال جهاز بعينه: إن كان jti في قائمة الإبطال يُرفض التوكن.
+    if (payload.jti) {
+      const jtiRevoked = await this.redis.get(revokedJtiKey(payload.jti));
+      if (jtiRevoked) {
+        throw new UnauthorizedException('Device signed out. Please sign in again.');
+      }
+    }
+
     // إعادة فحص الحظر: حساب محظور يتوقف توكنه فوراً (لا ينتظر انتهاء الصلاحية).
     const rider = await this.riderRepo.findOne({
       where: { id: payload.sub },
@@ -74,6 +88,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!rider) throw new UnauthorizedException('Account not found');
     if (rider.banned) throw new UnauthorizedException('Account is banned');
 
-    return { riderId: payload.sub, phone: payload.phone };
+    return { riderId: payload.sub, phone: payload.phone, jti: payload.jti };
   }
 }
