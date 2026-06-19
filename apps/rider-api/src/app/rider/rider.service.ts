@@ -25,6 +25,9 @@ export class RiderService {
       ...(input.email && { email: input.email }),
       ...(input.fcmToken && { fcmToken: input.fcmToken }),
       ...(input.avatarUrl && { avatarUrl: input.avatarUrl }),
+      ...(input.teamCode !== undefined && {
+        teamCode: input.teamCode || undefined,
+      }),
     });
 
     const rider = await this.findById(riderId);
@@ -83,6 +86,8 @@ export class RiderService {
       totalRides: rider.totalRides,
       lastLoginAt: rider.lastLoginAt,
       createdAt: rider.createdAt,
+      teamCode: rider.teamCode,
+      twoFactorEnabled: rider.twoFactorEnabled,
     };
   }
 }

@@ -17,6 +17,7 @@ import { CouponService } from './coupon.service';
 import { LoyaltyModule } from '../loyalty/loyalty.module';
 import { BundleModule } from '../bundle/bundle.module';
 import { CompanyModule } from '../company/company.module';
+import { PoolModule } from '../pool/pool.module';
 import { pubSubProvider } from '../pubsub.provider';
 
 @Module({
@@ -32,6 +33,7 @@ import { pubSubProvider } from '../pubsub.provider';
     LoyaltyModule,
     BundleModule,
     CompanyModule,
+    PoolModule,
   ],
   providers: [
     OrderService,

@@ -35,4 +35,18 @@ export class VerifyOtpInput {
   @IsOptional()
   @IsString()
   pendingToken?: string;
+
+  /** اسم الجهاز (لعرضه في قائمة الأجهزة) */
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  deviceName?: string;
+
+  /** المنصّة: android / ios / web */
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @Length(1, 16)
+  platform?: string;
 }

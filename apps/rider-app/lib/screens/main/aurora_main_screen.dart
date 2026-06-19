@@ -79,7 +79,14 @@ class _ServicesTab extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: ListView(
-          padding: const EdgeInsets.all(AuroraSpacing.lg),
+          padding: EdgeInsets.fromLTRB(
+            AuroraSpacing.lg,
+            AuroraSpacing.lg,
+            AuroraSpacing.lg,
+            AuroraBottomNav.height +
+                MediaQuery.of(context).viewPadding.bottom +
+                AuroraSpacing.lg,
+          ),
           children: [
             const SizedBox(height: AuroraSpacing.md),
             Text(tr('nav_services'), style: AuroraText.displayMedium),
@@ -134,8 +141,6 @@ class _ServicesTab extends StatelessWidget {
                   label: tr('rideBundles'),
                   customRoute: 'bundles'),
             ]),
-
-            const SizedBox(height: AuroraSpacing.huge),
           ],
         ),
       ),

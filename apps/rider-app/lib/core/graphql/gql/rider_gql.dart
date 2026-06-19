@@ -16,6 +16,8 @@ const String meQuery = r'''
       active
       lastLoginAt
       createdAt
+      teamCode
+      twoFactorEnabled
     }
   }
 ''';
@@ -28,6 +30,18 @@ const String updateProfileMutation = r'''
       lastName
       email
       avatarUrl
+    }
+  }
+''';
+
+// رابط رفع موقّع لصورة الملف الشخصي (presigned PUT) — يتبعه updateProfile(avatarUrl)
+const String generateRiderUploadUrlMutation = r'''
+  mutation GenerateRiderUploadUrl($input: GenerateRiderUploadUrlInput!) {
+    generateRiderUploadUrl(input: $input) {
+      uploadUrl
+      publicUrl
+      objectKey
+      expiresIn
     }
   }
 ''';
@@ -151,5 +165,87 @@ const String activeBidQuery = r'''
 const String acceptBidOfferMutation = r'''
   mutation AcceptBidOffer($offerId: Int!) {
     acceptBidOffer(offerId: $offerId) { id status }
+  }
+''';
+
+// ═══════════════════════════════════════════════
+// الدفعة الثانية — العائلة / 2FA / الأجهزة
+// ═══════════════════════════════════════════════
+
+const String _poolFields = r'''
+  id name type ownerId active isOwner createdAt
+  members {
+    id riderId riderName phone role
+    monthlySpendLimit currentMonthSpend joinedAt
+  }
+''';
+
+const String myPoolQuery = '''
+  query MyPool {
+    myPool { $_poolFields }
+  }
+''';
+
+const String createFamilyMutation = '''
+  mutation CreateFamily(\$name: String!) {
+    createFamily(name: \$name) { $_poolFields }
+  }
+''';
+
+const String inviteFamilyMemberMutation = '''
+  mutation InviteFamilyMember(\$phone: String!, \$monthlySpendLimit: Float) {
+    inviteFamilyMember(phone: \$phone, monthlySpendLimit: \$monthlySpendLimit) { $_poolFields }
+  }
+''';
+
+const String updateFamilyMemberLimitMutation = '''
+  mutation UpdateFamilyMemberLimit(\$memberId: Int!, \$monthlySpendLimit: Float) {
+    updateFamilyMemberLimit(memberId: \$memberId, monthlySpendLimit: \$monthlySpendLimit) { $_poolFields }
+  }
+''';
+
+const String removeFamilyMemberMutation = '''
+  mutation RemoveFamilyMember(\$memberId: Int!) {
+    removeFamilyMember(memberId: \$memberId) { $_poolFields }
+  }
+''';
+
+const String leaveFamilyMutation = r'''
+  mutation LeaveFamily { leaveFamily }
+''';
+
+const String deleteFamilyMutation = r'''
+  mutation DeleteFamily { deleteFamily }
+''';
+
+// ─── التحقق بخطوتين (2FA) ───
+const String startTwoFactorSetupMutation = r'''
+  mutation StartTwoFactorSetup {
+    startTwoFactorSetup { secret otpauthUri }
+  }
+''';
+
+const String enableTwoFactorMutation = r'''
+  mutation EnableTwoFactor($code: String!) {
+    enableTwoFactor(code: $code) { recoveryCodes }
+  }
+''';
+
+const String disableTwoFactorMutation = r'''
+  mutation DisableTwoFactor($code: String!) {
+    disableTwoFactor(code: $code)
+  }
+''';
+
+// ─── الأجهزة / الجلسات ───
+const String myDevicesQuery = r'''
+  query MyDevices {
+    myDevices { id deviceName platform lastActiveAt current createdAt }
+  }
+''';
+
+const String revokeDeviceMutation = r'''
+  mutation RevokeDevice($deviceId: Int!) {
+    revokeDevice(deviceId: $deviceId)
   }
 ''';

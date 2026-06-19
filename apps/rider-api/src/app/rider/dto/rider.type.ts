@@ -46,4 +46,12 @@ export class RiderType {
 
   @Field()
   createdAt!: Date;
+
+  /** رمز "الفريق" (الدولة) المختار — تجميلي */
+  @Field({ nullable: true })
+  teamCode?: string;
+
+  /** هل التحقق بخطوتين مُفعَّل */
+  @Field({ defaultValue: false })
+  twoFactorEnabled!: boolean;
 }

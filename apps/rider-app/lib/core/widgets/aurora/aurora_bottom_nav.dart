@@ -10,6 +10,10 @@ class AuroraBottomNav extends StatelessWidget {
   final VoidCallback? onCenterPressed;
   final List<AuroraNavItem> items;
 
+  /// ارتفاع الشريط الثابت (بدون الـ safe-area السفلي). تستخدمه الشاشات
+  /// القابلة للتمرير لحساب الحشوة السفلية حتى لا يختفي آخر عنصر خلف الشريط.
+  static const double height = 72;
+
   const AuroraBottomNav({
     required this.currentIndex,
     required this.onTap,
@@ -31,7 +35,7 @@ class AuroraBottomNav extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: SizedBox(
-          height: 72,
+          height: height,
           child: Row(
             children: [
               _navItem(0, items[0]),

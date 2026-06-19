@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../blocs/wallet/wallet_bloc.dart';
 import '../../blocs/wallet/wallet_event.dart';
 import '../../blocs/wallet/wallet_state.dart';
+import '../../core/graphql/graphql_client.dart';
+import '../../core/graphql/gql/inbox_gql.dart';
 import '../../core/models/wallet_model.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
@@ -120,6 +123,11 @@ class _WalletView extends StatelessWidget {
 
             // ─── Quick actions ───
             _quickActions(context, state.wallet),
+
+            const SizedBox(height: AuroraSpacing.lg),
+
+            // ─── Offers & codes ───
+            const _PromoCodeSection(),
 
             const SizedBox(height: AuroraSpacing.xxl),
 
@@ -422,6 +430,110 @@ class _WalletView extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// قسم العروض والأكواد — استخدام كود هدية/خصم يُضيف رصيداً للمحفظة (claimGiftCode).
+class _PromoCodeSection extends StatefulWidget {
+  const _PromoCodeSection();
+  @override
+  State<_PromoCodeSection> createState() => _PromoCodeSectionState();
+}
+
+class _PromoCodeSectionState extends State<_PromoCodeSection> {
+  final _code = TextEditingController();
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _code.dispose();
+    super.dispose();
+  }
+
+  Future<void> _apply() async {
+    final code = _code.text.trim();
+    if (code.isEmpty || _busy) return;
+    setState(() => _busy = true);
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.mutate(MutationOptions(
+        document: gql(claimGiftCodeMutation),
+        variables: {'code': code},
+      ));
+      if (res.hasException) throw res.exception!;
+      final d = res.data?['claimGiftCode'] as Map<String, dynamic>?;
+      final amount = (d?['amount'] as num?)?.toStringAsFixed(2) ?? '';
+      final currency = (d?['currency'] as String?) ?? '';
+      if (!mounted) return;
+      _code.clear();
+      // حدّث رصيد المحفظة بعد الإضافة.
+      context.read<WalletBloc>().add(const WalletLoadRequested());
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('${tr('codeApplied')} +$amount $currency'),
+        backgroundColor: AuroraColors.success,
+      ));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: AuroraColors.danger,
+        ));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(tr('offersAndCodes'), style: AuroraText.titleMedium),
+        const SizedBox(height: AuroraSpacing.md),
+        Container(
+          padding: const EdgeInsets.only(left: AuroraSpacing.md, right: 6),
+          decoration: BoxDecoration(
+            color: AuroraColors.ash,
+            borderRadius: BorderRadius.circular(AuroraRadius.md),
+            border: Border.all(color: AuroraColors.border),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.card_giftcard_outlined,
+                  color: AuroraColors.ember, size: 20),
+              const SizedBox(width: AuroraSpacing.sm),
+              Expanded(
+                child: TextField(
+                  controller: _code,
+                  textCapitalization: TextCapitalization.characters,
+                  style: AuroraText.bodyMedium
+                      .copyWith(color: AuroraColors.pearl),
+                  decoration: InputDecoration(
+                    hintText: tr('addPromoCode'),
+                    hintStyle: AuroraText.bodySmall,
+                    border: InputBorder.none,
+                  ),
+                  onSubmitted: (_) => _apply(),
+                ),
+              ),
+              TextButton(
+                onPressed: _busy ? null : _apply,
+                child: _busy
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: AuroraColors.ember))
+                    : Text(tr('apply'),
+                        style: AuroraText.titleSmall
+                            .copyWith(color: AuroraColors.ember)),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

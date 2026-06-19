@@ -11,7 +11,10 @@ import '../../core/widgets/aurora/aurora.dart';
 
 /// قائمة الرحلات القابلة لإعادة الاستخدام (تبويب + صفحة مدفوعة).
 class AuroraRidesView extends StatefulWidget {
-  const AuroraRidesView({super.key});
+  /// حشوة سفلية إضافية — تُمرَّر من تبويب النشاط ليتجاوز الشريط السفلي العائم.
+  /// تبقى = AuroraSpacing.lg في الصفحة المدفوعة (RidesHistoryScreen) حيث لا شريط.
+  final double bottomInset;
+  const AuroraRidesView({super.key, this.bottomInset = AuroraSpacing.lg});
   @override
   State<AuroraRidesView> createState() => _AuroraRidesViewState();
 }
@@ -40,7 +43,8 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
                 .read<OrderBloc>()
                 .add(const OrderHistoryRequested()),
             child: ListView.builder(
-              padding: const EdgeInsets.all(AuroraSpacing.lg),
+              padding: EdgeInsets.fromLTRB(AuroraSpacing.lg, AuroraSpacing.lg,
+                  AuroraSpacing.lg, widget.bottomInset),
               itemCount: state.orders.length,
               itemBuilder: (_, i) => _rideCard(context, state.orders[i]),
             ),

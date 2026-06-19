@@ -11,10 +11,12 @@ const String sendOtpMutation = r'''
 ''';
 
 const String verifyOtpMutation = r'''
-  mutation VerifyOtp($phone: String!, $code: String!, $referralCode: String, $pendingToken: String) {
-    verifyOtp(input: { phone: $phone, code: $code, referralCode: $referralCode, pendingToken: $pendingToken }) {
+  mutation VerifyOtp($phone: String!, $code: String!, $referralCode: String, $pendingToken: String, $deviceName: String, $platform: String) {
+    verifyOtp(input: { phone: $phone, code: $code, referralCode: $referralCode, pendingToken: $pendingToken, deviceName: $deviceName, platform: $platform }) {
       accessToken
       isNewUser
+      twoFactorRequired
+      pendingToken
       rider {
         id
         phoneNumber
@@ -30,6 +32,17 @@ const String verifyOtpMutation = r'''
         banned
         active
       }
+    }
+  }
+''';
+
+// ─── إكمال الدخول بالتحقق بخطوتين ───
+const String verifyTwoFactorMutation = r'''
+  mutation VerifyTwoFactor($pendingToken: String!, $code: String!, $deviceName: String, $platform: String) {
+    verifyTwoFactor(pendingToken: $pendingToken, code: $code, deviceName: $deviceName, platform: $platform) {
+      accessToken
+      isNewUser
+      rider { id phoneNumber firstName lastName }
     }
   }
 ''';

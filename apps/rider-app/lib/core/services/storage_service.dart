@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Manages secure local storage for JWT and user preferences
@@ -46,6 +47,12 @@ class StorageService {
       _storage.write(key: _keyLang, value: code);
   static Future<String?> getLanguage() => _storage.read(key: _keyLang);
 
+  // ── الفريق المختار (تجميلي، محلي) ───────────────────────────────────────────
+  static const _keyTeam = 'hancr_team';
+  static Future<void> saveTeam(String code) =>
+      _storage.write(key: _keyTeam, value: code);
+  static Future<String?> getTeam() => _storage.read(key: _keyTeam);
+
   // ── N5 — Live SDUI theme cache ──────────────────────────────────────────────
   // يُخزَّن آخر themeConfig (JSON string) ليُطبَّق فوراً عند الإقلاع قبل وصول الشبكة.
   static const _keyTheme = 'hancr_theme_config';
@@ -53,12 +60,67 @@ class StorageService {
       _storage.write(key: _keyTheme, value: json);
   static Future<String?> getThemeConfig() => _storage.read(key: _keyTheme);
 
+  // ── الحسابات المتعددة (تبديل الحساب) ────────────────────────────────────────
+  // قائمة الحسابات المحفوظة [{token, riderId, phone, name}] — تبقى بعد تسجيل
+  // الخروج ليتمكّن المستخدم من التبديل بينها دون إعادة دخول كامل.
+  static const _keyAccounts = 'hancr_accounts';
+
+  static Future<List<Map<String, dynamic>>> getAccounts() async {
+    final raw = await _storage.read(key: _keyAccounts);
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      return (jsonDecode(raw) as List).cast<Map<String, dynamic>>();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// يضيف/يحدّث حساباً (مفتاح التفرّد = riderId)
+  static Future<void> saveAccount({
+    required String token,
+    required int riderId,
+    required String phone,
+    String? name,
+  }) async {
+    final list = await getAccounts();
+    list.removeWhere((a) => a['riderId'] == riderId);
+    list.insert(0, {
+      'token': token,
+      'riderId': riderId,
+      'phone': phone,
+      'name': name,
+    });
+    await _storage.write(key: _keyAccounts, value: jsonEncode(list));
+  }
+
+  static Future<void> removeAccount(int riderId) async {
+    final list = await getAccounts();
+    list.removeWhere((a) => a['riderId'] == riderId);
+    await _storage.write(key: _keyAccounts, value: jsonEncode(list));
+  }
+
+  /// يجعل حساباً محفوظاً هو النشط (يبدّل التوكن/المعرّف/الهاتف)
+  static Future<bool> activateAccount(int riderId) async {
+    final list = await getAccounts();
+    final matches = list.where((a) => a['riderId'] == riderId);
+    if (matches.isEmpty) return false;
+    final acc = matches.first;
+    await saveToken(acc['token'] as String);
+    await saveRiderId(riderId);
+    await savePhone(acc['phone'] as String? ?? '');
+    return true;
+  }
+
   // ── Clear All ─────────────────────────────────────────────────────────────
-  // ملاحظة: لا يمسح ثيم الـ SDUI (مفتاح عام، ليس بيانات مستخدم) ليبقى الثيم
-  // المنشور ظاهراً بعد تسجيل الخروج.
+  // ملاحظة: لا يمسح ثيم الـ SDUI (مفتاح عام) ولا قائمة الحسابات المحفوظة
+  // (ليتمكّن المستخدم من التبديل/العودة لحساب آخر بعد الخروج).
   static Future<void> clearAll() async {
     final theme = await _storage.read(key: _keyTheme);
+    final accounts = await _storage.read(key: _keyAccounts);
     await _storage.deleteAll();
     if (theme != null) await _storage.write(key: _keyTheme, value: theme);
+    if (accounts != null) {
+      await _storage.write(key: _keyAccounts, value: accounts);
+    }
   }
 }

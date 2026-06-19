@@ -19,7 +19,13 @@ class RidesTab extends StatelessWidget {
                   AuroraSpacing.md, AuroraSpacing.lg, AuroraSpacing.sm),
               child: Text('النشاط', style: AuroraText.displayMedium),
             ),
-            const Expanded(child: AuroraRidesView()),
+            Expanded(
+              child: AuroraRidesView(
+                bottomInset: AuroraBottomNav.height +
+                    MediaQuery.of(context).viewPadding.bottom +
+                    AuroraSpacing.lg,
+              ),
+            ),
           ],
         ),
       ),

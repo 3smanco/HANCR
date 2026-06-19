@@ -4,6 +4,17 @@
 > ابدأ أي محادثة جديدة بقراءته (وحده يكفي للسياق) بدل تحميل المهارة الضخمة أو قراءة عشرات الملفات.
 > آخر تحديث: 2026-06-15
 
+## 👤 تطوير قسم "الحساب" في تطبيق الراكب — قوائم Uber الناقصة (2026-06-15) — `.claude/plans/synchronous-jingling-stream.md`
+الهدف: إضافة قوائم Uber الناقصة لقسم الحساب **بهوية HANCR الداكنة (Aurora/ember) دون حذف أو تغيير الشكل**. أُنجزت 7 مراحل (A–G)، **مبنية ومحلَّلة، غير منشورة بعد**.
+- **A — إصلاح قَص آخر القائمة + الأفاتار:** بطاقة "ادعُ أصدقاءك" كانت تختفي خلف الشريط السفلي العائم (`extendBody:true` + `SafeArea(bottom:false)` + حشوة 48px فقط < 72 ارتفاع الشريط). أُضيف `AuroraBottomNav.height=72` ثابت، وحُسبت الحشوة السفلية = `height + viewPadding.bottom + lg` في **كل التبويبات الأربعة** (الحساب/الرئيسية/الخدمات/النشاط). الأفاتار صار ودجت `RiderAvatar` (`core/widgets/rider_avatar.dart`) يعرض `Image.network` مع fallback للحرف.
+- **B — صورة الملف الشخصي (وظيفية، full-stack):** **backend جديد** `rider-api`: `upload-url.service.ts` + DTO `upload-url.type.ts` + ميوتيشن `generateRiderUploadUrl` (presigned GCS PUT، مرآة driver-api؛ bucket `GCS_RIDER_UPLOADS_BUCKET` أو fallback لـdriver؛ fallback تطويري). `updateProfile(avatarUrl)` موجود أصلاً. **app:** `image_picker`+`http` في pubspec + `RiderUploadService` + شارة كاميرا على الأفاتار في بطاقة المستخدم وEditProfileScreen ⇒ التقاط→رفع→`RiderUpdateRequested(avatarUrl)`.
+- **C — Safety Hub:** شاشة جديدة `screens/sos/aurora_safety_hub_screen.dart` (أدوات الأمان: تفضيلات + جهات موثوقة موجودة + PIN + RideCheck؛ اعرف قبل رحلتك: نصائح + الأمان في HANCR). بطاقة "فحص الأمان 1/7" تفتحها الآن.
+- **D — Inbox:** شاشة جديدة `screens/inbox/aurora_inbox_screen.dart` (كبسولات تصفية + حقل كود عرض + قائمة) مربوطة بـ`activeAnnouncements` + `claimGiftCode` (موجودان). أُضيفت كبلاطة رابعة (شبكة 2×2). gql: `core/graphql/gql/inbox_gql.dart`.
+- **E — كود الخصم في المحفظة:** قسم "العروض والأكواد" في `aurora_wallet_screen.dart` (`_PromoCodeSection` ⇒ `claimGiftCode` ⇒ رصيد فوري + تحديث المحفظة).
+- **F — تطوير المساعدة:** "اختر رحلة" (آخر 3 رحلات عبر `orderHistory` محلياً، مستقل عن OrderBloc لتفادي طمس الرحلة النشطة) + شبكة مواضيع، فوق FAQ الحالي.
+- **G:** كل النصوص الجديدة في `app_localization.dart` (ar+en، البقية fallback). **التحقق: `tsc` rider-api = 0 · `flutter analyze` = 0 أخطاء** (لِنتات info/deprecated قديمة فقط).
+- **⏭️ النشر (لم يتم):** rider-api = `git pull` + `pm2 restart rider-api` بهوية `info` (لميوتيشن الرفع). رفع الصور الفعلي يحتاج `GCS_SERVICE_ACCOUNT_JSON` + `GCS_RIDER_UPLOADS_BUCKET` + CORS (fallback تطويري بدونها). APK جديد للراكب (recipe arm64). **مؤجَّل لجولة لاحقة:** إدارة طرق الدفع · العائلة/المراهقين · الوضع البسيط · اشتراك مدفوع (Uber One) · حقل category للإعلانات (لتفعيل تصفية Offers/Support في Inbox).
+
 ## 🚀 نشر خطة موقع الهبوط (L1–L6) + إكمال TODO (2026-06-15) — منشور حيّاً
 - **✅ إكمال الـTODO الثلاثة (قيم عالمية، قابلة للتعديل):** `/legal/terms` الفصل 8 → "قوانين الدولة التي تُقدَّم فيها الخدمة + المحاكم المختصة فيها، دون الإخلال بحقوق بلد الإقامة" (بدل الرياض حصراً). `/contact` → حُذف الهاتف الوهمي، استُبدل بقناة بريد "الشراكات والأعمال" (`business@hancr.com`) + أُزيل استيراد `Phone`. `/investors` → الوسم صار "سوق النقل التشاركي العالمي يتجاوز 300 مليار دولار بحلول 2030".
 - **✅ Commit + push:** `f917e19` على `main` (29 ملفاً، شمل rider-api L3 الذي لم يكن مُودَعاً من قبل).
@@ -264,6 +275,27 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
+- **🟢 إنجاز كل المؤجَّل (الدفعة الثانية) — الكود مكتمل ومُتحقَّق (2026-06-19)، بانتظار النشر.**
+  - **التحقق:** rider/driver/admin-api `tsc=0` · rider-app `flutter analyze=0 errors` (97 info/warning تجميلية).
+  - **1) مزامنة الفريق مع السيرفر:** عمود `hancr_rider.team_code` + `teamCode` في `updateProfile`/`me` + `RiderModel`. `ChooseTeamScreen` يحفظ محلياً **و** يدفع للخادم.
+  - **2) تفاصيل CO₂:** `screens/profile/co2_details_screen.dart` (تقدير من totalRides — app-only) موصولة ببطاقة CO₂ في `aurora_profile_tab`.
+  - **3) العائلة الفعلية + حدود الإنفاق:** استُخدمت جداول `hancr_pool/hancr_pool_member` الموجودة (لا سكيمة جديدة). `PoolService` + mutations: `createFamily/inviteFamilyMember(phone,limit)/updateFamilyMemberLimit/removeFamilyMember/leaveFamily/deleteFamily` + `myPool` موسّع. **فرض الحدّ في `order.service.createOrder`** (حجز عند الإنشاء + إعادة عند الإلغاء) عبر عدّاد Redis شهري `hancr:pool:spend:<memberId>:<YYYYMM>` (تصفير تلقائي، لا كتابة DB ساخنة). شاشة `aurora_family_manage_screen.dart`.
+  - **4) 2FA حقيقي (TOTP):** `totp.util.ts` (RFC 6238 بـcrypto، بلا تبعية) + حقول `two_factor_*` على الراكب + mutations `startTwoFactorSetup/enableTwoFactor(يعيد أكواد استرداد)/disableTwoFactor/verifyTwoFactor`. **الفرض عند الدخول:** `verifyOtp` يعيد `twoFactorRequired+pendingToken` بدل توكن. التطبيق: حالة `AuthTwoFactorRequired` + شاشة رمز داخل `aurora_otp_screen` + `TwoFactorScreen` للإدارة. (opt-in — لا مستخدم مفعّل الآن، فالمخاطرة على الدخول الحالي صفر.)
+  - **5) الأجهزة/الجلسات:** جدول `hancr_rider_device` (jti لكل توكن) + `jti` في الـJWT + denylist Redis (`revokedJtiKey`) في `jwt.strategy`. mutations `myDevices/revokeDevice`. كل مسارات الدخول تُصدر جلسة عبر `issueSession`. شاشة `devices_screen.dart` في تبويب الأمان.
+  - **6) تبديل حسابات متعدد فعلي (app-only):** `StorageService` يحفظ قائمة حسابات (token/riderId/phone/name) تبقى بعد الخروج · `activateAccount` للتبديل · مبدّل حسابات (bottom sheet) في الإعدادات + "إضافة حساب". الحسابات تُحفظ عند كل دخول ناجح.
+  - **🗄️ migration:** `libs/database/src/lib/migrations/1781600000000-AddTeamTwoFactorAndDevices.ts` (idempotent، `IF NOT EXISTS`) — يُطبَّق بـ`npm run migration:run` على الخادم.
+  - **⏭️ النشر المطلوب:** (أ) backend: push→PR→merge→ `git pull`+`npm ci`+build+**`npm run migration:run`**+`pm2 restart rider-api` (driver/admin لا تتأثران سلوكياً، لا حاجة لإعادة تشغيلهما). (ب) APK الراكب: إعادة بناء arm64 ونشر. **لم يُنشر بعد.**
+
+
+- **🟩 قسم "الحساب" — الدفعة الثانية (Settings + Account mgmt + Family + Team) — مكتملة الكود (2026-06-19).**
+  - **H (رسوم):** الـ7 PNGs مولَّدة في `apps/rider-app/assets/images/` (family-invite/family-start/team-car/account-checkup + inbox-empty/safety-hero/invite-gift) عبر `~/hancr-logo-gen/gen-rider.js`.
+  - **I (الإعدادات):** `SettingsScreen` موسّعة (`profile_pages.dart`): بطاقة حساب + عناوين محفوظة + تحكّم/خصوصية (شاشات `_SettingsDetailScreen`) + تفضيلات ركوب + إجراءات (تبديل/خروج بحوار). `_navRow` جديد.
+  - **J:** `screens/profile/account_management_screen.dart` — 4 تبويبات مخصّصة (رئيسية/شخصية/أمان/خصوصية).
+  - **K:** `screens/family/aurora_family_screen.dart` — دعوة→عمر(Radio)→مشاركة (share_plus) + toast.
+  - **L:** `screens/profile/choose_team_screen.dart` — شبكة 4 أعمدة، أعلام مرسومة، حفظ `StorageService.saveTeam/getTeam` (مفتاح `hancr_team`).
+  - **M (آخر فجوة أُغلقت اليوم):** كانت كل الشاشات مكتوبة لكن **مفاتيح i18n مفقودة بالكامل** (~99 مفتاح ar+en، البقية fallback لـ en) + **بطاقة العائلة لم تكن موصولة** في `aurora_profile_tab.dart` (import ميت). أُضيف الاثنان. `flutter analyze` = **0 errors** (92 info/warning تجميلية فقط).
+  - **نقاط الدخول:** الإعدادات (chooseTeam في تفضيلات الركوب · switch/signOut في الإجراءات) · بطاقة Family + بطاقة الإعدادات في `aurora_profile_tab`.
+  - **✅ منشور حيّاً (2026-06-19):** APK الراكب (arm64، إنتاجي، release-signed، **46,680,523 بايت**، مفتاح Maps `AIzaSyBsz0...` مُتحقَّق بـaapt + `GOOGLE_SERVER_CLIENT_ID=390136620892-bkt9...`) بُني في 292s ورُفع. النشر: `scp -i ~/.ssh/google_compute_engine ...:/tmp` ثم `sudo cp` لـ`/var/www/hancr-landing/downloads/hancr-rider.apk` (chown www-data). مُتحقَّق: `hancr.com/downloads/hancr-rider.apk` HTTP 200 + content-length مطابق. **بعد التثبيت:** المستخدم يلغي تثبيت القديم ثم يثبّت الجديد. **مؤجَّل:** تفاصيل CO₂ · ربط حسابات العائلة الفعلي/حدود الإنفاق (backend) · أمان حقيقي (2FA/أجهزة) · تبديل حسابات متعدد فعلي · مزامنة "الفريق" مع السيرفر (محلي الآن، تجميلي).
 - **🟦 خطة الإكمال الشاملة (مجلس) — الموجة A جارية.** الخطة: `C:\Users\7bici\.claude\plans\llm-council-lexical-owl.md`. 6 موجات (A لوحة·B تصفير قريباً·C ميزات·D دفع·E ويب·F تدقيق).
   - **A1+A2+A3 منجزة ومنشورة (PR #68، #69):** إنشاء/تعديل راكب وسائق + تسطيح حجز رحلة. الثلاثة بنود المسمّاة من المالك مكتملة حيّاً على admin.hancr.com.
     - A1/A2: mutations adminCreateRider/Driver+Update (RequireRole('ops')) + modals.
