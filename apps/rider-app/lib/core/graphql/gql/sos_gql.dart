@@ -67,6 +67,12 @@ const String triggerSosMutation = r'''
   }
 ''';
 
+const String updateSosLocationMutation = r'''
+  mutation UpdateSosLocation($latitude: Float!, $longitude: Float!) {
+    updateSosLocation(latitude: $latitude, longitude: $longitude)
+  }
+''';
+
 const String cancelSosMutation = r'''
   mutation CancelSos($incidentId: Int!) {
     cancelSos(incidentId: $incidentId) {

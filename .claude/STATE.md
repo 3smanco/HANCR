@@ -275,12 +275,20 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
+- **🟩 نظام الدعم والطوارئ — الدفعة 1: SOS الحيّ — مكتمل ومُتحقَّق (2026-06-20).** الخطة الشاملة (4 دفعات): `C:\Users\7bici\.claude\plans\gleaming-snuggling-wind.md`. التحقق: rider/driver/admin-api `tsc=0` · rider+driver-app `flutter analyze=0` · ملفات admin-panel نظيفة (خطأ cancel-reasons سابق غير متعلّق).
+  - **بثّ GPS كل 3ث:** قناة Redis `SOS_LOCATION_CHANNEL` + `SosService.updateLocation` ينشر + `updateActiveLocation(ملكية)`. mutations `updateSosLocation`(rider) / `updateDriverSosLocation`(driver). `SosBloc` (التطبيقان) يبثّ `Geolocator` كل 3ث أثناء حادثة نشطة (يبدأ عند trigger/load، يقف عند cancel/close).
+  - **admin-api:** subscription `sosLocationUpdated` + DTO. (sosIncidentCreated موجود.)
+  - **admin-panel:** `apollo.ts` += `GraphQLWsLink` (split http/ws، graphql-ws) · صفحة SOS: اشتراكان (incidentCreated→وميض+صوت+refetch، locationUpdated→تحريك الماركر) + **خريطة حيّة** `LiveSosMap` (@react-google-maps) + زر "تفعيل الصوت" + بانر وميض أحمر.
+  - **التطبيقان:** زر "اتصل بالطوارئ المحلية" (رقم الدولة عبر `EmergencyNumbers` + `tel:`) في بانر الرايدر النشط + حوار السائق النشط.
+  - **مؤجَّل موثّق:** أزرار الاتصال السريع بالراكب/السائق في الأدمن (يلزم كشف الهاتف في AdminSosType) · الدفعات 2-4 (Helpdesk · تحسين الشات · شات الدعم الحي).
+  - **⏭️ النشر:** الـ3 APIs restart + admin-panel build + APK رايدر+سائق (لا migration). **لم يُنشر بعد.**
+
 - **🟩 صفحة النشاط + تفاصيل الرحلة + شكوى الرحلة — الكود مكتمل ومُتحقَّق (2026-06-20)، app-only.** الخطة: `C:\Users\7bici\.claude\plans\gleaming-snuggling-wind.md`. التحقق: `flutter analyze=0 errors` (لا backend/migration).
   - **القائمة (`aurora_rides.dart`):** أيقونة حسب نوع الخدمة (`_serviceIcon`) + شارة "ملغاة" رمادية للرحلات الملغاة بدل الـchip العام.
   - **التفاصيل (`RideDetailsScreen`):** خريطة lite حقيقية (GoogleMap + polyline من `points` + ماركرين، نمط داكن `_kMiniMapDark`) + سطر حالة بالتاريخ (ملغاة/اكتملت) + بطاقة السائق (`RiderAvatar`+اسم+تقييم+مركبة) + "عرض الإيصال" (ExpansionTile: أجرة/خصم/مدفوع) + قسم "المساعدة" (4 صفوف `AuroraListRow`).
   - **نموذج الشكوى (`trip_help_form_screen.dart`):** عنوان + نص سياسة حسب الفئة + text area + `AuroraStickyButton` "إرسال" معطّل حتى ≥5 أحرف → `submitComplaint(orderId, category, description)` → `SupportScreen`. خريطة الخيارات: lost→other · أمني→safety · أجرة→fare · عام→other.
   - **gql:** أُضيف `points/carColor/plateNumber/costAfterCoupon` لـ`orderHistoryQuery` (نفس OrderType، بلا backend).
-  - **⏭️ النشر:** **APK فقط** (لا backend) — لم يُنشر بعد.
+  - **✅ منشور (2026-06-20، PR #161، main=bb9b646):** app-only — APK الراكب (arm64، **47,076,931 بايت**، مفتاح Maps مُتحقَّق) رُفع → `hancr.com/downloads/hancr-rider.apk` HTTP 200 مطابق. لا backend/migration. **بعد التثبيت: إلغاء تثبيت القديم ثم تثبيت الجديد.**
 
 - **🟩 قسم "الحساب" — الدفعة الرابعة (الختام: إكمال وحدة الحساب) — الكود مكتمل ومُتحقَّق (2026-06-20).** الخطة: `C:\Users\7bici\.claude\plans\gleaming-snuggling-wind.md`.
   - **التحقق:** rider/driver/admin-api `tsc=0` · rider-app `flutter analyze=0 errors`.

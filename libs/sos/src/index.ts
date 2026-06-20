@@ -6,6 +6,7 @@ export { SosModule } from './lib/sos.module';
 export {
   SosService,
   SOS_INCIDENT_CHANNEL,
+  SOS_LOCATION_CHANNEL,
   type TriggerSosInput,
   type AddEmergencyContactInput,
 } from './lib/sos.service';

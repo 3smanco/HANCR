@@ -1099,6 +1099,35 @@ export const SOS_INCIDENTS = gql`
   }
 `;
 
+// ─── Live SOS subscriptions (WebSocket) ───
+export const SOS_INCIDENT_CREATED_SUB = gql`
+  subscription SosIncidentCreated {
+    sosIncidentCreated {
+      id
+      triggeredBy
+      triggeredById
+      orderId
+      latitude
+      longitude
+      status
+      contactsNotified
+      policeNotified
+      createdAt
+    }
+  }
+`;
+
+export const SOS_LOCATION_UPDATED_SUB = gql`
+  subscription SosLocationUpdated {
+    sosLocationUpdated {
+      incidentId
+      latitude
+      longitude
+      at
+    }
+  }
+`;
+
 export const RESOLVE_SOS = gql`
   mutation ResolveSos($input: ResolveSosInput!) {
     resolveSosIncident(input: $input) {

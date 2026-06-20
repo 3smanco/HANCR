@@ -67,6 +67,12 @@ const String triggerDriverSosMutation = r'''
   }
 ''';
 
+const String updateDriverSosLocationMutation = r'''
+  mutation UpdateDriverSosLocation($latitude: Float!, $longitude: Float!) {
+    updateDriverSosLocation(latitude: $latitude, longitude: $longitude)
+  }
+''';
+
 const String cancelDriverSosMutation = r'''
   mutation CancelDriverSos($incidentId: Int!) {
     cancelDriverSos(incidentId: $incidentId) {

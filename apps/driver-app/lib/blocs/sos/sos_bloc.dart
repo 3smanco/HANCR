@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/sos_gql.dart';
@@ -8,6 +10,8 @@ import 'sos_state.dart';
 
 /// SosBloc — مرآة لـ rider-app/SosBloc لكن يستخدم endpoints السائق.
 class SosBloc extends Bloc<SosEvent, SosState> {
+  Timer? _telemetry;
+
   SosBloc() : super(const SosInitial()) {
     on<SosLoadRequested>(_onLoad);
     on<SosContactAdded>(_onAddContact);
@@ -15,6 +19,36 @@ class SosBloc extends Bloc<SosEvent, SosState> {
     on<SosTriggered>(_onTrigger);
     on<SosCancelled>(_onCancel);
     on<SosToastCleared>(_onToastCleared);
+  }
+
+  /// بثّ موقع السائق كل 3ث أثناء حادثة نشطة (خريطة الأدمن الحيّة).
+  void _startTelemetry() {
+    if (_telemetry != null) return;
+    _telemetry = Timer.periodic(const Duration(seconds: 3), (_) async {
+      try {
+        final pos = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        ).timeout(const Duration(seconds: 5));
+        final client = await GraphQLClientManager.get();
+        await client.mutate(MutationOptions(
+          document: gql(updateDriverSosLocationMutation),
+          variables: {'latitude': pos.latitude, 'longitude': pos.longitude},
+        ));
+      } catch (_) {
+        // تجاهل أخطاء عابرة.
+      }
+    });
+  }
+
+  void _stopTelemetry() {
+    _telemetry?.cancel();
+    _telemetry = null;
+  }
+
+  @override
+  Future<void> close() {
+    _stopTelemetry();
+    return super.close();
   }
 
   void _onToastCleared(SosToastCleared e, Emitter<SosState> emit) {
@@ -50,6 +84,11 @@ class SosBloc extends Bloc<SosEvent, SosState> {
       }
 
       emit(SosLoaded(contacts: contacts, activeIncident: active));
+      if (active != null) {
+        _startTelemetry();
+      } else {
+        _stopTelemetry();
+      }
     } catch (e) {
       emit(SosError('فشل تحميل جهات الطوارئ: $e'));
     }
@@ -136,6 +175,7 @@ class SosBloc extends Bloc<SosEvent, SosState> {
           activeIncident: inc,
           toast: 'تم تفعيل الطوارئ — تم إشعار ${inc.contactsNotified} جهة',
         ));
+        _startTelemetry();
       } else {
         add(const SosLoadRequested());
       }
@@ -161,6 +201,7 @@ class SosBloc extends Bloc<SosEvent, SosState> {
         variables: {'incidentId': event.incidentId},
       ));
       if (result.hasException) throw result.exception!;
+      _stopTelemetry();
       emit(s.copyWith(
         clearIncident: true,
         toast: 'تم إلغاء الإنذار',

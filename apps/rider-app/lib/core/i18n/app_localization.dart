@@ -983,4 +983,7 @@ const Map<String, Map<String, String>> _t = {
     'ar': 'أخبرنا بما واجهته في هذه الرحلة وسيتواصل معك فريق الدعم لحلّ المشكلة.',
     'en': 'Tell us what you experienced on this trip and our support team will follow up to resolve it.'
   },
+
+  // ─── SOS الحيّ ───
+  'callEmergency': {'ar': 'اتصل بالطوارئ المحلية', 'en': 'Call local emergency'},
 };

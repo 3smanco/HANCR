@@ -1,9 +1,13 @@
 import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../blocs/sos/sos_bloc.dart';
 import '../../blocs/sos/sos_event.dart';
 import '../../blocs/sos/sos_state.dart';
+import '../../blocs/driver/driver_bloc.dart';
+import '../../blocs/driver/driver_state.dart';
+import '../../core/emergency_numbers.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import 'driver_emergency_contacts_screen.dart';
 
@@ -139,12 +143,18 @@ class _AuroraDriverSosButtonState extends State<AuroraDriverSosButton>
 
   Future<void> _showActiveDialog(
       BuildContext context, int incidentId, int notified) async {
+    final driverState = context.read<DriverBloc>().state;
+    final code =
+        driverState is DriverLoaded ? driverState.driver.countryCode : null;
+    final emergencyNo = EmergencyNumbers.forCountryCode(code);
     final ok = await _showAuroraDialog<bool>(
       context: context,
       title: tr('sosActiveTitle'),
       body: 'تم إشعار $notified جهة. هل أنت بأمان الآن؟',
       confirm: tr('yesSafe'),
       cancel: tr('dangerContinues'),
+      extraLabel: tr('callEmergency'),
+      onExtra: () => launchUrl(Uri.parse('tel:$emergencyNo')),
     );
     if (!context.mounted) return;
     if (ok == true) context.read<SosBloc>().add(SosCancelled(incidentId));
@@ -158,6 +168,8 @@ Future<T?> _showAuroraDialog<T>({
   required String confirm,
   required String cancel,
   bool dangerConfirm = false,
+  String? extraLabel,
+  VoidCallback? onExtra,
 }) {
   return showDialog<T>(
     context: context,
@@ -176,6 +188,14 @@ Future<T?> _showAuroraDialog<T>({
             const SizedBox(height: AuroraSpacing.sm),
             Text(body, style: AuroraText.bodyMedium),
             const SizedBox(height: AuroraSpacing.xl),
+            if (extraLabel != null && onExtra != null) ...[
+              AuroraButton.danger(
+                label: extraLabel,
+                icon: Icons.local_phone,
+                onPressed: onExtra,
+              ),
+              const SizedBox(height: AuroraSpacing.sm),
+            ],
             AuroraButton(
               label: confirm,
               variant: dangerConfirm

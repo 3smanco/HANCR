@@ -104,6 +104,24 @@ export class SosResolver {
     });
   }
 
+  @Mutation(() => Boolean, {
+    description: 'بثّ موقع الراكب الحيّ أثناء حادثة طوارئ نشطة (كل 3ث)',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ strict: { limit: 30, ttl: 60000 } })
+  async updateSosLocation(
+    @CurrentUser() user: AuthUser,
+    @Args('latitude') latitude: number,
+    @Args('longitude') longitude: number,
+  ): Promise<boolean> {
+    return this.sosService.updateActiveLocation(
+      SosTriggeredBy.Rider,
+      user.riderId,
+      latitude,
+      longitude,
+    );
+  }
+
   @Mutation(() => SosIncidentType, {
     description: 'إلغاء حادثة طوارئ (إنذار خاطئ)',
   })

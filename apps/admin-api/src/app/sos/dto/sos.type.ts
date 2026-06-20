@@ -41,3 +41,12 @@ export class ResolveSosInput {
   @Field({ defaultValue: false, description: 'تم إبلاغ الشرطة' })
   markPoliceNotified!: boolean;
 }
+
+/** بثّ موقع حادثة حيّ (live) */
+@ObjectType()
+export class SosLocationUpdateType {
+  @Field(() => Int) incidentId!: number;
+  @Field(() => Float) latitude!: number;
+  @Field(() => Float) longitude!: number;
+  @Field() at!: string;
+}

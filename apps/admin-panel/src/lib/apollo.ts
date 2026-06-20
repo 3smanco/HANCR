@@ -7,8 +7,12 @@ import {
   InMemoryCache,
   createHttpLink,
   ApolloLink,
+  split,
 } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { createClient } from 'graphql-ws';
 import Cookies from 'js-cookie';
 
 const ADMIN_API_URL =
@@ -30,8 +34,41 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+// ─── WebSocket link (للاشتراكات الحيّة — SOS map / live) ─────────────────────
+// نشتقّ عنوان ws من عنوان الـHTTP (http→ws, https→wss).
+const wsLink =
+  typeof window !== 'undefined'
+    ? new GraphQLWsLink(
+        createClient({
+          url: ADMIN_API_URL.replace(/^http/, 'ws'),
+          connectionParams: () => {
+            const token = Cookies.get(TOKEN_COOKIE);
+            return { authorization: token ? `Bearer ${token}` : '' };
+          },
+          retryAttempts: 5,
+          shouldRetry: () => true,
+        }),
+      )
+    : null;
+
+// split: الاشتراكات → ws، الباقي → http+auth.
+const splitLink =
+  wsLink != null
+    ? split(
+        ({ query }) => {
+          const def = getMainDefinition(query);
+          return (
+            def.kind === 'OperationDefinition' &&
+            def.operation === 'subscription'
+          );
+        },
+        wsLink,
+        ApolloLink.from([authLink, httpLink]),
+      )
+    : ApolloLink.from([authLink, httpLink]);
+
 export const apolloClient = new ApolloClient({
-  link: ApolloLink.from([authLink, httpLink]),
+  link: splitLink,
   cache: new InMemoryCache(),
   defaultOptions: {
     watchQuery: { fetchPolicy: 'network-only' },
