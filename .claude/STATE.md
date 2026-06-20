@@ -275,6 +275,13 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
+- **🟩 صفحة النشاط + تفاصيل الرحلة + شكوى الرحلة — الكود مكتمل ومُتحقَّق (2026-06-20)، app-only.** الخطة: `C:\Users\7bici\.claude\plans\gleaming-snuggling-wind.md`. التحقق: `flutter analyze=0 errors` (لا backend/migration).
+  - **القائمة (`aurora_rides.dart`):** أيقونة حسب نوع الخدمة (`_serviceIcon`) + شارة "ملغاة" رمادية للرحلات الملغاة بدل الـchip العام.
+  - **التفاصيل (`RideDetailsScreen`):** خريطة lite حقيقية (GoogleMap + polyline من `points` + ماركرين، نمط داكن `_kMiniMapDark`) + سطر حالة بالتاريخ (ملغاة/اكتملت) + بطاقة السائق (`RiderAvatar`+اسم+تقييم+مركبة) + "عرض الإيصال" (ExpansionTile: أجرة/خصم/مدفوع) + قسم "المساعدة" (4 صفوف `AuroraListRow`).
+  - **نموذج الشكوى (`trip_help_form_screen.dart`):** عنوان + نص سياسة حسب الفئة + text area + `AuroraStickyButton` "إرسال" معطّل حتى ≥5 أحرف → `submitComplaint(orderId, category, description)` → `SupportScreen`. خريطة الخيارات: lost→other · أمني→safety · أجرة→fare · عام→other.
+  - **gql:** أُضيف `points/carColor/plateNumber/costAfterCoupon` لـ`orderHistoryQuery` (نفس OrderType، بلا backend).
+  - **⏭️ النشر:** **APK فقط** (لا backend) — لم يُنشر بعد.
+
 - **🟩 قسم "الحساب" — الدفعة الرابعة (الختام: إكمال وحدة الحساب) — الكود مكتمل ومُتحقَّق (2026-06-20).** الخطة: `C:\Users\7bici\.claude\plans\gleaming-snuggling-wind.md`.
   - **التحقق:** rider/driver/admin-api `tsc=0` · rider-app `flutter analyze=0 errors`.
   - **مكوّنات مشتركة:** `AuroraListRow` (عام، يُصدَّر من aurora.dart) + `AuroraButton.pill()` + `AuroraStickyButton`. وُحِّدت `_navRow`/`_secNavRow` في ملفات الحساب لتفويض AuroraListRow.
@@ -284,7 +291,8 @@ flutter build apk --release --dart-define=ENV=production \
   - **طرق الدفع:** `payment_methods_screen` فوق `PaymentMode` (نقد/محفظة/شركة حقيقية، الافتراضي محفوظ) — البطاقات "قريباً" (تتطلّب PSP).
   - **ملفات الركوب/الأعمال:** `ride_profiles_screen` + mutation `setupBusinessProfile` (يعيد استخدام Company F2؛ Business→paymentMode=Company في الحجز).
   - **المجموعات المحفوظة (جديد كامل):** `SavedGroupEntity` + migration `1781800000000` + `saved-group` module (mySavedGroups/create/update/delete) + `saved_groups_screen` (شخصية/مهنية + أعضاء بالهاتف).
-  - **⏭️ النشر المطلوب:** backend (PR→merge→ `git pull` + **`migration:run`** saved_group + `pm2 restart rider-api`) + إعادة بناء APK. **لم يُنشر بعد.**
+  - **✅ منشور ومُتحقَّق حيّاً (2026-06-20، PR #160، main=fc5ca55):** الخادم `git pull` ff → migration `1781800000000` (saved_group) مطبَّق → `pm2 restart rider-api` → `health/ready=200`. مُتحقَّق: `mySavedGroups`/`myComplaints`/`setupBusinessProfile` حيّة (Unauthorized لا field-not-found)، ودخول الاختبار سليم بلا انحدار. APK الراكب (arm64، **47,076,647 بايت**، مفتاح Maps مُتحقَّق) رُفع → `hancr.com/downloads/hancr-rider.apk` HTTP 200 مطابق.
+  - **🟢 وحدة الحساب مكتملة بالكامل عبر 4 دفعات (الأساس + الإعدادات/الإدارة/العائلة/الفريق + الخصوصية/الأمان/المظهر + الختام).** المؤجَّل الوحيد: بطاقات الدفع (تحتاج PSP) · الوضع الفاتح البصري · KYC للراكب.
 
 - **🟩 قسم "الحساب" — الدفعة الثالثة (الخصوصية + الأمان + المظهر + فحص الأمان) — الكود مكتمل ومُتحقَّق (2026-06-19).** الخطة: `C:\Users\7bici\.claude\plans\gleaming-snuggling-wind.md`.
   - **التحقق:** rider/driver/admin-api `tsc=0` · rider-app `flutter analyze=0 errors`.
