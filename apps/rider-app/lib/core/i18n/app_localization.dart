@@ -959,4 +959,28 @@ const Map<String, Map<String, String>> _t = {
   'addCard': {'ar': 'إضافة بطاقة', 'en': 'Add card'},
   'addCardSoon': {'ar': 'بطاقات الدفع تتطلّب تفعيل بوابة الدفع — قريباً', 'en': 'Card payments require payment gateway activation — coming soon'},
   'defaultLabel': {'ar': 'افتراضي', 'en': 'Default'},
+
+  // ─── صفحة النشاط + تفاصيل الرحلة + المساعدة ───
+  'canceled': {'ar': 'ملغاة', 'en': 'Canceled'},
+  'canceledOn': {'ar': 'أُلغيت في', 'en': 'Canceled on'},
+  'completedOn': {'ar': 'اكتملت في', 'en': 'Completed on'},
+  'viewReceipt': {'ar': 'عرض الإيصال', 'en': 'View receipt'},
+  'discount': {'ar': 'الخصم', 'en': 'Discount'},
+  'describeIssue': {'ar': 'اشرح المشكلة', 'en': 'Describe the issue'},
+  'helpLostItem': {'ar': 'فقدتُ غرضاً', 'en': 'I lost an item'},
+  'helpSafety': {'ar': 'الإبلاغ عن مشكلة أمنية', 'en': 'Report a safety issue'},
+  'helpFare': {'ar': 'مراجعة الأجرة والرسوم', 'en': 'Review my fare or fees'},
+  'helpGeneral': {'ar': 'مساعدة عامة بشأن الرحلة', 'en': 'Get trip help'},
+  'policyFare': {
+    'ar': 'تُحتسب الأجرة من أجرة أساسية + مسافة + زمن، وقد تُطبَّق رسوم إلغاء أو انتظار. صف اعتراضك بالتفصيل وسيراجعه فريقنا.',
+    'en': 'Fares are calculated from a base fare + distance + time, and cancellation or wait fees may apply. Describe your concern and our team will review it.'
+  },
+  'policySafety': {
+    'ar': 'سلامتك أولويتنا. صف ما حدث بدقّة؛ تُعامَل البلاغات الأمنية بأولوية قصوى وسرّية. للطوارئ الفورية استخدم زر SOS.',
+    'en': 'Your safety is our priority. Describe what happened in detail; safety reports are treated with top priority and confidentiality. For immediate emergencies use the SOS button.'
+  },
+  'policyGeneral': {
+    'ar': 'أخبرنا بما واجهته في هذه الرحلة وسيتواصل معك فريق الدعم لحلّ المشكلة.',
+    'en': 'Tell us what you experienced on this trip and our support team will follow up to resolve it.'
+  },
 };

@@ -119,15 +119,19 @@ const String orderHistoryQuery = r'''
       type
       status
       costBest
+      costAfterCoupon
       paidAmount
       currency
       distanceBest
       durationBest
       addresses
+      points { lat lng }
       driverName
       driverRating
       carBrand
       carModel
+      carColor
+      plateNumber
       driverAvatarUrl
       createdOn
       finishTimestamp

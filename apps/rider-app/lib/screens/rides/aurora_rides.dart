@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../blocs/order/order_bloc.dart';
@@ -8,6 +9,24 @@ import '../../blocs/order/order_state.dart';
 import '../../core/models/order_model.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/widgets/rider_avatar.dart';
+import 'trip_help_form_screen.dart';
+
+/// أيقونة حسب نوع الخدمة.
+IconData _serviceIcon(String type) {
+  if (type.contains('Parcel')) return Icons.local_shipping_outlined;
+  if (type.contains('Grocery') || type.contains('Shop')) {
+    return Icons.shopping_basket_outlined;
+  }
+  if (type.contains('Hourly') || type.contains('Chauffeur')) {
+    return Icons.schedule_outlined;
+  }
+  return Icons.local_taxi;
+}
+
+bool _isCanceled(OrderModel o) =>
+    o.status == OrderStatus.riderCanceled ||
+    o.status == OrderStatus.driverCanceled;
 
 /// قائمة الرحلات القابلة لإعادة الاستخدام (تبويب + صفحة مدفوعة).
 class AuroraRidesView extends StatefulWidget {
@@ -95,7 +114,7 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
                 color: AuroraColors.coal,
                 borderRadius: BorderRadius.circular(AuroraRadius.sm),
               ),
-              child: Icon(Icons.local_taxi,
+              child: Icon(_serviceIcon(o.type),
                   color: AuroraColors.ember, size: 22),
             ),
             const SizedBox(width: AuroraSpacing.md),
@@ -119,7 +138,7 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
                     style: AuroraText.titleSmall
                         .copyWith(color: AuroraColors.pearl)),
                 const SizedBox(height: 2),
-                _statusChip(o.status.label),
+                if (_isCanceled(o)) _canceledBadge(),
               ],
             ),
           ],
@@ -128,14 +147,14 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
     );
   }
 
-  Widget _statusChip(String label) {
+  Widget _canceledBadge() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: AuroraColors.smoke,
         borderRadius: BorderRadius.circular(AuroraRadius.pill),
       ),
-      child: Text(label,
+      child: Text(tr('canceled'),
           style: AuroraText.caption.copyWith(color: AuroraColors.textSecondary)),
     );
   }
@@ -158,6 +177,16 @@ class RidesHistoryScreen extends StatelessWidget {
     );
   }
 }
+
+/// نمط خريطة داكن مبسّط (Aurora) — يُخفي معالم زائدة ويغمّق الخلفية.
+const String _kMiniMapDark = '''
+[{"elementType":"geometry","stylers":[{"color":"#13100e"}]},
+{"elementType":"labels.text.fill","stylers":[{"color":"#8a817a"}]},
+{"elementType":"labels.text.stroke","stylers":[{"color":"#13100e"}]},
+{"featureType":"poi","stylers":[{"visibility":"off"}]},
+{"featureType":"road","elementType":"geometry","stylers":[{"color":"#2a2421"}]},
+{"featureType":"water","elementType":"geometry","stylers":[{"color":"#0a0807"}]}]
+''';
 
 /// تفاصيل رحلة واحدة.
 class RideDetailsScreen extends StatelessWidget {
@@ -188,6 +217,22 @@ class RideDetailsScreen extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.all(AuroraSpacing.lg),
             children: [
+              // الخريطة (النصف العلوي)
+              _miniMap(),
+              const SizedBox(height: AuroraSpacing.md),
+
+              // سطر الحالة بالتاريخ المفصّل
+              Text(
+                _isCanceled(order)
+                    ? '${tr('canceledOn')} ${df.format(order.createdOn)}'
+                    : '${tr('completedOn')} ${df.format(order.finishTimestamp ?? order.createdOn)}',
+                style: AuroraText.bodyMedium.copyWith(
+                    color: _isCanceled(order)
+                        ? AuroraColors.danger
+                        : AuroraColors.pearl),
+              ),
+              const SizedBox(height: AuroraSpacing.md),
+
               // المسار
               _card(Column(
                 children: [
@@ -207,41 +252,27 @@ class RideDetailsScreen extends StatelessWidget {
               )),
               const SizedBox(height: AuroraSpacing.md),
 
-              // معلومات
-              _card(Column(
-                children: [
-                  _infoRow(tr('date'), df.format(order.createdOn)),
-                  _divider(),
-                  _infoRow(tr('status'), order.status.label),
-                  _divider(),
-                  _infoRow(tr('distance'), order.distanceLabel),
-                  _divider(),
-                  _infoRow(tr('duration'), order.durationLabel),
-                  if (order.driverName != null) ...[
-                    _divider(),
-                    _infoRow(tr('driver'), order.driverName!),
-                  ],
-                  if (order.carModel != null) ...[
-                    _divider(),
-                    _infoRow(tr('car'),
-                        '${order.carBrand ?? ''} ${order.carModel ?? ''} ${order.plateNumber ?? ''}'),
-                  ],
-                ],
-              )),
-              const SizedBox(height: AuroraSpacing.md),
+              // السائق والمركبة
+              if (order.driverName != null) ...[
+                _driverCard(),
+                const SizedBox(height: AuroraSpacing.md),
+              ],
 
-              // الفاتورة
-              _card(Column(
-                children: [
-                  _infoRow(tr('cost'),
-                      '${order.costBest.toStringAsFixed(2)} ${order.currency}'),
-                  if (order.paidAmount > 0) ...[
-                    _divider(),
-                    _infoRow(tr('paid'),
-                        '${order.paidAmount.toStringAsFixed(2)} ${order.currency}'),
-                  ],
-                ],
-              )),
+              // الإيصال (قابل للطيّ)
+              _receiptCard(),
+              const SizedBox(height: AuroraSpacing.lg),
+
+              // المساعدة الخاصة بالرحلة
+              Text(tr('help'), style: AuroraText.titleSmall),
+              const SizedBox(height: AuroraSpacing.sm),
+              _helpRow(context, Icons.luggage_outlined, tr('helpLostItem'),
+                  'other'),
+              _helpRow(context, Icons.shield_outlined, tr('helpSafety'),
+                  'safety'),
+              _helpRow(context, Icons.receipt_long_outlined, tr('helpFare'),
+                  'fare'),
+              _helpRow(context, Icons.help_outline, tr('helpGeneral'),
+                  'other'),
             ],
           ),
         ),
@@ -265,6 +296,162 @@ class RideDetailsScreen extends StatelessWidget {
       b.writeln('${tr('driver')}: ${order.driverName}');
     }
     return b.toString();
+  }
+
+  Widget _miniMap() {
+    final pts = order.points;
+    if (pts.length < 2) {
+      // احتياط: لا إحداثيات — بانر بسيط
+      return Container(
+        height: 160,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: AuroraColors.coal,
+          borderRadius: BorderRadius.circular(AuroraRadius.lg),
+          border: Border.all(color: AuroraColors.border),
+        ),
+        child: Icon(Icons.map_outlined,
+            color: AuroraColors.textHint, size: 40),
+      );
+    }
+    final coords = pts.map((p) => LatLng(p.lat, p.lng)).toList();
+    final lats = coords.map((c) => c.latitude);
+    final lngs = coords.map((c) => c.longitude);
+    final center = LatLng(
+      (lats.reduce((a, b) => a < b ? a : b) +
+              lats.reduce((a, b) => a > b ? a : b)) /
+          2,
+      (lngs.reduce((a, b) => a < b ? a : b) +
+              lngs.reduce((a, b) => a > b ? a : b)) /
+          2,
+    );
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AuroraRadius.lg),
+      child: SizedBox(
+        height: 200,
+        child: GoogleMap(
+          liteModeEnabled: true,
+          style: _kMiniMapDark,
+          initialCameraPosition: CameraPosition(target: center, zoom: 12.5),
+          zoomControlsEnabled: false,
+          myLocationButtonEnabled: false,
+          markers: {
+            Marker(
+                markerId: const MarkerId('pickup'),
+                position: coords.first,
+                icon: BitmapDescriptor.defaultMarkerWithHue(
+                    BitmapDescriptor.hueGreen)),
+            Marker(
+                markerId: const MarkerId('dropoff'),
+                position: coords.last,
+                icon: BitmapDescriptor.defaultMarkerWithHue(
+                    BitmapDescriptor.hueOrange)),
+          },
+          polylines: {
+            Polyline(
+              polylineId: const PolylineId('route'),
+              points: coords,
+              color: AuroraColors.ember,
+              width: 4,
+            ),
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _driverCard() => _card(Row(
+        children: [
+          RiderAvatar(
+              avatarUrl: order.driverAvatarUrl,
+              initial: (order.driverName ?? '?').isNotEmpty
+                  ? order.driverName![0].toUpperCase()
+                  : '?',
+              size: 48,
+              editable: false),
+          const SizedBox(width: AuroraSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(order.driverName ?? '—', style: AuroraText.titleSmall),
+                const SizedBox(height: 2),
+                Text(
+                    [
+                      order.carColor,
+                      order.carBrand,
+                      order.carModel,
+                    ].where((s) => s != null && s.isNotEmpty).join(' '),
+                    style: AuroraText.bodySmall),
+                if ((order.plateNumber ?? '').isNotEmpty)
+                  Text(order.plateNumber!, style: AuroraText.caption),
+              ],
+            ),
+          ),
+          if (order.driverRating != null)
+            Row(
+              children: [
+                Icon(Icons.star, color: AuroraColors.gold, size: 16),
+                const SizedBox(width: 2),
+                Text(order.driverRating!.toStringAsFixed(2),
+                    style: AuroraText.bodyMedium
+                        .copyWith(color: AuroraColors.pearl)),
+              ],
+            ),
+        ],
+      ));
+
+  Widget _receiptCard() {
+    final discount = order.costBest - order.costAfterCoupon;
+    return Container(
+      decoration: BoxDecoration(
+        color: AuroraColors.ash,
+        borderRadius: BorderRadius.circular(AuroraRadius.md),
+        border: Border.all(color: AuroraColors.border),
+      ),
+      child: Theme(
+        data: ThemeData(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          iconColor: AuroraColors.ember,
+          collapsedIconColor: AuroraColors.textSecondary,
+          leading: Icon(Icons.receipt_long_outlined, color: AuroraColors.ember),
+          title: Text(tr('viewReceipt'),
+              style:
+                  AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl)),
+          childrenPadding: const EdgeInsets.fromLTRB(
+              AuroraSpacing.lg, 0, AuroraSpacing.lg, AuroraSpacing.md),
+          children: [
+            _infoRow(tr('cost'),
+                '${order.costBest.toStringAsFixed(2)} ${order.currency}'),
+            if (discount > 0.01) ...[
+              _divider(),
+              _infoRow(tr('discount'),
+                  '-${discount.toStringAsFixed(2)} ${order.currency}'),
+            ],
+            if (order.paidAmount > 0) ...[
+              _divider(),
+              _infoRow(tr('paid'),
+                  '${order.paidAmount.toStringAsFixed(2)} ${order.currency}'),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _helpRow(
+      BuildContext context, IconData icon, String title, String category) {
+    return AuroraListRow(
+      icon: icon,
+      title: title,
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => TripHelpFormScreen(
+          orderId: order.id,
+          category: category,
+          title: title,
+        ),
+      )),
+    );
   }
 
   Widget _card(Widget child) => Container(
