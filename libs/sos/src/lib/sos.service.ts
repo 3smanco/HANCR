@@ -18,6 +18,12 @@ import { SmsService } from '@hancr/notifications';
  */
 export const SOS_INCIDENT_CHANNEL = 'SOS_INCIDENT_CREATED';
 
+/**
+ * Channel لبث موقع الحادثة الحيّ (كل 3ث أثناء SOS نشط).
+ * admin-api يشترك فيه لتحريك الماركر على الخريطة آنياً.
+ */
+export const SOS_LOCATION_CHANNEL = 'SOS_LOCATION_UPDATED';
+
 export interface TriggerSosInput {
   triggeredBy: SosTriggeredBy;
   triggeredById: number;
@@ -199,6 +205,38 @@ export class SosService {
       lastLongitude: longitude,
       lastLocationAt: new Date(),
     });
+    // بثّ الموقع آنياً لـ admin-api (الخريطة الحيّة).
+    this.redisPub
+      .publish(
+        SOS_LOCATION_CHANNEL,
+        JSON.stringify({
+          sosLocationUpdated: {
+            incidentId,
+            latitude,
+            longitude,
+            at: new Date().toISOString(),
+          },
+        }),
+      )
+      .catch((e) =>
+        this.logger.warn(`Failed to publish SOS location: ${e.message}`),
+      );
+  }
+
+  /**
+   * تحديث موقع حادثة نشطة مع التحقّق من الملكية (يُستدعى من resolver التطبيق).
+   * يتجاهل بصمت إن لم تكن الحادثة نشطة أو ليست للمستخدم — لا يكسر بثّ الموقع.
+   */
+  async updateActiveLocation(
+    triggeredBy: SosTriggeredBy,
+    triggeredById: number,
+    latitude: number,
+    longitude: number,
+  ): Promise<boolean> {
+    const incident = await this.getActiveSos(triggeredBy, triggeredById);
+    if (!incident) return false;
+    await this.updateLocation(incident.id, latitude, longitude);
+    return true;
   }
 
   async getActiveSos(

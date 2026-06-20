@@ -331,6 +331,7 @@ const Map<String, Map<String, String>> _t = {
   'yesActivate': {'ar': 'نعم، فعِّل', 'en': 'Yes, activate', 'ur': 'ہاں، فعال کریں', 'hi': 'हाँ, सक्रिय करें', 'bn': 'হ্যাঁ, সক্রিয় করুন', 'fil': 'Oo, i-activate', 'fr': 'Oui, activer', 'tr': 'Evet, etkinleştir'},
   'sosActiveTitle': {'ar': '🚨 طوارئ نشطة', 'en': '🚨 Emergency active', 'ur': '🚨 ہنگامی فعال', 'hi': '🚨 आपातकाल सक्रिय', 'bn': '🚨 জরুরি সক্রিয়', 'fil': '🚨 Aktibo ang emergency', 'fr': '🚨 Urgence active', 'tr': '🚨 Acil durum aktif'},
   'yesSafe': {'ar': 'نعم، بأمان', 'en': 'Yes, I\'m safe', 'ur': 'ہاں، محفوظ ہوں', 'hi': 'हाँ, सुरक्षित हूँ', 'bn': 'হ্যাঁ, নিরাপদ', 'fil': 'Oo, ligtas ako', 'fr': 'Oui, en sécurité', 'tr': 'Evet, güvendeyim'},
+  'callEmergency': {'ar': 'اتصل بالطوارئ المحلية', 'en': 'Call local emergency'},
   'dangerContinues': {'ar': 'الخطر مستمر', 'en': 'Still in danger', 'ur': 'خطرہ جاری ہے', 'hi': 'अभी भी खतरा', 'bn': 'এখনও বিপদে', 'fil': 'May panganib pa', 'fr': 'Toujours en danger', 'tr': 'Hâlâ tehlikede'},
 
   // ─── Add contact ───

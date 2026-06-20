@@ -2,10 +2,11 @@ import { Resolver, Query, Mutation, Subscription, Args, Int } from '@nestjs/grap
 import { UseGuards, Inject } from '@nestjs/common';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { SosStatus } from '@hancr/database';
-import { SOS_INCIDENT_CHANNEL } from '@hancr/sos';
+import { SOS_INCIDENT_CHANNEL, SOS_LOCATION_CHANNEL } from '@hancr/sos';
 import { SosAdminService } from './sos-admin.service';
 import {
   SosIncidentAdminType,
+  SosLocationUpdateType,
   ResolveSosInput,
 } from './dto/sos.type';
 import { AdminJwtGuard } from '../auth/admin-jwt.guard';
@@ -105,5 +106,14 @@ export class SosAdminResolver {
   })
   sosIncidentCreated(): AsyncIterator<unknown> {
     return this.pubSub.asyncIterator(SOS_INCIDENT_CHANNEL);
+  }
+
+  /** بثّ موقع الحوادث النشطة آنياً (لتحريك الماركر على الخريطة الحيّة). */
+  @Subscription(() => SosLocationUpdateType, {
+    description: 'تحديثات موقع حوادث SOS (live)',
+    name: 'sosLocationUpdated',
+  })
+  sosLocationUpdated(): AsyncIterator<unknown> {
+    return this.pubSub.asyncIterator(SOS_LOCATION_CHANNEL);
   }
 }

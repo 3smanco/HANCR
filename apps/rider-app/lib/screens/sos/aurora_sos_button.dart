@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../blocs/sos/sos_bloc.dart';
 import '../../blocs/sos/sos_event.dart';
 import '../../blocs/sos/sos_state.dart';
+import '../../blocs/rider/rider_bloc.dart';
+import '../../blocs/rider/rider_state.dart';
+import '../../core/emergency_numbers.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import 'aurora_emergency_contacts_screen.dart';
@@ -319,6 +323,18 @@ class AuroraActiveSosBanner extends StatelessWidget {
             style: AuroraText.bodyMedium,
           ),
           const SizedBox(height: AuroraSpacing.md),
+          // اتصال مباشر بالطوارئ المحلية (رقم الدولة)
+          AuroraButton.danger(
+            label: tr('callEmergency'),
+            icon: Icons.local_phone,
+            onPressed: () {
+              final state = context.read<RiderBloc>().state;
+              final code = state is RiderLoaded ? state.rider.countryCode : null;
+              final number = EmergencyNumbers.forCountryCode(code);
+              launchUrl(Uri.parse('tel:$number'));
+            },
+          ),
+          const SizedBox(height: AuroraSpacing.sm),
           AuroraButton.secondary(
             label: 'إنذار خاطئ — إلغاء',
             icon: Icons.cancel_outlined,

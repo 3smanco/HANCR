@@ -1,10 +1,28 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
-import { AlertTriangle, MapPin, Phone, CheckCircle, Shield, Clock, X, Globe2 } from 'lucide-react';
-import { SOS_INCIDENTS, RESOLVE_SOS, ESCALATE_SOS, GLOBAL_SOS_CENTER } from '@/lib/gql';
+import { useState, useEffect, useRef, useCallback, type FC, type ReactNode } from 'react';
+import { useQuery, useMutation, useSubscription } from '@apollo/client';
+import {
+  GoogleMap as GoogleMapComponent,
+  MarkerF,
+  useJsApiLoader,
+  type GoogleMapProps,
+} from '@react-google-maps/api';
+import { AlertTriangle, MapPin, Phone, CheckCircle, Shield, Clock, X, Globe2, Volume2 } from 'lucide-react';
+import {
+  SOS_INCIDENTS,
+  RESOLVE_SOS,
+  ESCALATE_SOS,
+  GLOBAL_SOS_CENTER,
+  SOS_INCIDENT_CREATED_SUB,
+  SOS_LOCATION_UPDATED_SUB,
+} from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
+
+const GoogleMap = GoogleMapComponent as unknown as FC<
+  GoogleMapProps & { children?: ReactNode }
+>;
+const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? '';
 
 type SosStatus = 'Active' | 'Resolved' | 'Cancelled' | 'Escalated';
 
@@ -38,17 +56,94 @@ export default function SosDashboardPage() {
 
   const { data, loading, error, refetch } = useQuery(SOS_INCIDENTS, {
     variables: { statuses: STATUS_FILTERS[filterIdx].value, limit: 100 },
-    pollInterval: 10000, // refresh كل 10 ثوانٍ — حتى نضيف subscription
+    pollInterval: 30000, // احتياط — الدفع الفوري عبر الاشتراك أدناه
   });
 
   const incidents: SosIncident[] = data?.sosIncidents ?? [];
   const activeCount: number = data?.activeSosCount ?? 0;
 
+  // ─── الزمن الحقيقي: تنبيه فوري + خريطة حيّة ───
+  const [liveLocs, setLiveLocs] = useState<Record<number, { lat: number; lng: number }>>({});
+  const [flash, setFlash] = useState(false);
+  const [soundOn, setSoundOn] = useState(false);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  const playAlarm = useCallback(() => {
+    if (!soundOn) return;
+    try {
+      audioCtxRef.current ??= new (window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext)();
+      const ctx = audioCtxRef.current;
+      // نغمة إنذار مزدوجة قصيرة
+      [0, 0.35].forEach((t) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = 880;
+        gain.gain.value = 0.12;
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(ctx.currentTime + t);
+        osc.stop(ctx.currentTime + t + 0.25);
+      });
+    } catch {
+      /* تجاهل */
+    }
+  }, [soundOn]);
+
+  // حادثة جديدة → وميض + صوت + إعادة جلب فورية
+  useSubscription(SOS_INCIDENT_CREATED_SUB, {
+    onData: () => {
+      setFlash(true);
+      playAlarm();
+      refetch();
+      setTimeout(() => setFlash(false), 6000);
+    },
+  });
+
+  // تحديث موقع حيّ → حرّك الماركر فوراً
+  useSubscription(SOS_LOCATION_UPDATED_SUB, {
+    onData: ({ data: d }) => {
+      const u = d.data?.sosLocationUpdated as
+        | { incidentId: number; latitude: number; longitude: number }
+        | undefined;
+      if (u) {
+        setLiveLocs((prev) => ({
+          ...prev,
+          [u.incidentId]: { lat: u.latitude, lng: u.longitude },
+        }));
+      }
+    },
+  });
+
+  const activeIncidents = incidents.filter((i) => i.status === 'Active' || i.status === 'Escalated');
+
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div
+      className={`flex flex-col h-screen bg-gray-50 transition-colors ${
+        flash ? 'ring-4 ring-red-500 ring-inset animate-pulse' : ''
+      }`}
+    >
       <Topbar title="مركز الطوارئ (SOS)" />
 
+      {flash && (
+        <div className="bg-red-600 text-white px-6 py-3 font-bold flex items-center gap-2 animate-pulse">
+          <AlertTriangle className="w-5 h-5" />
+          🚨 حادثة طوارئ جديدة — راجع القائمة فوراً
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto p-6">
+        {/* تفعيل الصوت (سياسة المتصفّح تتطلّب تفاعلاً) + الخريطة الحيّة */}
+        {!soundOn && (
+          <button
+            onClick={() => setSoundOn(true)}
+            className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200"
+          >
+            <Volume2 className="w-4 h-4" /> تفعيل التنبيه الصوتي
+          </button>
+        )}
+        <LiveSosMap incidents={activeIncidents} liveLocs={liveLocs} />
         {/* ─── Top stats ─── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-2xl p-5 border border-red-100 shadow-sm">
@@ -479,6 +574,59 @@ function IncidentDetails({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── الخريطة الحيّة لحوادث الطوارئ النشطة ───
+function LiveSosMap({
+  incidents,
+  liveLocs,
+}: {
+  incidents: SosIncident[];
+  liveLocs: Record<number, { lat: number; lng: number }>;
+}) {
+  const { isLoaded } = useJsApiLoader({
+    id: 'hancr-maps',
+    googleMapsApiKey: MAPS_KEY,
+  });
+
+  const points = incidents.map((i) => {
+    const live = liveLocs[i.id];
+    return {
+      id: i.id,
+      lat: live?.lat ?? i.lastLatitude ?? i.latitude,
+      lng: live?.lng ?? i.lastLongitude ?? i.longitude,
+      who: i.triggeredBy,
+    };
+  });
+
+  if (incidents.length === 0) return null;
+  if (!MAPS_KEY || !isLoaded) {
+    return (
+      <div className="mb-6 bg-white rounded-2xl p-8 border border-gray-200 text-center text-gray-400">
+        خريطة التتبّع الحيّ — {points.length} حادثة نشطة
+      </div>
+    );
+  }
+
+  const center = { lat: points[0].lat, lng: points[0].lng };
+  return (
+    <div className="mb-6 rounded-2xl overflow-hidden border border-red-200 shadow-sm">
+      <GoogleMap
+        mapContainerStyle={{ width: '100%', height: '320px' }}
+        center={center}
+        zoom={12}
+        options={{ streetViewControl: false, mapTypeControl: false }}
+      >
+        {points.map((p) => (
+          <MarkerF
+            key={p.id}
+            position={{ lat: p.lat, lng: p.lng }}
+            label={{ text: `#${p.id}`, color: '#fff', fontSize: '11px' }}
+          />
+        ))}
+      </GoogleMap>
     </div>
   );
 }
