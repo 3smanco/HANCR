@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -6,7 +6,9 @@ import {
   ComplaintEntity,
   DriverEntity,
   RiderEntity,
+  WalletOwnerType,
 } from '@hancr/database';
+import { WalletsService } from '../wallets/wallets.service';
 import {
   AddComplaintNoteInput,
   AdminComplaintActivityType,
@@ -27,6 +29,7 @@ export class ComplaintsService {
     private readonly riderRepo: Repository<RiderEntity>,
     @InjectRepository(DriverEntity)
     private readonly driverRepo: Repository<DriverEntity>,
+    private readonly walletsService: WalletsService,
   ) {}
 
   async list(
@@ -146,6 +149,64 @@ export class ComplaintsService {
     return this.getDetail(c.id);
   }
 
+  /** إسناد التذكرة لموظف. */
+  async assign(
+    complaintId: number,
+    assigneeId: number,
+    actorId: number,
+  ): Promise<AdminComplaintDetailType> {
+    const c = await this.complaintRepo.findOne({ where: { id: complaintId } });
+    if (!c) throw new NotFoundException('Complaint not found');
+    c.assignedTo = assigneeId;
+    if (c.status === 'submitted') c.status = 'under_review';
+    await this.complaintRepo.save(c);
+    await this.activityRepo.save(
+      this.activityRepo.create({
+        complaintId: c.id,
+        actorType: 'admin',
+        actorId,
+        type: 'assigned',
+        note: `Assigned to admin #${assigneeId}`,
+      }),
+    );
+    return this.getDetail(c.id);
+  }
+
+  /** إجراء مالي: تعويض/ردّ أموال لمحفظة مُبلِّغ التذكرة + تسجيله في الخطّ الزمني. */
+  async refund(
+    complaintId: number,
+    amount: number,
+    actorId: number,
+    voucher = false,
+  ): Promise<AdminComplaintDetailType> {
+    if (amount <= 0) throw new BadRequestException('Amount must be positive');
+    const c = await this.complaintRepo.findOne({ where: { id: complaintId } });
+    if (!c) throw new NotFoundException('Complaint not found');
+    const ownerType =
+      c.reportedByType === 'driver'
+        ? WalletOwnerType.Driver
+        : WalletOwnerType.Rider;
+    const reason = voucher
+      ? `Voucher for complaint #${c.id}`
+      : `Refund for complaint #${c.id}`;
+    await this.walletsService.adjust({
+      ownerType,
+      ownerId: c.reportedById,
+      amount, // موجب = إضافة رصيد
+      reason,
+    });
+    await this.activityRepo.save(
+      this.activityRepo.create({
+        complaintId: c.id,
+        actorType: 'admin',
+        actorId,
+        type: voucher ? 'voucher' : 'refund',
+        note: `${voucher ? 'Voucher' : 'Refund'}: ${amount}`,
+      }),
+    );
+    return this.getDetail(c.id);
+  }
+
   // ─── Helpers ─────────────────────────────────────────────────────────────
 
   private async fetchReporter(
@@ -206,6 +267,7 @@ export class ComplaintsService {
       status: c.status,
       resolutionNote: c.resolutionNote,
       assignedTo: c.assignedTo,
+      dueAt: c.dueAt,
       createdAt: c.createdAt,
       resolvedAt: c.resolvedAt,
     };

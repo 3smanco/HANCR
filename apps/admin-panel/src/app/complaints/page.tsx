@@ -25,6 +25,7 @@ import {
   COMPLAINT_DETAIL,
   UPDATE_COMPLAINT_STATUS,
   ADD_COMPLAINT_NOTE,
+  REFUND_COMPLAINT,
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { formatDate } from '@/lib/utils';
@@ -243,8 +244,17 @@ function ComplaintDetailDrawer({
     },
     onError: (e) => toast.error(e.message),
   });
+  const [refund, { loading: refunding }] = useMutation(REFUND_COMPLAINT, {
+    onCompleted: () => {
+      toast.success('تم تنفيذ الإجراء المالي');
+      setRefundAmount('');
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
   const [note, setNote] = useState('');
   const [resolutionNote, setResolutionNote] = useState('');
+  const [refundAmount, setRefundAmount] = useState('');
 
   if (loading) {
     return (
@@ -416,6 +426,63 @@ function ComplaintDetailDrawer({
               </div>
             </div>
           )}
+
+          {/* SLA + الإجراءات المالية */}
+          {c.dueAt && c.status !== 'resolved' && c.status !== 'dismissed' && (
+            <div
+              className={`card p-3 text-sm font-semibold ${
+                new Date(c.dueAt as string).getTime() < Date.now()
+                  ? 'text-red-600 bg-red-50'
+                  : 'text-amber-700 bg-amber-50'
+              }`}
+            >
+              {new Date(c.dueAt as string).getTime() < Date.now()
+                ? '⚠️ تجاوزت مهلة الرد (SLA)'
+                : `⏱ مهلة الرد حتى ${new Date(c.dueAt as string).toLocaleString('ar')}`}
+            </div>
+          )}
+          <div className="card p-4">
+            <h3 className="font-bold text-gray-900 text-sm mb-3">إجراء مالي للمُبلِّغ</h3>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                value={refundAmount}
+                onChange={(e) => setRefundAmount(e.target.value)}
+                placeholder="المبلغ"
+                className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm"
+              />
+              <button
+                disabled={refunding || !refundAmount}
+                onClick={() =>
+                  refund({
+                    variables: {
+                      complaintId: c.id,
+                      amount: parseFloat(refundAmount),
+                      voucher: false,
+                    },
+                  })
+                }
+                className="btn-sm bg-emerald-600 text-white disabled:opacity-50"
+              >
+                رد أموال
+              </button>
+              <button
+                disabled={refunding || !refundAmount}
+                onClick={() =>
+                  refund({
+                    variables: {
+                      complaintId: c.id,
+                      amount: parseFloat(refundAmount),
+                      voucher: true,
+                    },
+                  })
+                }
+                className="btn-sm btn-outline disabled:opacity-50"
+              >
+                كوبون
+              </button>
+            </div>
+          </div>
 
           {/* Timeline */}
           <div className="card p-4">

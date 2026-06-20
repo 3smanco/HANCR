@@ -647,7 +647,7 @@ export const LIST_COMPLAINTS = gql`
       items {
         id orderId reportedByType reportedById reporterName
         category description status resolutionNote
-        createdAt resolvedAt
+        assignedTo dueAt createdAt resolvedAt
       }
       total page limit submittedCount underReviewCount
     }
@@ -659,7 +659,7 @@ export const COMPLAINT_DETAIL = gql`
     adminComplaintDetail(id: $id) {
       id orderId reportedByType reportedById reporterName
       category description status resolutionNote
-      createdAt resolvedAt
+      assignedTo dueAt createdAt resolvedAt
       activities {
         id actorType actorId type note createdAt
       }
@@ -680,6 +680,24 @@ export const ADD_COMPLAINT_NOTE = gql`
   mutation AddComplaintNote($input: AddComplaintNoteInput!) {
     addComplaintNote(input: $input) {
       id activities { id actorType type note createdAt }
+    }
+  }
+`;
+
+export const ASSIGN_COMPLAINT = gql`
+  mutation AssignComplaint($complaintId: Int!, $assigneeId: Int!) {
+    assignComplaint(complaintId: $complaintId, assigneeId: $assigneeId) {
+      id status assignedTo
+      activities { id actorType type note createdAt }
+    }
+  }
+`;
+
+export const REFUND_COMPLAINT = gql`
+  mutation RefundComplaint($complaintId: Int!, $amount: Float!, $voucher: Boolean) {
+    refundComplaint(complaintId: $complaintId, amount: $amount, voucher: $voucher) {
+      id status
+      activities { id actorType type note createdAt }
     }
   }
 `;
