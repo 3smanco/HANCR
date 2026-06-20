@@ -8,6 +8,7 @@ import {
 } from '@hancr/database';
 import { ComplaintsService } from './complaints.service';
 import { ComplaintsResolver } from './complaints.resolver';
+import { AdminWalletsModule } from '../wallets/wallets.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ComplaintsResolver } from './complaints.resolver';
       RiderEntity,
       DriverEntity,
     ]),
+    AdminWalletsModule,
   ],
   providers: [ComplaintsService, ComplaintsResolver],
   exports: [ComplaintsService],

@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, Float } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { ComplaintsService } from './complaints.service';
 import {
@@ -56,5 +56,28 @@ export class ComplaintsResolver {
     @CurrentAdmin() admin: AdminUser,
   ): Promise<AdminComplaintDetailType> {
     return this.service.addNote(input, admin.adminId);
+  }
+
+  @Mutation(() => AdminComplaintDetailType, { description: 'إسناد شكوى لموظف' })
+  @UseGuards(AdminJwtGuard)
+  assignComplaint(
+    @Args('complaintId', { type: () => Int }) complaintId: number,
+    @Args('assigneeId', { type: () => Int }) assigneeId: number,
+    @CurrentAdmin() admin: AdminUser,
+  ): Promise<AdminComplaintDetailType> {
+    return this.service.assign(complaintId, assigneeId, admin.adminId);
+  }
+
+  @Mutation(() => AdminComplaintDetailType, {
+    description: 'إجراء مالي على شكوى (رد أموال/كوبون لمحفظة المُبلِّغ)',
+  })
+  @UseGuards(AdminJwtGuard)
+  refundComplaint(
+    @Args('complaintId', { type: () => Int }) complaintId: number,
+    @Args('amount', { type: () => Float }) amount: number,
+    @Args('voucher', { nullable: true, defaultValue: false }) voucher: boolean,
+    @CurrentAdmin() admin: AdminUser,
+  ): Promise<AdminComplaintDetailType> {
+    return this.service.refund(complaintId, amount, admin.adminId, voucher);
   }
 }

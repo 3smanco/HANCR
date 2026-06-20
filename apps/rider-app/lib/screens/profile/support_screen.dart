@@ -160,28 +160,92 @@ class _SupportScreenState extends State<SupportScreen> {
             ],
             if (activities.isNotEmpty) ...[
               const Divider(color: AuroraColors.border),
-              ...activities.map((a) => Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.circle,
-                            size: 8, color: AuroraColors.ember),
-                        const SizedBox(width: AuroraSpacing.sm),
-                        Expanded(
-                          child: Text(
-                              a['note'] as String? ??
-                                  tr('act_${a['type']}'),
-                              style: AuroraText.caption),
-                        ),
-                      ],
-                    ),
-                  )),
+              ...activities.map((a) {
+                final mine = a['type'] == 'rider_message';
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(mine ? Icons.reply : Icons.circle,
+                          size: mine ? 12 : 8,
+                          color: mine
+                              ? AuroraColors.pearl
+                              : AuroraColors.ember),
+                      const SizedBox(width: AuroraSpacing.sm),
+                      Expanded(
+                        child: Text(
+                            a['note'] as String? ?? tr('act_${a['type']}'),
+                            style: AuroraText.caption.copyWith(
+                                color: mine
+                                    ? AuroraColors.pearl
+                                    : AuroraColors.textSecondary)),
+                      ),
+                    ],
+                  ),
+                );
+              }),
             ],
+            const SizedBox(height: AuroraSpacing.sm),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: AuroraButton.pill(
+                label: tr('replyTicket'),
+                icon: Icons.reply,
+                onPressed: () => _reply(c['id'] as int),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _reply(int complaintId) async {
+    final ctl = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AuroraColors.coal,
+        title: Text(tr('replyTicket'), style: AuroraText.titleSmall),
+        content: TextField(
+          controller: ctl,
+          autofocus: true,
+          maxLines: 4,
+          style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
+          decoration: InputDecoration(hintText: tr('complaintDescHint')),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(tr('cancel'),
+                style: TextStyle(color: AuroraColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(tr('submit'),
+                style: TextStyle(color: AuroraColors.ember)),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || ctl.text.trim().isEmpty) return;
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.mutate(MutationOptions(
+        document: gql(replyToComplaintMutation),
+        variables: {'complaintId': complaintId, 'message': ctl.text.trim()},
+      ));
+      if (res.hasException) throw res.exception!;
+      await _load();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(tr('loadError')),
+          backgroundColor: AuroraColors.danger,
+        ));
+      }
+    }
   }
 
   Future<void> _newComplaint() async {

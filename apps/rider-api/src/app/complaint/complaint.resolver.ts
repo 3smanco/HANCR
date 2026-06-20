@@ -71,6 +71,8 @@ export class RiderComplaintService {
         category: input.category,
         description: input.description,
         status: 'submitted',
+        // SLA: موعد استحقاق الرد بعد 24 ساعة من الإنشاء.
+        dueAt: new Date(Date.now() + 24 * 3600 * 1000),
       }),
     );
     await this.activityRepo.save(
@@ -129,6 +131,33 @@ export class RiderComplaintService {
       activities: byComplaint.get(c.id) ?? [],
     }));
   }
+
+  /** ردّ الراكب داخل تذكرته (يُضاف للخطّ الزمني كـ rider_message). */
+  async reply(
+    riderId: number,
+    complaintId: number,
+    message: string,
+    imageUrl?: string,
+  ): Promise<boolean> {
+    const c = await this.repo.findOne({
+      where: { id: complaintId, reportedByType: 'rider', reportedById: riderId },
+    });
+    if (!c) return false;
+    await this.activityRepo.save(
+      this.activityRepo.create({
+        complaintId: c.id,
+        actorType: 'rider',
+        actorId: riderId,
+        type: 'rider_message',
+        note: imageUrl ? `${message}\n📎 ${imageUrl}` : message,
+      }),
+    );
+    // إعادة فتح التذكرة إن كانت مُغلقة ليراها الدعم.
+    if (c.status === 'resolved' || c.status === 'dismissed') {
+      await this.repo.update(c.id, { status: 'under_review' });
+    }
+    return true;
+  }
 }
 
 @Resolver(() => RiderComplaintType)
@@ -150,5 +179,16 @@ export class RiderComplaintResolver {
     @Args('input') input: SubmitComplaintInput,
   ): Promise<RiderComplaintType> {
     return this.service.submit(user.riderId, input);
+  }
+
+  @Mutation(() => Boolean, { description: 'ردّ الراكب داخل تذكرة' })
+  @UseGuards(JwtAuthGuard)
+  replyToComplaint(
+    @CurrentUser() user: AuthUser,
+    @Args('complaintId', { type: () => Int }) complaintId: number,
+    @Args('message') message: string,
+    @Args('imageUrl', { nullable: true }) imageUrl?: string,
+  ): Promise<boolean> {
+    return this.service.reply(user.riderId, complaintId, message, imageUrl);
   }
 }

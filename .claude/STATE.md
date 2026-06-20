@@ -275,13 +275,21 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
+- **🟩 نظام الدعم — الدفعة 2: إكمال التذاكر (Helpdesk) — مكتمل ومُتحقَّق (2026-06-20).** التحقق: rider/admin-api `tsc=0` · rider-app `flutter analyze=0` · ملفات admin-panel نظيفة.
+  - **Backend:** `ComplaintEntity.dueAt` (SLA) + migration `1781900000000`. rider-api: `replyToComplaint(complaintId,message,imageUrl?)` (activity `rider_message` + يعيد فتح المُغلقة) + `dueAt=now+24h` عند الإنشاء. admin-api: `assignComplaint` + `refundComplaint(amount, voucher)` (يلفّ `WalletsService.adjust` لإضافة رصيد للمُبلِّغ + activity refund/voucher) + `assignedTo`/`dueAt` في AdminComplaintType.
+  - **الأدمن (`complaints/page.tsx`):** بانر SLA (مهلة/تجاوز) + قسم إجراء مالي (مبلغ + زرّا "رد أموال"/"كوبون") في الدرج + gql ASSIGN/REFUND.
+  - **التطبيق (`support_screen`):** زر "الردّ" داخل التذكرة (حوار) → `replyToComplaint` + تمييز ردود الراكب في الخطّ الزمني.
+  - **مؤجَّل موثّق:** فلاتر متقدمة (تاريخ/فئة/مُسنَد) في جدول الأدمن · cron تصعيد SLA التلقائي (الحالي يعرض التجاوز بصرياً) · إرفاق صور في الردّ (backend جاهز imageUrl، UI لاحقاً) · غرامة السائق.
+  - **⏭️ النشر:** rider-api+admin-api restart + migration (due_at) + admin-panel build + APK رايدر (لا سائق). **لم يُنشر بعد.**
+
 - **🟩 نظام الدعم والطوارئ — الدفعة 1: SOS الحيّ — مكتمل ومُتحقَّق (2026-06-20).** الخطة الشاملة (4 دفعات): `C:\Users\7bici\.claude\plans\gleaming-snuggling-wind.md`. التحقق: rider/driver/admin-api `tsc=0` · rider+driver-app `flutter analyze=0` · ملفات admin-panel نظيفة (خطأ cancel-reasons سابق غير متعلّق).
   - **بثّ GPS كل 3ث:** قناة Redis `SOS_LOCATION_CHANNEL` + `SosService.updateLocation` ينشر + `updateActiveLocation(ملكية)`. mutations `updateSosLocation`(rider) / `updateDriverSosLocation`(driver). `SosBloc` (التطبيقان) يبثّ `Geolocator` كل 3ث أثناء حادثة نشطة (يبدأ عند trigger/load، يقف عند cancel/close).
   - **admin-api:** subscription `sosLocationUpdated` + DTO. (sosIncidentCreated موجود.)
   - **admin-panel:** `apollo.ts` += `GraphQLWsLink` (split http/ws، graphql-ws) · صفحة SOS: اشتراكان (incidentCreated→وميض+صوت+refetch، locationUpdated→تحريك الماركر) + **خريطة حيّة** `LiveSosMap` (@react-google-maps) + زر "تفعيل الصوت" + بانر وميض أحمر.
   - **التطبيقان:** زر "اتصل بالطوارئ المحلية" (رقم الدولة عبر `EmergencyNumbers` + `tel:`) في بانر الرايدر النشط + حوار السائق النشط.
   - **مؤجَّل موثّق:** أزرار الاتصال السريع بالراكب/السائق في الأدمن (يلزم كشف الهاتف في AdminSosType) · الدفعات 2-4 (Helpdesk · تحسين الشات · شات الدعم الحي).
-  - **⏭️ النشر:** الـ3 APIs restart + admin-panel build + APK رايدر+سائق (لا migration). **لم يُنشر بعد.**
+  - **✅ منشور ومُتحقَّق حيّاً (2026-06-20، PR #162، main=6249733):** الخادم `git pull` ff → `pm2 restart rider-api driver-api admin-api` (الثلاثة `health/ready=200`) → `updateSosLocation`/`updateDriverSosLocation` حيّان · admin-panel `npm run build` + restart → `admin.hancr.com` 307 (حي) · APK الراكب (47,076,931) والسائق (44,966,020) مبنيان (arm64، مفتاح Maps مُتحقَّق) ومرفوعان → `hancr.com/downloads/hancr-{rider,driver}.apk` HTTP 200 مطابقان. لا migration.
+  - **⏭️ التالي:** الدفعة 2 (Helpdesk: إجراءات مالية + إسناد + SLA + ردّ الراكب + مرفقات) ثم 3 (تحسين الشات) ثم 4 (شات الدعم الحي).
 
 - **🟩 صفحة النشاط + تفاصيل الرحلة + شكوى الرحلة — الكود مكتمل ومُتحقَّق (2026-06-20)، app-only.** الخطة: `C:\Users\7bici\.claude\plans\gleaming-snuggling-wind.md`. التحقق: `flutter analyze=0 errors` (لا backend/migration).
   - **القائمة (`aurora_rides.dart`):** أيقونة حسب نوع الخدمة (`_serviceIcon`) + شارة "ملغاة" رمادية للرحلات الملغاة بدل الـchip العام.

@@ -23,6 +23,7 @@ export class AdminComplaintType {
   @Field() status!: string;
   @Field({ nullable: true }) resolutionNote?: string;
   @Field(() => Int, { nullable: true }) assignedTo?: number;
+  @Field({ nullable: true }) dueAt?: Date;
   @Field() createdAt!: Date;
   @Field({ nullable: true }) resolvedAt?: Date;
 }

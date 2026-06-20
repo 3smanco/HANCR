@@ -986,4 +986,8 @@ const Map<String, Map<String, String>> _t = {
 
   // ─── SOS الحيّ ───
   'callEmergency': {'ar': 'اتصل بالطوارئ المحلية', 'en': 'Call local emergency'},
+
+  // ─── الدعم: ردّ التذكرة ───
+  'replyTicket': {'ar': 'الردّ', 'en': 'Reply'},
+  'act_rider_message': {'ar': 'ردّ منك', 'en': 'Your reply'},
 };

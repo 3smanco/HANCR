@@ -308,6 +308,12 @@ const String submitComplaintMutation = r'''
   }
 ''';
 
+const String replyToComplaintMutation = r'''
+  mutation ReplyToComplaint($complaintId: Int!, $message: String!) {
+    replyToComplaint(complaintId: $complaintId, message: $message)
+  }
+''';
+
 // ─── الأعمال (ملف الأعمال) — myCompanyQuery معرّف في company_gql.dart ───
 const String setupBusinessProfileMutation = r'''
   mutation SetupBusinessProfile($name: String!, $billingEmail: String) {

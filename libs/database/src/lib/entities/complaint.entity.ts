@@ -52,6 +52,10 @@ export class ComplaintEntity {
   @Column({ nullable: true, name: 'assigned_to' })
   assignedTo?: number;
 
+  /** موعد استحقاق الرد (SLA) — يُحسب عند الإنشاء؛ التجاوز يُصعِّد التذكرة. */
+  @Column({ type: 'timestamp', nullable: true, name: 'due_at' })
+  dueAt?: Date;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
