@@ -53,6 +53,26 @@ class StorageService {
       _storage.write(key: _keyAppearance, value: mode);
   static Future<String?> getAppearance() => _storage.read(key: _keyAppearance);
 
+  // ── الوضع البسيط (تكبير الخط) ───────────────────────────────────────────────
+  static const _keySimpleMode = 'hancr_simple_mode';
+  static Future<void> saveSimpleMode(bool on) =>
+      _storage.write(key: _keySimpleMode, value: on ? '1' : '0');
+  static Future<bool> getSimpleMode() async =>
+      (await _storage.read(key: _keySimpleMode)) == '1';
+
+  // ── طريقة الدفع الافتراضية + ملف الركوب ─────────────────────────────────────
+  static const _keyPaymentDefault = 'hancr_payment_default';
+  static Future<void> savePaymentDefault(String mode) =>
+      _storage.write(key: _keyPaymentDefault, value: mode);
+  static Future<String?> getPaymentDefault() =>
+      _storage.read(key: _keyPaymentDefault);
+
+  static const _keyRideProfile = 'hancr_ride_profile';
+  static Future<void> saveRideProfile(String p) =>
+      _storage.write(key: _keyRideProfile, value: p);
+  static Future<String?> getRideProfile() =>
+      _storage.read(key: _keyRideProfile);
+
   // ── تفضيل البيومترية (محلي على الجهاز) ──────────────────────────────────────
   static const _keyBiometric = 'hancr_biometric';
   static Future<void> saveBiometric(bool on) =>
@@ -131,6 +151,7 @@ class StorageService {
     final theme = await _storage.read(key: _keyTheme);
     final accounts = await _storage.read(key: _keyAccounts);
     final appearance = await _storage.read(key: _keyAppearance);
+    final simple = await _storage.read(key: _keySimpleMode);
     await _storage.deleteAll();
     if (theme != null) await _storage.write(key: _keyTheme, value: theme);
     if (accounts != null) {
@@ -138,6 +159,9 @@ class StorageService {
     }
     if (appearance != null) {
       await _storage.write(key: _keyAppearance, value: appearance);
+    }
+    if (simple != null) {
+      await _storage.write(key: _keySimpleMode, value: simple);
     }
   }
 }

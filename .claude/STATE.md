@@ -275,6 +275,17 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
+- **🟩 قسم "الحساب" — الدفعة الرابعة (الختام: إكمال وحدة الحساب) — الكود مكتمل ومُتحقَّق (2026-06-20).** الخطة: `C:\Users\7bici\.claude\plans\gleaming-snuggling-wind.md`.
+  - **التحقق:** rider/driver/admin-api `tsc=0` · rider-app `flutter analyze=0 errors`.
+  - **مكوّنات مشتركة:** `AuroraListRow` (عام، يُصدَّر من aurora.dart) + `AuroraButton.pill()` + `AuroraStickyButton`. وُحِّدت `_navRow`/`_secNavRow` في ملفات الحساب لتفويض AuroraListRow.
+  - **قائمة الحساب (نمط Uber):** قسم "المزيد" في `aurora_profile_tab` يربط: تنبيهات التنقّل · المجموعات (NEW) · ملفات الركوب · طرق الدفع · اربح بالقيادة · الدعم · إدارة الحساب · الوضع البسيط (NEW) · القانوني + تذييل إصدار ديناميكي (`package_info_plus` عبر `core/account_version.dart`).
+  - **الوضع البسيط:** `ThemeController.simpleMode` + textScaler 1.3 في `app.dart` (MaterialApp.builder) + شاشة + مفتاح محفوظ.
+  - **الشكاوى/الدعم (backend بلا migration):** query `myComplaints` + activities في `complaint.resolver` + `support_screen.dart` (تقديم + حالة + خط زمني).
+  - **طرق الدفع:** `payment_methods_screen` فوق `PaymentMode` (نقد/محفظة/شركة حقيقية، الافتراضي محفوظ) — البطاقات "قريباً" (تتطلّب PSP).
+  - **ملفات الركوب/الأعمال:** `ride_profiles_screen` + mutation `setupBusinessProfile` (يعيد استخدام Company F2؛ Business→paymentMode=Company في الحجز).
+  - **المجموعات المحفوظة (جديد كامل):** `SavedGroupEntity` + migration `1781800000000` + `saved-group` module (mySavedGroups/create/update/delete) + `saved_groups_screen` (شخصية/مهنية + أعضاء بالهاتف).
+  - **⏭️ النشر المطلوب:** backend (PR→merge→ `git pull` + **`migration:run`** saved_group + `pm2 restart rider-api`) + إعادة بناء APK. **لم يُنشر بعد.**
+
 - **🟩 قسم "الحساب" — الدفعة الثالثة (الخصوصية + الأمان + المظهر + فحص الأمان) — الكود مكتمل ومُتحقَّق (2026-06-19).** الخطة: `C:\Users\7bici\.claude\plans\gleaming-snuggling-wind.md`.
   - **التحقق:** rider/driver/admin-api `tsc=0` · rider-app `flutter analyze=0 errors`.
   - **المظهر:** `ThemeController.appearanceMode` (system/light/dark) + `StorageService.saveAppearance` + ربط `themeMode` في `app.dart` + شاشة `appearance_screen.dart` (راديو، تطبيق فوري). **الهوية داكنة محفوظة:** الثيمان داكنان فالعرض يبقى داكناً (الفاتح "قريباً"، التفضيل يُحفظ). صف المظهر في الإعدادات يفتح الشاشة.
@@ -282,7 +293,9 @@ flutter build apk --release --dart-define=ENV=production \
   - **الخصوصية + حذف الحساب:** تبويب Privacy أُثري بمفاتيح محلية (مشاركة موقع/طرف ثالث/إعلانات) + صف "حذف الحساب" (danger، تأكيد مزدوج). **backend حقيقي:** عمود `hancr_rider.deleted_at` + migration `1781700000000` + mutation `requestAccountDeletion` (deletedAt+active=false+إبطال الجلسات) + `jwt.strategy` يرفض `!active`.
   - **الأمان:** `login_methods_screen.dart` (الهاتف موثَّق · Google مرتبط/ربط حقيقي عبر `googleLinked` المكشوف الآن في RiderType/me · بيومترية محلية · Apple "قريباً") + صف في تبويب Security. زر "تسجيل الخروج من كل الأجهزة الأخرى" في `devices_screen` ← mutation `revokeOtherDevices` (denylist كل jti عدا الحالي).
   - **فحص الأمان:** `security_checkup_screen.dart` (حلقة حالة خضراء/برتقالية + قائمة مهام مشتقة: 2FA/بريد/جهة طوارئ/مراجعة أجهزة). بطاقة "ابدأ الفحص" في Home تفتحها (بدل Safety Hub الذي يبقى لأدوات السلامة).
-  - **⏭️ النشر المطلوب:** backend عبر PR→merge→ `git pull`+`migration:run` (deleted_at)+`pm2 restart rider-api` + إعادة بناء APK الراكب. **لم يُنشر بعد.**
+  - **✅ Backend منشور ومُتحقَّق حيّاً (2026-06-19، PR #159 مدموج، main=45f8a63):** الخادم `git pull` ff → migration `1781700000000` (deleted_at) طُبّق عبر نفس أمر الدفعة السابقة، `pm2 restart rider-api` → online، `health/ready=200`. مُتحقَّق: `requestAccountDeletion`/`revokeOtherDevices` حيّان (Unauthorized لا field-not-found)، ودخول الاختبار يُصدر توكناً + `googleLinked` مكشوف، بلا انحدار.
+  - **✅ APK الراكب منشور ومُتحقَّق (2026-06-19):** arm64 إنتاجي release-signed، **46,813,495 بايت**، مفتاح Maps مُتحقَّق. رُفع لـ`/var/www/hancr-landing/downloads/hancr-rider.apk` → `hancr.com/downloads/hancr-rider.apk` HTTP 200 + content-length مطابق. **بعد التثبيت: إلغاء تثبيت القديم ثم تثبيت الجديد.**
+  - **🟢 الدفعة الثالثة كاملة منشورة (backend + APK) ومُتحقَّقة حيّاً — ملف الحساب مكتمل (3 دفعات).**
 
 - **🟢 إنجاز كل المؤجَّل (الدفعة الثانية) — الكود مكتمل ومُتحقَّق (2026-06-19)، بانتظار النشر.**
   - **التحقق:** rider/driver/admin-api `tsc=0` · rider-app `flutter analyze=0 errors` (97 info/warning تجميلية).

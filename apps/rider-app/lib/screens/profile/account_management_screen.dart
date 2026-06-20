@@ -322,29 +322,13 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
   Widget _secNavRow(
       IconData icon, String title, String subtitle, VoidCallback onTap,
       {bool danger = false}) {
-    final accent = danger ? AuroraColors.danger : AuroraColors.ember;
-    return Container(
-      margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
-      decoration: BoxDecoration(
-        color: AuroraColors.ash,
-        borderRadius: BorderRadius.circular(AuroraRadius.md),
-        border: Border.all(
-            color: danger
-                ? AuroraColors.danger.withValues(alpha: 0.4)
-                : AuroraColors.border),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: accent),
-        title: Text(title,
-            style: AuroraText.bodyMedium.copyWith(
-                color: danger ? AuroraColors.danger : AuroraColors.pearl)),
-        subtitle: Text(subtitle, style: AuroraText.caption),
-        trailing: Icon(Icons.chevron_left,
-            color: danger
-                ? AuroraColors.danger.withValues(alpha: 0.7)
-                : AuroraColors.textSecondary),
-        onTap: onTap,
-      ),
+    // مُوحَّد على AuroraListRow المشترك.
+    return AuroraListRow(
+      icon: icon,
+      title: title,
+      subtitle: subtitle,
+      onTap: onTap,
+      danger: danger,
     );
   }
 
