@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args, Int, Field, InputType, ObjectType } from '@nestjs/graphql';
+import { Resolver, Mutation, Query, Args, Int, Field, InputType, ObjectType } from '@nestjs/graphql';
 import { Injectable, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -29,11 +29,25 @@ export class SubmitComplaintInput {
 }
 
 @ObjectType()
+export class ComplaintActivityType {
+  @Field(() => Int) id!: number;
+  @Field() type!: string;
+  @Field({ nullable: true }) note?: string;
+  @Field() createdAt!: Date;
+}
+
+@ObjectType()
 export class RiderComplaintType {
   @Field(() => Int) id!: number;
+  @Field(() => Int, { nullable: true }) orderId?: number;
   @Field() category!: string;
   @Field() status!: string;
+  @Field({ nullable: true }) description?: string;
+  @Field({ nullable: true }) resolutionNote?: string;
+  @Field({ nullable: true }) resolvedAt?: Date;
   @Field() createdAt!: Date;
+  @Field(() => [ComplaintActivityType], { defaultValue: [] })
+  activities!: ComplaintActivityType[];
 }
 
 @Injectable()
@@ -70,16 +84,64 @@ export class RiderComplaintService {
     );
     return {
       id: saved.id,
+      orderId: saved.orderId,
       category: saved.category,
       status: saved.status,
+      description: saved.description,
       createdAt: saved.createdAt,
+      activities: [],
     };
+  }
+
+  /** شكاوى الراكب مع خطّ زمني للنشاط (read-only) */
+  async list(riderId: number): Promise<RiderComplaintType[]> {
+    const complaints = await this.repo.find({
+      where: { reportedByType: 'rider', reportedById: riderId },
+      order: { createdAt: 'DESC' },
+      take: 50,
+    });
+    if (complaints.length === 0) return [];
+    const ids = complaints.map((c) => c.id);
+    const activities = await this.activityRepo.find({
+      where: ids.map((complaintId) => ({ complaintId })),
+      order: { createdAt: 'ASC' },
+    });
+    const byComplaint = new Map<number, ComplaintActivityType[]>();
+    for (const a of activities) {
+      const list = byComplaint.get(a.complaintId) ?? [];
+      list.push({
+        id: a.id,
+        type: a.type,
+        note: a.note ?? undefined,
+        createdAt: a.createdAt,
+      });
+      byComplaint.set(a.complaintId, list);
+    }
+    return complaints.map((c) => ({
+      id: c.id,
+      orderId: c.orderId,
+      category: c.category,
+      status: c.status,
+      description: c.description,
+      resolutionNote: c.resolutionNote ?? undefined,
+      resolvedAt: c.resolvedAt ?? undefined,
+      createdAt: c.createdAt,
+      activities: byComplaint.get(c.id) ?? [],
+    }));
   }
 }
 
 @Resolver(() => RiderComplaintType)
 export class RiderComplaintResolver {
   constructor(private readonly service: RiderComplaintService) {}
+
+  @Query(() => [RiderComplaintType], {
+    description: 'شكاوى الراكب مع حالتها وخطّها الزمني',
+  })
+  @UseGuards(JwtAuthGuard)
+  myComplaints(@CurrentUser() user: AuthUser): Promise<RiderComplaintType[]> {
+    return this.service.list(user.riderId);
+  }
 
   @Mutation(() => RiderComplaintType, { description: 'تقديم شكوى من راكب' })
   @UseGuards(JwtAuthGuard)

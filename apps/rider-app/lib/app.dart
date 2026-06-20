@@ -234,6 +234,14 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
                   // الهوية داكنة: كلا الثيمين داكن، فالعرض يبقى داكناً مهما كان
                   // الاختيار (الوضع الفاتح "قريباً")؛ التفضيل يُحفظ ويُطبَّق هنا.
                   themeMode: ThemeController.instance.themeMode,
+                  // الوضع البسيط: تكبير خطوط التطبيق كاملاً (كبار السن).
+                  builder: (context, child) => MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      textScaler: TextScaler.linear(
+                          ThemeController.instance.textScale),
+                    ),
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                   routerConfig: _router,
                   debugShowCheckedModeBanner: false,
                   locale: locale,

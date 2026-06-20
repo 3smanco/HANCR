@@ -76,6 +76,45 @@ export class CompanyService {
   }
 
   /**
+   * إعداد ملف أعمال: ينشئ شركة جديدة ويربط الراكب بها كموظف نشط.
+   * إن كان الراكب مرتبطاً بشركة فعّالة مسبقاً يعيدها كما هي.
+   */
+  async setupBusinessProfile(
+    riderId: number,
+    name: string,
+    billingEmail?: string,
+  ): Promise<MyCompanyType> {
+    const existing = await this.findActiveLink(riderId);
+    if (existing) {
+      const my = await this.myCompany(riderId);
+      if (my) return my;
+    }
+    const company = await this.companyRepo.save(
+      this.companyRepo.create({
+        name: (name ?? '').trim().slice(0, 200) || 'حسابي للأعمال',
+        contactEmail: billingEmail?.trim()?.slice(0, 255),
+        balance: 0,
+        currency: 'SAR',
+        monthlyCapPerEmployee: 0,
+        status: 'active',
+      }),
+    );
+    await this.empRepo.save(
+      this.empRepo.create({
+        companyId: company.id,
+        riderId,
+        monthlyPeriod: this.currentPeriod(),
+        status: 'active',
+      }),
+    );
+    const my = await this.myCompany(riderId);
+    if (!my) {
+      throw new BadRequestException('تعذّر إعداد ملف الأعمال.');
+    }
+    return my;
+  }
+
+  /**
    * يخصم الأجرة من رصيد الشركة ويزيد monthlySpent للموظف.
    * يرمي BadRequestException عند تجاوز السقف أو نقص الرصيد.
    *

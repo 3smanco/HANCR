@@ -12,10 +12,20 @@ import '../inbox/aurora_inbox_screen.dart';
 import '../family/aurora_family_manage_screen.dart';
 import 'co2_details_screen.dart';
 import '../wallet/aurora_wallet_screen.dart';
+import '../wallet/payment_methods_screen.dart';
 import '../rides/aurora_rides.dart';
 import '../loyalty/loyalty_tab.dart';
+import '../commuter/aurora_commuter_screen.dart';
 import 'profile_pages.dart';
 import 'aurora_saved_places_screen.dart';
+import 'account_management_screen.dart';
+import 'saved_groups_screen.dart';
+import 'ride_profiles_screen.dart';
+import 'support_screen.dart';
+import 'earn_driving_screen.dart';
+import 'simple_mode_screen.dart';
+import 'legal_screen.dart';
+import '../../core/account_version.dart';
 
 void _open(BuildContext context, Widget page) {
   Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
@@ -173,6 +183,70 @@ class AuroraProfileTab extends StatelessWidget {
                   subtitle: tr('inviteSub'),
                   icon: Icons.card_giftcard,
                   onTap: () => _open(context, const InviteFriendsScreen()),
+                ),
+
+                const SizedBox(height: AuroraSpacing.lg),
+                // ─── قائمة الحساب الطويلة (نمط Uber) ───
+                Text(tr('more'), style: AuroraText.titleSmall),
+                const SizedBox(height: AuroraSpacing.sm),
+                AuroraListRow(
+                  icon: Icons.commute_outlined,
+                  title: tr('commuteAlerts'),
+                  onTap: () => _open(context, const AuroraCommuterScreen()),
+                ),
+                AuroraListRow(
+                  icon: Icons.groups_outlined,
+                  title: tr('savedGroups'),
+                  badge: tr('badgeNew'),
+                  onTap: () => _open(context, const SavedGroupsScreen()),
+                ),
+                AuroraListRow(
+                  icon: Icons.swap_horiz,
+                  title: tr('rideProfiles'),
+                  onTap: () => _open(context, const RideProfilesScreen()),
+                ),
+                AuroraListRow(
+                  icon: Icons.credit_card_outlined,
+                  title: tr('paymentMethods'),
+                  onTap: () => _open(context, const PaymentMethodsScreen()),
+                ),
+                AuroraListRow(
+                  icon: Icons.directions_car_outlined,
+                  title: tr('earnDriving'),
+                  onTap: () => _open(context, const EarnDrivingScreen()),
+                ),
+                AuroraListRow(
+                  icon: Icons.support_agent_outlined,
+                  title: tr('support'),
+                  onTap: () => _open(context, const SupportScreen()),
+                ),
+                AuroraListRow(
+                  icon: Icons.manage_accounts_outlined,
+                  title: tr('manageAccount'),
+                  onTap: () =>
+                      _open(context, const AccountManagementScreen()),
+                ),
+                AuroraListRow(
+                  icon: Icons.elderly_outlined,
+                  title: tr('simpleMode'),
+                  badge: tr('badgeNew'),
+                  onTap: () => _open(context, const SimpleModeScreen()),
+                ),
+                AuroraListRow(
+                  icon: Icons.gavel_outlined,
+                  title: tr('legal'),
+                  onTap: () => _open(context, const LegalScreen()),
+                ),
+                const SizedBox(height: AuroraSpacing.md),
+                Center(
+                  child: FutureBuilder<String>(
+                    future: AccountVersion.label(),
+                    builder: (context, snap) => Text(
+                      snap.data ?? '',
+                      style: AuroraText.caption
+                          .copyWith(color: AuroraColors.textHint),
+                    ),
+                  ),
                 ),
               ],
             );

@@ -11,6 +11,7 @@ import { CityEntity } from './entities/city.entity';
 import { ServiceEntity } from './entities/service.entity';
 import { RiderEntity } from './entities/rider.entity';
 import { RiderDeviceEntity } from './entities/rider-device.entity';
+import { SavedGroupEntity } from './entities/saved-group.entity';
 import { DriverEntity } from './entities/driver.entity';
 import { OrderEntity } from './entities/order.entity';
 import { LoyaltyEntity } from './entities/loyalty.entity';
@@ -63,6 +64,7 @@ export const HANCR_ENTITIES = [
   ServiceEntity,
   RiderEntity,
   RiderDeviceEntity,
+  SavedGroupEntity,
   DriverEntity,
   OrderEntity,
   LoyaltyEntity,

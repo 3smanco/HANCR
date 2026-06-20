@@ -105,6 +105,26 @@ class AuroraButton extends StatelessWidget {
         variant: AuroraButtonVariant.danger,
       );
 
+  /// زر كبسولي صغير (pill) — للإجراءات الثانوية المدمجة.
+  factory AuroraButton.pill({
+    Key? key,
+    required String label,
+    required VoidCallback? onPressed,
+    IconData? icon,
+    bool primary = false,
+  }) =>
+      AuroraButton(
+        key: key,
+        label: label,
+        onPressed: onPressed,
+        icon: icon,
+        fullWidth: false,
+        size: AuroraButtonSize.small,
+        variant: primary
+            ? AuroraButtonVariant.primary
+            : AuroraButtonVariant.secondary,
+      );
+
   @override
   Widget build(BuildContext context) {
     final isDisabled = onPressed == null || loading;
@@ -263,3 +283,43 @@ class AuroraButton extends StatelessWidget {
 enum AuroraButtonVariant { primary, secondary, ghost, danger }
 
 enum AuroraButtonSize { small, medium, large }
+
+/// زر سفلي ثابت بعرض الشاشة (sticky CTA) — خلفية obsidian + حدّ علوي،
+/// مع احترام الـ safe-area. يُوضع كآخر عنصر في Column/Stack.
+class AuroraStickyButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onPressed;
+  final IconData? icon;
+  final bool loading;
+  final bool danger;
+
+  const AuroraStickyButton({
+    required this.label,
+    required this.onPressed,
+    this.icon,
+    this.loading = false,
+    this.danger = false,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AuroraColors.obsidian,
+      padding: EdgeInsets.fromLTRB(
+        AuroraSpacing.lg,
+        AuroraSpacing.md,
+        AuroraSpacing.lg,
+        AuroraSpacing.md + MediaQuery.of(context).viewPadding.bottom,
+      ),
+      child: danger
+          ? AuroraButton.danger(label: label, onPressed: onPressed, icon: icon)
+          : AuroraButton.primary(
+              label: label,
+              onPressed: onPressed,
+              icon: icon,
+              loading: loading,
+            ),
+    );
+  }
+}

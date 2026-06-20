@@ -263,3 +263,57 @@ const String requestAccountDeletionMutation = r'''
     requestAccountDeletion
   }
 ''';
+
+// ═══════════════════════════════════════════════
+// الدفعة الرابعة — المجموعات / الشكاوى / الأعمال
+// ═══════════════════════════════════════════════
+
+const String _groupFields = r'''
+  id name type createdAt members { name phone }
+''';
+
+const String mySavedGroupsQuery = '''
+  query MySavedGroups { mySavedGroups { $_groupFields } }
+''';
+
+const String createSavedGroupMutation = '''
+  mutation CreateSavedGroup(\$name: String!, \$type: String, \$members: [SavedGroupMemberInput!]) {
+    createSavedGroup(name: \$name, type: \$type, members: \$members) { $_groupFields }
+  }
+''';
+
+const String updateSavedGroupMutation = '''
+  mutation UpdateSavedGroup(\$id: Int!, \$name: String, \$type: String, \$members: [SavedGroupMemberInput!]) {
+    updateSavedGroup(id: \$id, name: \$name, type: \$type, members: \$members) { $_groupFields }
+  }
+''';
+
+const String deleteSavedGroupMutation = r'''
+  mutation DeleteSavedGroup($id: Int!) { deleteSavedGroup(id: $id) }
+''';
+
+// ─── الشكاوى / الدعم ───
+const String myComplaintsQuery = r'''
+  query MyComplaints {
+    myComplaints {
+      id orderId category status description resolutionNote resolvedAt createdAt
+      activities { id type note createdAt }
+    }
+  }
+''';
+
+const String submitComplaintMutation = r'''
+  mutation SubmitComplaint($input: SubmitComplaintInput!) {
+    submitComplaint(input: $input) { id category status createdAt }
+  }
+''';
+
+// ─── الأعمال (ملف الأعمال) — myCompanyQuery معرّف في company_gql.dart ───
+const String setupBusinessProfileMutation = r'''
+  mutation SetupBusinessProfile($name: String!, $billingEmail: String) {
+    setupBusinessProfile(name: $name, billingEmail: $billingEmail) {
+      companyId companyName companyBalance currency
+      monthlyCapPerEmployee monthlySpent monthlyRemaining status
+    }
+  }
+''';

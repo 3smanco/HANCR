@@ -43,6 +43,19 @@ class ThemeController extends ChangeNotifier {
     }
   }
 
+  /// الوضع البسيط (تكبير الخط لكبار السن) — يُطبَّق كـ textScaler في app.dart.
+  bool _simpleMode = false;
+  bool get simpleMode => _simpleMode;
+  double get textScale => _simpleMode ? 1.3 : 1.0;
+
+  Future<void> setSimpleMode(bool on) async {
+    if (on == _simpleMode) return;
+    _simpleMode = on;
+    await StorageService.saveSimpleMode(on);
+    _version++;
+    notifyListeners();
+  }
+
   /// يغيّر تفضيل المظهر ويحفظه ويعيد بناء MaterialApp.
   Future<void> setAppearanceMode(String mode) async {
     if (mode != 'system' && mode != 'light' && mode != 'dark') return;
@@ -58,9 +71,10 @@ class ThemeController extends ChangeNotifier {
     if (_bootstrapped) return;
     _bootstrapped = true;
 
-    // 0) تحميل تفضيل المظهر المخزَّن.
+    // 0) تحميل تفضيل المظهر + الوضع البسيط المخزَّنين.
     try {
       _appearanceMode = await StorageService.getAppearance() ?? 'dark';
+      _simpleMode = await StorageService.getSimpleMode();
     } catch (_) {
       _appearanceMode = 'dark';
     }

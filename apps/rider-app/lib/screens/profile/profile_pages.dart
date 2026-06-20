@@ -15,6 +15,7 @@ import '../../core/graphql/gql/order_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/models/order_model.dart';
 import '../../core/services/storage_service.dart';
+import '../../core/account_version.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../../core/widgets/rider_avatar.dart';
 import '../rides/aurora_rides.dart';
@@ -712,7 +713,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // ─── حول ───
           _sectionLabel(tr('about')),
-          _infoRow(tr('version'), '1.0.0'),
+          FutureBuilder<String>(
+            future: AccountVersion.raw(),
+            builder: (context, snap) =>
+                _infoRow(tr('version'), snap.data ?? '…'),
+          ),
           _infoRow('hancr.com', 'hancr.com'),
           const SizedBox(height: AuroraSpacing.lg),
 
@@ -777,28 +782,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _navRow(IconData icon, String title,
       {String? subtitle, VoidCallback? onTap, bool danger = false}) {
-    final color = danger ? AuroraColors.danger : AuroraColors.pearl;
-    return Container(
-      margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
-      decoration: BoxDecoration(
-        color: AuroraColors.ash,
-        borderRadius: BorderRadius.circular(AuroraRadius.md),
-        border: Border.all(color: AuroraColors.border),
-      ),
-      child: ListTile(
-        leading: Icon(icon,
-            color: danger ? AuroraColors.danger : AuroraColors.ember),
-        title: Text(title,
-            style: AuroraText.bodyMedium.copyWith(color: color)),
-        subtitle: subtitle == null
-            ? null
-            : Text(subtitle, style: AuroraText.caption),
-        trailing: danger
-            ? null
-            : const Icon(Icons.chevron_left,
-                color: AuroraColors.textSecondary),
-        onTap: onTap,
-      ),
+    // مُوحَّد على AuroraListRow المشترك. (للصفوف الخطرة نُخفي الـchevron.)
+    return AuroraListRow(
+      icon: icon,
+      title: title,
+      subtitle: subtitle,
+      onTap: onTap,
+      danger: danger,
+      trailing: danger ? const SizedBox.shrink() : null,
     );
   }
 
