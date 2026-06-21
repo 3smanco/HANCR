@@ -275,7 +275,12 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
-- **🟦 التجديد البصري — الدفعتان D1+D2 (السائق — الانطباع الأول + الخريطة) — مكتملتان ومُتحقَّقتان (2026-06-21).** التحقق: driver-app `flutter analyze=0 errors`.
+- **🟦 التجديد البصري — الدفعة D3 (السائق — الطلب الوارد + الرحلة النشطة) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: driver-app `flutter analyze=0 errors`.
+  - **إعادة بناء `incoming_order_sheet` بالكامل بهوية Aurora** (كان Material أبيض ونصّه شبه مخفي على الثيم الداكن): خلفية coal + حلقة عدّ نابضة (GlowPulse + تدرّج success→danger) + دخول bounce (slideY+overshoot) + وسوم/إحصاءات popIn + زر قبول متوهّج + haptics. أُضيفت مفاتيح i18n `newRideRequest/quietRide/audioOff`.
+  - الرحلة النشطة: بطاقة Aurora مصقولة مسبقاً.
+  - **⏭️ بناء APK مجمّع للسائق (D1+D2+D3) + نشره ثم D4+D5.**
+
+- **🟩 التجديد البصري — الدفعتان D1+D2 (السائق — الانطباع الأول + الخريطة) — مكتملتان ومُتحقَّقتان (2026-06-21، PR #172).** التحقق: driver-app `flutter analyze=0 errors`.
   - **D1 splash:** `CarArt.suv` تنساب + `AuroraLoader`. **D1 OTP:** `Shake` على الرمز (مع haptics الموجودة) + مسح عند الخطأ.
   - **D2 الخريطة (`driver_car_map`):** توحيد علامة السيارة إلى `CarMarkerFactory` (top-down) بدل سهم الدائرة — مع الإبقاء على interpolation/heading الموجود. (القشرة IndexedStack بلا تغيير — لحفظ حالة الخريطة؛ زر online مصقول مسبقاً.)
   - **⏭️ D3 (الطلب الوارد — إعادة بناء بهوية Aurora + الرحلة النشطة) ثم APK مجمّع للسائق.**

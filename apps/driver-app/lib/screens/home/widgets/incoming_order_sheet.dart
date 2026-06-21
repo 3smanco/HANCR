@@ -8,8 +8,11 @@ import '../../../blocs/auth/auth_state.dart';
 import '../../../blocs/order/order_state.dart';
 import '../../../core/i18n/app_localization.dart';
 import '../../../core/models/order_model.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/aurora/aurora.dart';
+import '../../../core/motion/motion.dart';
 
+/// لوحة الطلب الوارد — أُعيد بناؤها بهوية Aurora (كانت Material أبيض).
+/// حلقة عدّ نابضة + دخول bounce + وسوم متدرّجة + زر قبول متوهّج.
 class IncomingOrderSheet extends StatefulWidget {
   final DriverOrderModel order;
   const IncomingOrderSheet({super.key, required this.order});
@@ -18,12 +21,14 @@ class IncomingOrderSheet extends StatefulWidget {
 }
 
 class _IncomingOrderSheetState extends State<IncomingOrderSheet> {
-  int _countdown = 25; // 25 seconds to accept
+  static const int _total = 25;
+  int _countdown = _total;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
+    Haptics.warning(); // تنبيه لمسي عند ورود الطلب
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (_countdown > 0) {
         setState(() => _countdown--);
@@ -41,6 +46,7 @@ class _IncomingOrderSheetState extends State<IncomingOrderSheet> {
 
   void _accept() {
     _timer?.cancel();
+    Haptics.success();
     context.read<OrderBloc>().add(OrderAcceptRequested(widget.order.id));
     Navigator.pop(context);
   }
@@ -51,8 +57,12 @@ class _IncomingOrderSheetState extends State<IncomingOrderSheet> {
     if (mounted) Navigator.pop(context);
   }
 
+  Color get _ringColor =>
+      _countdown > 10 ? AuroraColors.success : AuroraColors.danger;
+
   @override
   Widget build(BuildContext context) {
+    final o = widget.order;
     return BlocListener<OrderBloc, OrderState>(
       listener: (ctx, state) {
         if (state is OrderActive) Navigator.of(ctx).popUntil((r) => r.isFirst);
@@ -62,165 +72,171 @@ class _IncomingOrderSheetState extends State<IncomingOrderSheet> {
         padding: EdgeInsets.fromLTRB(
           20, 12, 20, 20 + MediaQuery.of(context).padding.bottom,
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: AuroraColors.coal,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          border: const Border(top: BorderSide(color: AuroraColors.borderGlow)),
+          boxShadow: const [
+            BoxShadow(color: Color(0x99000000), blurRadius: 30, offset: Offset(0, -10)),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle
+            // مقبض
             Container(
-              width: 40,
+              width: 44,
               height: 4,
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: HancrColors.divider,
+                color: AuroraColors.border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
 
-            // Countdown ring
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 72,
-                  height: 72,
-                  child: CircularProgressIndicator(
-                    value: _countdown / 25,
-                    strokeWidth: 5,
-                    backgroundColor: HancrColors.surfaceVariant,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      _countdown > 10
-                          ? HancrColors.onlineGreen
-                          : HancrColors.statusRed,
+            // حلقة العدّ النابضة
+            GlowPulse(
+              color: _ringColor,
+              minBlur: 6,
+              maxBlur: 22,
+              child: SizedBox(
+                width: 76,
+                height: 76,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 76,
+                      height: 76,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween<double>(
+                            begin: _countdown / _total,
+                            end: _countdown / _total),
+                        duration: const Duration(milliseconds: 900),
+                        builder: (context, v, _) => CircularProgressIndicator(
+                          value: v,
+                          strokeWidth: 5,
+                          backgroundColor: AuroraColors.smoke,
+                          valueColor: AlwaysStoppedAnimation<Color>(_ringColor),
+                        ),
+                      ),
                     ),
-                  ),
+                    Text('$_countdown',
+                        style: AuroraText.titleLarge
+                            .copyWith(color: AuroraColors.pearl)),
+                  ],
                 ),
-                Text(
-                  '$_countdown',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              ],
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            Text(
-              'New Ride Request',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 16),
+            Text(tr('newRideRequest'),
+                style: AuroraText.titleMedium, textAlign: TextAlign.center),
+            const SizedBox(height: 14),
 
-            // Phase H — service tags (VIP / Night / Family / Hourly / Grocery / Prepaid)
-            _ServiceTagsRow(order: widget.order),
+            // وسوم الخدمات الخاصة (متدرّجة)
+            _ServiceTagsRow(order: o),
 
-            // Trip info
-            _TripRow(
-              origin: widget.order.originAddress,
-              destination: widget.order.destinationAddress,
-            ),
+            // المسار
+            _TripRow(origin: o.originAddress, destination: o.destinationAddress),
             const SizedBox(height: 12),
 
-            // Stats row
+            // إحصاءات
             Row(
               children: [
                 Expanded(
-                  child: _InfoChip(
-                    icon: Icons.route,
-                    label: widget.order.distanceLabel,
-                  ),
-                ),
+                    child: _InfoChip(
+                            icon: Icons.route, label: o.distanceLabel)
+                        .popIn(index: 0)),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: _InfoChip(
-                    icon: Icons.access_time,
-                    label: widget.order.durationLabel,
-                  ),
-                ),
+                    child: _InfoChip(
+                            icon: Icons.access_time, label: o.durationLabel)
+                        .popIn(index: 1)),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: _InfoChip(
-                    icon: Icons.payments_outlined,
-                    label:
-                        '${widget.order.costAfterCoupon.toStringAsFixed(0)} ${widget.order.currency}',
-                    bold: true,
-                    color: HancrColors.primary,
-                  ),
-                ),
+                    child: _InfoChip(
+                      icon: Icons.payments_outlined,
+                      label:
+                          '${o.costAfterCoupon.toStringAsFixed(0)} ${o.currency}',
+                      bold: true,
+                      color: AuroraColors.ember,
+                    ).popIn(index: 2)),
               ],
             ),
 
-            // Ride mood icons
-            if (widget.order.quietRide || widget.order.audioOff) ...[
+            if (o.quietRide || o.audioOff) ...[
               const SizedBox(height: 10),
               Row(
                 children: [
-                  if (widget.order.quietRide)
-                    _MoodChip(icon: Icons.do_not_disturb, label: 'Quiet ride'),
-                  if (widget.order.audioOff)
-                    _MoodChip(icon: Icons.music_off, label: 'Audio off'),
+                  if (o.quietRide)
+                    _MoodChip(icon: Icons.do_not_disturb, label: tr('quietRide')),
+                  if (o.audioOff)
+                    _MoodChip(icon: Icons.music_off, label: tr('audioOff')),
                 ],
               ),
             ],
 
-            // Rider rating
+            // الراكب
             const SizedBox(height: 12),
             Row(
               children: [
-                const Icon(Icons.star, color: HancrColors.accent, size: 16),
+                Icon(Icons.star, color: AuroraColors.gold, size: 16),
                 const SizedBox(width: 4),
-                Text(
-                  widget.order.riderRating.toStringAsFixed(1),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                Text(o.riderRating.toStringAsFixed(1),
+                    style: AuroraText.titleSmall),
                 const SizedBox(width: 6),
-                if (widget.order.riderName != null)
-                  Text(
-                    widget.order.riderName!,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                if (o.riderName != null)
+                  Flexible(
+                    child: Text(o.riderName!,
+                        overflow: TextOverflow.ellipsis,
+                        style: AuroraText.bodyMedium),
                   ),
                 const Spacer(),
                 Text(
-                  widget.order.paymentMode.toUpperCase(),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: HancrColors.statusBlue,
-                      ),
+                  o.paymentMode.toUpperCase(),
+                  style: AuroraText.bodySmall.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: AuroraColors.info,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
 
-            // Action buttons
+            // الأزرار
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
+                  child: AuroraButton.danger(
+                    label: tr('decline'),
                     onPressed: _decline,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: HancrColors.error,
-                      side: const BorderSide(color: HancrColors.error),
-                    ),
-                    child: Text(tr('decline')),
                   ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
                   flex: 2,
-                  child: ElevatedButton(
-                    onPressed: _accept,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: HancrColors.onlineGreen,
+                  child: GlowPulse(
+                    color: AuroraColors.success,
+                    minBlur: 4,
+                    maxBlur: 20,
+                    child: AuroraButton.primary(
+                      label: tr('accept'),
+                      icon: Icons.check_circle,
+                      onPressed: _accept,
                     ),
-                    child: Text(tr('accept')),
                   ),
                 ),
               ],
             ),
           ],
         ),
-      ),
+      ).animate().slideY(
+            begin: 0.12,
+            end: 0,
+            duration: Motion.sheet,
+            curve: Motion.overshoot,
+          ).fadeIn(duration: Motion.base),
     );
   }
 }
@@ -239,21 +255,17 @@ class _TripRow extends StatelessWidget {
             Container(
               width: 10,
               height: 10,
-              decoration: const BoxDecoration(
-                color: HancrColors.statusGreen,
+              decoration: BoxDecoration(
+                color: AuroraColors.success,
                 shape: BoxShape.circle,
               ),
             ),
-            Container(
-              width: 1,
-              height: 30,
-              color: HancrColors.divider,
-            ),
+            Container(width: 2, height: 30, color: AuroraColors.border),
             Container(
               width: 10,
               height: 10,
-              decoration: const BoxDecoration(
-                color: HancrColors.accent,
+              decoration: BoxDecoration(
+                color: AuroraColors.ember,
                 shape: BoxShape.circle,
               ),
             ),
@@ -265,12 +277,12 @@ class _TripRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(origin,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: AuroraText.bodyMedium
+                      .copyWith(color: AuroraColors.textSecondary),
                   overflow: TextOverflow.ellipsis),
               const SizedBox(height: 16),
               Text(destination,
-                  style: Theme.of(context).textTheme.titleMedium,
-                  overflow: TextOverflow.ellipsis),
+                  style: AuroraText.titleSmall, overflow: TextOverflow.ellipsis),
             ],
           ),
         ),
@@ -296,19 +308,19 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-        color: HancrColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(10),
+        color: AuroraColors.ash,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AuroraColors.border),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 18, color: color ?? HancrColors.textSecondary),
+          Icon(icon, size: 18, color: color ?? AuroraColors.textSecondary),
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
-              color: color ?? HancrColors.textPrimary,
+            style: AuroraText.bodySmall.copyWith(
+              fontWeight: bold ? FontWeight.w800 : FontWeight.w400,
+              color: color ?? AuroraColors.pearl,
             ),
             textAlign: TextAlign.center,
           ),
@@ -318,8 +330,7 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-/// صفّ شارات الخدمات الخاصة (VIP/Night/Family/Hourly/Grocery/Prepaid)
-/// — يظهر فقط عند توفّر إشارة واحدة على الأقل.
+/// صفّ شارات الخدمات الخاصة (VIP/Night/Family/Hourly/Grocery/Prepaid).
 class _ServiceTagsRow extends StatelessWidget {
   final DriverOrderModel order;
   const _ServiceTagsRow({required this.order});
@@ -327,61 +338,53 @@ class _ServiceTagsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.read<AuthBloc>().state;
-    final currentDriverId =
-        auth is AuthAuthenticated ? auth.driverId : null;
+    final currentDriverId = auth is AuthAuthenticated ? auth.driverId : null;
 
-    final tags = <_ServiceTag>[];
+    final tags = <Widget>[];
 
     if (order.preferredDriverId != null &&
         order.preferredDriverId == currentDriverId) {
       tags.add(_ServiceTag(
-        icon: Icons.workspace_premium,
-        label: tr('tag_vip'),
-        color: const Color(0xFFFFB547), // gold
-      ));
+          icon: Icons.workspace_premium,
+          label: tr('tag_vip'),
+          color: AuroraColors.gold));
     }
     if (order.nightShift) {
       tags.add(_ServiceTag(
-        icon: Icons.nightlight_round,
-        label: tr('tag_night'),
-        color: const Color(0xFF6366F1), // indigo
-      ));
+          icon: Icons.nightlight_round,
+          label: tr('tag_night'),
+          color: const Color(0xFF6366F1)));
     }
     if (order.familyMode || order.preferFemaleDriver) {
       tags.add(_ServiceTag(
-        icon: Icons.family_restroom,
-        label: tr('tag_family'),
-        color: const Color(0xFFEC4899), // pink
-      ));
+          icon: Icons.family_restroom,
+          label: tr('tag_family'),
+          color: const Color(0xFFEC4899)));
     }
     if (order.isHourly) {
       tags.add(_ServiceTag(
-        icon: Icons.av_timer,
-        label: '${tr('tag_hourly')} · ${order.bookedHours}h',
-        color: HancrColors.primary,
-      ));
+          icon: Icons.av_timer,
+          label: '${tr('tag_hourly')} · ${order.bookedHours}h',
+          color: AuroraColors.ember));
     }
     if (order.isGrocery) {
       tags.add(_ServiceTag(
-        icon: Icons.shopping_basket,
-        label:
-            '${tr('tag_grocery')} · ${order.budget?.toStringAsFixed(0) ?? '—'} ${order.currency}',
-        color: const Color(0xFF10B981), // green
-      ));
+          icon: Icons.shopping_basket,
+          label:
+              '${tr('tag_grocery')} · ${order.budget?.toStringAsFixed(0) ?? '—'} ${order.currency}',
+          color: AuroraColors.success));
     }
     if (order.entitlementId != null) {
       tags.add(_ServiceTag(
-        icon: Icons.confirmation_number_outlined,
-        label: tr('tag_paid_bundle'),
-        color: const Color(0xFF8B5CF6), // violet
-      ));
+          icon: Icons.confirmation_number_outlined,
+          label: tr('tag_paid_bundle'),
+          color: const Color(0xFF8B5CF6)));
     }
     if (order.companyId != null) {
       tags.add(_ServiceTag(
-        icon: Icons.business_outlined,
-        label: tr('tag_paid_company'),
-        color: HancrColors.textSecondary,
-      ));
+          icon: Icons.business_outlined,
+          label: tr('tag_paid_company'),
+          color: AuroraColors.textSecondary));
     }
 
     if (tags.isEmpty) return const SizedBox(height: 4);
@@ -392,7 +395,9 @@ class _ServiceTagsRow extends StatelessWidget {
         spacing: 6,
         runSpacing: 6,
         alignment: WrapAlignment.center,
-        children: tags,
+        children: [
+          for (var i = 0; i < tags.length; i++) tags[i].popIn(index: i),
+        ],
       ),
     );
   }
@@ -413,9 +418,9 @@ class _ServiceTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: color.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -445,17 +450,17 @@ class _MoodChip extends StatelessWidget {
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: HancrColors.primary.withValues(alpha: 0.08),
+        color: AuroraColors.ember.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AuroraColors.ember.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: HancrColors.primary),
+          Icon(icon, size: 14, color: AuroraColors.ember),
           const SizedBox(width: 4),
           Text(label,
-              style: const TextStyle(
-                  fontSize: 11, color: HancrColors.primary)),
+              style: AuroraText.caption.copyWith(color: AuroraColors.ember)),
         ],
       ),
     );
