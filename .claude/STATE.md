@@ -275,12 +275,17 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
+- **🟩 نظام الدعم — الدفعة 3: تحسين الشات (راكب↔سائق) — مكتمل ومُتحقَّق (2026-06-20).** التحقق: rider/driver-api `tsc=0` · rider+driver-app `flutter analyze=0`.
+  - **Backend:** `OrderMessageEntity.imageUrl` + migration `1782000000000`. كلا الـAPIs (chat): `sendOrderMessage(imageUrl?)` + `setOrderTyping` + `markOrderMessagesRead` + subscriptions `orderTyping`/`orderMessagesRead` (قنوات `ORDER_TYPING`/`ORDER_READ` عبر RedisPubSub، filter يستثني نفس الطرف).
+  - **التطبيقان (chat screens):** مؤشّر "يكتب الآن…" (إرسال throttled 2ث + اشتراك يُخفى بعد 3ث) · ✓/✓✓ على فقاعاتي (isRead + اشتراك القراءة) · عرض صور الرسائل · **إرفاق صورة** (الراكب عبر `RiderUploadService` presigned؛ السائق عرض فقط) · `markRead` عند الفتح/الوصول.
+  - **⏭️ النشر:** rider-api+driver-api restart + migration (image_url) + APK راكب+سائق (لا أدمن). **لم يُنشر بعد.**
+
 - **🟩 نظام الدعم — الدفعة 2: إكمال التذاكر (Helpdesk) — مكتمل ومُتحقَّق (2026-06-20).** التحقق: rider/admin-api `tsc=0` · rider-app `flutter analyze=0` · ملفات admin-panel نظيفة.
   - **Backend:** `ComplaintEntity.dueAt` (SLA) + migration `1781900000000`. rider-api: `replyToComplaint(complaintId,message,imageUrl?)` (activity `rider_message` + يعيد فتح المُغلقة) + `dueAt=now+24h` عند الإنشاء. admin-api: `assignComplaint` + `refundComplaint(amount, voucher)` (يلفّ `WalletsService.adjust` لإضافة رصيد للمُبلِّغ + activity refund/voucher) + `assignedTo`/`dueAt` في AdminComplaintType.
   - **الأدمن (`complaints/page.tsx`):** بانر SLA (مهلة/تجاوز) + قسم إجراء مالي (مبلغ + زرّا "رد أموال"/"كوبون") في الدرج + gql ASSIGN/REFUND.
   - **التطبيق (`support_screen`):** زر "الردّ" داخل التذكرة (حوار) → `replyToComplaint` + تمييز ردود الراكب في الخطّ الزمني.
   - **مؤجَّل موثّق:** فلاتر متقدمة (تاريخ/فئة/مُسنَد) في جدول الأدمن · cron تصعيد SLA التلقائي (الحالي يعرض التجاوز بصرياً) · إرفاق صور في الردّ (backend جاهز imageUrl، UI لاحقاً) · غرامة السائق.
-  - **⏭️ النشر:** rider-api+admin-api restart + migration (due_at) + admin-panel build + APK رايدر (لا سائق). **لم يُنشر بعد.**
+  - **✅ منشور ومُتحقَّق حيّاً (2026-06-20، PR #163، main=1139840):** migration `due_at` مطبَّق · rider-api+admin-api restart → `health/ready=200` · `replyToComplaint`/`refundComplaint` حيّان · admin-panel أُعيد بناؤه + restart · APK الراكب (47,076,979) مرفوع → HTTP 200 مطابق. (لا تغيير سائق.) **التالي: الدفعة 3 (تحسين شات راكب↔سائق) ثم 4 (شات الدعم الحي).**
 
 - **🟩 نظام الدعم والطوارئ — الدفعة 1: SOS الحيّ — مكتمل ومُتحقَّق (2026-06-20).** الخطة الشاملة (4 دفعات): `C:\Users\7bici\.claude\plans\gleaming-snuggling-wind.md`. التحقق: rider/driver/admin-api `tsc=0` · rider+driver-app `flutter analyze=0` · ملفات admin-panel نظيفة (خطأ cancel-reasons سابق غير متعلّق).
   - **بثّ GPS كل 3ث:** قناة Redis `SOS_LOCATION_CHANNEL` + `SosService.updateLocation` ينشر + `updateActiveLocation(ملكية)`. mutations `updateSosLocation`(rider) / `updateDriverSosLocation`(driver). `SosBloc` (التطبيقان) يبثّ `Geolocator` كل 3ث أثناء حادثة نشطة (يبدأ عند trigger/load، يقف عند cancel/close).

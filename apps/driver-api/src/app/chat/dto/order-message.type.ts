@@ -12,6 +12,9 @@ export class OrderMessageType {
   @Field()
   message!: string;
 
+  @Field({ nullable: true })
+  imageUrl?: string;
+
   /** 'rider' | 'driver' */
   @Field()
   senderType!: string;
@@ -24,4 +27,15 @@ export class OrderMessageType {
 
   @Field()
   sentAt!: Date;
+}
+
+/** حدث محادثة عابر (يكتب الآن / تمّت القراءة) */
+@ObjectType()
+export class ChatEventType {
+  @Field(() => Int)
+  orderId!: number;
+
+  /** 'rider' | 'driver' */
+  @Field()
+  actorType!: string;
 }

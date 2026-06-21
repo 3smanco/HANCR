@@ -990,4 +990,7 @@ const Map<String, Map<String, String>> _t = {
   // ─── الدعم: ردّ التذكرة ───
   'replyTicket': {'ar': 'الردّ', 'en': 'Reply'},
   'act_rider_message': {'ar': 'ردّ منك', 'en': 'Your reply'},
+
+  // ─── الشات ───
+  'typingNow': {'ar': 'يكتب الآن…', 'en': 'Typing…'},
 };

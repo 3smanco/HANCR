@@ -18,7 +18,7 @@ export class ChatService {
   ) {}
 
   /** يتحقق أن الطلب مُسنَد لهذا السائق */
-  private async assertAssigned(driverId: number, orderId: number): Promise<void> {
+  async assertAssigned(driverId: number, orderId: number): Promise<void> {
     const order = await this.orderRepo.findOne({
       where: { id: orderId },
       select: ['id', 'driverId'],
@@ -46,12 +46,14 @@ export class ChatService {
     driverId: number,
     orderId: number,
     text: string,
+    imageUrl?: string,
   ): Promise<OrderMessageType> {
     await this.assertAssigned(driverId, orderId);
     const saved = await this.msgRepo.save(
       this.msgRepo.create({
         orderId,
         message: text.trim(),
+        imageUrl: imageUrl?.trim() || undefined,
         senderType: 'driver',
         senderId: driverId,
         isRead: false,
@@ -60,11 +62,21 @@ export class ChatService {
     return this.toType(saved);
   }
 
+  /** يعلّم رسائل الراكب كمقروءة (عند فتح/قراءة السائق للمحادثة). */
+  async markRead(driverId: number, orderId: number): Promise<void> {
+    await this.assertAssigned(driverId, orderId);
+    await this.msgRepo.update(
+      { orderId, senderType: 'rider', isRead: false },
+      { isRead: true },
+    );
+  }
+
   private toType(m: OrderMessageEntity): OrderMessageType {
     return {
       id: m.id,
       orderId: m.orderId,
       message: m.message,
+      imageUrl: m.imageUrl,
       senderType: m.senderType,
       senderId: m.senderId,
       isRead: m.isRead,

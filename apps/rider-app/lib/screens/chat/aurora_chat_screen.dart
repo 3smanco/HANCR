@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/order_gql.dart';
 import '../../core/i18n/app_localization.dart';
+import '../../core/services/rider_upload_service.dart';
 import '../../core/widgets/aurora/aurora.dart';
 
 /// شاشة دردشة الراكب مع السائق أثناء الرحلة.
@@ -21,19 +23,28 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
   final _scroll = ScrollController();
   final List<Map<String, dynamic>> _messages = [];
   StreamSubscription<QueryResult<Object?>>? _sub;
+  StreamSubscription<QueryResult<Object?>>? _typingSub;
+  StreamSubscription<QueryResult<Object?>>? _readSub;
   bool _loading = true;
   bool _sending = false;
+  bool _otherTyping = false;
+  Timer? _typingClear;
+  DateTime _lastTypingSent = DateTime.fromMillisecondsSinceEpoch(0);
 
   @override
   void initState() {
     super.initState();
     _load();
     _subscribe();
+    _markRead();
   }
 
   @override
   void dispose() {
     _sub?.cancel();
+    _typingSub?.cancel();
+    _readSub?.cancel();
+    _typingClear?.cancel();
     _ctrl.dispose();
     _scroll.dispose();
     super.dispose();
@@ -61,44 +72,99 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
     }
   }
 
+  Future<void> _markRead() async {
+    try {
+      final client = await GraphQLClientManager.get();
+      await client.mutate(MutationOptions(
+        document: gql(markOrderMessagesReadMutation),
+        variables: {'orderId': widget.orderId},
+      ));
+    } catch (_) {}
+  }
+
   Future<void> _subscribe() async {
     try {
       final client = await GraphQLClientManager.get();
-      final stream = client.subscribe(SubscriptionOptions(
-        document: gql(orderMessageAddedSubscription),
-        variables: {'orderId': widget.orderId},
-      ));
-      _sub = stream.listen((result) {
+      _sub = client
+          .subscribe(SubscriptionOptions(
+            document: gql(orderMessageAddedSubscription),
+            variables: {'orderId': widget.orderId},
+          ))
+          .listen((result) {
         final m = result.data?['orderMessageAdded'] as Map<String, dynamic>?;
         if (m == null || !mounted) return;
-        // تفادي التكرار (الرسالة التي أرسلناها تعود عبر الاشتراك)
         if (_messages.any((x) => x['id'] == m['id'])) return;
         setState(() => _messages.add(m));
         _scrollToEnd();
+        if (m['senderType'] != 'rider') _markRead(); // وصلت رسالة → علّمها مقروءة
+      });
+
+      // "يكتب الآن"
+      _typingSub = client
+          .subscribe(SubscriptionOptions(
+            document: gql(orderTypingSubscription),
+            variables: {'orderId': widget.orderId},
+          ))
+          .listen((_) {
+        if (!mounted) return;
+        setState(() => _otherTyping = true);
+        _typingClear?.cancel();
+        _typingClear = Timer(const Duration(seconds: 3),
+            () => mounted ? setState(() => _otherTyping = false) : null);
+      });
+
+      // قراءة الطرف الآخر لرسائلي → ✓✓
+      _readSub = client
+          .subscribe(SubscriptionOptions(
+            document: gql(orderMessagesReadSubscription),
+            variables: {'orderId': widget.orderId},
+          ))
+          .listen((_) {
+        if (!mounted) return;
+        setState(() {
+          for (final m in _messages) {
+            if (m['senderType'] == 'rider') m['isRead'] = true;
+          }
+        });
       });
     } catch (_) {}
+  }
+
+  void _onChanged(String _) {
+    final now = DateTime.now();
+    if (now.difference(_lastTypingSent).inMilliseconds < 2000) return;
+    _lastTypingSent = now;
+    GraphQLClientManager.get().then((client) {
+      client.mutate(MutationOptions(
+        document: gql(setOrderTypingMutation),
+        variables: {'orderId': widget.orderId},
+      ));
+    });
   }
 
   void _scrollToEnd() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scroll.hasClients) {
         _scroll.animateTo(_scroll.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut);
+            duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
       }
     });
   }
 
-  Future<void> _send() async {
+  Future<void> _send({String? imageUrl}) async {
     final text = _ctrl.text.trim();
-    if (text.isEmpty || _sending) return;
+    if ((text.isEmpty && imageUrl == null) || _sending) return;
     setState(() => _sending = true);
-    _ctrl.clear();
+    if (imageUrl == null) _ctrl.clear();
     try {
       final client = await GraphQLClientManager.get();
       final res = await client.mutate(MutationOptions(
         document: gql(sendOrderMessageMutation),
-        variables: {'orderId': widget.orderId, 'message': text},
+        variables: {
+          'orderId': widget.orderId,
+          'message': imageUrl != null ? '' : text,
+          if (imageUrl != null) 'imageUrl': imageUrl,
+        },
       ));
       final m = res.data?['sendOrderMessage'] as Map<String, dynamic>?;
       if (m != null && mounted && !_messages.any((x) => x['id'] == m['id'])) {
@@ -106,7 +172,27 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
         _scrollToEnd();
       }
     } catch (_) {
-      if (mounted) _ctrl.text = text;
+      if (mounted && imageUrl == null) _ctrl.text = text;
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  Future<void> _attachImage() async {
+    try {
+      final file =
+          await RiderUploadService.capture(source: ImageSource.gallery);
+      if (file == null) return;
+      if (mounted) setState(() => _sending = true);
+      final url = await RiderUploadService.upload(file);
+      await _send(imageUrl: url);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(tr('loadError')),
+          backgroundColor: AuroraColors.danger,
+        ));
+      }
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -118,8 +204,16 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
       backgroundColor: AuroraColors.obsidian,
       appBar: AppBar(
         backgroundColor: AuroraColors.coal,
-        title: Text(widget.driverName ?? tr('chatWithDriver'),
-            style: AuroraText.titleSmall),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.driverName ?? tr('chatWithDriver'),
+                style: AuroraText.titleSmall),
+            if (_otherTyping)
+              Text(tr('typingNow'),
+                  style: AuroraText.caption.copyWith(color: AuroraColors.ember)),
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -148,12 +242,16 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
 
   Widget _bubble(Map<String, dynamic> m) {
     final mine = m['senderType'] == 'rider';
+    final imageUrl = m['imageUrl'] as String?;
+    final isRead = m['isRead'] == true;
     return Align(
       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(
-            horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
+        padding: imageUrl != null
+            ? const EdgeInsets.all(4)
+            : const EdgeInsets.symmetric(
+                horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
         constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width * 0.72),
         decoration: BoxDecoration(
@@ -165,11 +263,40 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
             bottomRight: Radius.circular(mine ? 2 : AuroraRadius.md),
           ),
         ),
-        child: Text(
-          m['message'] as String? ?? '',
-          style: AuroraText.bodyMedium.copyWith(
-            color: mine ? AuroraColors.obsidian : AuroraColors.pearl,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (imageUrl != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AuroraRadius.sm),
+                child: Image.network(imageUrl,
+                    width: 200, fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox(
+                        width: 200,
+                        height: 120,
+                        child: Icon(Icons.broken_image, color: Colors.white54))),
+              ),
+            if ((m['message'] as String? ?? '').isNotEmpty)
+              Padding(
+                padding: imageUrl != null
+                    ? const EdgeInsets.fromLTRB(6, 6, 6, 2)
+                    : EdgeInsets.zero,
+                child: Text(m['message'] as String,
+                    style: AuroraText.bodyMedium.copyWith(
+                        color:
+                            mine ? AuroraColors.obsidian : AuroraColors.pearl)),
+              ),
+            if (mine)
+              Padding(
+                padding: const EdgeInsets.only(top: 2, right: 2),
+                child: Icon(isRead ? Icons.done_all : Icons.done,
+                    size: 14,
+                    color: isRead
+                        ? AuroraColors.obsidian
+                        : AuroraColors.obsidian.withValues(alpha: 0.5)),
+              ),
+          ],
         ),
       ),
     );
@@ -183,6 +310,10 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
         color: AuroraColors.coal,
         child: Row(
           children: [
+            IconButton(
+              onPressed: _sending ? null : _attachImage,
+              icon: Icon(Icons.attach_file, color: AuroraColors.ember),
+            ),
             Expanded(
               child: TextField(
                 controller: _ctrl,
@@ -191,6 +322,7 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
                 minLines: 1,
                 maxLines: 4,
                 textInputAction: TextInputAction.send,
+                onChanged: _onChanged,
                 onSubmitted: (_) => _send(),
                 decoration: InputDecoration(
                   hintText: tr('typeMessage'),

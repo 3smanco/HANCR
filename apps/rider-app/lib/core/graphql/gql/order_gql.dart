@@ -31,15 +31,15 @@ const String createOrderMutation = r'''
 const String orderMessagesQuery = r'''
   query OrderMessages($orderId: Int!) {
     orderMessages(orderId: $orderId) {
-      id orderId message senderType senderId isRead sentAt
+      id orderId message imageUrl senderType senderId isRead sentAt
     }
   }
 ''';
 
 const String sendOrderMessageMutation = r'''
-  mutation SendOrderMessage($orderId: Int!, $message: String!) {
-    sendOrderMessage(orderId: $orderId, message: $message) {
-      id orderId message senderType senderId isRead sentAt
+  mutation SendOrderMessage($orderId: Int!, $message: String!, $imageUrl: String) {
+    sendOrderMessage(orderId: $orderId, message: $message, imageUrl: $imageUrl) {
+      id orderId message imageUrl senderType senderId isRead sentAt
     }
   }
 ''';
@@ -47,8 +47,32 @@ const String sendOrderMessageMutation = r'''
 const String orderMessageAddedSubscription = r'''
   subscription OrderMessageAdded($orderId: Int!) {
     orderMessageAdded(orderId: $orderId) {
-      id orderId message senderType senderId isRead sentAt
+      id orderId message imageUrl senderType senderId isRead sentAt
     }
+  }
+''';
+
+const String setOrderTypingMutation = r'''
+  mutation SetOrderTyping($orderId: Int!) {
+    setOrderTyping(orderId: $orderId)
+  }
+''';
+
+const String markOrderMessagesReadMutation = r'''
+  mutation MarkOrderMessagesRead($orderId: Int!) {
+    markOrderMessagesRead(orderId: $orderId)
+  }
+''';
+
+const String orderTypingSubscription = r'''
+  subscription OrderTyping($orderId: Int!) {
+    orderTyping(orderId: $orderId) { orderId actorType }
+  }
+''';
+
+const String orderMessagesReadSubscription = r'''
+  subscription OrderMessagesRead($orderId: Int!) {
+    orderMessagesRead(orderId: $orderId) { orderId actorType }
   }
 ''';
 

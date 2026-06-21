@@ -47,12 +47,14 @@ export class ChatService {
     riderId: number,
     orderId: number,
     text: string,
+    imageUrl?: string,
   ): Promise<OrderMessageType> {
     await this.assertOwnership(riderId, orderId);
     const saved = await this.msgRepo.save(
       this.msgRepo.create({
         orderId,
         message: text.trim(),
+        imageUrl: imageUrl?.trim() || undefined,
         senderType: 'rider',
         senderId: riderId,
         isRead: false,
@@ -61,11 +63,21 @@ export class ChatService {
     return this.toType(saved);
   }
 
+  /** يعلّم رسائل السائق كمقروءة (عند فتح/قراءة الراكب للمحادثة). */
+  async markRead(riderId: number, orderId: number): Promise<void> {
+    await this.assertOwnership(riderId, orderId);
+    await this.msgRepo.update(
+      { orderId, senderType: 'driver', isRead: false },
+      { isRead: true },
+    );
+  }
+
   private toType(m: OrderMessageEntity): OrderMessageType {
     return {
       id: m.id,
       orderId: m.orderId,
       message: m.message,
+      imageUrl: m.imageUrl,
       senderType: m.senderType,
       senderId: m.senderId,
       isRead: m.isRead,
