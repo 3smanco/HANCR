@@ -21,4 +21,14 @@ export 'entrance.dart';
 export 'lottie_view.dart';
 export 'rive_view.dart';
 export 'success_check.dart';
+// ─── v2 (التجديد البصري الشامل) ───
+export 'count_up.dart';
+export 'glass.dart';
+export 'aurora_loader.dart';
+export 'stagger.dart';
+export 'shake.dart';
+export 'parallax.dart';
+export 'confetti_burst.dart';
+export 'animated_car_marker.dart';
+export 'animated_polyline.dart';
 export 'package:flutter_animate/flutter_animate.dart';

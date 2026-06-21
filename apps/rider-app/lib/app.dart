@@ -16,6 +16,7 @@ import 'core/router/app_router.dart';
 import 'core/services/push_service.dart';
 import 'core/theme/aurora_theme.dart';
 import 'core/theme/theme_controller.dart';
+import 'core/motion/motion_tokens.dart';
 import 'screens/auth/aurora_otp_screen.dart';
 import 'screens/auth/aurora_phone_screen.dart';
 import 'screens/auth/aurora_email_screen.dart';
@@ -229,19 +230,25 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
                 return MaterialApp.router(
                   key: ValueKey('theme-${ThemeController.instance.version}'),
                   title: 'HANCR',
-                  theme: AuroraTheme.dark,
+                  // السكينان: فاتح «Dawn» + داكن «Aurora». الافتراضي داكن
+                  // (ThemeController) حتى يكتمل سحب الشاشات، ثم يُقلب لـ system.
+                  theme: AuroraTheme.light,
                   darkTheme: AuroraTheme.dark,
-                  // الهوية داكنة: كلا الثيمين داكن، فالعرض يبقى داكناً مهما كان
-                  // الاختيار (الوضع الفاتح "قريباً")؛ التفضيل يُحفظ ويُطبَّق هنا.
                   themeMode: ThemeController.instance.themeMode,
                   // الوضع البسيط: تكبير خطوط التطبيق كاملاً (كبار السن).
-                  builder: (context, child) => MediaQuery(
-                    data: MediaQuery.of(context).copyWith(
-                      textScaler: TextScaler.linear(
-                          ThemeController.instance.textScale),
-                    ),
-                    child: child ?? const SizedBox.shrink(),
-                  ),
+                  builder: (context, child) {
+                    // بوابة تقليل الحركة: إعداد النظام أو الوضع المبسّط.
+                    Motion.reduceMotion =
+                        MediaQuery.of(context).disableAnimations ||
+                            ThemeController.instance.simpleMode;
+                    return MediaQuery(
+                      data: MediaQuery.of(context).copyWith(
+                        textScaler: TextScaler.linear(
+                            ThemeController.instance.textScale),
+                      ),
+                      child: child ?? const SizedBox.shrink(),
+                    );
+                  },
                   routerConfig: _router,
                   debugShowCheckedModeBanner: false,
                   locale: locale,

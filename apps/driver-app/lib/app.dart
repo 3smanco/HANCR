@@ -17,6 +17,7 @@ import 'core/router/app_router.dart';
 import 'core/services/push_service.dart';
 import 'core/theme/aurora_theme.dart';
 import 'core/theme/theme_controller.dart';
+import 'core/motion/motion_tokens.dart';
 import 'screens/auth/aurora_otp_screen.dart';
 import 'screens/auth/aurora_phone_screen.dart';
 import 'screens/auth/aurora_email_screen.dart';
@@ -161,6 +162,12 @@ class _HancrCaptainAppState extends State<HancrCaptainApp> {
                   theme: AuroraTheme.dark,
                   darkTheme: AuroraTheme.dark,
                   themeMode: ThemeMode.dark,
+                  // بوابة تقليل الحركة (إعداد النظام) — كوكبت السائق يبقى داكناً.
+                  builder: (context, child) {
+                    Motion.reduceMotion =
+                        MediaQuery.of(context).disableAnimations;
+                    return child ?? const SizedBox.shrink();
+                  },
                   routerConfig: _router,
                   debugShowCheckedModeBanner: false,
                   locale: locale,

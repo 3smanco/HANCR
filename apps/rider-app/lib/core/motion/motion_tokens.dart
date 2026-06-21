@@ -31,4 +31,17 @@ class Motion {
 
   // ═══ Scales ═══
   static const double pressScale = 0.97; // ضغط الأزرار (design token)
+
+  // ╔══════════════════════════════════════════════════════════════╗
+  // ║  Reduce-motion gate (الوصول / كبار السن / إعداد النظام)        ║
+  // ║  يُضبط في app.dart من MediaQuery.disableAnimations + الوضع     ║
+  // ║  المبسّط. الحركات الثقيلة (parallax/confetti/pulse) تحترمه.    ║
+  // ╚══════════════════════════════════════════════════════════════╝
+  static bool reduceMotion = false;
+
+  /// يُعيد [d] أو Duration.zero عند تفعيل تقليل الحركة (للانتقالات الفورية).
+  static Duration dur(Duration d) => reduceMotion ? Duration.zero : d;
+
+  /// هل يُسمح بالحركات الزخرفية (نبض/كونفيتي/parallax)؟
+  static bool get decorative => !reduceMotion;
 }
