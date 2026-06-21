@@ -108,6 +108,12 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   // محطات وسيطة (Multi-stop) — قائمة نقاط بين الانطلاق والوجهة
   final List<({GeoPoint point, String label})> _stops = [];
 
+  // ─── بحث الأماكن بالاسم (Google Places عبر الخادم) ───
+  final TextEditingController _searchCtrl = TextEditingController();
+  Timer? _searchDebounce;
+  List<Map<String, dynamic>> _predictions = [];
+  bool _searching = false;
+
   bool get _isDelivery => _selectedService?.serviceType == 'PackageDelivery';
   bool get _isHourly => _selectedService?.serviceType == 'HourlyChauffeur';
 
@@ -299,7 +305,86 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     }
   }
 
+  // ─── بحث الأماكن ───
+  void _onSearchChanged(String q) {
+    _searchDebounce?.cancel();
+    if (q.trim().length < 2) {
+      setState(() => _predictions = []);
+      return;
+    }
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () => _runSearch(q));
+  }
+
+  Future<void> _runSearch(String q) async {
+    setState(() => _searching = true);
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(searchPlacesQuery),
+        fetchPolicy: FetchPolicy.networkOnly,
+        variables: {
+          'query': q.trim(),
+          // انحياز للموقع الحالي لنتائج أقرب
+          'lat': _destination.lat,
+          'lng': _destination.lng,
+        },
+      ));
+      final list = (res.data?['searchPlaces'] as List<dynamic>? ?? [])
+          .cast<Map<String, dynamic>>();
+      if (!mounted) return;
+      setState(() {
+        _predictions = list;
+        _searching = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _searching = false);
+    }
+  }
+
+  Future<void> _pickPrediction(String placeId, String title) async {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _predictions = [];
+      _searchCtrl.text = title;
+      _searching = true;
+    });
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(placeDetailsQuery),
+        fetchPolicy: FetchPolicy.networkOnly,
+        variables: {'placeId': placeId},
+      ));
+      final d = res.data?['placeDetails'] as Map<String, dynamic>?;
+      if (!mounted) return;
+      setState(() => _searching = false);
+      if (d != null) {
+        final lat = (d['lat'] as num).toDouble();
+        final lng = (d['lng'] as num).toDouble();
+        setState(() {
+          _destination = GeoPoint(lat: lat, lng: lng);
+          _destinationLabel = (d['address'] as String?) ?? title;
+        });
+        await _mapCtrl?.animateCamera(
+          CameraUpdate.newLatLngZoom(LatLng(lat, lng), 16),
+        );
+      }
+    } catch (_) {
+      if (mounted) setState(() => _searching = false);
+    }
+  }
+
+  void _clearSearch() {
+    _searchDebounce?.cancel();
+    setState(() {
+      _searchCtrl.clear();
+      _predictions = [];
+    });
+    FocusScope.of(context).unfocus();
+  }
+
   void _confirmDestination() {
+    FocusScope.of(context).unfocus();
     setState(() => _step = _BookingStep.pickService);
     if (_services.isEmpty) {
       _loadServices();
@@ -616,6 +701,8 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+    _searchCtrl.dispose();
     _mapCtrl?.dispose();
     super.dispose();
   }
@@ -752,6 +839,15 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // حقل البحث عن مكان بالاسم
+          _searchField(),
+          if (_predictions.isNotEmpty) ...[
+            const SizedBox(height: AuroraSpacing.sm),
+            ..._predictions.map(_predictionRow),
+            const SizedBox(height: AuroraSpacing.sm),
+            Divider(color: AuroraColors.border, height: AuroraSpacing.lg),
+          ] else
+            const SizedBox(height: AuroraSpacing.md),
           _routeRow(Icons.my_location, AuroraColors.success, _originLabel),
           // محطات وسيطة
           for (var i = 0; i < _stops.length; i++) ...[
@@ -805,6 +901,89 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
             onPressed: _confirmDestination,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _searchField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AuroraColors.ash,
+        borderRadius: BorderRadius.circular(AuroraRadius.md),
+        border: Border.all(color: AuroraColors.border),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: AuroraSpacing.md),
+          _searching
+              ? const Padding(
+                  padding: EdgeInsets.all(2),
+                  child: AuroraLoader(size: 18, stroke: 2),
+                )
+              : Icon(Icons.search, color: AuroraColors.textSecondary, size: 20),
+          Expanded(
+            child: TextField(
+              controller: _searchCtrl,
+              onChanged: _onSearchChanged,
+              textInputAction: TextInputAction.search,
+              style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
+              decoration: InputDecoration(
+                hintText: tr('searchPlaceHint'),
+                hintStyle: AuroraText.bodyMedium
+                    .copyWith(color: AuroraColors.textHint),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AuroraSpacing.sm, vertical: 14),
+              ),
+            ),
+          ),
+          if (_searchCtrl.text.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.close,
+                  color: AuroraColors.textSecondary, size: 18),
+              onPressed: _clearSearch,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _predictionRow(Map<String, dynamic> p) {
+    final title = p['title'] as String? ?? '';
+    final subtitle = p['subtitle'] as String?;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _pickPrediction(p['placeId'] as String, title),
+        borderRadius: BorderRadius.circular(AuroraRadius.sm),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+              horizontal: AuroraSpacing.sm, vertical: AuroraSpacing.md),
+          child: Row(
+            children: [
+              Icon(Icons.place_outlined,
+                  color: AuroraColors.ember, size: 20),
+              const SizedBox(width: AuroraSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AuroraText.bodyMedium
+                            .copyWith(color: AuroraColors.pearl)),
+                    if (subtitle != null && subtitle.isNotEmpty)
+                      Text(subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AuroraText.bodySmall),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1358,17 +1537,18 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   }
 
   Widget _sheetContainer({required Widget child}) {
-    // ورقة زجاجية: blur فوق الخريطة + سطح شبه شفاف (Glassmorphism).
+    // ورقة زجاجية قابلة للتمرير بحدّ أقصى للارتفاع — حتى يبقى زر الطلب
+    // قابلاً للوصول دائماً مهما طال المحتوى (خدمات + تفضيلات + دفع + كوبون).
+    final maxH = MediaQuery.of(context).size.height * 0.80;
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(AuroraSpacing.lg,
-              AuroraSpacing.lg, AuroraSpacing.lg, AuroraSpacing.xl),
+          constraints: BoxConstraints(maxHeight: maxH),
           decoration: BoxDecoration(
-            color: AuroraColors.coal.withValues(alpha: 0.82),
+            color: AuroraColors.coal.withValues(alpha: 0.92),
             borderRadius:
                 const BorderRadius.vertical(top: Radius.circular(24)),
             border: Border(
@@ -1380,7 +1560,31 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                   offset: Offset(0, -8)),
             ],
           ),
-          child: SafeArea(top: false, child: child),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // مقبض السحب
+                Container(
+                  margin: const EdgeInsets.only(top: AuroraSpacing.sm),
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AuroraColors.borderStrong,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(AuroraSpacing.lg,
+                        AuroraSpacing.lg, AuroraSpacing.lg, AuroraSpacing.xl),
+                    child: child,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

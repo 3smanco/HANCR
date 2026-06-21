@@ -275,12 +275,24 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
+- **🟦 شاشة الحجز (الراكب): إصلاح عدم القدرة على الحجز + بحث الأماكن بالاسم — مكتمل (2026-06-21).** التحقق: rider-api `tsc=0` · rider-app `flutter analyze=0 errors`.
+  - **(حرِج) الورقة لم تكن قابلة للتمرير** فزر الطلب يختفي تحت الشاشة → `_sheetContainer` صار `ConstrainedBox(maxHeight 80%)` + `SingleChildScrollView` + مقبض سحب. الآن كل المحتوى (الخدمات/التفضيلات/الدفع/الكوبون/زر الطلب) قابل للوصول.
+  - **بحث الأماكن بالاسم:** وحدة backend جديدة `apps/rider-api/src/app/places/` (PlacesService يوكّل Google Places Autocomplete+Details بمفتاح `GOOGLE_MAPS_API_KEY` الخادمي) + queries `searchPlaces`/`placeDetails`. شاشة الحجز: حقل بحث + اقتراحات + اختيار يحرّك الكاميرا ويضبط الوجهة. (gql + i18n `searchPlaceHint`.)
+  - **⚠️ تشغيلي للمالك:** يجب **تفعيل "Places API"** على مفتاح GOOGLE_MAPS_API_KEY في Google Cloud (Directions مفعّل أصلاً)؛ وإلا تعود نتائج البحث فارغة.
+  - **⚠️ بيانات:** خدمتان تظهران «؟؟؟؟» في اختيار الخدمة — اسم الخدمة في DB غالباً مخزَّن خطأً (charset/placeholder)؛ يُصلَح من لوحة الأدمن (الخدمات ← تعديل الاسم).
+  - **⏭️ نشر: rider-api restart (لا migration) + APK الراكب.**
+
+- **🟥➡️🟩 إصلاح جذري: تعليق دخول السائق على شاشة اللوجو — محلول ومنشور (2026-06-21، PR #177).**
+  - **السبب الجذري:** redirect في `driver-app/lib/app.dart` كان `if (auth is AuthLoading || auth is AuthInitial) → /splash`، فعند إرسال OTP (AuthLoading) يُقذف المستخدم من /auth/phone إلى /splash ويعلق (splash لا تعالج AuthOtpSent). (الراكب كان سليماً.)
+  - **الإصلاح:** فصل AuthInitial (→splash) عن AuthLoading؛ أثناء AuthLoading إن كان `loc.startsWith('/auth')||'/splash'` يبقى (return null) فينتقل listener إلى /auth/otp. يصلح أيضاً تعليق تحقق OTP. APK السائق (45,031,664) أُعيد بناؤه ونُشر HTTP 200.
+  - **درس:** أي AuthLoading-redirect لتدفّق مصادقة يجب أن يستثني مسارات /auth و/splash؛ هذه كانت شكوى متكرّرة وجذرها هنا.
+
 - **🟦 التجديد البصري — الصقل العام (الختام) — مكتمل برمجياً ومُتحقَّق (2026-06-21).** التحقق: rider+driver `flutter analyze=0 errors`.
   - **reduce-motion:** بوابة في `entrance.dart` (fadeSlideIn/popIn/fadeInRight تُرجع الطفل فوراً عند التفعيل) + `page_transitions` تستخدم `Motion.dur` (انتقالات فورية). يغطّي كل الشاشات في التطبيقين (الملفات مشتركة).
   - **توحيد الانتقالات:** السائق app.dart صار يستخدم `AppTransitions` (sharedAxis/fade/slideUp) مثل الراكب.
   - **قلب الافتراضي:** الراكب الجديد افتراضه «تلقائي/system» (السكينان مفعّلان، يتبع سطوع الجهاز)؛ المستخدم الحالي يبقى على اختياره المحفوظ.
   - **⚠️ لم يُنفَّذ (يحتاج جهازاً):** فحص RTL + الوضع المبسّط حيّاً، وQA نهائي على arm64 — لا أستطيع تشغيل جهاز في هذه البيئة؛ الكود مُهيّأ لكن يلزم تأكيدك البصري (خاصة وضوح السكين الفاتح).
-  - **⏭️ بناء APK الراكب + السائق.**
+  - **✅ APK الراكب (47,142,899) + السائق (45,031,664) منشوران HTTP 200 (2026-06-21).** يبقى فحص RTL/الوضع المبسّط/QA حيّ على جهاز arm64 (يحتاجك).
 
 - **🟦 التجديد البصري — تفعيل السكين الفاتح/VIP فعلياً (الراكب) + سحب الدوّارات — مكتمل ومُتحقَّق (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
   - **آلية السكين:** حوّلت كل حقول `AuroraColors` إلى mutable + أضفت `AuroraColors.applySkin('dark'|'light'|'vip')` (لوحات كاملة). `ThemeController` يطبّق السكين عبر `_repaint()` (applySkin ثم SDUI فوقه للسكين الداكن فقط)؛ `appearanceMode` صار يدعم `vip`؛ `_skinFor()` يحلّ `system` حسب سطوع الجهاز. كل MaterialApp يُعاد بناؤه (version bump) فتلتقط **كل الشاشات** (التي تقرأ AuroraColors.*) السكين فوراً **دون ترحيل context.c لكل شاشة**.
