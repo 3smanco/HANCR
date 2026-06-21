@@ -53,7 +53,9 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AuroraColors.obsidian,
-      body: AuroraBackground(
+      body: Stack(
+        children: [
+          AuroraBackground(
         child: BlocBuilder<OrderBloc, OrderState>(
           builder: (context, state) {
             final order = state is OrderAwaitingReview ? state.order : null;
@@ -64,8 +66,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(
-                          color: AuroraColors.ember),
+                      const AuroraLoader(size: 40),
                       const SizedBox(height: AuroraSpacing.lg),
                       TextButton(
                         onPressed: () => context.go('/home'),
@@ -202,6 +203,10 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
             );
           },
         ),
+      ),
+          // احتفال إتمام الرحلة (يُشغَّل مرة عند الدخول)
+          const Positioned.fill(child: ConfettiBurst(play: true)),
+        ],
       ),
     );
   }

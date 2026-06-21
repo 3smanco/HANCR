@@ -1,10 +1,10 @@
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../core/motion/motion.dart';
 import '../../blocs/order/order_bloc.dart';
 import '../../blocs/order/order_event.dart';
 import '../../blocs/order/order_state.dart';
@@ -32,7 +32,8 @@ class AuroraTrackingScreen extends StatefulWidget {
   State<AuroraTrackingScreen> createState() => _AuroraTrackingScreenState();
 }
 
-class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
+class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
+    with TickerProviderStateMixin {
   // نمط داكن غنيّ بالتفاصيل أثناء التتبّع: شوارع وأسماؤها + طرق سريعة بلون مميّز + مياه + معالم + مناطق.
   static const String _darkMapStyle = '''
 [
@@ -60,39 +61,67 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
   DriverLocation? _lastDriverLoc;
   OrderModel? _lastOrder;
 
+  // ─── انسياب علامة السيارة (موضع + اتجاه) ───
+  final MarkerInterpolator _interp = MarkerInterpolator();
+  LatLng? _carPos; // الموضع المُنعّم (يتحرّك بين تحديثات GPS)
+  double _carBearing = 0;
+
+  // ─── رسم المسار تدريجياً (مرة واحدة) ───
+  final PolylineReveal _reveal = PolylineReveal();
+  List<LatLng>? _routeReveal;
+
   @override
   void initState() {
     super.initState();
     _buildCarIcon();
   }
 
-  /// يولّد علامة سيارة (سهم اتجاه) برمجياً — بلا أصول فنية.
+  @override
+  void dispose() {
+    _interp.dispose();
+    _reveal.dispose();
+    super.dispose();
+  }
+
+  /// يولّد علامة سيارة top-down مرسومة بالكود (CarMarkerFactory موحّد).
   Future<void> _buildCarIcon() async {
-    const s = 96.0;
-    final rec = ui.PictureRecorder();
-    final canvas = Canvas(rec);
-    final c = Offset(s / 2, s / 2);
-    canvas.drawCircle(c, s * 0.42, Paint()..color = const Color(0xFFFF7A1A));
-    canvas.drawCircle(
-        c,
-        s * 0.42,
-        Paint()
-          ..color = const Color(0x66000000)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3);
-    final arrow = Path()
-      ..moveTo(c.dx, c.dy - 24)
-      ..lineTo(c.dx - 15, c.dy + 18)
-      ..lineTo(c.dx, c.dy + 7)
-      ..lineTo(c.dx + 15, c.dy + 18)
-      ..close();
-    canvas.drawPath(arrow, Paint()..color = Colors.white);
-    final img = await rec.endRecording().toImage(s.toInt(), s.toInt());
-    final bytes = await img.toByteData(format: ui.ImageByteFormat.png);
-    if (bytes != null && mounted) {
-      setState(() =>
-          _carIcon = BitmapDescriptor.bytes(bytes.buffer.asUint8List()));
-    }
+    final dpr = WidgetsBinding.instance.platformDispatcher.views.first
+        .devicePixelRatio;
+    final icon = await CarMarkerFactory.car(
+      color: AuroraColors.ember,
+      px: 110,
+      dpr: dpr,
+    );
+    if (mounted) setState(() => _carIcon = icon);
+  }
+
+  /// يحرّك علامة السيارة بنعومة نحو آخر موقع GPS.
+  void _moveCarTo(DriverLocation loc) {
+    _interp.to(
+      LatLng(loc.lat, loc.lng),
+      vsync: this,
+      duration: Motion.driverMove,
+      onStep: (pos, bearing) {
+        if (!mounted) return;
+        setState(() {
+          _carPos = pos;
+          _carBearing = bearing;
+        });
+      },
+    );
+  }
+
+  /// يرسم المسار تدريجياً مرة واحدة عند توفّره.
+  void _revealRoute(List<LatLng> full) {
+    if (_routeReveal != null) return;
+    _reveal.reveal(
+      full,
+      vsync: this,
+      duration: Motion.slow,
+      onUpdate: (partial) {
+        if (mounted) setState(() => _routeReveal = partial);
+      },
+    );
   }
 
   /// يفتح ورقة مشاركة بنص يصف الرحلة الحيّة (سائق، سيارة، ETA، وجهة).
@@ -189,6 +218,15 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
               }
             },
           ),
+          // انسياب علامة السيارة عند كل تحديث موقع
+          BlocListener<TrackingBloc, TrackingState>(
+            listenWhen: (p, c) => c is TrackingActive && c.lastLocation != null,
+            listener: (ctx, state) {
+              if (state is TrackingActive && state.lastLocation != null) {
+                _moveCarTo(state.lastLocation!);
+              }
+            },
+          ),
         ],
         child: _buildContent(),
       ),
@@ -207,9 +245,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
         if (order == null) {
           return Scaffold(
             backgroundColor: AuroraColors.obsidian,
-            body: Center(
-              child: CircularProgressIndicator(color: AuroraColors.ember),
-            ),
+            body: const Center(child: AuroraLoader(size: 40)),
           );
         }
 
@@ -286,10 +322,14 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
       ));
     }
     if (driverLoc != null) {
+      // الموضع المُنعّم (من المُنزلِق) مع احتياط لموقع GPS الخام
+      final pos = _carPos ?? LatLng(driverLoc.lat, driverLoc.lng);
+      final bearing =
+          _carPos != null ? _carBearing : driverLoc.heading.toDouble();
       markers.add(Marker(
         markerId: const MarkerId('driver'),
-        position: LatLng(driverLoc.lat, driverLoc.lng),
-        rotation: driverLoc.heading.toDouble(),
+        position: pos,
+        rotation: bearing,
         anchor: const Offset(0.5, 0.5),
         flat: true,
         icon: _carIcon ??
@@ -307,8 +347,13 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
       style: _darkMapStyle,
       onMapCreated: (c) {
         _mapCtrl = c;
-        WidgetsBinding.instance
-            .addPostFrameCallback((_) => _fitBounds());
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _fitBounds();
+          if (order.points.length > 1) {
+            _revealRoute(
+                order.points.map((p) => LatLng(p.lat, p.lng)).toList());
+          }
+        });
       },
       initialCameraPosition: CameraPosition(
         target: LatLng(centerLat, centerLng),
@@ -322,9 +367,8 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen> {
                 color: AuroraColors.ember,
                 width: 5,
                 patterns: const [],
-                points: order.points
-                    .map((p) => LatLng(p.lat, p.lng))
-                    .toList(),
+                points: _routeReveal ??
+                    order.points.map((p) => LatLng(p.lat, p.lng)).toList(),
               ),
             }
           : <Polyline>{},

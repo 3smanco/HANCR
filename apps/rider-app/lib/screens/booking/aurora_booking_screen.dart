@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -18,6 +19,8 @@ import '../../core/models/order_model.dart';
 import '../../core/models/service_model.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/widgets/car_art.dart';
+import '../../core/motion/motion.dart';
 import 'aurora_bid_waiting_screen.dart';
 
 /// AuroraBookingScreen — قلب تجربة الراكب: تحديد الوجهة + اختيار الخدمة + الطلب.
@@ -849,10 +852,9 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           const SizedBox(height: AuroraSpacing.md),
 
           if (_loadingServices)
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(AuroraSpacing.xl),
-              child: Center(
-                  child: CircularProgressIndicator(color: AuroraColors.ember)),
+              child: Center(child: AuroraLoader(size: 36)),
             )
           else if (_servicesError != null)
             _errorBox(_servicesError!)
@@ -1134,11 +1136,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                         ),
                       ),
                       child: _couponLoading
-                          ? SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: AuroraColors.ember))
+                          ? const AuroraLoader(size: 18, stroke: 2)
                           : Text(tr('apply')),
                     ),
                   ),
@@ -1213,6 +1211,18 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     );
   }
 
+  CarType _carTypeFor(ServiceModel s) {
+    if (s.isVip) return CarType.luxury;
+    switch (s.serviceType) {
+      case 'PackageDelivery':
+        return CarType.van;
+      case 'HourlyChauffeur':
+        return CarType.luxury;
+      default:
+        return CarType.sedan;
+    }
+  }
+
   Widget _serviceRow(ServiceModel s) {
     final selected = _selectedService?.id == s.id;
     return GestureDetector(
@@ -1234,16 +1244,18 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         child: Row(
           children: [
             Container(
-              width: 44,
+              width: 60,
               height: 44,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: AuroraColors.coal,
                 borderRadius: BorderRadius.circular(AuroraRadius.sm),
+                boxShadow: selected ? AuroraShadows.iconGlow : null,
               ),
-              child: Icon(
-                s.isVip ? Icons.diamond_outlined : Icons.local_taxi,
-                color: AuroraColors.ember,
-                size: 22,
+              child: CarArt(
+                type: _carTypeFor(s),
+                color: selected ? AuroraColors.ember : AuroraColors.emberLight,
+                size: const Size(50, 30),
               ),
             ),
             const SizedBox(width: AuroraSpacing.md),
@@ -1253,19 +1265,22 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                 children: [
                   Text(s.name, style: AuroraText.titleSmall),
                   const SizedBox(height: 2),
-                  Text(
-                    (selected && _routeFare != null)
-                        ? '${_routeFare!.toStringAsFixed(2)} $_routeCurrency'
-                        : 'تبدأ من ${s.minimumFee.toStringAsFixed(0)} ر.س',
-                    style: AuroraText.bodySmall.copyWith(
-                      color: (selected && _routeFare != null)
-                          ? AuroraColors.ember
-                          : AuroraColors.textSecondary,
-                      fontWeight: (selected && _routeFare != null)
-                          ? FontWeight.w700
-                          : FontWeight.w400,
-                    ),
-                  ),
+                  (selected && _routeFare != null)
+                      ? CountUpText(
+                          value: _routeFare!,
+                          fractionDigits: 2,
+                          suffix: ' $_routeCurrency',
+                          style: AuroraText.bodySmall.copyWith(
+                            color: AuroraColors.ember,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        )
+                      : Text(
+                          'تبدأ من ${s.minimumFee.toStringAsFixed(0)} ر.س',
+                          style: AuroraText.bodySmall.copyWith(
+                            color: AuroraColors.textSecondary,
+                          ),
+                        ),
                 ],
               ),
             ),
@@ -1343,19 +1358,31 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   }
 
   Widget _sheetContainer({required Widget child}) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(
-          AuroraSpacing.lg, AuroraSpacing.lg, AuroraSpacing.lg, AuroraSpacing.xl),
-      decoration: BoxDecoration(
-        color: AuroraColors.coal,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(top: BorderSide(color: AuroraColors.border)),
-        boxShadow: [
-          BoxShadow(color: Color(0x66000000), blurRadius: 24, offset: Offset(0, -8)),
-        ],
+    // ورقة زجاجية: blur فوق الخريطة + سطح شبه شفاف (Glassmorphism).
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(AuroraSpacing.lg,
+              AuroraSpacing.lg, AuroraSpacing.lg, AuroraSpacing.xl),
+          decoration: BoxDecoration(
+            color: AuroraColors.coal.withValues(alpha: 0.82),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(24)),
+            border: const Border(
+                top: BorderSide(color: AuroraColors.borderStrong)),
+            boxShadow: const [
+              BoxShadow(
+                  color: Color(0x66000000),
+                  blurRadius: 24,
+                  offset: Offset(0, -8)),
+            ],
+          ),
+          child: SafeArea(top: false, child: child),
+        ),
       ),
-      child: SafeArea(top: false, child: child),
     );
   }
 }
