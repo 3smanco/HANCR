@@ -20,6 +20,10 @@ export class OrderMessageEntity {
   @Column({ type: 'text' })
   message!: string;
 
+  /** رابط صورة مرفقة (اختياري) */
+  @Column({ type: 'varchar', length: 500, nullable: true, name: 'image_url' })
+  imageUrl?: string;
+
   /** من أرسل الرسالة: rider | driver */
   @Column({ length: 10, name: 'sender_type' })
   senderType!: 'rider' | 'driver';

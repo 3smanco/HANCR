@@ -21,22 +21,53 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
   final _scroll = ScrollController();
   final List<Map<String, dynamic>> _messages = [];
   StreamSubscription<QueryResult<Object?>>? _sub;
+  StreamSubscription<QueryResult<Object?>>? _typingSub;
+  StreamSubscription<QueryResult<Object?>>? _readSub;
   bool _loading = true;
   bool _sending = false;
+  bool _otherTyping = false;
+  Timer? _typingClear;
+  DateTime _lastTypingSent = DateTime.fromMillisecondsSinceEpoch(0);
 
   @override
   void initState() {
     super.initState();
     _load();
     _subscribe();
+    _markRead();
   }
 
   @override
   void dispose() {
     _sub?.cancel();
+    _typingSub?.cancel();
+    _readSub?.cancel();
+    _typingClear?.cancel();
     _ctrl.dispose();
     _scroll.dispose();
     super.dispose();
+  }
+
+  Future<void> _markRead() async {
+    try {
+      final client = await GraphQLClientManager.get();
+      await client.mutate(MutationOptions(
+        document: gql(markOrderMessagesReadMutation),
+        variables: {'orderId': widget.orderId},
+      ));
+    } catch (_) {}
+  }
+
+  void _onChanged(String _) {
+    final now = DateTime.now();
+    if (now.difference(_lastTypingSent).inMilliseconds < 2000) return;
+    _lastTypingSent = now;
+    GraphQLClientManager.get().then((client) {
+      client.mutate(MutationOptions(
+        document: gql(setOrderTypingMutation),
+        variables: {'orderId': widget.orderId},
+      ));
+    });
   }
 
   Future<void> _load() async {
@@ -74,6 +105,34 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
         if (_messages.any((x) => x['id'] == m['id'])) return;
         setState(() => _messages.add(m));
         _scrollToEnd();
+        if (m['senderType'] != 'driver') _markRead();
+      });
+
+      _typingSub = client
+          .subscribe(SubscriptionOptions(
+            document: gql(orderTypingSubscription),
+            variables: {'orderId': widget.orderId},
+          ))
+          .listen((_) {
+        if (!mounted) return;
+        setState(() => _otherTyping = true);
+        _typingClear?.cancel();
+        _typingClear = Timer(const Duration(seconds: 3),
+            () => mounted ? setState(() => _otherTyping = false) : null);
+      });
+
+      _readSub = client
+          .subscribe(SubscriptionOptions(
+            document: gql(orderMessagesReadSubscription),
+            variables: {'orderId': widget.orderId},
+          ))
+          .listen((_) {
+        if (!mounted) return;
+        setState(() {
+          for (final m in _messages) {
+            if (m['senderType'] == 'driver') m['isRead'] = true;
+          }
+        });
       });
     } catch (_) {}
   }
@@ -117,8 +176,16 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
       backgroundColor: AuroraColors.obsidian,
       appBar: AppBar(
         backgroundColor: AuroraColors.coal,
-        title: Text(widget.riderName ?? tr('chatWithRider'),
-            style: AuroraText.titleSmall),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.riderName ?? tr('chatWithRider'),
+                style: AuroraText.titleSmall),
+            if (_otherTyping)
+              Text(tr('typingNow'),
+                  style: AuroraText.caption.copyWith(color: AuroraColors.ember)),
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -147,12 +214,16 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
 
   Widget _bubble(Map<String, dynamic> m) {
     final mine = m['senderType'] == 'driver';
+    final imageUrl = m['imageUrl'] as String?;
+    final isRead = m['isRead'] == true;
     return Align(
       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(
-            horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
+        padding: imageUrl != null
+            ? const EdgeInsets.all(4)
+            : const EdgeInsets.symmetric(
+                horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
         constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width * 0.72),
         decoration: BoxDecoration(
@@ -164,11 +235,40 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
             bottomRight: Radius.circular(mine ? 2 : AuroraRadius.md),
           ),
         ),
-        child: Text(
-          m['message'] as String? ?? '',
-          style: AuroraText.bodyMedium.copyWith(
-            color: mine ? AuroraColors.obsidian : AuroraColors.pearl,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (imageUrl != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AuroraRadius.sm),
+                child: Image.network(imageUrl,
+                    width: 200, fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox(
+                        width: 200,
+                        height: 120,
+                        child: Icon(Icons.broken_image, color: Colors.white54))),
+              ),
+            if ((m['message'] as String? ?? '').isNotEmpty)
+              Padding(
+                padding: imageUrl != null
+                    ? const EdgeInsets.fromLTRB(6, 6, 6, 2)
+                    : EdgeInsets.zero,
+                child: Text(m['message'] as String,
+                    style: AuroraText.bodyMedium.copyWith(
+                        color:
+                            mine ? AuroraColors.obsidian : AuroraColors.pearl)),
+              ),
+            if (mine)
+              Padding(
+                padding: const EdgeInsets.only(top: 2, right: 2),
+                child: Icon(isRead ? Icons.done_all : Icons.done,
+                    size: 14,
+                    color: isRead
+                        ? AuroraColors.obsidian
+                        : AuroraColors.obsidian.withValues(alpha: 0.5)),
+              ),
+          ],
         ),
       ),
     );
@@ -190,6 +290,7 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
                 minLines: 1,
                 maxLines: 4,
                 textInputAction: TextInputAction.send,
+                onChanged: _onChanged,
                 onSubmitted: (_) => _send(),
                 decoration: InputDecoration(
                   hintText: tr('typeMessage'),
