@@ -6,6 +6,7 @@ import '../../core/graphql/gql/loyalty_gql.dart';
 import '../../core/models/loyalty_model.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/hancr_widgets.dart';
+import '../../core/motion/motion.dart';
 
 /// LoyaltyTab — HANCR Miles (نظام الولاء) بالتصميم الجديد
 ///
@@ -123,9 +124,7 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
         ],
       ),
       body: _loading
-          ? const Center(
-              child: CircularProgressIndicator(color: HancrColors.violet),
-            )
+          ? const Center(child: AuroraLoader(size: 40))
           : _error != null
               ? _ErrorState(error: _error!, onRetry: _load)
               : _loyalty == null
@@ -397,8 +396,9 @@ class _TierHero extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    loyalty.totalMiles.toStringAsFixed(0),
+                  CountUpText(
+                    value: loyalty.totalMiles,
+                    fractionDigits: 0,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 44,
@@ -462,12 +462,18 @@ class _TierHero extends StatelessWidget {
                 const SizedBox(height: 6),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(HancrRadius.pill),
-                  child: LinearProgressIndicator(
-                    value: loyalty.progressToNext,
-                    backgroundColor: Colors.white24,
-                    valueColor:
-                        const AlwaysStoppedAnimation(HancrColors.violet),
-                    minHeight: 8,
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween<double>(
+                        begin: 0, end: loyalty.progressToNext.clamp(0.0, 1.0)),
+                    duration: Motion.dur(Motion.slow),
+                    curve: Motion.decelerate,
+                    builder: (_, v, __) => LinearProgressIndicator(
+                      value: v,
+                      backgroundColor: Colors.white24,
+                      valueColor:
+                          const AlwaysStoppedAnimation(HancrColors.violet),
+                      minHeight: 8,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 6),

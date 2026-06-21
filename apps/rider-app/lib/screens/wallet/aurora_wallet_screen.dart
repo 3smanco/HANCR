@@ -10,6 +10,7 @@ import '../../core/graphql/gql/inbox_gql.dart';
 import '../../core/models/wallet_model.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/motion/motion.dart';
 import 'aurora_add_funds_sheet.dart';
 
 /// AuroraWalletScreen — شاشة المحفظة كاملة بنمط Aurora.
@@ -36,9 +37,7 @@ class _WalletView extends StatelessWidget {
         child: BlocBuilder<WalletBloc, WalletState>(
           builder: (context, state) {
             if (state is WalletInitial || state is WalletLoading) {
-              return Center(
-                child: CircularProgressIndicator(color: AuroraColors.ember),
-              );
+              return const Center(child: AuroraLoader(size: 40));
             }
             if (state is WalletError) {
               return Center(
@@ -158,10 +157,10 @@ class _WalletView extends StatelessWidget {
             if (state.transactions.isEmpty)
               _empty()
             else
-              ...state.transactions.map(
-                (t) => Padding(
+              ...state.transactions.indexed.map(
+                (e) => Padding(
                   padding: const EdgeInsets.only(bottom: AuroraSpacing.sm),
-                  child: _txRow(t),
+                  child: _txRow(e.$2).fadeSlideIn(index: e.$1),
                 ),
               ),
 
@@ -174,7 +173,6 @@ class _WalletView extends StatelessWidget {
 
   // ─────────────────────────────────────────────────────────────
   Widget _balanceCard(BuildContext context, WalletModel wallet) {
-    final fmt = NumberFormat('#,##0.00', 'ar');
     return Container(
       padding: const EdgeInsets.all(AuroraSpacing.xxl),
       decoration: BoxDecoration(
@@ -202,8 +200,9 @@ class _WalletView extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                fmt.format(wallet.balance),
+              CountUpText(
+                value: wallet.balance,
+                fractionDigits: 2,
                 style: AuroraText.displayLarge.copyWith(
                   color: AuroraColors.pearl,
                   fontSize: 44,
@@ -521,11 +520,7 @@ class _PromoCodeSectionState extends State<_PromoCodeSection> {
               TextButton(
                 onPressed: _busy ? null : _apply,
                 child: _busy
-                    ? SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: AuroraColors.ember))
+                    ? const AuroraLoader(size: 16, stroke: 2)
                     : Text(tr('apply'),
                         style: AuroraText.titleSmall
                             .copyWith(color: AuroraColors.ember)),
