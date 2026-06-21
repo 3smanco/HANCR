@@ -89,6 +89,7 @@ const Map<String, Map<String, String>> _t = {
   'greeting': {'ar': 'مرحباً بك 👋', 'en': 'Welcome 👋', 'ur': 'خوش آمدید 👋', 'hi': 'स्वागत है 👋', 'bn': 'স্বাগতম 👋', 'fil': 'Maligayang pagdating 👋', 'fr': 'Bienvenue 👋', 'tr': 'Hoş geldiniz 👋'},
   'whereToGo': {'ar': 'إلى أين تريد الذهاب؟', 'en': 'Where do you want to go?', 'ur': 'آپ کہاں جانا چاہتے ہیں؟', 'hi': 'आप कहाँ जाना चाहते हैं?', 'bn': 'আপনি কোথায় যেতে চান?', 'fil': 'Saan mo gustong pumunta?', 'fr': 'Où voulez-vous aller ?', 'tr': 'Nereye gitmek istiyorsunuz?'},
   'whereTo': {'ar': 'إلى أين؟', 'en': 'Where to?', 'ur': 'کہاں جانا ہے؟', 'hi': 'कहाँ जाना है?', 'bn': 'কোথায় যাবেন?', 'fil': 'Saan?', 'fr': 'Où aller ?', 'tr': 'Nereye?'},
+  'searchPlaceHint': {'ar': 'ابحث عن مكان أو عنوان…', 'en': 'Search a place or address…'},
   'now': {'ar': 'الآن', 'en': 'Now', 'ur': 'ابھی', 'hi': 'अभी', 'bn': 'এখন', 'fil': 'Ngayon', 'fr': 'Maintenant', 'tr': 'Şimdi'},
   'homePlace': {'ar': 'المنزل', 'en': 'Home', 'ur': 'گھر', 'hi': 'घर', 'bn': 'বাড়ি', 'fil': 'Bahay', 'fr': 'Maison', 'tr': 'Ev'},
   'suggestions': {'ar': 'اقتراحات', 'en': 'Suggestions', 'ur': 'تجاویز', 'hi': 'सुझाव', 'bn': 'পরামর্শ', 'fil': 'Mga mungkahi', 'fr': 'Suggestions', 'tr': 'Öneriler'},
