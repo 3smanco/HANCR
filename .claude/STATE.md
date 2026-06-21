@@ -275,7 +275,12 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
-- **🟦 التجديد البصري — الدفعة R1 (الراكب — الانطباع الأول) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
+- **🟦 التجديد البصري — الدفعة R2 (الراكب — الرئيسية والاكتشاف) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
+  - **الرئيسية (`aurora_home_tab`):** skeleton للبانرات أثناء التحميل (`_bannersLoading`) + `fadeSlideIn` للبانرات عند الوصول.
+  - **الخدمات (`_ServicesTab` في `aurora_main_screen`):** شريط بطل `_carHero` (sedan/suv/bike بـCarArt) + `popIn` متدرّج على بطاقات الشبكة.
+  - **⏭️ R3 (الحجز) — النشر يُجمَّع في APK واحد مع R3/R4 (الخريطة والتتبّع) لتفادي إعادة البناء المتكرّر.**
+
+- **🟩 التجديد البصري — الدفعة R1 (الراكب — الانطباع الأول) — مكتملة ومنشورة (2026-06-21، PR #167، APK 47,142,855 HTTP 200).** التحقق: rider-app `flutter analyze=0 errors`.
   - **Splash:** استبدال spinner بـ`AuroraLoader` + سيارة بطلة (`CarArt.luxury`) تنساب للداخل.
   - **القشرة (`aurora_main_screen`):** انتقال `AnimatedSwitcher` (fade+slide) بين التبويبات.
   - **OTP (`aurora_otp_screen`):** `Shake` على حقل الرمز + `Haptics.warning` + مسح الرمز عند الخطأ (عدّاد `_failCount`).

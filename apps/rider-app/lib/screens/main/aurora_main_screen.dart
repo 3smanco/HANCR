@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/widgets/car_art.dart';
 import '../../core/motion/motion.dart';
 import '../home/aurora_home_tab.dart';
 import '../rides/rides_tab.dart';
@@ -110,7 +111,11 @@ class _ServicesTab extends StatelessWidget {
           children: [
             const SizedBox(height: AuroraSpacing.md),
             Text(tr('nav_services'), style: AuroraText.displayMedium),
-            const SizedBox(height: AuroraSpacing.xxl),
+            const SizedBox(height: AuroraSpacing.lg),
+
+            // ─── شريط بطل بسيارات (sedan/suv/bike) ───
+            _carHero(),
+            const SizedBox(height: AuroraSpacing.xl),
 
             _section(tr('goAnywhere')),
             const SizedBox(height: AuroraSpacing.md),
@@ -170,6 +175,34 @@ class _ServicesTab extends StatelessWidget {
   Widget _section(String title) =>
       Text(title, style: AuroraText.titleMedium);
 
+  /// شريط بطل: تدرّج ember + ثلاث مركبات مرسومة بالكود.
+  Widget _carHero() {
+    return Container(
+      height: 120,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.lg),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AuroraColors.ember.withValues(alpha: 0.22),
+            AuroraColors.coal,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(AuroraRadius.lg),
+        border: Border.all(color: AuroraColors.borderGlow),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          const CarArt(type: CarType.sedan, size: Size(96, 52))
+              .popIn(index: 0),
+          const CarArt(type: CarType.suv, size: Size(96, 52)).popIn(index: 1),
+          const CarArt(type: CarType.bike, size: Size(70, 52)).popIn(index: 2),
+        ],
+      ),
+    );
+  }
+
   Widget _grid(BuildContext context, List<_ServiceItem> items) {
     return GridView.builder(
       shrinkWrap: true,
@@ -226,7 +259,7 @@ class _ServicesTab extends StatelessWidget {
             AuroraToast.comingSoon(ctx, feature: item.label);
           }
         },
-      ),
+      ).popIn(index: i),
     );
   }
 }
