@@ -66,8 +66,15 @@ class _HancrCaptainAppState extends State<HancrCaptainApp> {
         final order = _orderBloc.state;
         final loc = state.matchedLocation;
 
-        if (auth is AuthLoading || auth is AuthInitial) {
+        // بدء التطبيق (فحص التوكن) → splash فقط.
+        if (auth is AuthInitial) {
           return loc == '/splash' ? null : '/splash';
+        }
+        // AuthLoading يحدث أيضاً أثناء إرسال/تحقق OTP — لا نقذف المستخدم إلى
+        // splash إن كان داخل تدفق المصادقة (هاتف/OTP)، وإلا يعلق على اللوجو.
+        if (auth is AuthLoading) {
+          if (loc.startsWith('/auth') || loc == '/splash') return null;
+          return '/splash';
         }
         if (auth is AuthUnauthenticated || auth is AuthError) {
           if (loc.startsWith('/auth')) return null;
