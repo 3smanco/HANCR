@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/motion/motion.dart';
 import '../home/aurora_home_tab.dart';
 import '../rides/rides_tab.dart';
 import '../profile/aurora_profile_tab.dart';
@@ -37,7 +38,26 @@ class _AuroraMainScreenState extends State<AuroraMainScreen> {
       extendBody: true,
       // نعرض التبويب النشط فقط (بدل IndexedStack) حتى لا يُنفّذ تبويب النشاط
       // طلب السجل تلقائياً ويطمس حالة الطلب النشط (active/awaiting-review).
-      body: _tabs[_currentIndex],
+      // انتقال متلاشٍ ناعم بين التبويبات.
+      body: AnimatedSwitcher(
+        duration: Motion.dur(Motion.base),
+        switchInCurve: Motion.decelerate,
+        switchOutCurve: Motion.accelerate,
+        transitionBuilder: (child, anim) => FadeTransition(
+          opacity: anim,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.02),
+              end: Offset.zero,
+            ).animate(anim),
+            child: child,
+          ),
+        ),
+        child: KeyedSubtree(
+          key: ValueKey<int>(_currentIndex),
+          child: _tabs[_currentIndex],
+        ),
+      ),
       bottomNavigationBar: AuroraBottomNav(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),

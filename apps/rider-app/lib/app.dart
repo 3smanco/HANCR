@@ -17,6 +17,7 @@ import 'core/services/push_service.dart';
 import 'core/theme/aurora_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'core/motion/motion_tokens.dart';
+import 'core/motion/page_transitions.dart';
 import 'screens/auth/aurora_otp_screen.dart';
 import 'screens/auth/aurora_phone_screen.dart';
 import 'screens/auth/aurora_email_screen.dart';
@@ -111,11 +112,16 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
         return null;
       },
       routes: [
-        GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
-        GoRoute(path: '/auth/phone', builder: (_, __) => const AuroraPhoneScreen()),
+        GoRoute(
+            path: '/splash',
+            pageBuilder: (_, __) => AppTransitions.fade(const SplashScreen())),
+        GoRoute(
+            path: '/auth/phone',
+            pageBuilder: (_, __) =>
+                AppTransitions.sharedAxis(const AuroraPhoneScreen())),
         GoRoute(
           path: '/auth/otp',
-          builder: (_, state) {
+          pageBuilder: (_, state) {
             // يقبل إما String مباشر (من aurora_phone_screen) أو Map (legacy)
             String phone = '';
             String? devOtp;
@@ -126,42 +132,58 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
               phone = m['phone'] as String? ?? '';
               devOtp = m['devOtp'] as String?;
             }
-            return AuroraOtpScreen(phone: phone, devOtp: devOtp);
+            return AppTransitions.sharedAxis(
+                AuroraOtpScreen(phone: phone, devOtp: devOtp));
           },
         ),
         GoRoute(
             path: '/auth/email',
-            builder: (_, __) => const AuroraEmailScreen()),
+            pageBuilder: (_, __) =>
+                AppTransitions.sharedAxis(const AuroraEmailScreen())),
         GoRoute(
           path: '/auth/email-otp',
-          builder: (_, state) {
+          pageBuilder: (_, state) {
             final m = (state.extra as Map?) ?? const {};
-            return AuroraEmailOtpScreen(
+            return AppTransitions.sharedAxis(AuroraEmailOtpScreen(
               email: m['email'] as String? ?? '',
               devOtp: m['devOtp'] as String?,
-            );
+            ));
           },
         ),
-        GoRoute(path: '/home', builder: (_, __) => const AuroraMainScreen()),
         GoRoute(
-            path: '/ai', builder: (_, __) => const AiAssistantScreen()),
+            path: '/home',
+            pageBuilder: (_, __) =>
+                AppTransitions.fade(const AuroraMainScreen())),
+        GoRoute(
+            path: '/ai',
+            pageBuilder: (_, __) =>
+                AppTransitions.slideUp(const AiAssistantScreen())),
         GoRoute(
           path: '/book',
-          builder: (_, state) {
+          pageBuilder: (_, state) {
             final extra = state.extra;
             if (extra is Map) {
-              return AuroraBookingScreen(
+              return AppTransitions.slideUp(AuroraBookingScreen(
                 presetDestination: extra['destination'] as GeoPoint?,
                 presetDestinationLabel: extra['label'] as String?,
                 preferServiceType: extra['preferServiceType'] as String?,
-              );
+              ));
             }
-            return const AuroraBookingScreen();
+            return AppTransitions.slideUp(const AuroraBookingScreen());
           },
         ),
-        GoRoute(path: '/wallet', builder: (_, __) => const AuroraWalletScreen()),
-        GoRoute(path: '/tracking', builder: (_, __) => const AuroraTrackingScreen()),
-        GoRoute(path: '/rate', builder: (_, __) => const AuroraRateDriverScreen()),
+        GoRoute(
+            path: '/wallet',
+            pageBuilder: (_, __) =>
+                AppTransitions.slideUp(const AuroraWalletScreen())),
+        GoRoute(
+            path: '/tracking',
+            pageBuilder: (_, __) =>
+                AppTransitions.fade(const AuroraTrackingScreen())),
+        GoRoute(
+            path: '/rate',
+            pageBuilder: (_, __) =>
+                AppTransitions.slideUp(const AuroraRateDriverScreen())),
         // Dev-only — visual showcase for the new design system
         GoRoute(
           path: '/showcase',

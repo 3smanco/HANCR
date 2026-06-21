@@ -9,6 +9,8 @@ import '../../blocs/auth/auth_state.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/utils/country_detect.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/widgets/car_art.dart';
+import '../../core/motion/motion.dart';
 
 /// AuroraPhoneScreen — شاشة تسجيل الدخول بالنمط الجديد.
 ///
@@ -269,23 +271,49 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
   }
 
   Widget _buildCarIllustration() {
-    // Placeholder للـ 3D car. لاحقاً: استبدل بـ Lottie animation أو SVG.
-    return Container(
+    // سيارة فاخرة مرسومة بالكود (CarArt) فوق هالة ember، تنساب للداخل.
+    return SizedBox(
       height: 180,
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          colors: [
-            AuroraColors.emberMute.withValues(alpha: 0.3),
-            Colors.transparent,
-          ],
-        ),
-      ),
-      child: Center(
-        child: Icon(
-          Icons.directions_car,
-          size: 130,
-          color: AuroraColors.emberLight,
-        ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // هالة توهّج خلف السيارة
+          Container(
+            height: 180,
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                colors: [
+                  AuroraColors.emberMute.withValues(alpha: 0.30),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+          GlowPulse(
+            color: AuroraColors.ember,
+            minBlur: 10,
+            maxBlur: 34,
+            child: const CarArt(type: CarType.luxury, size: Size(230, 110)),
+          )
+              .animate()
+              .fadeIn(duration: Motion.slow)
+              .slideX(begin: -0.4, end: 0, curve: Motion.decelerate),
+          // خط أرضية تحت السيارة
+          Positioned(
+            bottom: 26,
+            child: Container(
+              width: 200,
+              height: 3,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [
+                  Colors.transparent,
+                  AuroraColors.ember.withValues(alpha: 0.5),
+                  Colors.transparent,
+                ]),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
