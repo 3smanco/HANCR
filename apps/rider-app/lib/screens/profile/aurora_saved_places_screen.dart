@@ -206,7 +206,7 @@ class _AuroraSavedPlacesScreenState extends State<AuroraSavedPlacesScreen> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AuroraColors.ember,
         onPressed: _busy ? null : _addFlow,
-        icon: const Icon(Icons.add, color: Colors.white),
+        icon: Icon(Icons.add, color: Colors.white),
         label: Text(tr('addPlace'),
             style: const TextStyle(color: Colors.white)),
       ),
@@ -232,7 +232,7 @@ class _AuroraSavedPlacesScreenState extends State<AuroraSavedPlacesScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.bookmark_border_rounded,
+            Icon(Icons.bookmark_border_rounded,
                 size: 56, color: AuroraColors.textSecondary),
             const SizedBox(height: AuroraSpacing.sm),
             Text(tr('noSavedPlaces'),
@@ -265,7 +265,7 @@ class _AuroraSavedPlacesScreenState extends State<AuroraSavedPlacesScreen> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline,
+            icon: Icon(Icons.delete_outline,
                 color: AuroraColors.textSecondary),
             onPressed: _busy ? null : () => _delete(p),
           ),

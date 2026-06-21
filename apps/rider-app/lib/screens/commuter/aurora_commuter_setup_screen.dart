@@ -7,6 +7,7 @@ import '../../core/graphql/gql/commuter_gql.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+ import '../../core/motion/motion.dart';
 
 /// شاشة إنشاء اشتراك Commuter — تختار المنزل والعمل والتوقيتات والأيام.
 class AuroraCommuterSetupScreen extends StatefulWidget {
@@ -261,7 +262,7 @@ class _AuroraCommuterSetupScreenState
       ),
       body: _loadingPlaces
           ? Center(
-              child: CircularProgressIndicator(color: AuroraColors.ember))
+              child: AuroraLoader(size: 36))
           : ListView(
               padding: const EdgeInsets.all(AuroraSpacing.lg),
               children: [
@@ -491,7 +492,7 @@ class _AuroraCommuterSetupScreenState
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AuroraColors.textSecondary),
+            Icon(Icons.chevron_right, color: AuroraColors.textSecondary),
           ],
         ),
       ),

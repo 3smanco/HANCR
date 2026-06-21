@@ -6,6 +6,7 @@ import '../../blocs/sos/sos_state.dart';
 import '../../core/models/sos_model.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+ import '../../core/motion/motion.dart';
 import 'aurora_add_contact_sheet.dart';
 
 /// AuroraEmergencyContactsScreen — قائمة جهات الطوارئ بنمط Aurora.
@@ -86,7 +87,7 @@ class _ContactsView extends StatelessWidget {
   Widget _buildBody(BuildContext context, SosState state) {
     if (state is SosInitial || state is SosLoading) {
       return Center(
-        child: CircularProgressIndicator(color: AuroraColors.ember),
+        child: AuroraLoader(size: 36),
       );
     }
     if (state is SosError) {
@@ -288,7 +289,7 @@ class _ContactsView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AuroraSpacing.huge),
       child: Column(
         children: [
-          const Icon(Icons.contact_phone_outlined,
+          Icon(Icons.contact_phone_outlined,
               size: 64, color: AuroraColors.textHint),
           const SizedBox(height: AuroraSpacing.md),
           Text(tr('noContactsYet'), style: AuroraText.titleSmall),

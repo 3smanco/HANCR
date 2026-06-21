@@ -287,7 +287,7 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AuroraRadius.md),
                           borderSide:
-                              const BorderSide(color: AuroraColors.border),
+                              BorderSide(color: AuroraColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AuroraRadius.md),
@@ -335,7 +335,7 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                         padding: const EdgeInsets.all(AuroraSpacing.md),
                         child: Row(
                           children: [
-                            const Icon(Icons.info_outline,
+                            Icon(Icons.info_outline,
                                 color: AuroraColors.warning, size: 18),
                             const SizedBox(width: AuroraSpacing.sm),
                             Expanded(

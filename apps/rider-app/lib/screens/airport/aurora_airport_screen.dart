@@ -6,6 +6,7 @@ import '../../core/graphql/gql/flight_gql.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+ import '../../core/motion/motion.dart';
 
 /// شاشة Airport Pickup — يدخل الراكب رقم رحلة طيران وعنوان التوصيل،
 /// ونتعقّب رحلته آلياً ونحجز طلباً قبل الوصول الفعلي بـ 30 دقيقة.
@@ -161,7 +162,7 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
       ),
       body: _loading
           ? Center(
-              child: CircularProgressIndicator(color: AuroraColors.ember))
+              child: AuroraLoader(size: 36))
           : ListView(
               padding: const EdgeInsets.all(AuroraSpacing.lg),
               children: [

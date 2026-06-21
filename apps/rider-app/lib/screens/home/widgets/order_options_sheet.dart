@@ -132,7 +132,7 @@ class _OrderOptionsSheetState extends State<OrderOptionsSheet> {
                         color: HancrColors.primary.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.directions_car,
                         color: HancrColors.primary,
                       ),

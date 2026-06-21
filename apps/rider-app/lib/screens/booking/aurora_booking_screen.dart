@@ -550,7 +550,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         fillColor: AuroraColors.ash,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AuroraRadius.md),
-          borderSide: const BorderSide(color: AuroraColors.border),
+          borderSide: BorderSide(color: AuroraColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AuroraRadius.md),
@@ -755,7 +755,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           _routeRow(Icons.my_location, AuroraColors.success, _originLabel),
           // محطات وسيطة
           for (var i = 0; i < _stops.length; i++) ...[
-            const Divider(color: AuroraColors.border, height: AuroraSpacing.md),
+            Divider(color: AuroraColors.border, height: AuroraSpacing.md),
             Row(
               children: [
                 Expanded(
@@ -767,14 +767,14 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                           : _stops[i].label),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close,
+                  icon: Icon(Icons.close,
                       color: AuroraColors.textSecondary, size: 18),
                   onPressed: () => setState(() => _stops.removeAt(i)),
                 ),
               ],
             ),
           ],
-          const Divider(color: AuroraColors.border, height: AuroraSpacing.lg),
+          Divider(color: AuroraColors.border, height: AuroraSpacing.lg),
           Row(
             children: [
               Expanded(
@@ -905,7 +905,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.remove_circle_outline,
+                    icon: Icon(Icons.remove_circle_outline,
                         color: AuroraColors.textSecondary),
                     onPressed: _bookedHours > 1
                         ? () => setState(() => _bookedHours--)
@@ -999,7 +999,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                 fillColor: AuroraColors.ash,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AuroraRadius.md),
-                  borderSide: const BorderSide(color: AuroraColors.border),
+                  borderSide: BorderSide(color: AuroraColors.border),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AuroraRadius.md),
@@ -1057,11 +1057,11 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                     if (_scheduledAt != null)
                       GestureDetector(
                         onTap: () => setState(() => _scheduledAt = null),
-                        child: const Icon(Icons.close,
+                        child: Icon(Icons.close,
                             size: 18, color: AuroraColors.textSecondary),
                       )
                     else
-                      const Icon(Icons.keyboard_arrow_down,
+                      Icon(Icons.keyboard_arrow_down,
                           size: 18, color: AuroraColors.textSecondary),
                   ],
                 ),
@@ -1166,7 +1166,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                     ),
                     GestureDetector(
                       onTap: _removeCoupon,
-                      child: const Icon(Icons.close,
+                      child: Icon(Icons.close,
                           size: 18, color: AuroraColors.textSecondary),
                     ),
                   ],
@@ -1371,7 +1371,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
             color: AuroraColors.coal.withValues(alpha: 0.82),
             borderRadius:
                 const BorderRadius.vertical(top: Radius.circular(24)),
-            border: const Border(
+            border: Border(
                 top: BorderSide(color: AuroraColors.borderStrong)),
             boxShadow: const [
               BoxShadow(

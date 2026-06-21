@@ -149,7 +149,7 @@ class SecurityCheckupScreen extends StatelessWidget {
     } else if (done == false) {
       trailing = Icon(Icons.error_outline, color: AuroraColors.warning, size: 22);
     } else {
-      trailing = const Icon(Icons.chevron_left,
+      trailing = Icon(Icons.chevron_left,
           color: AuroraColors.textSecondary, size: 20);
     }
     return Container(

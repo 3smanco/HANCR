@@ -39,7 +39,7 @@ class AuroraSearchBar extends StatelessWidget {
                   color: AuroraColors.smoke,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.search,
                   color: AuroraColors.textSecondary,
                   size: 18,

@@ -261,7 +261,7 @@ class _PickupConfirmationScreenState extends State<PickupConfirmationScreen>
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.payments_rounded,
                               size: 20,
                               color: HancrColors.violetDeep,

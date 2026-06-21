@@ -11,7 +11,7 @@ class AuroraIconTile extends StatelessWidget {
   final VoidCallback? onTap;
   final bool selected;
   final String? badge;
-  final Color badgeColor;
+  final Color? badgeColor;
   final double size;
 
   const AuroraIconTile({
@@ -20,7 +20,7 @@ class AuroraIconTile extends StatelessWidget {
     this.onTap,
     this.selected = false,
     this.badge,
-    this.badgeColor = AuroraColors.promoBg,
+    this.badgeColor,
     this.size = 96,
     super.key,
   });
@@ -95,7 +95,7 @@ class AuroraIconTile extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: AuroraSpacing.sm, vertical: 3),
                 decoration: BoxDecoration(
-                  color: badgeColor,
+                  color: badgeColor ?? AuroraColors.promoBg,
                   borderRadius: BorderRadius.circular(AuroraRadius.pill),
                 ),
                 child: Text(

@@ -7,6 +7,7 @@ import '../../core/graphql/gql/order_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/services/rider_upload_service.dart';
 import '../../core/widgets/aurora/aurora.dart';
+ import '../../core/motion/motion.dart';
 
 /// شاشة دردشة الراكب مع السائق أثناء الرحلة.
 class AuroraChatScreen extends StatefulWidget {
@@ -221,7 +222,7 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
             child: _loading
                 ? Center(
                     child:
-                        CircularProgressIndicator(color: AuroraColors.ember))
+                        AuroraLoader(size: 36))
                 : _messages.isEmpty
                     ? Center(
                         child: Text(tr('noMessagesYet'),

@@ -98,7 +98,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                   },
                 ),
               ),
-              const Divider(color: AuroraColors.border, height: 1),
+              Divider(color: AuroraColors.border, height: 1),
               Expanded(
                 child: BlocBuilder<RiderBloc, RiderState>(
                   builder: (context, state) {

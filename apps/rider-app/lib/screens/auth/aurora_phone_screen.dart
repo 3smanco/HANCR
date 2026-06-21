@@ -363,7 +363,7 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 onChanged: (_) => setState(() {}),
                 style: AuroraText.bodyLarge,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: '5XXXXXXXX',
                   prefixIcon: Icon(Icons.phone, color: AuroraColors.textHint),
                 ),

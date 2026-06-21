@@ -28,43 +28,43 @@ class AuroraColors {
   static Color obsidian = const Color(0xFF0A0807); // الخلفية الأعمق
   static Color coal = const Color(0xFF13100E); // خلفية الـ surface
   static Color ash = const Color(0xFF1F1A17); // cards غامقة
-  static const Color smoke = Color(0xFF2A2421); // cards فاتحة قليلاً
-  static const Color stone = Color(0xFF3D3530); // hover/elevated
+  static Color smoke = const Color(0xFF2A2421); // cards فاتحة قليلاً
+  static Color stone = const Color(0xFF3D3530); // hover/elevated
 
   // ═══ Brand accent — Orange Glow — live ═══
   static Color ember = const Color(0xFFFF7A1A); // الـ primary action
   static Color emberLight = const Color(0xFFFF9D4D); // glow + accent
   static Color emberDeep = const Color(0xFFE55F00); // pressed/active
-  static const Color emberMute = Color(0xFF6B3920); // muted accent (low emphasis)
+  static Color emberMute = const Color(0xFF6B3920); // muted accent (low emphasis)
 
   // ═══ Gold accents (premium / loyalty) — live ═══
   static Color gold = const Color(0xFFFFB547);
-  static const Color goldGlow = Color(0xFFFFC97A);
+  static Color goldGlow = const Color(0xFFFFC97A);
 
   // ═══ Text hierarchy — pearl live ═══
   static Color pearl = const Color(0xFFFFF5EE); // text عالي تباين
-  static const Color textPrimary = Color(0xFFF5EDE7);
-  static const Color textSecondary = Color(0xFFA89B96);
-  static const Color textHint = Color(0xFF6F635E);
-  static const Color textDisabled = Color(0xFF4D4441);
+  static Color textPrimary = const Color(0xFFF5EDE7);
+  static Color textSecondary = const Color(0xFFA89B96);
+  static Color textHint = const Color(0xFF6F635E);
+  static Color textDisabled = const Color(0xFF4D4441);
 
   // ═══ Borders ═══
-  static const Color border = Color(0x1AFFFFFF); // 10% white
-  static const Color borderStrong = Color(0x33FFFFFF); // 20% white
-  static const Color borderGlow = Color(0x4DFF7A1A); // 30% ember
-  static const Color divider = Color(0x0DFFFFFF); // 5% white
+  static Color border = const Color(0x1AFFFFFF); // 10% white
+  static Color borderStrong = const Color(0x33FFFFFF); // 20% white
+  static Color borderGlow = const Color(0x4DFF7A1A); // 30% ember
+  static Color divider = const Color(0x0DFFFFFF); // 5% white
 
   // ═══ Status colors — success/danger live ═══
   static Color success = const Color(0xFF10B981);
-  static const Color successGlow = Color(0xFF34D399);
-  static const Color successBg = Color(0x1A10B981);
+  static Color successGlow = const Color(0xFF34D399);
+  static Color successBg = const Color(0x1A10B981);
 
-  static const Color warning = Color(0xFFFFB547);
-  static const Color warningBg = Color(0x1AFFB547);
+  static Color warning = const Color(0xFFFFB547);
+  static Color warningBg = const Color(0x1AFFB547);
 
   static Color danger = const Color(0xFFFF4D4D);
-  static const Color dangerGlow = Color(0xFFFF6B6B);
-  static const Color dangerBg = Color(0x1AFF4D4D);
+  static Color dangerGlow = const Color(0xFFFF6B6B);
+  static Color dangerBg = const Color(0x1AFF4D4D);
 
   // ═══ Typography + shape — live من themeConfig ═══
   /// عائلة الخط (Google Fonts) — تُقرأ ديناميكياً في AuroraText.
@@ -73,12 +73,12 @@ class AuroraColors {
   /// نصف قطر الحواف الأساسي للمكوّنات (أزرار/حقول) — يُطبَّق في AuroraTheme.dark.
   static double baseRadius = 16;
 
-  static const Color info = Color(0xFF3B82F6);
-  static const Color infoBg = Color(0x1A3B82F6);
+  static Color info = const Color(0xFF3B82F6);
+  static Color infoBg = const Color(0x1A3B82F6);
 
   // ═══ Promo badge (للـ promotional badges) ═══
-  static const Color promoBg = Color(0xFF10B981);
-  static const Color promoText = Color(0xFFFFFFFF);
+  static Color promoBg = const Color(0xFF10B981);
+  static Color promoText = const Color(0xFFFFFFFF);
 
   // ═══ Gradients — تعتمد على ألوان live فصارت getters ═══
   static LinearGradient get emberGradient => LinearGradient(
@@ -93,12 +93,20 @@ class AuroraColors {
         colors: [emberLight, ember, emberDeep],
       );
 
-  static LinearGradient get pageBackground => LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [const Color(0xFF1A0F08), obsidian, obsidian],
-        stops: const [0.0, 0.4, 1.0],
-      );
+  static LinearGradient get pageBackground {
+    // قمّة التدرّج تتبع السكين (دافئة فاتحة / داكنة / نيون).
+    final top = activeSkin == 'light'
+        ? const Color(0xFFFCEFE3)
+        : activeSkin == 'vip'
+            ? const Color(0xFF120A24)
+            : const Color(0xFF1A0F08);
+    return LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [top, obsidian, obsidian],
+      stops: const [0.0, 0.4, 1.0],
+    );
+  }
 
   static const RadialGradient emberHalo = RadialGradient(
     colors: [Color(0x33FF7A1A), Color(0x00FF7A1A)],
@@ -115,17 +123,135 @@ class AuroraColors {
   static Color get background => obsidian;
   static Color get surface => ash;
   static Color get surfaceMute => coal;
-  static const Color surfaceElevated = smoke;
+  static Color get surfaceElevated => smoke;
   static Color get primary => ember;
   static Color get accent => ember;
   static Color get violet => ember; // mapping القديم → ember
   static Color get violetDeep => emberDeep;
-  static const Color violetLight = emberMute;
+  static Color get violetLight => emberMute;
   static Color get navy => obsidian;
   static Color get cream => pearl;
-  static const Color purple = textSecondary;
+  static Color get purple => textSecondary;
   static Color get error => danger;
-  static const Color errorBg = dangerBg;
+  static Color get errorBg => dangerBg;
+
+  // ╔═══════════════════════════════════════════════════════════════╗
+  // ║  السكين الحيّ — يعيد طلاء كل الحقول (dark / light / vip)        ║
+  // ║  يُستدعى من ThemeController عند تغيير المظهر؛ ثم يُطبَّق SDUI    ║
+  // ║  فوقه. لأن كل MaterialApp يُعاد بناؤه عند bump الإصدار، تلتقط    ║
+  // ║  كل الشاشات (التي تقرأ AuroraColors.*) الطلاء الجديد فوراً.     ║
+  // ╚═══════════════════════════════════════════════════════════════╝
+  static String activeSkin = 'dark';
+
+  /// يطبّق لوحة السكين المطلوب: 'dark' (Aurora) · 'light' (Dawn) · 'vip'.
+  static void applySkin(String skin) {
+    activeSkin = skin;
+    switch (skin) {
+      case 'light':
+        // Dawn — عاج دافئ + ember
+        obsidian = const Color(0xFFF6EFE8);
+        coal = const Color(0xFFFFFFFF);
+        ash = const Color(0xFFFFFFFF);
+        smoke = const Color(0xFFF1E8E0);
+        stone = const Color(0xFFE6DAD0);
+        ember = const Color(0xFFE9670F);
+        emberLight = const Color(0xFFFF8A3D);
+        emberDeep = const Color(0xFFC24E00);
+        emberMute = const Color(0xFFFBE0CC);
+        gold = const Color(0xFFC8870F);
+        goldGlow = const Color(0xFFE3A93A);
+        pearl = const Color(0xFF1E1714);
+        textPrimary = const Color(0xFF241C18);
+        textSecondary = const Color(0xFF6B5E57);
+        textHint = const Color(0xFF9C8E86);
+        textDisabled = const Color(0xFFC2B5AD);
+        border = const Color(0x14000000);
+        borderStrong = const Color(0x29000000);
+        borderGlow = const Color(0x4DE9670F);
+        divider = const Color(0x12000000);
+        success = const Color(0xFF0E9F6E);
+        successGlow = const Color(0xFF34D399);
+        successBg = const Color(0x1A0E9F6E);
+        warning = const Color(0xFFB7791F);
+        warningBg = const Color(0x1AB7791F);
+        danger = const Color(0xFFDC2626);
+        dangerGlow = const Color(0xFFEF4444);
+        dangerBg = const Color(0x1ADC2626);
+        info = const Color(0xFF2563EB);
+        infoBg = const Color(0x1A2563EB);
+        promoBg = const Color(0xFF0E9F6E);
+        promoText = const Color(0xFFFFFFFF);
+        break;
+      case 'vip':
+        // VIP — obsidian نيون بنفسجي/سماوي
+        obsidian = const Color(0xFF070611);
+        coal = const Color(0xFF0C0B1C);
+        ash = const Color(0xFF14122A);
+        smoke = const Color(0xFF1E1B3C);
+        stone = const Color(0xFF2A2750);
+        ember = const Color(0xFFB048FF);
+        emberLight = const Color(0xFFCB7BFF);
+        emberDeep = const Color(0xFF7E2FBF);
+        emberMute = const Color(0xFF2A1745);
+        gold = const Color(0xFF00F5FF);
+        goldGlow = const Color(0xFF7DF9FF);
+        pearl = const Color(0xFFF3EEFF);
+        textPrimary = const Color(0xFFECE7FF);
+        textSecondary = const Color(0xFFA9A2C9);
+        textHint = const Color(0xFF6E6790);
+        textDisabled = const Color(0xFF4A4570);
+        border = const Color(0x1AB048FF);
+        borderStrong = const Color(0x33B048FF);
+        borderGlow = const Color(0x4DB048FF);
+        divider = const Color(0x14FFFFFF);
+        success = const Color(0xFF39FF14);
+        successGlow = const Color(0xFF7CFF6B);
+        successBg = const Color(0x2239FF14);
+        warning = const Color(0xFFFFC043);
+        warningBg = const Color(0x1AFFC043);
+        danger = const Color(0xFFFF3D8B);
+        dangerGlow = const Color(0xFFFF6BA6);
+        dangerBg = const Color(0x22FF3D8B);
+        info = const Color(0xFF00F5FF);
+        infoBg = const Color(0x1A00F5FF);
+        promoBg = const Color(0xFFB048FF);
+        promoText = const Color(0xFFFFFFFF);
+        break;
+      default: // 'dark' — Aurora الأصلي
+        obsidian = const Color(0xFF0A0807);
+        coal = const Color(0xFF13100E);
+        ash = const Color(0xFF1F1A17);
+        smoke = const Color(0xFF2A2421);
+        stone = const Color(0xFF3D3530);
+        ember = const Color(0xFFFF7A1A);
+        emberLight = const Color(0xFFFF9D4D);
+        emberDeep = const Color(0xFFE55F00);
+        emberMute = const Color(0xFF6B3920);
+        gold = const Color(0xFFFFB547);
+        goldGlow = const Color(0xFFFFC97A);
+        pearl = const Color(0xFFFFF5EE);
+        textPrimary = const Color(0xFFF5EDE7);
+        textSecondary = const Color(0xFFA89B96);
+        textHint = const Color(0xFF6F635E);
+        textDisabled = const Color(0xFF4D4441);
+        border = const Color(0x1AFFFFFF);
+        borderStrong = const Color(0x33FFFFFF);
+        borderGlow = const Color(0x4DFF7A1A);
+        divider = const Color(0x0DFFFFFF);
+        success = const Color(0xFF10B981);
+        successGlow = const Color(0xFF34D399);
+        successBg = const Color(0x1A10B981);
+        warning = const Color(0xFFFFB547);
+        warningBg = const Color(0x1AFFB547);
+        danger = const Color(0xFFFF4D4D);
+        dangerGlow = const Color(0xFFFF6B6B);
+        dangerBg = const Color(0x1AFF4D4D);
+        info = const Color(0xFF3B82F6);
+        infoBg = const Color(0x1A3B82F6);
+        promoBg = const Color(0xFF10B981);
+        promoText = const Color(0xFFFFFFFF);
+    }
+  }
 
   // ╔═══════════════════════════════════════════════════════════════╗
   // ║  N5 — hex parsing helper                                       ║

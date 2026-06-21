@@ -90,7 +90,7 @@ class GlassSheet extends StatelessWidget {
             decoration: BoxDecoration(
               color: AuroraColors.coal.withValues(alpha: 0.82),
               borderRadius: const BorderRadius.only(topLeft: r, topRight: r),
-              border: const Border(
+              border: Border(
                 top: BorderSide(color: AuroraColors.borderStrong, width: 1),
               ),
             ),

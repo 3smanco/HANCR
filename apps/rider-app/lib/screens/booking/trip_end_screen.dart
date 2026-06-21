@@ -248,7 +248,7 @@ class _TripEndScreenState extends State<TripEndScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (selected) ...[
-                            const Icon(
+                            Icon(
                               Icons.check_rounded,
                               size: 14,
                               color: HancrColors.violetDeep,
@@ -291,7 +291,7 @@ class _TripEndScreenState extends State<TripEndScreen> {
               if (_rating >= 4) ...[
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.volunteer_activism_rounded,
                       size: 18,
                       color: HancrColors.violet,

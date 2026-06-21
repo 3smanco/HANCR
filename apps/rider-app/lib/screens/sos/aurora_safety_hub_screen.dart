@@ -168,7 +168,7 @@ class AuroraSafetyHubScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_left,
+            Icon(Icons.chevron_left,
                 color: AuroraColors.textSecondary, size: 20),
           ],
         ),

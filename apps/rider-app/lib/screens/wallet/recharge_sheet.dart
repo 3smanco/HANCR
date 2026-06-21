@@ -145,7 +145,7 @@ class _RechargeSheetState extends State<RechargeSheet> {
                 onChanged: (_) => setState(() => _selectedAmount = null),
                 decoration: InputDecoration(
                   labelText: 'أو أدخل مبلغاً مخصصاً',
-                  prefixIcon: const Icon(Icons.edit_outlined, size: 18),
+                  prefixIcon: Icon(Icons.edit_outlined, size: 18),
                   suffix: Text(widget.currency),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),

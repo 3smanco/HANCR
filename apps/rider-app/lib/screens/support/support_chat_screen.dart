@@ -5,6 +5,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+ import '../../core/motion/motion.dart';
 
 /// شات الدعم الحي بين الراكب وموظف خدمة العملاء.
 class SupportChatScreen extends StatefulWidget {
@@ -135,7 +136,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
             child: _loading
                 ? Center(
                     child:
-                        CircularProgressIndicator(color: AuroraColors.ember))
+                        AuroraLoader(size: 36))
                 : _messages.isEmpty
                     ? Center(
                         child: Padding(

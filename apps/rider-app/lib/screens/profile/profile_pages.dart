@@ -17,6 +17,7 @@ import '../../core/models/order_model.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/account_version.dart';
 import '../../core/widgets/aurora/aurora.dart';
+ import '../../core/motion/motion.dart';
 import '../../core/widgets/rider_avatar.dart';
 import '../rides/aurora_rides.dart';
 import 'aurora_saved_places_screen.dart';
@@ -147,7 +148,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             fillColor: AuroraColors.ash,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AuroraRadius.md),
-              borderSide: const BorderSide(color: AuroraColors.border),
+              borderSide: BorderSide(color: AuroraColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AuroraRadius.md),
@@ -239,7 +240,7 @@ class HelpCenterScreen extends StatelessWidget {
             Icon(icon, color: AuroraColors.ember, size: 20),
             const SizedBox(width: AuroraSpacing.md),
             Expanded(child: Text(value, style: AuroraText.bodyMedium)),
-            const Icon(Icons.copy, color: AuroraColors.textSecondary, size: 16),
+            Icon(Icons.copy, color: AuroraColors.textSecondary, size: 16),
           ],
         ),
       ),
@@ -402,7 +403,7 @@ class _HelpTopics extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis),
                     ),
-                    const Icon(Icons.chevron_left,
+                    Icon(Icons.chevron_left,
                         color: AuroraColors.textSecondary, size: 18),
                   ],
                 ),
@@ -518,7 +519,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
           ? Center(
               child: Padding(
                 padding: EdgeInsets.all(AuroraSpacing.xxl),
-                child: CircularProgressIndicator(color: AuroraColors.ember),
+                child: AuroraLoader(size: 36),
               ),
             )
           : ListView(
@@ -700,7 +701,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: Text(LocaleController.instance.currentLanguage.nativeName,
                   style: AuroraText.bodyMedium
                       .copyWith(color: AuroraColors.pearl)),
-              trailing: const Icon(Icons.chevron_left,
+              trailing: Icon(Icons.chevron_left,
                   color: AuroraColors.textSecondary),
               onTap: () async {
                 await Navigator.of(context).push(MaterialPageRoute(
@@ -771,7 +772,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_left,
+              Icon(Icons.chevron_left,
                   color: AuroraColors.textSecondary, size: 20),
             ],
           ),
@@ -848,7 +849,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       },
               );
             }),
-            const Divider(color: AuroraColors.border, height: 1),
+            Divider(color: AuroraColors.border, height: 1),
             ListTile(
               leading: Icon(Icons.person_add_alt, color: AuroraColors.ember),
               title: Text(tr('addAccount'),

@@ -682,6 +682,8 @@ const Map<String, Map<String, String>> _t = {
   'cmSmsSub': {'ar': 'تنبيهات عبر الرسائل القصيرة', 'en': 'Alerts via text messages'},
   'appearance': {'ar': 'المظهر', 'en': 'Appearance'},
   'appearanceDark': {'ar': 'داكن', 'en': 'Dark'},
+  'appearanceVip': {'ar': 'VIP فاخر', 'en': 'VIP Luxury'},
+  'appearanceVipSub': {'ar': 'داكن نيوني بلمسة بنفسجية فاخرة', 'en': 'Neon-dark with a luxe violet accent'},
   'appearanceInfo': {'ar': 'يستخدم تطبيق HANCR المظهر الداكن دائماً لتجربة أنيقة ومريحة للعين.', 'en': 'HANCR always uses a dark theme for an elegant, eye-friendly experience.'},
   'ridePreferences': {'ar': 'تفضيلات الركوب', 'en': 'Ride preferences'},
   'reserve': {'ar': 'الحجز المسبق', 'en': 'Reserve'},

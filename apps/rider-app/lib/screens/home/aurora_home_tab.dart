@@ -147,7 +147,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.schedule,
+                    Icon(Icons.schedule,
                         color: AuroraColors.textPrimary, size: 16),
                     const SizedBox(width: 4),
                     Text(
@@ -156,7 +156,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                           color: AuroraColors.textPrimary,
                           fontWeight: FontWeight.w600),
                     ),
-                    const Icon(Icons.keyboard_arrow_down,
+                    Icon(Icons.keyboard_arrow_down,
                         color: AuroraColors.textPrimary, size: 18),
                   ],
                 ),
@@ -372,7 +372,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(
                   color: AuroraColors.coal,
-                  child: const Icon(Icons.image_outlined,
+                  child: Icon(Icons.image_outlined,
                       color: AuroraColors.textSecondary, size: 32),
                 ),
                 loadingBuilder: (ctx, child, p) => p == null
@@ -533,7 +533,7 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
           ),
           if (onDelete != null)
             IconButton(
-              icon: const Icon(Icons.delete_outline,
+              icon: Icon(Icons.delete_outline,
                   color: AuroraColors.textSecondary, size: 20),
               onPressed: onDelete,
             ),

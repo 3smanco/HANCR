@@ -5,6 +5,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/bundle_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+ import '../../core/motion/motion.dart';
 
 /// F1 — Ride Bundles: تصفّح + شراء + متابعة الحزم.
 class AuroraBundlesScreen extends StatefulWidget {
@@ -143,7 +144,7 @@ class _AuroraBundlesScreenState extends State<AuroraBundlesScreen> {
       ),
       body: _loading
           ? Center(
-              child: CircularProgressIndicator(color: AuroraColors.ember))
+              child: AuroraLoader(size: 36))
           : RefreshIndicator(
               onRefresh: _bootstrap,
               color: AuroraColors.ember,

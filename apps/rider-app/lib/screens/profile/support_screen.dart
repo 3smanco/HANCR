@@ -4,6 +4,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+ import '../../core/motion/motion.dart';
 import '../support/support_chat_screen.dart';
 
 /// الدعم والشكاوى — تقديم شكوى وعرض حالتها وخطّها الزمني (read-only).
@@ -105,7 +106,7 @@ class _SupportScreenState extends State<SupportScreen> {
           top: false,
           child: _loading
               ? Center(
-                  child: CircularProgressIndicator(color: AuroraColors.ember))
+                  child: AuroraLoader(size: 36))
               : _error != null
                   ? Center(child: Text(_error!, style: AuroraText.bodyMedium))
                   : _complaints.isEmpty
@@ -168,7 +169,7 @@ class _SupportScreenState extends State<SupportScreen> {
                       .copyWith(color: AuroraColors.success)),
             ],
             if (activities.isNotEmpty) ...[
-              const Divider(color: AuroraColors.border),
+              Divider(color: AuroraColors.border),
               ...activities.map((a) {
                 final mine = a['type'] == 'rider_message';
                 return Padding(
@@ -322,7 +323,7 @@ class _SupportScreenState extends State<SupportScreen> {
                     fillColor: AuroraColors.ash,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AuroraRadius.md),
-                      borderSide: const BorderSide(color: AuroraColors.border),
+                      borderSide: BorderSide(color: AuroraColors.border),
                     ),
                   ),
                 ),

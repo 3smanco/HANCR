@@ -124,13 +124,13 @@ class _DestinationBottomSheetState extends State<DestinationBottomSheet> {
                 autofocus: true,
                 decoration: InputDecoration(
                   hintText: 'Search destination',
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.location_on,
                     color: HancrColors.accent,
                   ),
                   suffixIcon: _ctrl.text.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear),
+                          icon: Icon(Icons.clear),
                           onPressed: () => _ctrl.clear(),
                         )
                       : null,
@@ -155,7 +155,7 @@ class _DestinationBottomSheetState extends State<DestinationBottomSheet> {
                         color: HancrColors.surfaceVariant,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.location_on_outlined,
                         color: HancrColors.textSecondary,
                         size: 20,

@@ -7,6 +7,7 @@ import '../../core/i18n/app_localization.dart';
 import '../../core/models/order_model.dart';
 import '../../core/models/service_model.dart';
 import '../../core/widgets/aurora/aurora.dart';
+ import '../../core/motion/motion.dart';
 
 /// Grocery Run — يطلب الراكب من سائق شراء قائمة بقالة ضمن ميزانية محددة
 /// وتوصيلها إلى عنوانه. يُستخدم نوع خدمة PackageDelivery الموجود + shoppingList.
@@ -204,7 +205,7 @@ class _AuroraGroceryScreenState extends State<AuroraGroceryScreen> {
       ),
       body: _loading
           ? Center(
-              child: CircularProgressIndicator(color: AuroraColors.ember))
+              child: AuroraLoader(size: 36))
           : ListView(
               padding: const EdgeInsets.all(AuroraSpacing.lg),
                 children: [
@@ -369,7 +370,7 @@ class _AuroraGroceryScreenState extends State<AuroraGroceryScreen> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.remove_circle_outline,
+                icon: Icon(Icons.remove_circle_outline,
                     color: AuroraColors.textSecondary),
                 onPressed: _itemQty > 1
                     ? () => setState(() => _itemQty--)

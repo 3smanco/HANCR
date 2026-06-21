@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -263,6 +264,16 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
                     Motion.reduceMotion =
                         MediaQuery.of(context).disableAnimations ||
                             ThemeController.instance.simpleMode;
+                    // شريط الحالة يتبع السكين (أيقونات داكنة على الفاتح).
+                    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+                      statusBarColor: Colors.transparent,
+                      statusBarIconBrightness: AuroraColors.activeSkin == 'light'
+                          ? Brightness.dark
+                          : Brightness.light,
+                      statusBarBrightness: AuroraColors.activeSkin == 'light'
+                          ? Brightness.light
+                          : Brightness.dark,
+                    ));
                     return MediaQuery(
                       data: MediaQuery.of(context).copyWith(
                         textScaler: TextScaler.linear(

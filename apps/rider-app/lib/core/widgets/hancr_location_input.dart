@@ -137,7 +137,7 @@ class _LocationRow extends StatelessWidget {
                 ),
               ),
               if (!isEmpty)
-                const Icon(
+                Icon(
                   Icons.close_rounded,
                   size: 18,
                   color: HancrColors.textHint,
@@ -223,7 +223,7 @@ class HancrSavedPlaceRow extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
                 size: 22,
                 color: HancrColors.textHint,

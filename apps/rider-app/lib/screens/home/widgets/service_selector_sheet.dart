@@ -141,7 +141,7 @@ class _ServiceSelectorSheetState extends State<ServiceSelectorSheet> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.directions_car_filled_outlined,
                         size: 56,
                         color: HancrColors.textHint,
@@ -194,7 +194,7 @@ class _ServiceSelectorSheetState extends State<ServiceSelectorSheet> {
                                 color: HancrColors.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.directions_car,
                                 color: HancrColors.primary,
                                 size: 26,
