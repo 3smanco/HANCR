@@ -275,7 +275,13 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
-- **🟦 التجديد البصري — الدفعة R5 (الراكب — المحفظة/النشاط/الولاء) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
+- **🟦 التجديد البصري — الدفعة R6 (الراكب — المظهر/الحساب) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`. **بهذا يكتمل تطبيق الراكب (R1–R6).**
+  - **المظهر (`appearance_screen`):** منتقي السكين فاتح/داكن/تلقائي يعمل فعلياً (theme:light مفعّل). تنويه «تدريجي» لغير الداكن (معظم الشاشات تُثبّت AuroraColors الداكنة حالياً فلا يظهر الفاتح كاملاً حتى الترحيل لـ`context.c`).
+  - **انتظار المزايدة (`aurora_bid_waiting`):** سعرك `CountUpText` + `AuroraLoader`.
+  - **⚠️ متبقٍّ للراكب (تمريرة لاحقة):** ترحيل الشاشات إلى `context.c` لإظهار الفاتح/VIP كاملاً + سحب `CircularProgressIndicator→AuroraLoader` المتبقّي (~21 ملف).
+  - **⏭️ بناء APK مجمّع (R5+R6) + نشره ثم تطبيق السائق (D1–D5).**
+
+- **🟩 التجديد البصري — الدفعة R5 (الراكب — المحفظة/النشاط/الولاء) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
   - **المحفظة:** رصيد `CountUpText` + `AuroraLoader` + معاملات بدخول `fadeSlideIn` متدرّج + لودر كود الهدية.
   - **النشاط (`aurora_rides`):** **skeleton list** أثناء التحميل (بدل spinner) + بطاقات الرحلات بدخول متدرّج.
   - **الولاء (`loyalty_tab`، شاشة legacy HancrColors):** ميل `CountUpText` + شريط تقدّم متحرك (TweenAnimationBuilder) + `AuroraLoader`. (الترحيل الكامل لـAurora مؤجَّل — خارج نطاق R5.)
