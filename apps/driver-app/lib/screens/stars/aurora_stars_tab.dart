@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/driver/driver_bloc.dart';
 import '../../blocs/driver/driver_state.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/motion/motion.dart';
 
 /// AuroraStarsTab — نظام النجوم (loyalty) للسائق بنمط Aurora.
 class AuroraStarsTab extends StatelessWidget {
@@ -18,9 +19,7 @@ class AuroraStarsTab extends StatelessWidget {
           child: BlocBuilder<DriverBloc, DriverState>(
             builder: (ctx, state) {
               if (state is! DriverLoaded) {
-                return Center(
-                  child: CircularProgressIndicator(color: AuroraColors.ember),
-                );
+                return const Center(child: AuroraLoader(size: 40));
               }
               final d = state.driver;
               final stars = state.stars;
@@ -55,8 +54,10 @@ class AuroraStarsTab extends StatelessWidget {
                             Icon(Icons.workspace_premium,
                                 color: AuroraColors.obsidian, size: 24),
                             const SizedBox(width: AuroraSpacing.sm),
-                            Text(
-                              '${(stars?.totalStars ?? 0).toStringAsFixed(1)} ⭐',
+                            CountUpText(
+                              value: (stars?.totalStars ?? 0),
+                              fractionDigits: 1,
+                              suffix: ' ⭐',
                               style: AuroraText.titleMedium.copyWith(
                                 color: AuroraColors.obsidian,
                               ),

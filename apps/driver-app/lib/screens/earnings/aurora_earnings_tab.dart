@@ -1,11 +1,11 @@
 import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import '../../blocs/driver/driver_bloc.dart';
 import '../../blocs/driver/driver_state.dart';
 import '../../core/utils/external_launch.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/motion/motion.dart';
 import '../wallet/aurora_driver_wallet_screen.dart';
 import '../wallet/aurora_payout_methods_screen.dart';
 import 'earnings_insights.dart';
@@ -33,9 +33,7 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
           child: BlocBuilder<DriverBloc, DriverState>(
             builder: (ctx, state) {
               if (state is DriverLoading) {
-                return Center(
-                  child: CircularProgressIndicator(color: AuroraColors.ember),
-                );
+                return const Center(child: AuroraLoader(size: 40));
               }
               if (state is DriverLoaded) {
                 final d = state.driver;
@@ -64,14 +62,14 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
                           icon: Icons.directions_car,
                           label: tr('trips'),
                           value: '${d.ratingCount}',
-                        )),
+                        ).popIn(index: 0)),
                         const SizedBox(width: AuroraSpacing.sm),
                         Expanded(child: _statCard(
                           icon: Icons.star,
                           label: tr('rating'),
                           value: d.rating.toStringAsFixed(1),
                           iconColor: AuroraColors.gold,
-                        )),
+                        ).popIn(index: 1)),
                       ],
                     ),
                     const SizedBox(height: AuroraSpacing.sm),
@@ -81,13 +79,13 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
                           icon: Icons.timer,
                           label: tr('hours'),
                           value: '0h',
-                        )),
+                        ).popIn(index: 2)),
                         const SizedBox(width: AuroraSpacing.sm),
                         Expanded(child: _statCard(
                           icon: Icons.straighten,
                           label: tr('kilometers'),
                           value: '0',
-                        )),
+                        ).popIn(index: 3)),
                       ],
                     ),
 
@@ -189,7 +187,6 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
 
   // ─────────────────────────────────────────────────────────────
   Widget _balanceHero(double balance, String currency, double rating) {
-    final fmt = NumberFormat('#,##0.00', 'ar');
     return Container(
       padding: const EdgeInsets.all(AuroraSpacing.xxl),
       decoration: BoxDecoration(
@@ -241,8 +238,9 @@ class _AuroraEarningsTabState extends State<AuroraEarningsTab> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                fmt.format(balance),
+              CountUpText(
+                value: balance,
+                fractionDigits: 2,
                 style: AuroraText.displayLarge.copyWith(
                   color: AuroraColors.pearl,
                   fontSize: 44,

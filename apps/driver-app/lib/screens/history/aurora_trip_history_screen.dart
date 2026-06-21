@@ -5,6 +5,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/order_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/motion/motion.dart';
 
 /// AuroraTripHistoryScreen — سجل رحلات السائق المكتملة (completedOrders).
 class AuroraTripHistoryScreen extends StatefulWidget {
@@ -60,9 +61,7 @@ class _AuroraTripHistoryScreenState extends State<AuroraTripHistoryScreen> {
       body: AuroraBackground(
         child: SafeArea(
           child: _loading && _orders.isEmpty
-              ? Center(
-                  child:
-                      CircularProgressIndicator(color: AuroraColors.ember))
+              ? const Center(child: AuroraLoader(size: 40))
               : _orders.isEmpty
                   ? _empty()
                   : ListView.separated(
@@ -73,14 +72,12 @@ class _AuroraTripHistoryScreenState extends State<AuroraTripHistoryScreen> {
                       itemBuilder: (ctx, i) {
                         if (i >= _orders.length) {
                           _load();
-                          return Padding(
-                            padding: const EdgeInsets.all(AuroraSpacing.md),
-                            child: Center(
-                                child: CircularProgressIndicator(
-                                    color: AuroraColors.ember)),
+                          return const Padding(
+                            padding: EdgeInsets.all(AuroraSpacing.md),
+                            child: Center(child: AuroraLoader(size: 28)),
                           );
                         }
-                        return _tripCard(_orders[i]);
+                        return _tripCard(_orders[i]).fadeSlideIn(index: i);
                       },
                     ),
         ),
