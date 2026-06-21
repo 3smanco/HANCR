@@ -7,6 +7,7 @@ import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/motion/motion.dart';
 
 /// AuroraOtpScreen — تحقق من الـ OTP بنمط Aurora.
 class AuroraOtpScreen extends StatefulWidget {
@@ -28,6 +29,7 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
   final _referralCtrl = TextEditingController();
   final _twoFaCtrl = TextEditingController();
   int _resendIn = 30;
+  int _failCount = 0; // يُحرّك اهتزاز حقل الرمز عند الخطأ
 
   @override
   void initState() {
@@ -139,6 +141,12 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
               context.go('/home');
             }
             if (state is AuthError) {
+              // اهتزاز + اهتزاز لمسي + مسح الرمز لإعادة المحاولة
+              Haptics.warning();
+              setState(() {
+                _failCount++;
+                _otpCtrl.clear();
+              });
               ScaffoldMessenger.of(ctx).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
@@ -227,8 +235,10 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
 
                     const SizedBox(height: AuroraSpacing.huge),
 
-                    // ─── PIN code field ───
-                    PinCodeTextField(
+                    // ─── PIN code field (يهتزّ عند الخطأ) ───
+                    Shake(
+                      trigger: _failCount,
+                      child: PinCodeTextField(
                       appContext: context,
                       length: 6,
                       controller: _otpCtrl,
@@ -254,6 +264,7 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                       ),
                       onCompleted: _verify,
                       onChanged: (_) {},
+                    ),
                     ),
 
                     const SizedBox(height: AuroraSpacing.lg),

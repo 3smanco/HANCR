@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/widgets/car_art.dart';
 import '../../core/motion/motion.dart';
 
 /// SplashScreen — Aurora design (dark obsidian + ember glow).
@@ -102,15 +103,14 @@ class _SplashScreenState extends State<SplashScreen>
                         letterSpacing: 1,
                       ),
                     ),
-                    const SizedBox(height: 40),
-                    SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation(AuroraColors.ember),
-                      ),
-                    ),
+                    const SizedBox(height: 28),
+                    // سيارة بطلة تنساب للداخل
+                    const CarArt(type: CarType.luxury, size: Size(132, 60))
+                        .animate()
+                        .fadeIn(duration: Motion.slow, delay: Motion.base)
+                        .slideX(begin: -0.5, end: 0, curve: Motion.decelerate),
+                    const SizedBox(height: 28),
+                    const AuroraLoader(size: 30),
                   ],
                 ),
               ),

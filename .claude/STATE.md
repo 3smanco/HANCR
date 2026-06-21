@@ -275,7 +275,15 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
-- **🟦 التجديد البصري الشامل + الحركة — الدفعة 0 (الأساس) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: rider/driver-app `flutter analyze=0 errors`. (الخطة: `~/.claude/plans/gleaming-snuggling-wind.md`.)
+- **🟦 التجديد البصري — الدفعة R1 (الراكب — الانطباع الأول) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
+  - **Splash:** استبدال spinner بـ`AuroraLoader` + سيارة بطلة (`CarArt.luxury`) تنساب للداخل.
+  - **القشرة (`aurora_main_screen`):** انتقال `AnimatedSwitcher` (fade+slide) بين التبويبات.
+  - **OTP (`aurora_otp_screen`):** `Shake` على حقل الرمز + `Haptics.warning` + مسح الرمز عند الخطأ (عدّاد `_failCount`).
+  - **الهاتف (`aurora_phone_screen`):** استبدال أيقونة السيارة بـ`CarArt.luxury` متحركة فوق هالة ember + خط أرضية.
+  - **انتقالات go_router (app.dart):** auth=`sharedAxis` · home/splash/tracking=`fade` · book/wallet/ai/rate=`slideUp` (عبر `AppTransitions`).
+  - **⏭️ بناء APK الراكب + نشره ثم الدفعة R2.**
+
+- **🟩 التجديد البصري الشامل + الحركة — الدفعة 0 (الأساس) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: rider/driver-app `flutter analyze=0 errors`. (الخطة: `~/.claude/plans/gleaming-snuggling-wind.md`.)
   - **نظام السكينين:** `AuroraTokens extends ThemeExtension` (dawn فاتح / aurora داكن / vip نيون) + `lerp` + `context.c` في `core/theme/aurora_theme.dart`. `AuroraTheme.light/_build(brightness,tk)` يحقن الـextension. الراكب: `theme:light + darkTheme:dark` (الافتراضي داكن عبر ThemeController حتى يكتمل السحب). السائق: داكن فقط (كوكبت).
   - **حركة v2 (كود أصلي، بلا حِزَم جديدة):** `core/motion/` += `count_up · glass (BackdropFilter) · aurora_loader · stagger · shake · parallax · confetti_burst (CustomPainter) · animated_car_marker (سيارة top-down BitmapDescriptor + MarkerInterpolator موضع/اتجاه) · animated_polyline (رسم تدريجي)`. بوابة `Motion.reduceMotion` (تُضبط في app.dart من `MediaQuery.disableAnimations`+الوضع المبسّط). barrel `motion.dart` محدّث.
   - **رسوم السيارات:** `core/widgets/car_art.dart` (CarArt: sedan/suv/bike/van/luxury عبر CustomPainter — قابلة للاستبدال بـSVG/3D لاحقاً).
