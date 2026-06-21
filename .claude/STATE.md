@@ -275,10 +275,18 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
+- **🟦 نظام الدعم — الدفعة 4: شات الدعم الحي (راكب↔موظف) — الكود مكتمل ومُتحقَّق (2026-06-21).** التحقق: rider/admin-api `tsc=0` · admin-panel `tsc=0` · rider-app `flutter analyze=0 errors`.
+  - **DB (جديد):** `SupportConversationEntity` (riderId, status[open/assigned/closed], assignedAgentId, lastMessageAt) + `SupportMessageEntity` (conversationId, senderType[rider/agent], senderId, body, imageUrl, isRead) + migration `1782100000000` (مسجَّلان في index.ts + data-source.ts).
+  - **rider-api (`support-chat/`):** `mySupportConversation` (get-or-create) · `supportMessages(conversationId)` (يعلّم رسائل الموظف مقروءة) · `sendSupportMessage(conversationId,body,imageUrl?)` (يعيد فتح المُغلقة) · subscription `supportMessageAdded` (قناة `SUPPORT_MESSAGE_ADDED` عبر RedisPubSub).
+  - **admin-api (`support-chat/`):** `supportConversations(status?)` (طابور + اسم/هاتف الراكب + آخر رسالة + غير مقروء) · `supportConversationDetail(id)` (يعلّم مقروء) · `sendAgentSupportMessage` (إسناد تلقائي للموظف الأول + status=assigned + ينشر لنفس القناة فيصل الراكب) · `assignSupportConversation` · `closeSupportConversation` · subscription.
+  - **التطبيق (راكب):** `screens/support/support_chat_screen.dart` (شات Aurora فوري) + مدخل من `support_screen` (أيقونة forum) + i18n `liveSupport`/`supportChatEmpty`.
+  - **الأدمن:** صفحة `/support` (طابور + thread حيّ عبر WS + ردود جاهزة canned + sidebar سياق الراكب + اتصال/إغلاق) + عنصر شريط جانبي `nav.support`.
+  - **⏭️ النشر:** rider-api+admin-api restart + migration (`1782100000000`) + admin-panel build + APK راكب (لا سائق). **لم يُنشر بعد.**
+
 - **🟩 نظام الدعم — الدفعة 3: تحسين الشات (راكب↔سائق) — مكتمل ومُتحقَّق (2026-06-20).** التحقق: rider/driver-api `tsc=0` · rider+driver-app `flutter analyze=0`.
   - **Backend:** `OrderMessageEntity.imageUrl` + migration `1782000000000`. كلا الـAPIs (chat): `sendOrderMessage(imageUrl?)` + `setOrderTyping` + `markOrderMessagesRead` + subscriptions `orderTyping`/`orderMessagesRead` (قنوات `ORDER_TYPING`/`ORDER_READ` عبر RedisPubSub، filter يستثني نفس الطرف).
   - **التطبيقان (chat screens):** مؤشّر "يكتب الآن…" (إرسال throttled 2ث + اشتراك يُخفى بعد 3ث) · ✓/✓✓ على فقاعاتي (isRead + اشتراك القراءة) · عرض صور الرسائل · **إرفاق صورة** (الراكب عبر `RiderUploadService` presigned؛ السائق عرض فقط) · `markRead` عند الفتح/الوصول.
-  - **⏭️ النشر:** rider-api+driver-api restart + migration (image_url) + APK راكب+سائق (لا أدمن). **لم يُنشر بعد.**
+  - **✅ منشور ومُتحقَّق حيّاً (2026-06-20، PR #164، main=3ea0256):** migration `image_url` مطبَّق · rider-api+driver-api restart → `health/ready=200` · `setOrderTyping`/`markOrderMessagesRead` حيّان · APK الراكب (47,077,235) والسائق (44,966,196) → HTTP 200 مطابقان. **التالي: الدفعة 4 (شات الدعم الحي راكب↔موظف — الأضخم).**
 
 - **🟩 نظام الدعم — الدفعة 2: إكمال التذاكر (Helpdesk) — مكتمل ومُتحقَّق (2026-06-20).** التحقق: rider/admin-api `tsc=0` · rider-app `flutter analyze=0` · ملفات admin-panel نظيفة.
   - **Backend:** `ComplaintEntity.dueAt` (SLA) + migration `1781900000000`. rider-api: `replyToComplaint(complaintId,message,imageUrl?)` (activity `rider_message` + يعيد فتح المُغلقة) + `dueAt=now+24h` عند الإنشاء. admin-api: `assignComplaint` + `refundComplaint(amount, voucher)` (يلفّ `WalletsService.adjust` لإضافة رصيد للمُبلِّغ + activity refund/voucher) + `assignedTo`/`dueAt` في AdminComplaintType.

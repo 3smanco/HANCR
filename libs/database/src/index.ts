@@ -12,6 +12,8 @@ export { RiderEntity } from './lib/entities/rider.entity';
 export { RiderDeviceEntity } from './lib/entities/rider-device.entity';
 export { SavedGroupEntity } from './lib/entities/saved-group.entity';
 export type { SavedGroupMember } from './lib/entities/saved-group.entity';
+export { SupportConversationEntity } from './lib/entities/support-conversation.entity';
+export { SupportMessageEntity } from './lib/entities/support-message.entity';
 export { DriverEntity } from './lib/entities/driver.entity';
 export { OrderEntity } from './lib/entities/order.entity';
 export { LoyaltyEntity } from './lib/entities/loyalty.entity';

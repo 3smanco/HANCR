@@ -993,4 +993,11 @@ const Map<String, Map<String, String>> _t = {
 
   // ─── الشات ───
   'typingNow': {'ar': 'يكتب الآن…', 'en': 'Typing…'},
+
+  // ─── شات الدعم الحي ───
+  'liveSupport': {'ar': 'الدعم المباشر', 'en': 'Live support'},
+  'supportChatEmpty': {
+    'ar': 'ابدأ المحادثة وسيردّ عليك فريق الدعم في أقرب وقت.',
+    'en': 'Start the conversation and our support team will reply shortly.'
+  },
 };

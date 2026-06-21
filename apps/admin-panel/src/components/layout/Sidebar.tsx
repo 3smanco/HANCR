@@ -21,6 +21,7 @@ import {
   Building2,
   Wallet,
   AlertOctagon,
+  MessageSquare,
   Users2,
   Megaphone,
   Banknote,
@@ -44,6 +45,7 @@ const NAV_GROUPS = [
       { key: 'nav.crossCity', icon: MapPin, href: '/cross-city' },
       { key: 'nav.sos', icon: ShieldAlert, href: '/sos' },
       { key: 'nav.complaints', icon: AlertOctagon, href: '/complaints' },
+      { key: 'nav.support', icon: MessageSquare, href: '/support' },
     ],
   },
   {

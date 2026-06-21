@@ -684,6 +684,47 @@ export const ADD_COMPLAINT_NOTE = gql`
   }
 `;
 
+// ─── شات الدعم الحي (Agent console) ───
+export const SUPPORT_CONVERSATIONS = gql`
+  query SupportConversations($status: String) {
+    supportConversations(status: $status) {
+      id riderId riderName riderPhone status assignedAgentId
+      lastMessageAt lastMessage unreadCount createdAt
+    }
+  }
+`;
+
+export const SUPPORT_CONVERSATION_DETAIL = gql`
+  query SupportConversationDetail($id: Int!) {
+    supportConversationDetail(id: $id) {
+      id riderId riderName riderPhone status assignedAgentId createdAt
+      messages { id senderType senderId body imageUrl isRead createdAt }
+    }
+  }
+`;
+
+export const SEND_AGENT_SUPPORT_MESSAGE = gql`
+  mutation SendAgentSupportMessage($conversationId: Int!, $body: String!) {
+    sendAgentSupportMessage(conversationId: $conversationId, body: $body) {
+      id conversationId senderType body createdAt
+    }
+  }
+`;
+
+export const CLOSE_SUPPORT_CONVERSATION = gql`
+  mutation CloseSupportConversation($conversationId: Int!) {
+    closeSupportConversation(conversationId: $conversationId)
+  }
+`;
+
+export const SUPPORT_MESSAGE_ADDED_SUB = gql`
+  subscription SupportMessageAdded($conversationId: Int!) {
+    supportMessageAdded(conversationId: $conversationId) {
+      id conversationId senderType senderId body imageUrl isRead createdAt
+    }
+  }
+`;
+
 export const ASSIGN_COMPLAINT = gql`
   mutation AssignComplaint($complaintId: Int!, $assigneeId: Int!) {
     assignComplaint(complaintId: $complaintId, assigneeId: $assigneeId) {
