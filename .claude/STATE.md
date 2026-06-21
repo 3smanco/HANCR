@@ -275,12 +275,18 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
-- **🟦 التجديد البصري — الدفعتان R3+R4 (الراكب — الحجز + التتبّع الحي) — مكتملتان ومُتحقَّقتان (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
+- **🟦 التجديد البصري — الدفعة R5 (الراكب — المحفظة/النشاط/الولاء) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
+  - **المحفظة:** رصيد `CountUpText` + `AuroraLoader` + معاملات بدخول `fadeSlideIn` متدرّج + لودر كود الهدية.
+  - **النشاط (`aurora_rides`):** **skeleton list** أثناء التحميل (بدل spinner) + بطاقات الرحلات بدخول متدرّج.
+  - **الولاء (`loyalty_tab`، شاشة legacy HancrColors):** ميل `CountUpText` + شريط تقدّم متحرك (TweenAnimationBuilder) + `AuroraLoader`. (الترحيل الكامل لـAurora مؤجَّل — خارج نطاق R5.)
+  - **⏭️ النشر يُجمَّع في APK مع R6 (آخر دفعة راكب).**
+
+- **🟩 التجديد البصري — الدفعتان R3+R4 (الراكب — الحجز + التتبّع الحي) — مكتملتان ومنشورتان (2026-06-21، PR #169، APK مجمّع 47,142,855 HTTP 200).** التحقق: rider-app `flutter analyze=0 errors`.
   - **R4 التتبّع (`aurora_tracking_screen`):** **السيارة top-down (CarMarkerFactory) تنساب موضعاً واتجاهاً** عبر `MarkerInterpolator` (بدل القفز) + **رسم المسار تدريجياً** (`PolylineReveal`) + استبدال spinner بـ`AuroraLoader`.
   - **R4 التقييم (`aurora_rate_driver_screen`):** `ConfettiBurst` احتفال إتمام الرحلة + `AuroraLoader`.
   - **R3 الحجز (`aurora_booking_screen`):** بطاقات الخدمة بسيارات `CarArt` (luxury/van/sedan حسب النوع) + أجرة `CountUpText` + **ورقة سفلية زجاجية** (BackdropFilter blur فوق الخريطة) + `AuroraLoader` للخدمات والكوبون.
   - **مؤجَّل:** تبديل سكين VIP الكامل على ورقة الحجز يحتاج ترحيل الشاشة إلى `context.c` (يُجمع في تمريرة الترحيل لاحقاً)؛ السكين الفاتح/VIP نفسه موجود (الأساس) وسيُتاح للمستخدم في R6 (Appearance).
-  - **⏭️ بناء APK مجمّع (R2+R3+R4) + نشره ثم R5.**
+  - **✅ APK مجمّع (R2+R3+R4) منشور (2026-06-21، 47,142,855 HTTP 200).** ⏭️ التالي R5 (المحفظة/النشاط/الولاء).
 
 - **🟩 التجديد البصري — الدفعة R2 (الراكب — الرئيسية والاكتشاف) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
   - **الرئيسية (`aurora_home_tab`):** skeleton للبانرات أثناء التحميل (`_bannersLoading`) + `fadeSlideIn` للبانرات عند الوصول.

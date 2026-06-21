@@ -10,6 +10,7 @@ import '../../core/models/order_model.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../../core/widgets/rider_avatar.dart';
+import '../../core/motion/motion.dart';
 import 'trip_help_form_screen.dart';
 
 /// أيقونة حسب نوع الخدمة.
@@ -50,8 +51,7 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
     return BlocBuilder<OrderBloc, OrderState>(
       builder: (ctx, state) {
         if (state is OrderLoading) {
-          return Center(
-              child: CircularProgressIndicator(color: AuroraColors.ember));
+          return _skeletonList();
         }
         if (state is OrderHistoryLoaded) {
           if (state.orders.isEmpty) return _empty();
@@ -65,13 +65,52 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
               padding: EdgeInsets.fromLTRB(AuroraSpacing.lg, AuroraSpacing.lg,
                   AuroraSpacing.lg, widget.bottomInset),
               itemCount: state.orders.length,
-              itemBuilder: (_, i) => _rideCard(context, state.orders[i]),
+              itemBuilder: (_, i) =>
+                  _rideCard(context, state.orders[i]).fadeSlideIn(index: i),
             ),
           );
         }
         // حالات أخرى (idle/active) — اطلب السجل
         return _empty();
       },
+    );
+  }
+
+  /// هياكل تحميل (skeleton) لقائمة الرحلات أثناء الجلب.
+  Widget _skeletonList() {
+    return SkeletonGroup(
+      child: ListView.builder(
+        padding: EdgeInsets.fromLTRB(AuroraSpacing.lg, AuroraSpacing.lg,
+            AuroraSpacing.lg, widget.bottomInset),
+        itemCount: 7,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (_, __) => Container(
+          margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
+          padding: const EdgeInsets.all(AuroraSpacing.md),
+          decoration: BoxDecoration(
+            color: AuroraColors.ash,
+            borderRadius: BorderRadius.circular(AuroraRadius.md),
+          ),
+          child: Row(
+            children: [
+              const SkeletonBox(width: 44, height: 44, radius: AuroraRadius.sm),
+              const SizedBox(width: AuroraSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    SkeletonBox(width: 160, height: 13),
+                    SizedBox(height: 8),
+                    SkeletonBox(width: 90, height: 10),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AuroraSpacing.md),
+              const SkeletonBox(width: 48, height: 13),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
