@@ -275,6 +275,13 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
+- **🟦 التجديد البصري — الصقل العام (الختام) — مكتمل برمجياً ومُتحقَّق (2026-06-21).** التحقق: rider+driver `flutter analyze=0 errors`.
+  - **reduce-motion:** بوابة في `entrance.dart` (fadeSlideIn/popIn/fadeInRight تُرجع الطفل فوراً عند التفعيل) + `page_transitions` تستخدم `Motion.dur` (انتقالات فورية). يغطّي كل الشاشات في التطبيقين (الملفات مشتركة).
+  - **توحيد الانتقالات:** السائق app.dart صار يستخدم `AppTransitions` (sharedAxis/fade/slideUp) مثل الراكب.
+  - **قلب الافتراضي:** الراكب الجديد افتراضه «تلقائي/system» (السكينان مفعّلان، يتبع سطوع الجهاز)؛ المستخدم الحالي يبقى على اختياره المحفوظ.
+  - **⚠️ لم يُنفَّذ (يحتاج جهازاً):** فحص RTL + الوضع المبسّط حيّاً، وQA نهائي على arm64 — لا أستطيع تشغيل جهاز في هذه البيئة؛ الكود مُهيّأ لكن يلزم تأكيدك البصري (خاصة وضوح السكين الفاتح).
+  - **⏭️ بناء APK الراكب + السائق.**
+
 - **🟦 التجديد البصري — تفعيل السكين الفاتح/VIP فعلياً (الراكب) + سحب الدوّارات — مكتمل ومُتحقَّق (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
   - **آلية السكين:** حوّلت كل حقول `AuroraColors` إلى mutable + أضفت `AuroraColors.applySkin('dark'|'light'|'vip')` (لوحات كاملة). `ThemeController` يطبّق السكين عبر `_repaint()` (applySkin ثم SDUI فوقه للسكين الداكن فقط)؛ `appearanceMode` صار يدعم `vip`؛ `_skinFor()` يحلّ `system` حسب سطوع الجهاز. كل MaterialApp يُعاد بناؤه (version bump) فتلتقط **كل الشاشات** (التي تقرأ AuroraColors.*) السكين فوراً **دون ترحيل context.c لكل شاشة**.
   - **إصلاح ~51 موقع `const`** كان يقرأ ألواناً صارت mutable (BorderSide/Icon/Divider/Border/InputDecoration…) — معظمها بـsed آمن.
@@ -283,7 +290,7 @@ flutter build apk --release --dart-define=ENV=production \
   - **سحب الدوّارات:** 16 شاشة `CircularProgressIndicator→AuroraLoader` (+ إضافة motion import آلياً).
   - **السائق:** يبقى داكناً فقط (كوكبت) — لم يُمسّ (لا حاجة لإصلاح const فيه).
   - **Lottie الاحتفالية:** الاحتفال يتم بالكود (ConfettiBurst + SuccessCheck)؛ ملفات Lottie حقيقية تحتاج أصول مصمِّم (مؤجَّلة، البنية lottie_view جاهزة).
-  - **⏭️ بناء APK الراكب + نشره.**
+  - **✅ APK الراكب منشور (2026-06-21، 47,142,899 HTTP 200) — السكين الفاتح/VIP يعمل على كل الشاشات.**
 
 - **🟦 التجديد البصري — الدفعتان D4+D5 (السائق — الأرباح/النجوم/الحساب) — مكتملتان ومُتحقَّقتان (2026-06-21).** التحقق: driver-app `flutter analyze=0 errors`. **بهذا يكتمل تطبيق السائق (D1–D5) والبرنامج كله.**
   - **D4:** الأرباح (رصيد `CountUpText` + إحصاءات `popIn` + `AuroraLoader`) · النجوم (نجوم `CountUpText` + `AuroraLoader`) · المحفظة (رصيد `CountUpText` + معاملات `fadeSlideIn` + لودرات).

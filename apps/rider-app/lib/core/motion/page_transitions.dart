@@ -14,8 +14,8 @@ class AppTransitions {
   static CustomTransitionPage<T> fade<T>(Widget child, {LocalKey? key}) {
     return CustomTransitionPage<T>(
       key: key,
-      transitionDuration: Motion.base,
-      reverseTransitionDuration: Motion.fast,
+      transitionDuration: Motion.dur(Motion.base),
+      reverseTransitionDuration: Motion.dur(Motion.fast),
       child: child,
       transitionsBuilder: (context, a, secondary, c) => FadeTransition(
         opacity: CurvedAnimation(parent: a, curve: Motion.standard),
@@ -28,8 +28,8 @@ class AppTransitions {
   static CustomTransitionPage<T> slideUp<T>(Widget child, {LocalKey? key}) {
     return CustomTransitionPage<T>(
       key: key,
-      transitionDuration: Motion.sheet,
-      reverseTransitionDuration: Motion.base,
+      transitionDuration: Motion.dur(Motion.sheet),
+      reverseTransitionDuration: Motion.dur(Motion.base),
       child: child,
       transitionsBuilder: (context, a, secondary, c) {
         final slide = Tween<Offset>(
@@ -48,7 +48,7 @@ class AppTransitions {
   static CustomTransitionPage<T> sharedAxis<T>(Widget child, {LocalKey? key}) {
     return CustomTransitionPage<T>(
       key: key,
-      transitionDuration: Motion.base,
+      transitionDuration: Motion.dur(Motion.base),
       child: child,
       transitionsBuilder: (context, a, secondary, c) {
         final inOff = Tween<Offset>(

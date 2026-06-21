@@ -18,6 +18,7 @@ import 'core/services/push_service.dart';
 import 'core/theme/aurora_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'core/motion/motion_tokens.dart';
+import 'core/motion/page_transitions.dart';
 import 'screens/auth/aurora_otp_screen.dart';
 import 'screens/auth/aurora_phone_screen.dart';
 import 'screens/auth/aurora_email_screen.dart';
@@ -85,37 +86,45 @@ class _HancrCaptainAppState extends State<HancrCaptainApp> {
         return null;
       },
       routes: [
-        GoRoute(path: '/splash', builder: (ctx, st) => const SplashScreen()),
+        GoRoute(
+            path: '/splash',
+            pageBuilder: (_, __) => AppTransitions.fade(const SplashScreen())),
         GoRoute(
             path: '/auth/phone',
-            builder: (ctx, st) => const AuroraPhoneScreen()),
+            pageBuilder: (_, __) =>
+                AppTransitions.sharedAxis(const AuroraPhoneScreen())),
         GoRoute(
           path: '/auth/otp',
-          builder: (_, state) {
+          pageBuilder: (_, state) {
             final extra = state.extra as Map<String, dynamic>?;
-            return AuroraOtpScreen(
+            return AppTransitions.sharedAxis(AuroraOtpScreen(
               phone: extra?['phone'] as String? ?? '',
               devOtp: extra?['devOtp'] as String?,
-            );
+            ));
           },
         ),
         GoRoute(
             path: '/auth/email',
-            builder: (ctx, st) => const AuroraEmailScreen()),
+            pageBuilder: (_, __) =>
+                AppTransitions.sharedAxis(const AuroraEmailScreen())),
         GoRoute(
           path: '/auth/email-otp',
-          builder: (_, state) {
+          pageBuilder: (_, state) {
             final extra = state.extra as Map<String, dynamic>?;
-            return AuroraEmailOtpScreen(
+            return AppTransitions.sharedAxis(AuroraEmailOtpScreen(
               email: extra?['email'] as String? ?? '',
               devOtp: extra?['devOtp'] as String?,
-            );
+            ));
           },
         ),
         GoRoute(
             path: '/onboarding',
-            builder: (ctx, st) => const AuroraOnboardingScreen()),
-        GoRoute(path: '/home', builder: (ctx, st) => const AuroraDriverHome()),
+            pageBuilder: (_, __) =>
+                AppTransitions.slideUp(const AuroraOnboardingScreen())),
+        GoRoute(
+            path: '/home',
+            pageBuilder: (_, __) =>
+                AppTransitions.fade(const AuroraDriverHome())),
       ],
     );
   }

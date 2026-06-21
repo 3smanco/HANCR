@@ -105,10 +105,12 @@ class ThemeController extends ChangeNotifier {
 
     // 0) تحميل تفضيل المظهر + الوضع البسيط المخزَّنين.
     try {
-      _appearanceMode = await StorageService.getAppearance() ?? 'dark';
+      // الافتراضي للمستخدمين الجدد: «تلقائي» (يتبع سطوع الجهاز، السكينان مفعّلان).
+      // مَن اختار سابقاً يبقى على اختياره المحفوظ.
+      _appearanceMode = await StorageService.getAppearance() ?? 'system';
       _simpleMode = await StorageService.getSimpleMode();
     } catch (_) {
-      _appearanceMode = 'dark';
+      _appearanceMode = 'system';
     }
 
     // 1) تحميل كاش إعداد SDUI (إن وُجد) ثم طلاء السكين + SDUI عبر _repaint.
