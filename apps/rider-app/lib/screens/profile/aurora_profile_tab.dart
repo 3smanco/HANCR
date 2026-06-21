@@ -602,7 +602,7 @@ class AuroraProfileTab extends StatelessWidget {
             style: AuroraText.caption.copyWith(color: AuroraColors.ember),
           ),
           if (onTap != null)
-            const Icon(Icons.chevron_left,
+            Icon(Icons.chevron_left,
                 color: AuroraColors.textSecondary, size: 18),
         ],
       ),

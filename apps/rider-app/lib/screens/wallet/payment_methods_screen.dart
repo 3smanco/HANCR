@@ -6,6 +6,7 @@ import '../../core/graphql/gql/company_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/widgets/aurora/aurora.dart';
+ import '../../core/motion/motion.dart';
 
 /// طرق الدفع — خيارات حقيقية من PaymentMode (نقد/محفظة/شركة) مع تحديد
 /// الافتراضي. إضافة بطاقة معلّقة على تفعيل بوابة الدفع (owner action).
@@ -74,7 +75,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
           top: false,
           child: _loading
               ? Center(
-                  child: CircularProgressIndicator(color: AuroraColors.ember))
+                  child: AuroraLoader(size: 36))
               : ListView(
                   padding: const EdgeInsets.all(AuroraSpacing.lg),
                   children: [

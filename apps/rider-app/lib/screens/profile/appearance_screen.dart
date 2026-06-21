@@ -30,6 +30,8 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
           Icons.light_mode_outlined),
       ('dark', tr('appearanceDark'), tr('appearanceDarkSub'),
           Icons.dark_mode_outlined),
+      ('vip', tr('appearanceVip'), tr('appearanceVipSub'),
+          Icons.workspace_premium_outlined),
     ];
     return Scaffold(
       backgroundColor: AuroraColors.obsidian,
@@ -46,28 +48,6 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
             padding: const EdgeInsets.all(AuroraSpacing.lg),
             children: [
               ...options.map((o) => _radio(o.$1, o.$2, o.$3, o.$4)),
-              if (_mode != 'dark') ...[
-                const SizedBox(height: AuroraSpacing.md),
-                Container(
-                  padding: const EdgeInsets.all(AuroraSpacing.md),
-                  decoration: BoxDecoration(
-                    color: AuroraColors.ash,
-                    borderRadius: BorderRadius.circular(AuroraRadius.md),
-                    border: Border.all(color: AuroraColors.border),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline,
-                          color: AuroraColors.ember, size: 18),
-                      const SizedBox(width: AuroraSpacing.sm),
-                      Expanded(
-                        child: Text(tr('appearanceLightSoon'),
-                            style: AuroraText.caption.copyWith(height: 1.4)),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ],
           ),
         ),

@@ -30,7 +30,7 @@ class _DesignShowcaseScreenState extends State<DesignShowcaseScreen> {
         appBar: AppBar(
           title: const Text('HANCR Design System'),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded),
+            icon: Icon(Icons.arrow_back_rounded),
             onPressed: () => Navigator.maybePop(context),
           ),
         ),

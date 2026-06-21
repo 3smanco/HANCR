@@ -118,7 +118,7 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
         title: const Text('Hancr Miles 🏆'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
+            icon: Icon(Icons.refresh_rounded),
             onPressed: _load,
           ),
         ],
@@ -385,7 +385,7 @@ class _TierHero extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  const Icon(
+                  Icon(
                     Icons.workspace_premium_rounded,
                     color: Colors.white24,
                     size: 24,
@@ -685,7 +685,7 @@ class _RewardCard extends StatelessWidget {
             const SizedBox(height: HancrSpacing.sm),
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.stars_rounded,
                   size: 14,
                   color: HancrColors.violet,
@@ -768,7 +768,7 @@ class _ErrorState extends StatelessWidget {
                 color: HancrColors.errorBg,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.error_outline_rounded,
                 size: 40,
                 color: HancrColors.error,
@@ -825,7 +825,7 @@ class _EmptyState extends StatelessWidget {
                 color: HancrColors.violetLight,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.stars_rounded,
                 size: 40,
                 color: HancrColors.violet,

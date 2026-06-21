@@ -131,7 +131,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
             fillColor: AuroraColors.ash,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AuroraRadius.md),
-              borderSide: const BorderSide(color: AuroraColors.border),
+              borderSide: BorderSide(color: AuroraColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AuroraRadius.md),

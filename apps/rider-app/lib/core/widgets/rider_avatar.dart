@@ -150,7 +150,7 @@ class _RiderAvatarState extends State<RiderAvatar> {
                 shape: BoxShape.circle,
                 border: Border.all(color: AuroraColors.coal, width: 2),
               ),
-              child: const Icon(Icons.camera_alt,
+              child: Icon(Icons.camera_alt,
                   color: Color(0xFFFFF5EE), size: 12),
             ),
           ),

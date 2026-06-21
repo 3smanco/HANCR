@@ -189,7 +189,7 @@ Future<T?> _showAuroraDialog<T>({
       backgroundColor: AuroraColors.ash,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AuroraRadius.xl),
-        side: const BorderSide(color: AuroraColors.border),
+        side: BorderSide(color: AuroraColors.border),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AuroraSpacing.xl),

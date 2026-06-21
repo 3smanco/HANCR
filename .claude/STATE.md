@@ -275,11 +275,22 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
+- **🟦 التجديد البصري — تفعيل السكين الفاتح/VIP فعلياً (الراكب) + سحب الدوّارات — مكتمل ومُتحقَّق (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
+  - **آلية السكين:** حوّلت كل حقول `AuroraColors` إلى mutable + أضفت `AuroraColors.applySkin('dark'|'light'|'vip')` (لوحات كاملة). `ThemeController` يطبّق السكين عبر `_repaint()` (applySkin ثم SDUI فوقه للسكين الداكن فقط)؛ `appearanceMode` صار يدعم `vip`؛ `_skinFor()` يحلّ `system` حسب سطوع الجهاز. كل MaterialApp يُعاد بناؤه (version bump) فتلتقط **كل الشاشات** (التي تقرأ AuroraColors.*) السكين فوراً **دون ترحيل context.c لكل شاشة**.
+  - **إصلاح ~51 موقع `const`** كان يقرأ ألواناً صارت mutable (BorderSide/Icon/Divider/Border/InputDecoration…) — معظمها بـsed آمن.
+  - **`pageBackground`** صار يتبع السكين (قمّة فاتحة/داكنة/نيون). **شريط الحالة** يتبع السكين (أيقونات داكنة على الفاتح) في app.dart.
+  - **شاشة المظهر:** 4 خيارات تعمل فعلياً (نظام/فاتح/داكن/VIP) — أُزيل تنويه «قريباً».
+  - **سحب الدوّارات:** 16 شاشة `CircularProgressIndicator→AuroraLoader` (+ إضافة motion import آلياً).
+  - **السائق:** يبقى داكناً فقط (كوكبت) — لم يُمسّ (لا حاجة لإصلاح const فيه).
+  - **Lottie الاحتفالية:** الاحتفال يتم بالكود (ConfettiBurst + SuccessCheck)؛ ملفات Lottie حقيقية تحتاج أصول مصمِّم (مؤجَّلة، البنية lottie_view جاهزة).
+  - **⏭️ بناء APK الراكب + نشره.**
+
 - **🟦 التجديد البصري — الدفعتان D4+D5 (السائق — الأرباح/النجوم/الحساب) — مكتملتان ومُتحقَّقتان (2026-06-21).** التحقق: driver-app `flutter analyze=0 errors`. **بهذا يكتمل تطبيق السائق (D1–D5) والبرنامج كله.**
   - **D4:** الأرباح (رصيد `CountUpText` + إحصاءات `popIn` + `AuroraLoader`) · النجوم (نجوم `CountUpText` + `AuroraLoader`) · المحفظة (رصيد `CountUpText` + معاملات `fadeSlideIn` + لودرات).
   - **D5:** سجل الرحلات (skeleton/loaders + بطاقات `fadeSlideIn`) · المزايدات/الملف/الوثائق (`AuroraLoader`).
   - **إصلاح مهم:** `CountUpText` كان ثابتاً (begin==end، بلا حركة) — صار stateful يعدّ من 0→القيمة فعلياً (يُصلح كل الاستخدامات في التطبيقين). تمّت مزامنته للسائق.
-  - **⏭️ بناء APK ختامي للسائق (D1–D5) + نشره.**
+  - **✅ APK السائق النهائي (D1–D5) منشور (2026-06-21، 45,031,664 HTTP 200).** 🎉 **اكتمل برنامج التجديد البصري: الأساس + الراكب (R1–R6) + السائق (D1–D5)، التطبيقان منشوران.**
+  - **⚠️ متبقٍّ (اختياري لاحقاً):** ترحيل الشاشات إلى توكنات `context.c` لإظهار السكين الفاتح/VIP كاملاً + سحب آخر `CircularProgressIndicator` + إضافة Lottie احتفالية.
 
 - **🟩 التجديد البصري — الدفعة D3 (السائق — الطلب الوارد + الرحلة النشطة) — مكتملة ومنشورة (2026-06-21، PR #173، APK السائق 45,031,664 HTTP 200).** التحقق: driver-app `flutter analyze=0 errors`.
   - **إعادة بناء `incoming_order_sheet` بالكامل بهوية Aurora** (كان Material أبيض ونصّه شبه مخفي على الثيم الداكن): خلفية coal + حلقة عدّ نابضة (GlowPulse + تدرّج success→danger) + دخول bounce (slideY+overshoot) + وسوم/إحصاءات popIn + زر قبول متوهّج + haptics. أُضيفت مفاتيح i18n `newRideRequest/quietRide/audioOff`.

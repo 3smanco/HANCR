@@ -26,11 +26,14 @@ class ThemeController extends ChangeNotifier {
 
   bool _bootstrapped = false;
 
-  /// تفضيل المظهر المختار محلياً: 'system' | 'light' | 'dark'.
-  /// ملاحظة: الهوية الداكنة محفوظة — حتى يُصمَّم وضع فاتح، يبقى العرض داكناً
-  /// (theme و darkTheme كلاهما AuroraTheme.dark)، والتفضيل يُخزَّن للمستقبل.
+  /// تفضيل المظهر المختار محلياً: 'system' | 'light' | 'dark' | 'vip'.
+  /// السكين يُطبَّق فعلياً على لوحة AuroraColors عبر applySkin، فتتبدّل كل
+  /// الشاشات (التي تقرأ AuroraColors.*) عند إعادة بناء MaterialApp.
   String _appearanceMode = 'dark';
   String get appearanceMode => _appearanceMode;
+
+  /// آخر إعداد SDUI مطبَّق (يُعاد تطبيقه فوق السكين عند تبديله).
+  Map<String, dynamic>? _lastConfig;
 
   ThemeMode get themeMode {
     switch (_appearanceMode) {
@@ -38,8 +41,34 @@ class ThemeController extends ChangeNotifier {
         return ThemeMode.light;
       case 'system':
         return ThemeMode.system;
-      default:
+      default: // dark | vip
         return ThemeMode.dark;
+    }
+  }
+
+  /// يحوّل تفضيل المظهر إلى اسم سكين فعلي ('dark'|'light'|'vip').
+  String _skinFor() {
+    switch (_appearanceMode) {
+      case 'light':
+        return 'light';
+      case 'vip':
+        return 'vip';
+      case 'system':
+        final b =
+            WidgetsBinding.instance.platformDispatcher.platformBrightness;
+        return b == Brightness.light ? 'light' : 'dark';
+      default:
+        return 'dark';
+    }
+  }
+
+  /// يطبّق السكين الحالي، ثم إعداد SDUI فوقه — لكن فقط للسكين الداكن
+  /// (إعداد الأدمن مُصمَّم للهوية الداكنة؛ لا يُطبَّق على الفاتح/VIP).
+  void _repaint() {
+    final skin = _skinFor();
+    AuroraColors.applySkin(skin);
+    if (skin == 'dark' && _lastConfig != null) {
+      AuroraThemeData.apply(_lastConfig);
     }
   }
 
@@ -56,11 +85,14 @@ class ThemeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// يغيّر تفضيل المظهر ويحفظه ويعيد بناء MaterialApp.
+  /// يغيّر تفضيل المظهر ويحفظه ويعيد بناء MaterialApp بالسكين الجديد.
   Future<void> setAppearanceMode(String mode) async {
-    if (mode != 'system' && mode != 'light' && mode != 'dark') return;
+    if (mode != 'system' && mode != 'light' && mode != 'dark' && mode != 'vip') {
+      return;
+    }
     if (mode == _appearanceMode) return;
     _appearanceMode = mode;
+    _repaint(); // طلاء السكين الجديد فوراً
     await StorageService.saveAppearance(mode);
     _version++;
     notifyListeners();
@@ -79,16 +111,17 @@ class ThemeController extends ChangeNotifier {
       _appearanceMode = 'dark';
     }
 
-    // 1) تطبيق الكاش المحلي فوراً (إن وُجد) — لا ننتظر الشبكة.
+    // 1) تحميل كاش إعداد SDUI (إن وُجد) ثم طلاء السكين + SDUI عبر _repaint.
     try {
       final cached = await StorageService.getThemeConfig();
       if (cached != null && cached.isNotEmpty) {
         final map = jsonDecode(cached);
-        if (map is Map<String, dynamic>) AuroraThemeData.apply(map);
+        if (map is Map<String, dynamic>) _lastConfig = map;
       }
     } catch (e) {
-      debugPrint('[ThemeController] cache apply skipped: $e');
+      debugPrint('[ThemeController] cache load skipped: $e');
     }
+    _repaint();
 
     // 2) جلب أحدث ثيم من الخادم في الخلفية (fire-and-forget).
     unawaited(refresh());
@@ -114,7 +147,9 @@ class ThemeController extends ChangeNotifier {
       final theme = res.data?['appTheme'];
       if (theme is! Map<String, dynamic> || theme.isEmpty) return;
 
-      AuroraThemeData.apply(theme);
+      _lastConfig = theme;
+      // أعِد طلاء السكين ثم طبّق SDUI فوقه (حتى لا تطمس قيم السكين).
+      _repaint();
       await StorageService.saveThemeConfig(jsonEncode(theme));
       _version++;
       notifyListeners();

@@ -4,6 +4,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/commuter_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+ import '../../core/motion/motion.dart';
 import 'aurora_commuter_setup_screen.dart';
 
 /// شاشة اشتراكات Commuter — قائمة الاشتراكات النشطة + زر إضافة.
@@ -99,7 +100,7 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
       ),
       body: _loading
           ? Center(
-              child: CircularProgressIndicator(color: AuroraColors.ember))
+              child: AuroraLoader(size: 36))
           : _subs.isEmpty
               ? _empty()
               : RefreshIndicator(
@@ -123,7 +124,7 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.commute,
+            Icon(Icons.commute,
                 size: 64, color: AuroraColors.textSecondary),
             const SizedBox(height: AuroraSpacing.md),
             Text(tr('commuterEmpty'),

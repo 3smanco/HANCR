@@ -4,6 +4,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+ import '../../core/motion/motion.dart';
 import 'aurora_family_screen.dart';
 
 /// إدارة العائلة الفعلية — مرتبطة بالخادم (hancr_pool):
@@ -102,7 +103,7 @@ class _AuroraFamilyManageScreenState extends State<AuroraFamilyManageScreen> {
           top: false,
           child: _loading
               ? Center(
-                  child: CircularProgressIndicator(color: AuroraColors.ember))
+                  child: AuroraLoader(size: 36))
               : _error != null
                   ? _errorView()
                   : _pool == null

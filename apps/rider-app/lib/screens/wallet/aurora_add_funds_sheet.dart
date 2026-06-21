@@ -371,7 +371,7 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
               ),
             ),
           ),
-          const Icon(Icons.chevron_right, color: AuroraColors.textSecondary),
+          Icon(Icons.chevron_right, color: AuroraColors.textSecondary),
         ],
       ),
     );

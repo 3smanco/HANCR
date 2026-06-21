@@ -27,7 +27,7 @@ class AuroraBottomNav extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AuroraColors.coal,
-        border: const Border(
+        border: Border(
           top: BorderSide(color: AuroraColors.border, width: 0.5),
         ),
         boxShadow: AuroraShadows.floatingNav,

@@ -4,6 +4,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+ import '../../core/motion/motion.dart';
 
 /// أجهزة/جلسات الراكب — عرض وإبطال جهاز بعينه (مرتبط بالخادم).
 class DevicesScreen extends StatefulWidget {
@@ -135,7 +136,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
           top: false,
           child: _loading
               ? Center(
-                  child: CircularProgressIndicator(color: AuroraColors.ember))
+                  child: AuroraLoader(size: 36))
               : _error != null
                   ? Center(
                       child: Column(

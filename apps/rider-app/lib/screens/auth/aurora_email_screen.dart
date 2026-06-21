@@ -111,7 +111,7 @@ class _AuroraEmailScreenState extends State<AuroraEmailScreen> {
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AuroraRadius.md),
                           borderSide:
-                              const BorderSide(color: AuroraColors.border),
+                              BorderSide(color: AuroraColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AuroraRadius.md),

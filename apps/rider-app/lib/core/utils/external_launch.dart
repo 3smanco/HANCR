@@ -57,7 +57,7 @@ Future<void> openExternalNav(
             },
           ),
           ListTile(
-            leading: const Icon(Icons.navigation, color: AuroraColors.info),
+            leading: Icon(Icons.navigation, color: AuroraColors.info),
             title: Text(tr('waze'),
                 style: AuroraText.bodyMedium
                     .copyWith(color: AuroraColors.pearl)),

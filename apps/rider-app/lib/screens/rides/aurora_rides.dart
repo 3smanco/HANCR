@@ -119,7 +119,7 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.receipt_long_outlined,
+          Icon(Icons.receipt_long_outlined,
               color: AuroraColors.textHint, size: 64),
           const SizedBox(height: AuroraSpacing.md),
           Text(tr('noRides'), style: AuroraText.titleMedium),
@@ -277,8 +277,8 @@ class RideDetailsScreen extends StatelessWidget {
                 children: [
                   _routeRow(Icons.my_location, AuroraColors.success,
                       order.originAddress),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 9),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 9),
                     child: SizedBox(
                       height: 20,
                       child: VerticalDivider(
@@ -530,5 +530,5 @@ class RideDetailsScreen extends StatelessWidget {
       );
 
   Widget _divider() =>
-      const Divider(color: AuroraColors.border, height: AuroraSpacing.md);
+      Divider(color: AuroraColors.border, height: AuroraSpacing.md);
 }
