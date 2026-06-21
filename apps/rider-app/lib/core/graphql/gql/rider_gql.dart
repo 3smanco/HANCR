@@ -314,6 +314,34 @@ const String replyToComplaintMutation = r'''
   }
 ''';
 
+// ─── شات الدعم الحي (راكب↔موظف) ───
+const String mySupportConversationQuery = r'''
+  query MySupportConversation {
+    mySupportConversation { id status assignedAgentId lastMessageAt createdAt }
+  }
+''';
+
+const String _supportMsgFields =
+    r'id conversationId senderType senderId body imageUrl isRead createdAt';
+
+const String supportMessagesQuery = '''
+  query SupportMessages(\$conversationId: Int!) {
+    supportMessages(conversationId: \$conversationId) { $_supportMsgFields }
+  }
+''';
+
+const String sendSupportMessageMutation = '''
+  mutation SendSupportMessage(\$conversationId: Int!, \$body: String!, \$imageUrl: String) {
+    sendSupportMessage(conversationId: \$conversationId, body: \$body, imageUrl: \$imageUrl) { $_supportMsgFields }
+  }
+''';
+
+const String supportMessageAddedSubscription = '''
+  subscription SupportMessageAdded(\$conversationId: Int!) {
+    supportMessageAdded(conversationId: \$conversationId) { $_supportMsgFields }
+  }
+''';
+
 // ─── الأعمال (ملف الأعمال) — myCompanyQuery معرّف في company_gql.dart ───
 const String setupBusinessProfileMutation = r'''
   mutation SetupBusinessProfile($name: String!, $billingEmail: String) {

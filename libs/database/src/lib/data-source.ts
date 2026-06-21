@@ -12,6 +12,8 @@ import { ServiceEntity } from './entities/service.entity';
 import { RiderEntity } from './entities/rider.entity';
 import { RiderDeviceEntity } from './entities/rider-device.entity';
 import { SavedGroupEntity } from './entities/saved-group.entity';
+import { SupportConversationEntity } from './entities/support-conversation.entity';
+import { SupportMessageEntity } from './entities/support-message.entity';
 import { DriverEntity } from './entities/driver.entity';
 import { OrderEntity } from './entities/order.entity';
 import { LoyaltyEntity } from './entities/loyalty.entity';
@@ -65,6 +67,8 @@ export const HANCR_ENTITIES = [
   RiderEntity,
   RiderDeviceEntity,
   SavedGroupEntity,
+  SupportConversationEntity,
+  SupportMessageEntity,
   DriverEntity,
   OrderEntity,
   LoyaltyEntity,

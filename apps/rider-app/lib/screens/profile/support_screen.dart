@@ -4,6 +4,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../support/support_chat_screen.dart';
 
 /// الدعم والشكاوى — تقديم شكوى وعرض حالتها وخطّها الزمني (read-only).
 class SupportScreen extends StatefulWidget {
@@ -83,6 +84,14 @@ class _SupportScreenState extends State<SupportScreen> {
         elevation: 0,
         title: Text(tr('support'), style: AuroraText.titleMedium),
         iconTheme: IconThemeData(color: AuroraColors.pearl),
+        actions: [
+          IconButton(
+            tooltip: tr('liveSupport'),
+            icon: Icon(Icons.forum_outlined, color: AuroraColors.ember),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const SupportChatScreen())),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AuroraColors.ember,

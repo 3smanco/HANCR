@@ -64,6 +64,7 @@ import { CompaniesModule } from './companies/companies.module';
 import { DriversModule } from './drivers/drivers.module';
 import { AdminWalletsModule } from './wallets/wallets.module';
 import { ComplaintsModule } from './complaints/complaints.module';
+import { SupportChatAdminModule } from './support-chat/support-chat-admin.module';
 import { OperatorsModule } from './operators/operators.module';
 import { MarketingModule } from './marketing/marketing.module';
 import { AdminPayoutsModule } from './payouts/payouts.module';
@@ -219,6 +220,7 @@ import { ObservabilityModule } from '@hancr/observability';
     DriversModule,
     AdminWalletsModule,
     ComplaintsModule,
+    SupportChatAdminModule,
     OperatorsModule,
     MarketingModule,
     AdminPayoutsModule,

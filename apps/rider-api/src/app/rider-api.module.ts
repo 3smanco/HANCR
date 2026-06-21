@@ -79,6 +79,7 @@ import { RiderAppConfigModule } from './app-config/app-config.module';
 import { ChatModule } from './chat/chat.module';
 import { SavedPlaceModule } from './saved-place/saved-place.module';
 import { SavedGroupModule } from './saved-group/saved-group.module';
+import { SupportChatModule } from './support-chat/support-chat.module';
 import { CommuterModule } from './commuter/commuter.module';
 import { FlightModule } from './flight/flight.module';
 import { CarpoolModule } from './carpool/carpool.module';
@@ -210,6 +211,7 @@ import { pubSubProvider } from './pubsub.provider';
     ChatModule,
     SavedPlaceModule,
     SavedGroupModule,
+    SupportChatModule,
     CommuterModule,
     FlightModule,
     CarpoolModule,
