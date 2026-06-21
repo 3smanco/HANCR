@@ -7,6 +7,7 @@ import '../../core/i18n/app_localization.dart';
 import '../../core/models/order_model.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../../core/widgets/live_activity_bar.dart';
+import '../../core/motion/motion.dart';
 import '../commuter/aurora_commuter_screen.dart';
 import '../airport/aurora_airport_screen.dart';
 import 'home_extras.dart';
@@ -29,6 +30,7 @@ class AuroraHomeTab extends StatefulWidget {
 class _AuroraHomeTabState extends State<AuroraHomeTab> {
   List<Map<String, dynamic>> _banners = [];
   List<Map<String, dynamic>> _savedPlaces = [];
+  bool _bannersLoading = true;
 
   @override
   void initState() {
@@ -73,10 +75,13 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
       ));
       final list = (res.data?['appConfig']?['banners'] as List<dynamic>?) ?? [];
       if (!mounted) return;
-      setState(() =>
-          _banners = list.map((e) => (e as Map<String, dynamic>)).toList());
+      setState(() {
+        _banners = list.map((e) => (e as Map<String, dynamic>)).toList();
+        _bannersLoading = false;
+      });
     } catch (_) {
       // تجاهل بصمت — البانرات اختيارية
+      if (mounted) setState(() => _bannersLoading = false);
     }
   }
 
@@ -282,8 +287,24 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
             // ─── Schedule card (يشبه "Ride on your schedule") ───
             _scheduleCta(),
 
-            // ─── Promo banners (SDUI من app-config) ───
-            if (_banners.isNotEmpty) ...[
+            // ─── Promo banners (SDUI من app-config) — مع skeleton أثناء التحميل ───
+            if (_bannersLoading) ...[
+              const SizedBox(height: AuroraSpacing.lg),
+              SizedBox(
+                height: 150,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 3,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(width: AuroraSpacing.md),
+                  itemBuilder: (_, __) => const Skeleton(
+                    width: 300,
+                    height: 150,
+                    radius: AuroraRadius.lg,
+                  ),
+                ),
+              ),
+            ] else if (_banners.isNotEmpty) ...[
               const SizedBox(height: AuroraSpacing.lg),
               SizedBox(
                 height: 150,
@@ -292,7 +313,8 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                   itemCount: _banners.length,
                   separatorBuilder: (_, __) =>
                       const SizedBox(width: AuroraSpacing.md),
-                  itemBuilder: (_, i) => _bannerCard(_banners[i]),
+                  itemBuilder: (_, i) =>
+                      _bannerCard(_banners[i]).fadeSlideIn(index: i),
                 ),
               ),
             ],
