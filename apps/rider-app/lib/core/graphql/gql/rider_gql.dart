@@ -92,7 +92,7 @@ const String routePreviewQuery = r'''
 const String searchPlacesQuery = r'''
   query SearchPlaces($query: String!, $lat: Float, $lng: Float) {
     searchPlaces(query: $query, lat: $lat, lng: $lng) {
-      placeId title subtitle
+      placeId title subtitle lat lng distanceMeters
     }
   }
 ''';

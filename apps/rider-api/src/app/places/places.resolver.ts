@@ -16,7 +16,7 @@ export class PlacesResolver {
     @Args('lat', { type: () => Float, nullable: true }) lat?: number,
     @Args('lng', { type: () => Float, nullable: true }) lng?: number,
   ): Promise<PlacePredictionType[]> {
-    return this.places.autocomplete(query, lat, lng);
+    return this.places.search(query, lat, lng);
   }
 
   /** إحداثيات مكان من معرّفه. */

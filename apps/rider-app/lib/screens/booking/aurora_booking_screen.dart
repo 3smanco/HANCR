@@ -341,37 +341,48 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     }
   }
 
-  Future<void> _pickPrediction(String placeId, String title) async {
+  Future<void> _pickPrediction(Map<String, dynamic> p) async {
     FocusScope.of(context).unfocus();
+    final title = p['title'] as String? ?? '';
     setState(() {
       _predictions = [];
       _searchCtrl.text = title;
-      _searching = true;
     });
-    try {
-      final client = await GraphQLClientManager.get();
-      final res = await client.query(QueryOptions(
-        document: gql(placeDetailsQuery),
-        fetchPolicy: FetchPolicy.networkOnly,
-        variables: {'placeId': placeId},
-      ));
-      final d = res.data?['placeDetails'] as Map<String, dynamic>?;
-      if (!mounted) return;
-      setState(() => _searching = false);
-      if (d != null) {
-        final lat = (d['lat'] as num).toDouble();
-        final lng = (d['lng'] as num).toDouble();
-        setState(() {
-          _destination = GeoPoint(lat: lat, lng: lng);
-          _destinationLabel = (d['address'] as String?) ?? title;
-        });
-        await _mapCtrl?.animateCamera(
-          CameraUpdate.newLatLngZoom(LatLng(lat, lng), 16),
-        );
-      }
-    } catch (_) {
+    // searchText يُرجع الإحداثيات مباشرة — نستخدمها فوراً (بلا نداء تفاصيل).
+    double? lat = (p['lat'] as num?)?.toDouble();
+    double? lng = (p['lng'] as num?)?.toDouble();
+    String label = (p['subtitle'] as String?)?.isNotEmpty == true
+        ? '$title — ${p['subtitle']}'
+        : title;
+
+    // احتياط: إن غابت الإحداثيات نجلبها عبر placeDetails.
+    if (lat == null || lng == null) {
+      setState(() => _searching = true);
+      try {
+        final client = await GraphQLClientManager.get();
+        final res = await client.query(QueryOptions(
+          document: gql(placeDetailsQuery),
+          fetchPolicy: FetchPolicy.networkOnly,
+          variables: {'placeId': p['placeId']},
+        ));
+        final d = res.data?['placeDetails'] as Map<String, dynamic>?;
+        if (d != null) {
+          lat = (d['lat'] as num).toDouble();
+          lng = (d['lng'] as num).toDouble();
+          label = (d['address'] as String?) ?? title;
+        }
+      } catch (_) {}
       if (mounted) setState(() => _searching = false);
     }
+
+    if (lat == null || lng == null || !mounted) return;
+    setState(() {
+      _destination = GeoPoint(lat: lat!, lng: lng!);
+      _destinationLabel = label;
+    });
+    await _mapCtrl?.animateCamera(
+      CameraUpdate.newLatLngZoom(LatLng(lat, lng), 16),
+    );
   }
 
   void _clearSearch() {
@@ -948,13 +959,19 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     );
   }
 
+  String _distLabel(int meters) {
+    if (meters < 1000) return '$meters م';
+    return '${(meters / 1000).toStringAsFixed(1)} كم';
+  }
+
   Widget _predictionRow(Map<String, dynamic> p) {
     final title = p['title'] as String? ?? '';
     final subtitle = p['subtitle'] as String?;
+    final dist = p['distanceMeters'] as int?;
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _pickPrediction(p['placeId'] as String, title),
+        onTap: () => _pickPrediction(p),
         borderRadius: BorderRadius.circular(AuroraRadius.sm),
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -981,6 +998,20 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                   ],
                 ),
               ),
+              if (dist != null) ...[
+                const SizedBox(width: AuroraSpacing.sm),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.near_me_outlined,
+                        color: AuroraColors.textSecondary, size: 14),
+                    const SizedBox(height: 2),
+                    Text(_distLabel(dist),
+                        style: AuroraText.caption
+                            .copyWith(color: AuroraColors.textSecondary)),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
