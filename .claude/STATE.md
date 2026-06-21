@@ -275,7 +275,14 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
-- **🟦 التجديد البصري — الدفعة R2 (الراكب — الرئيسية والاكتشاف) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
+- **🟦 التجديد البصري — الدفعتان R3+R4 (الراكب — الحجز + التتبّع الحي) — مكتملتان ومُتحقَّقتان (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
+  - **R4 التتبّع (`aurora_tracking_screen`):** **السيارة top-down (CarMarkerFactory) تنساب موضعاً واتجاهاً** عبر `MarkerInterpolator` (بدل القفز) + **رسم المسار تدريجياً** (`PolylineReveal`) + استبدال spinner بـ`AuroraLoader`.
+  - **R4 التقييم (`aurora_rate_driver_screen`):** `ConfettiBurst` احتفال إتمام الرحلة + `AuroraLoader`.
+  - **R3 الحجز (`aurora_booking_screen`):** بطاقات الخدمة بسيارات `CarArt` (luxury/van/sedan حسب النوع) + أجرة `CountUpText` + **ورقة سفلية زجاجية** (BackdropFilter blur فوق الخريطة) + `AuroraLoader` للخدمات والكوبون.
+  - **مؤجَّل:** تبديل سكين VIP الكامل على ورقة الحجز يحتاج ترحيل الشاشة إلى `context.c` (يُجمع في تمريرة الترحيل لاحقاً)؛ السكين الفاتح/VIP نفسه موجود (الأساس) وسيُتاح للمستخدم في R6 (Appearance).
+  - **⏭️ بناء APK مجمّع (R2+R3+R4) + نشره ثم R5.**
+
+- **🟩 التجديد البصري — الدفعة R2 (الراكب — الرئيسية والاكتشاف) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: rider-app `flutter analyze=0 errors`.
   - **الرئيسية (`aurora_home_tab`):** skeleton للبانرات أثناء التحميل (`_bannersLoading`) + `fadeSlideIn` للبانرات عند الوصول.
   - **الخدمات (`_ServicesTab` في `aurora_main_screen`):** شريط بطل `_carHero` (sedan/suv/bike بـCarArt) + `popIn` متدرّج على بطاقات الشبكة.
   - **⏭️ R3 (الحجز) — النشر يُجمَّع في APK واحد مع R3/R4 (الخريطة والتتبّع) لتفادي إعادة البناء المتكرّر.**
