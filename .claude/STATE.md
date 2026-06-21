@@ -275,10 +275,16 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
-- **🟦 التجديد البصري — الدفعة D3 (السائق — الطلب الوارد + الرحلة النشطة) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: driver-app `flutter analyze=0 errors`.
+- **🟦 التجديد البصري — الدفعتان D4+D5 (السائق — الأرباح/النجوم/الحساب) — مكتملتان ومُتحقَّقتان (2026-06-21).** التحقق: driver-app `flutter analyze=0 errors`. **بهذا يكتمل تطبيق السائق (D1–D5) والبرنامج كله.**
+  - **D4:** الأرباح (رصيد `CountUpText` + إحصاءات `popIn` + `AuroraLoader`) · النجوم (نجوم `CountUpText` + `AuroraLoader`) · المحفظة (رصيد `CountUpText` + معاملات `fadeSlideIn` + لودرات).
+  - **D5:** سجل الرحلات (skeleton/loaders + بطاقات `fadeSlideIn`) · المزايدات/الملف/الوثائق (`AuroraLoader`).
+  - **إصلاح مهم:** `CountUpText` كان ثابتاً (begin==end، بلا حركة) — صار stateful يعدّ من 0→القيمة فعلياً (يُصلح كل الاستخدامات في التطبيقين). تمّت مزامنته للسائق.
+  - **⏭️ بناء APK ختامي للسائق (D1–D5) + نشره.**
+
+- **🟩 التجديد البصري — الدفعة D3 (السائق — الطلب الوارد + الرحلة النشطة) — مكتملة ومنشورة (2026-06-21، PR #173، APK السائق 45,031,664 HTTP 200).** التحقق: driver-app `flutter analyze=0 errors`.
   - **إعادة بناء `incoming_order_sheet` بالكامل بهوية Aurora** (كان Material أبيض ونصّه شبه مخفي على الثيم الداكن): خلفية coal + حلقة عدّ نابضة (GlowPulse + تدرّج success→danger) + دخول bounce (slideY+overshoot) + وسوم/إحصاءات popIn + زر قبول متوهّج + haptics. أُضيفت مفاتيح i18n `newRideRequest/quietRide/audioOff`.
   - الرحلة النشطة: بطاقة Aurora مصقولة مسبقاً.
-  - **⏭️ بناء APK مجمّع للسائق (D1+D2+D3) + نشره ثم D4+D5.**
+  - **✅ APK السائق (D1+D2+D3) منشور (2026-06-21، 45,031,664 HTTP 200) على hancr.com/downloads/hancr-driver.apk.** ⏭️ D4 (الأرباح/المحفظة/النجوم) + D5 (الحساب/الوثائق/الدعم/المزايدات/السجل).
 
 - **🟩 التجديد البصري — الدفعتان D1+D2 (السائق — الانطباع الأول + الخريطة) — مكتملتان ومُتحقَّقتان (2026-06-21، PR #172).** التحقق: driver-app `flutter analyze=0 errors`.
   - **D1 splash:** `CarArt.suv` تنساب + `AuroraLoader`. **D1 OTP:** `Shake` على الرمز (مع haptics الموجودة) + مسح عند الخطأ.

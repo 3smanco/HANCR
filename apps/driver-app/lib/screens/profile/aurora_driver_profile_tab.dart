@@ -1,6 +1,7 @@
 import '../../core/i18n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../core/motion/motion.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
@@ -681,13 +682,8 @@ class _ProfileAvatarState extends State<_ProfileAvatar> {
                   color: AuroraColors.obsidian.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(AuroraRadius.md),
                 ),
-                child: Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AuroraColors.ember),
-                  ),
+                child: const Center(
+                  child: AuroraLoader(size: 20, stroke: 2),
                 ),
               ),
             ),

@@ -8,7 +8,9 @@ import 'motion_tokens.dart';
 /// ║  مثال: CountUpText(value: 125.5, prefix: '', suffix: ' ر.س')  ║
 /// ║  يحترم reduce-motion (يقفز فوراً للقيمة).                      ║
 /// ╚══════════════════════════════════════════════════════════════╝
-class CountUpText extends StatelessWidget {
+/// عدّاد متحرك: يعدّ من 0 → [value] عند الظهور، ومن القيمة السابقة → الجديدة
+/// عند التغيّر. يحترم reduce-motion (يقفز فوراً).
+class CountUpText extends StatefulWidget {
   const CountUpText({
     super.key,
     required this.value,
@@ -31,16 +33,29 @@ class CountUpText extends StatelessWidget {
   final TextAlign? textAlign;
 
   @override
+  State<CountUpText> createState() => _CountUpTextState();
+}
+
+class _CountUpTextState extends State<CountUpText> {
+  double _from = 0;
+
+  @override
+  void didUpdateWidget(CountUpText old) {
+    super.didUpdateWidget(old);
+    if (old.value != widget.value) _from = old.value;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final d = Motion.dur(duration ?? Motion.slow);
+    final d = Motion.dur(widget.duration ?? Motion.slow);
     return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: value, end: value),
+      tween: Tween<double>(begin: _from, end: widget.value),
       duration: d,
-      curve: curve,
+      curve: widget.curve,
       builder: (context, v, _) => Text(
-        '$prefix${v.toStringAsFixed(fractionDigits)}$suffix',
-        style: style,
-        textAlign: textAlign,
+        '${widget.prefix}${v.toStringAsFixed(widget.fractionDigits)}${widget.suffix}',
+        style: widget.style,
+        textAlign: widget.textAlign,
       ),
     );
   }

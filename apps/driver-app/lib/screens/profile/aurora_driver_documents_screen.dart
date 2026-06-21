@@ -7,6 +7,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/documents_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/motion/motion.dart';
 
 /// I1 — شاشة وثائق السائق
 ///
@@ -154,8 +155,7 @@ class _AuroraDriverDocumentsScreenState
         title: Text(tr('myDocuments'), style: AuroraText.titleSmall),
       ),
       body: _loading
-          ? Center(
-              child: CircularProgressIndicator(color: AuroraColors.ember))
+          ? const Center(child: AuroraLoader(size: 40))
           : RefreshIndicator(
               onRefresh: _load,
               color: AuroraColors.ember,

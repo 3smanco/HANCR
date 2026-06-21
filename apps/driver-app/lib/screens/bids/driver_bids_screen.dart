@@ -6,6 +6,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/order_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/theme/aurora_theme.dart';
+import '../../core/motion/motion.dart';
 
 /// DriverBidsScreen — المزايدات المفتوحة + تقديم عرض سعر.
 class DriverBidsScreen extends StatefulWidget {
@@ -121,8 +122,7 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
                 color: AuroraColors.pearl, fontWeight: FontWeight.w700)),
       ),
       body: _loading
-          ? Center(
-              child: CircularProgressIndicator(color: AuroraColors.ember))
+          ? const Center(child: AuroraLoader(size: 40))
           : _bids.isEmpty
               ? Center(
                   child: Column(

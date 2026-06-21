@@ -7,6 +7,7 @@ import '../../blocs/wallet/wallet_event.dart';
 import '../../blocs/wallet/wallet_state.dart';
 import '../../core/models/wallet_model.dart';
 import '../../core/widgets/aurora/aurora.dart';
+import '../../core/motion/motion.dart';
 
 /// AuroraDriverWalletScreen — محفظة السائق بنمط Aurora.
 class AuroraDriverWalletScreen extends StatelessWidget {
@@ -42,9 +43,7 @@ class _View extends StatelessWidget {
           },
           builder: (context, state) {
             if (state is WalletInitial || state is WalletLoading) {
-              return Center(
-                child: CircularProgressIndicator(color: AuroraColors.ember),
-              );
+              return const Center(child: AuroraLoader(size: 40));
             }
             if (state is WalletError) {
               return _errorView(context, state.message);
@@ -84,9 +83,9 @@ class _View extends StatelessWidget {
                 if (state.transactions.isEmpty)
                   _empty()
                 else
-                  ...state.transactions.map((t) => Padding(
+                  ...state.transactions.indexed.map((e) => Padding(
                     padding: const EdgeInsets.only(bottom: AuroraSpacing.sm),
-                    child: _txRow(t),
+                    child: _txRow(e.$2).fadeSlideIn(index: e.$1),
                   )),
                 const SizedBox(height: AuroraSpacing.huge),
               ],
@@ -95,9 +94,7 @@ class _View extends StatelessWidget {
           if (withdrawing)
             Container(
               color: Colors.black.withValues(alpha: 0.5),
-              child: Center(
-                child: CircularProgressIndicator(color: AuroraColors.ember),
-              ),
+              child: const Center(child: AuroraLoader(size: 40)),
             ),
         ],
       ),
@@ -132,7 +129,6 @@ class _View extends StatelessWidget {
   }
 
   Widget _balanceCard(BuildContext ctx, WalletModel w) {
-    final fmt = NumberFormat('#,##0.00', 'ar');
     final canWithdraw = w.balance >= 50;
     return Container(
       padding: const EdgeInsets.all(AuroraSpacing.xxl),
@@ -160,8 +156,9 @@ class _View extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                fmt.format(w.balance),
+              CountUpText(
+                value: w.balance,
+                fractionDigits: 2,
                 style: AuroraText.displayLarge.copyWith(
                   color: AuroraColors.pearl,
                   fontSize: 44,
