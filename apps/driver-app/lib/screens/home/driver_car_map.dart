@@ -1,4 +1,3 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -65,9 +64,13 @@ class _DriverCarMapState extends State<DriverCarMap>
   }
 
   Future<void> _loadCarIcon() async {
-    final icon = await _buildCarBitmap(
-      bg: AuroraColors.obsidian,
-      fg: AuroraColors.ember,
+    // علامة سيارة top-down موحّدة مع تطبيق الراكب (CarMarkerFactory).
+    final dpr = WidgetsBinding
+        .instance.platformDispatcher.views.first.devicePixelRatio;
+    final icon = await CarMarkerFactory.car(
+      color: AuroraColors.ember,
+      px: 110,
+      dpr: dpr,
     );
     if (mounted) setState(() => _carIcon = icon);
   }
@@ -170,45 +173,5 @@ class _DriverCarMapState extends State<DriverCarMap>
       zoomControlsEnabled: false,
       compassEnabled: false,
     );
-  }
-
-  /// يرسم أيقونة سيارة (سهم اتجاه داخل دائرة) إلى BitmapDescriptor.
-  static Future<BitmapDescriptor> _buildCarBitmap({
-    required Color bg,
-    required Color fg,
-    double size = 110,
-  }) async {
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-    final r = size / 2;
-
-    canvas.drawCircle(Offset(r, r), r, Paint()..color = bg);
-    canvas.drawCircle(
-      Offset(r, r),
-      r - 4,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 5
-        ..color = fg,
-    );
-
-    final glyph = Icons.navigation_rounded;
-    final tp = TextPainter(textDirection: TextDirection.ltr)
-      ..text = TextSpan(
-        text: String.fromCharCode(glyph.codePoint),
-        style: TextStyle(
-          fontSize: size * 0.5,
-          fontFamily: glyph.fontFamily,
-          package: glyph.fontPackage,
-          color: fg,
-        ),
-      )
-      ..layout();
-    tp.paint(canvas, Offset(r - tp.width / 2, r - tp.height / 2));
-
-    final image =
-        await recorder.endRecording().toImage(size.toInt(), size.toInt());
-    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    return BitmapDescriptor.bytes(bytes!.buffer.asUint8List());
   }
 }

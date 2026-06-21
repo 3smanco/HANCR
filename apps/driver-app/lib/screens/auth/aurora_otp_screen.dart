@@ -22,6 +22,7 @@ class AuroraOtpScreen extends StatefulWidget {
 class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
   final _otpCtrl = TextEditingController();
   int _resendIn = 30;
+  int _failCount = 0;
 
   @override
   void initState() {
@@ -74,6 +75,10 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
             }
             if (state is AuthError) {
               Haptics.error();
+              setState(() {
+                _failCount++;
+                _otpCtrl.clear();
+              });
               ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
                 content: Text(state.message),
                 backgroundColor: AuroraColors.danger,
@@ -129,7 +134,9 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                       const SizedBox(height: AuroraSpacing.huge),
                       Directionality(
                         textDirection: TextDirection.ltr,
-                        child: PinCodeTextField(
+                        child: Shake(
+                          trigger: _failCount,
+                          child: PinCodeTextField(
                           appContext: context,
                           length: 6,
                           controller: _otpCtrl,
@@ -155,6 +162,7 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                           ),
                           onCompleted: _verify,
                           onChanged: (_) => setState(() {}),
+                        ),
                         ),
                       ),
                       const SizedBox(height: AuroraSpacing.xl),
