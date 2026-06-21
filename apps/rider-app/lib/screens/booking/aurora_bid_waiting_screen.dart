@@ -121,8 +121,10 @@ class _AuroraBidWaitingScreenState extends State<AuroraBidWaitingScreen> {
                         style: AuroraText.bodySmall
                             .copyWith(color: AuroraColors.pearl)),
                     const SizedBox(height: 4),
-                    Text(
-                      '${widget.proposedPrice.toStringAsFixed(0)} ${widget.currency}',
+                    CountUpText(
+                      value: widget.proposedPrice,
+                      fractionDigits: 0,
+                      suffix: ' ${widget.currency}',
                       style: AuroraText.displayMedium
                           .copyWith(color: AuroraColors.pearl),
                     ),
@@ -136,12 +138,7 @@ class _AuroraBidWaitingScreenState extends State<AuroraBidWaitingScreen> {
                 child: Row(
                   children: [
                     if (_status == 'Open')
-                      SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: AuroraColors.ember),
-                      ),
+                      const AuroraLoader(size: 16, stroke: 2),
                     const SizedBox(width: AuroraSpacing.sm),
                     Text(
                       _offers.isEmpty ? tr('waitingOffers') : tr('offersReceived'),

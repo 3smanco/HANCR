@@ -46,7 +46,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
             padding: const EdgeInsets.all(AuroraSpacing.lg),
             children: [
               ...options.map((o) => _radio(o.$1, o.$2, o.$3, o.$4)),
-              if (_mode == 'light') ...[
+              if (_mode != 'dark') ...[
                 const SizedBox(height: AuroraSpacing.md),
                 Container(
                   padding: const EdgeInsets.all(AuroraSpacing.md),
