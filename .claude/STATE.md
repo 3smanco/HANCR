@@ -275,13 +275,21 @@ flutter build apk --release --dart-define=ENV=production \
 ---
 
 ## أين نحن الآن
-- **🟦 نظام الدعم — الدفعة 4: شات الدعم الحي (راكب↔موظف) — الكود مكتمل ومُتحقَّق (2026-06-21).** التحقق: rider/admin-api `tsc=0` · admin-panel `tsc=0` · rider-app `flutter analyze=0 errors`.
+- **🟦 التجديد البصري الشامل + الحركة — الدفعة 0 (الأساس) — مكتملة ومُتحقَّقة (2026-06-21).** التحقق: rider/driver-app `flutter analyze=0 errors`. (الخطة: `~/.claude/plans/gleaming-snuggling-wind.md`.)
+  - **نظام السكينين:** `AuroraTokens extends ThemeExtension` (dawn فاتح / aurora داكن / vip نيون) + `lerp` + `context.c` في `core/theme/aurora_theme.dart`. `AuroraTheme.light/_build(brightness,tk)` يحقن الـextension. الراكب: `theme:light + darkTheme:dark` (الافتراضي داكن عبر ThemeController حتى يكتمل السحب). السائق: داكن فقط (كوكبت).
+  - **حركة v2 (كود أصلي، بلا حِزَم جديدة):** `core/motion/` += `count_up · glass (BackdropFilter) · aurora_loader · stagger · shake · parallax · confetti_burst (CustomPainter) · animated_car_marker (سيارة top-down BitmapDescriptor + MarkerInterpolator موضع/اتجاه) · animated_polyline (رسم تدريجي)`. بوابة `Motion.reduceMotion` (تُضبط في app.dart من `MediaQuery.disableAnimations`+الوضع المبسّط). barrel `motion.dart` محدّث.
+  - **رسوم السيارات:** `core/widgets/car_art.dart` (CarArt: sedan/suv/bike/van/luxury عبر CustomPainter — قابلة للاستبدال بـSVG/3D لاحقاً).
+  - **قرار:** لا flutter_svg/confetti/Rive — كل شيء code-native (CustomPainter) = أخفّ وبلا تبعيات. Lottie/rive في pubspec محفوظة للّحظات الاحتفالية لاحقاً.
+  - **⏭️ التالي: الدفعة R1 (راكب — الانطباع الأول: splash/auth/main shell + انتقالات + اللودر).** لم يُبنَ APK بعد (الأساس بلا تغيير مرئي — يُدمج النشر مع أول دفعة شاشات).
+
+- **🟩 نظام الدعم — الدفعة 4: شات الدعم الحي (راكب↔موظف) — مكتمل ومنشور (2026-06-21).** التحقق: rider/admin-api `tsc=0` · admin-panel `tsc=0` · rider-app `flutter analyze=0 errors`.
   - **DB (جديد):** `SupportConversationEntity` (riderId, status[open/assigned/closed], assignedAgentId, lastMessageAt) + `SupportMessageEntity` (conversationId, senderType[rider/agent], senderId, body, imageUrl, isRead) + migration `1782100000000` (مسجَّلان في index.ts + data-source.ts).
   - **rider-api (`support-chat/`):** `mySupportConversation` (get-or-create) · `supportMessages(conversationId)` (يعلّم رسائل الموظف مقروءة) · `sendSupportMessage(conversationId,body,imageUrl?)` (يعيد فتح المُغلقة) · subscription `supportMessageAdded` (قناة `SUPPORT_MESSAGE_ADDED` عبر RedisPubSub).
   - **admin-api (`support-chat/`):** `supportConversations(status?)` (طابور + اسم/هاتف الراكب + آخر رسالة + غير مقروء) · `supportConversationDetail(id)` (يعلّم مقروء) · `sendAgentSupportMessage` (إسناد تلقائي للموظف الأول + status=assigned + ينشر لنفس القناة فيصل الراكب) · `assignSupportConversation` · `closeSupportConversation` · subscription.
   - **التطبيق (راكب):** `screens/support/support_chat_screen.dart` (شات Aurora فوري) + مدخل من `support_screen` (أيقونة forum) + i18n `liveSupport`/`supportChatEmpty`.
   - **الأدمن:** صفحة `/support` (طابور + thread حيّ عبر WS + ردود جاهزة canned + sidebar سياق الراكب + اتصال/إغلاق) + عنصر شريط جانبي `nav.support`.
-  - **⏭️ النشر:** rider-api+admin-api restart + migration (`1782100000000`) + admin-panel build + APK راكب (لا سائق). **لم يُنشر بعد.**
+  - **✅ منشور ومُتحقَّق (2026-06-21، PR #165، دُمج في main):** migration `1782100000000` مطبَّق (الجدولان مُنشآن) · rider-api+admin-api restart → `health/ready=200` · admin-panel `npm run build` (مسار `/support` مُجمَّع 2.55kB) + restart · APK الراكب (47,142,855) منشور على hancr.com/downloads/hancr-rider.apk → HTTP 200 مطابق. (driver لم يتغيّر.)
+  - **🎉 بهذا يكتمل نظام الدعم والطوارئ متعدد القنوات بالكامل (الدفعات 1–4).** تذكير المالك: يجب إلغاء تثبيت APK القديم قبل تثبيت الجديد.
 
 - **🟩 نظام الدعم — الدفعة 3: تحسين الشات (راكب↔سائق) — مكتمل ومُتحقَّق (2026-06-20).** التحقق: rider/driver-api `tsc=0` · rider+driver-app `flutter analyze=0`.
   - **Backend:** `OrderMessageEntity.imageUrl` + migration `1782000000000`. كلا الـAPIs (chat): `sendOrderMessage(imageUrl?)` + `setOrderTyping` + `markOrderMessagesRead` + subscriptions `orderTyping`/`orderMessagesRead` (قنوات `ORDER_TYPING`/`ORDER_READ` عبر RedisPubSub، filter يستثني نفس الطرف).

@@ -360,49 +360,57 @@ class AuroraText {
 class AuroraTheme {
   AuroraTheme._();
 
-  static ThemeData get dark {
+  static ThemeData get dark => _build(Brightness.dark, AuroraTokens.aurora);
+
+  /// السكين الفاتح «Economy / Dawn».
+  static ThemeData get light => _build(Brightness.light, AuroraTokens.dawn);
+
+  static ThemeData _build(Brightness brightness, AuroraTokens tk) {
     // N5 — نصف القطر الحي (من themeConfig). non-const فلا يمكن استخدامه في const.
     final r = AuroraColors.baseRadius;
+    final dark = brightness == Brightness.dark;
     return ThemeData(
         useMaterial3: true,
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: AuroraColors.obsidian,
-        canvasColor: AuroraColors.obsidian,
-        colorScheme: ColorScheme.dark(
-          primary: AuroraColors.ember,
-          onPrimary: AuroraColors.pearl,
-          secondary: AuroraColors.emberLight,
-          onSecondary: AuroraColors.obsidian,
-          surface: AuroraColors.ash,
-          onSurface: AuroraColors.pearl,
-          error: AuroraColors.danger,
-          onError: AuroraColors.pearl,
+        brightness: brightness,
+        extensions: <ThemeExtension<dynamic>>[tk],
+        scaffoldBackgroundColor: tk.bg,
+        canvasColor: tk.bg,
+        colorScheme: ColorScheme(
+          brightness: brightness,
+          primary: tk.accent,
+          onPrimary: tk.onAccent,
+          secondary: tk.accentLight,
+          onSecondary: tk.onAccent,
+          surface: tk.surface,
+          onSurface: tk.textPrimary,
+          error: tk.danger,
+          onError: Colors.white,
         ),
         textTheme: TextTheme(
-          displayLarge: AuroraText.displayLarge,
-          displayMedium: AuroraText.displayMedium,
-          headlineLarge: AuroraText.titleLarge,
-          headlineMedium: AuroraText.titleMedium,
-          headlineSmall: AuroraText.titleSmall,
-          titleLarge: AuroraText.titleLarge,
-          titleMedium: AuroraText.titleMedium,
-          titleSmall: AuroraText.titleSmall,
-          bodyLarge: AuroraText.bodyLarge,
-          bodyMedium: AuroraText.bodyMedium,
-          bodySmall: AuroraText.bodySmall,
-          labelLarge: AuroraText.buttonLarge,
+          displayLarge: AuroraText.displayLarge.copyWith(color: tk.textPrimary),
+          displayMedium: AuroraText.displayMedium.copyWith(color: tk.textPrimary),
+          headlineLarge: AuroraText.titleLarge.copyWith(color: tk.textPrimary),
+          headlineMedium: AuroraText.titleMedium.copyWith(color: tk.textPrimary),
+          headlineSmall: AuroraText.titleSmall.copyWith(color: tk.textPrimary),
+          titleLarge: AuroraText.titleLarge.copyWith(color: tk.textPrimary),
+          titleMedium: AuroraText.titleMedium.copyWith(color: tk.textPrimary),
+          titleSmall: AuroraText.titleSmall.copyWith(color: tk.textPrimary),
+          bodyLarge: AuroraText.bodyLarge.copyWith(color: tk.textPrimary),
+          bodyMedium: AuroraText.bodyMedium.copyWith(color: tk.textSecondary),
+          bodySmall: AuroraText.bodySmall.copyWith(color: tk.textSecondary),
+          labelLarge: AuroraText.buttonLarge.copyWith(color: tk.onAccent),
         ),
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
           centerTitle: true,
-          titleTextStyle: AuroraText.titleMedium,
-          iconTheme: IconThemeData(color: AuroraColors.pearl),
+          titleTextStyle: AuroraText.titleMedium.copyWith(color: tk.textPrimary),
+          iconTheme: IconThemeData(color: tk.textPrimary),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AuroraColors.ember,
-            foregroundColor: AuroraColors.pearl,
+            backgroundColor: tk.accent,
+            foregroundColor: tk.onAccent,
             elevation: 0,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             shape: RoundedRectangleBorder(
@@ -413,38 +421,244 @@ class AuroraTheme {
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: AuroraColors.ash,
+          fillColor: dark ? tk.surface : tk.surfaceAlt,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(r),
-            borderSide: const BorderSide(color: AuroraColors.border),
+            borderSide: BorderSide(color: tk.border),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(r),
-            borderSide: const BorderSide(color: AuroraColors.border),
+            borderSide: BorderSide(color: tk.border),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(r),
-            borderSide: BorderSide(color: AuroraColors.ember, width: 1.5),
+            borderSide: BorderSide(color: tk.accent, width: 1.5),
           ),
-          hintStyle: AuroraText.bodyMedium.copyWith(color: AuroraColors.textHint),
-          labelStyle: AuroraText.bodyMedium.copyWith(color: AuroraColors.textSecondary),
+          hintStyle: AuroraText.bodyMedium.copyWith(color: tk.textHint),
+          labelStyle: AuroraText.bodyMedium.copyWith(color: tk.textSecondary),
         ),
-        dividerTheme: const DividerThemeData(
-          color: AuroraColors.divider,
+        dividerTheme: DividerThemeData(
+          color: tk.divider,
           thickness: 1,
           space: 1,
         ),
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: AuroraColors.coal,
-          selectedItemColor: AuroraColors.ember,
-          unselectedItemColor: AuroraColors.textSecondary,
+          backgroundColor: tk.surfaceAlt,
+          selectedItemColor: tk.accent,
+          unselectedItemColor: tk.textSecondary,
           showSelectedLabels: true,
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,
         ),
       );
   }
+}
+
+/// ╔══════════════════════════════════════════════════════════════╗
+/// ║  AuroraTokens — نظام السكينين (ThemeExtension)                ║
+/// ║                                                               ║
+/// ║  ألوان دلالية تُقرأ بـ context.c فتتبدّل تلقائياً مع السكين     ║
+/// ║  (فاتح dawn / داكن aurora / فاخر vip) عبر AnimatedTheme.       ║
+/// ║  سكين aurora يشير لحقول AuroraColors الحية (يحفظ SDUI).        ║
+/// ╚══════════════════════════════════════════════════════════════╝
+@immutable
+class AuroraTokens extends ThemeExtension<AuroraTokens> {
+  const AuroraTokens({
+    required this.bg,
+    required this.surface,
+    required this.surfaceAlt,
+    required this.elevated,
+    required this.accent,
+    required this.accentLight,
+    required this.accentDeep,
+    required this.onAccent,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textHint,
+    required this.border,
+    required this.borderStrong,
+    required this.divider,
+    required this.success,
+    required this.danger,
+    required this.warning,
+    required this.gold,
+    required this.isDark,
+  });
+
+  final Color bg;
+  final Color surface;
+  final Color surfaceAlt;
+  final Color elevated;
+  final Color accent;
+  final Color accentLight;
+  final Color accentDeep;
+  final Color onAccent;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textHint;
+  final Color border;
+  final Color borderStrong;
+  final Color divider;
+  final Color success;
+  final Color danger;
+  final Color warning;
+  final Color gold;
+  final bool isDark;
+
+  LinearGradient get accentGradient => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [accent, accentDeep],
+      );
+
+  /// السكين الداكن (الحالي) — يشير للحقول الحية فيبقى SDUI فعّالاً.
+  static AuroraTokens get aurora => AuroraTokens(
+        bg: AuroraColors.obsidian,
+        surface: AuroraColors.ash,
+        surfaceAlt: AuroraColors.coal,
+        elevated: AuroraColors.smoke,
+        accent: AuroraColors.ember,
+        accentLight: AuroraColors.emberLight,
+        accentDeep: AuroraColors.emberDeep,
+        onAccent: AuroraColors.pearl,
+        textPrimary: AuroraColors.pearl,
+        textSecondary: AuroraColors.textSecondary,
+        textHint: AuroraColors.textHint,
+        border: AuroraColors.border,
+        borderStrong: AuroraColors.borderStrong,
+        divider: AuroraColors.divider,
+        success: AuroraColors.success,
+        danger: AuroraColors.danger,
+        warning: AuroraColors.warning,
+        gold: AuroraColors.gold,
+        isDark: true,
+      );
+
+  /// السكين الفاتح «Economy / Dawn» — عاج كريمي دافئ + ember.
+  // ignore: prefer_const_constructors
+  static AuroraTokens get dawn => AuroraTokens(
+        bg: const Color(0xFFF7F1EC),
+        surface: const Color(0xFFFFFFFF),
+        surfaceAlt: const Color(0xFFF1E9E2),
+        elevated: const Color(0xFFFFFFFF),
+        accent: const Color(0xFFE56A12),
+        accentLight: const Color(0xFFFF8A3D),
+        accentDeep: const Color(0xFFC24E00),
+        onAccent: const Color(0xFFFFFFFF),
+        textPrimary: const Color(0xFF1E1714),
+        textSecondary: const Color(0xFF6B5E57),
+        textHint: const Color(0xFF9C8E86),
+        border: const Color(0x14000000),
+        borderStrong: const Color(0x26000000),
+        divider: const Color(0x0F000000),
+        success: const Color(0xFF0E9F6E),
+        danger: const Color(0xFFE02424),
+        warning: const Color(0xFFD98A00),
+        gold: const Color(0xFFCB8B1A),
+        isDark: false,
+      );
+
+  /// السكين الفاخر «VIP» — obsidian أعمق + نيون بنفسجي/سماوي.
+  // ignore: prefer_const_constructors
+  static AuroraTokens get vip => AuroraTokens(
+        bg: const Color(0xFF070611),
+        surface: const Color(0xFF14122A),
+        surfaceAlt: const Color(0xFF0C0B1C),
+        elevated: const Color(0xFF1E1B3C),
+        accent: const Color(0xFFB048FF),
+        accentLight: const Color(0xFFCB7BFF),
+        accentDeep: const Color(0xFF7E2FBF),
+        onAccent: const Color(0xFFFFFFFF),
+        textPrimary: const Color(0xFFF3EEFF),
+        textSecondary: const Color(0xFFA9A2C9),
+        textHint: const Color(0xFF6E6790),
+        border: const Color(0x1AB048FF),
+        borderStrong: const Color(0x33B048FF),
+        divider: const Color(0x14FFFFFF),
+        success: const Color(0xFF39FF14),
+        danger: const Color(0xFFFF3D8B),
+        warning: const Color(0xFFFFC043),
+        gold: const Color(0xFF00F5FF),
+        isDark: true,
+      );
+
+  @override
+  AuroraTokens copyWith({
+    Color? bg,
+    Color? surface,
+    Color? surfaceAlt,
+    Color? elevated,
+    Color? accent,
+    Color? accentLight,
+    Color? accentDeep,
+    Color? onAccent,
+    Color? textPrimary,
+    Color? textSecondary,
+    Color? textHint,
+    Color? border,
+    Color? borderStrong,
+    Color? divider,
+    Color? success,
+    Color? danger,
+    Color? warning,
+    Color? gold,
+    bool? isDark,
+  }) {
+    return AuroraTokens(
+      bg: bg ?? this.bg,
+      surface: surface ?? this.surface,
+      surfaceAlt: surfaceAlt ?? this.surfaceAlt,
+      elevated: elevated ?? this.elevated,
+      accent: accent ?? this.accent,
+      accentLight: accentLight ?? this.accentLight,
+      accentDeep: accentDeep ?? this.accentDeep,
+      onAccent: onAccent ?? this.onAccent,
+      textPrimary: textPrimary ?? this.textPrimary,
+      textSecondary: textSecondary ?? this.textSecondary,
+      textHint: textHint ?? this.textHint,
+      border: border ?? this.border,
+      borderStrong: borderStrong ?? this.borderStrong,
+      divider: divider ?? this.divider,
+      success: success ?? this.success,
+      danger: danger ?? this.danger,
+      warning: warning ?? this.warning,
+      gold: gold ?? this.gold,
+      isDark: isDark ?? this.isDark,
+    );
+  }
+
+  @override
+  AuroraTokens lerp(ThemeExtension<AuroraTokens>? other, double t) {
+    if (other is! AuroraTokens) return this;
+    return AuroraTokens(
+      bg: Color.lerp(bg, other.bg, t)!,
+      surface: Color.lerp(surface, other.surface, t)!,
+      surfaceAlt: Color.lerp(surfaceAlt, other.surfaceAlt, t)!,
+      elevated: Color.lerp(elevated, other.elevated, t)!,
+      accent: Color.lerp(accent, other.accent, t)!,
+      accentLight: Color.lerp(accentLight, other.accentLight, t)!,
+      accentDeep: Color.lerp(accentDeep, other.accentDeep, t)!,
+      onAccent: Color.lerp(onAccent, other.onAccent, t)!,
+      textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
+      textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
+      textHint: Color.lerp(textHint, other.textHint, t)!,
+      border: Color.lerp(border, other.border, t)!,
+      borderStrong: Color.lerp(borderStrong, other.borderStrong, t)!,
+      divider: Color.lerp(divider, other.divider, t)!,
+      success: Color.lerp(success, other.success, t)!,
+      danger: Color.lerp(danger, other.danger, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      gold: Color.lerp(gold, other.gold, t)!,
+      isDark: t < 0.5 ? isDark : other.isDark,
+    );
+  }
+}
+
+/// اختصار قراءة التوكنات السياقية: context.c.accent ...
+extension AuroraContext on BuildContext {
+  AuroraTokens get c =>
+      Theme.of(this).extension<AuroraTokens>() ?? AuroraTokens.aurora;
 }
 
 /// ╔══════════════════════════════════════════════════════════════╗
