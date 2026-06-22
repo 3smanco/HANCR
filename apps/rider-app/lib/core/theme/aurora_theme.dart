@@ -35,7 +35,8 @@ class AuroraColors {
   static Color ember = const Color(0xFFFF7A1A); // الـ primary action
   static Color emberLight = const Color(0xFFFF9D4D); // glow + accent
   static Color emberDeep = const Color(0xFFE55F00); // pressed/active
-  static Color emberMute = const Color(0xFF6B3920); // muted accent (low emphasis)
+  static Color emberMute =
+      const Color(0xFF6B3920); // muted accent (low emphasis)
 
   // ═══ Gold accents (premium / loyalty) — live ═══
   static Color gold = const Color(0xFFFFB547);
@@ -496,88 +497,89 @@ class AuroraTheme {
     final r = AuroraColors.baseRadius;
     final dark = brightness == Brightness.dark;
     return ThemeData(
-        useMaterial3: true,
+      useMaterial3: true,
+      brightness: brightness,
+      extensions: <ThemeExtension<dynamic>>[tk],
+      scaffoldBackgroundColor: tk.bg,
+      canvasColor: tk.bg,
+      colorScheme: ColorScheme(
         brightness: brightness,
-        extensions: <ThemeExtension<dynamic>>[tk],
-        scaffoldBackgroundColor: tk.bg,
-        canvasColor: tk.bg,
-        colorScheme: ColorScheme(
-          brightness: brightness,
-          primary: tk.accent,
-          onPrimary: tk.onAccent,
-          secondary: tk.accentLight,
-          onSecondary: tk.onAccent,
-          surface: tk.surface,
-          onSurface: tk.textPrimary,
-          error: tk.danger,
-          onError: Colors.white,
-        ),
-        textTheme: TextTheme(
-          displayLarge: AuroraText.displayLarge.copyWith(color: tk.textPrimary),
-          displayMedium: AuroraText.displayMedium.copyWith(color: tk.textPrimary),
-          headlineLarge: AuroraText.titleLarge.copyWith(color: tk.textPrimary),
-          headlineMedium: AuroraText.titleMedium.copyWith(color: tk.textPrimary),
-          headlineSmall: AuroraText.titleSmall.copyWith(color: tk.textPrimary),
-          titleLarge: AuroraText.titleLarge.copyWith(color: tk.textPrimary),
-          titleMedium: AuroraText.titleMedium.copyWith(color: tk.textPrimary),
-          titleSmall: AuroraText.titleSmall.copyWith(color: tk.textPrimary),
-          bodyLarge: AuroraText.bodyLarge.copyWith(color: tk.textPrimary),
-          bodyMedium: AuroraText.bodyMedium.copyWith(color: tk.textSecondary),
-          bodySmall: AuroraText.bodySmall.copyWith(color: tk.textSecondary),
-          labelLarge: AuroraText.buttonLarge.copyWith(color: tk.onAccent),
-        ),
-        appBarTheme: AppBarTheme(
-          backgroundColor: Colors.transparent,
+        primary: tk.accent,
+        onPrimary: tk.onAccent,
+        secondary: tk.accentLight,
+        onSecondary: tk.onAccent,
+        surface: tk.surface,
+        onSurface: tk.textPrimary,
+        error: tk.danger,
+        onError: Colors.white,
+      ),
+      textTheme: TextTheme(
+        displayLarge: AuroraText.displayLarge.copyWith(color: tk.textPrimary),
+        displayMedium: AuroraText.displayMedium.copyWith(color: tk.textPrimary),
+        headlineLarge: AuroraText.titleLarge.copyWith(color: tk.textPrimary),
+        headlineMedium: AuroraText.titleMedium.copyWith(color: tk.textPrimary),
+        headlineSmall: AuroraText.titleSmall.copyWith(color: tk.textPrimary),
+        titleLarge: AuroraText.titleLarge.copyWith(color: tk.textPrimary),
+        titleMedium: AuroraText.titleMedium.copyWith(color: tk.textPrimary),
+        titleSmall: AuroraText.titleSmall.copyWith(color: tk.textPrimary),
+        bodyLarge: AuroraText.bodyLarge.copyWith(color: tk.textPrimary),
+        bodyMedium: AuroraText.bodyMedium.copyWith(color: tk.textSecondary),
+        bodySmall: AuroraText.bodySmall.copyWith(color: tk.textSecondary),
+        labelLarge: AuroraText.buttonLarge.copyWith(color: tk.onAccent),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: AuroraText.titleMedium.copyWith(color: tk.textPrimary),
+        iconTheme: IconThemeData(color: tk.textPrimary),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: tk.accent,
+          foregroundColor: tk.onAccent,
           elevation: 0,
-          centerTitle: true,
-          titleTextStyle: AuroraText.titleMedium.copyWith(color: tk.textPrimary),
-          iconTheme: IconThemeData(color: tk.textPrimary),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: tk.accent,
-            foregroundColor: tk.onAccent,
-            elevation: 0,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(r),
-            ),
-            textStyle: AuroraText.buttonLarge,
-          ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: dark ? tk.surface : tk.surfaceAlt,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          border: OutlineInputBorder(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(r),
-            borderSide: BorderSide(color: tk.border),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(r),
-            borderSide: BorderSide(color: tk.border),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(r),
-            borderSide: BorderSide(color: tk.accent, width: 1.5),
-          ),
-          hintStyle: AuroraText.bodyMedium.copyWith(color: tk.textHint),
-          labelStyle: AuroraText.bodyMedium.copyWith(color: tk.textSecondary),
+          textStyle: AuroraText.buttonLarge,
         ),
-        dividerTheme: DividerThemeData(
-          color: tk.divider,
-          thickness: 1,
-          space: 1,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: dark ? tk.surface : tk.surfaceAlt,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(r),
+          borderSide: BorderSide(color: tk.border),
         ),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: tk.surfaceAlt,
-          selectedItemColor: tk.accent,
-          unselectedItemColor: tk.textSecondary,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          type: BottomNavigationBarType.fixed,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(r),
+          borderSide: BorderSide(color: tk.border),
         ),
-      );
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(r),
+          borderSide: BorderSide(color: tk.accent, width: 1.5),
+        ),
+        hintStyle: AuroraText.bodyMedium.copyWith(color: tk.textHint),
+        labelStyle: AuroraText.bodyMedium.copyWith(color: tk.textSecondary),
+      ),
+      dividerTheme: DividerThemeData(
+        color: tk.divider,
+        thickness: 1,
+        space: 1,
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: tk.surfaceAlt,
+        selectedItemColor: tk.accent,
+        unselectedItemColor: tk.textSecondary,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+      ),
+    );
   }
 }
 

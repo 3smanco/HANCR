@@ -118,8 +118,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthError(msg));
         return;
       }
-      final payload =
-          result.data?['verifyOtp'] as Map<String, dynamic>?;
+      final payload = result.data?['verifyOtp'] as Map<String, dynamic>?;
       final token = payload?['accessToken'] as String?;
       final isNewUser = payload?['isNewUser'] as bool? ?? false;
       final riderData = payload?['rider'] as Map<String, dynamic>?;
@@ -175,8 +174,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         return;
       }
-      final payload =
-          result.data?['verifyTwoFactor'] as Map<String, dynamic>?;
+      final payload = result.data?['verifyTwoFactor'] as Map<String, dynamic>?;
       final token = payload?['accessToken'] as String?;
       final riderData = payload?['rider'] as Map<String, dynamic>?;
       final riderId = riderData?['id'] as int? ?? 0;
@@ -267,7 +265,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final serverClientId = AppConfig.googleServerClientId;
       if (serverClientId.isEmpty) {
-        emit(const AuthError('دخول Google غير مُهيّأ بعد. جرّب الهاتف أو الإيميل.'));
+        emit(const AuthError(
+            'دخول Google غير مُهيّأ بعد. جرّب الهاتف أو الإيميل.'));
         return;
       }
       final googleSignIn = GoogleSignIn(

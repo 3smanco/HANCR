@@ -375,9 +375,8 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
                   child: Icon(Icons.image_outlined,
                       color: AuroraColors.textSecondary, size: 32),
                 ),
-                loadingBuilder: (ctx, child, p) => p == null
-                    ? child
-                    : Container(color: AuroraColors.coal),
+                loadingBuilder: (ctx, child, p) =>
+                    p == null ? child : Container(color: AuroraColors.coal),
               ),
               if (title != null || subtitle != null)
                 Positioned(
@@ -557,51 +556,51 @@ class _AuroraHomeTabState extends State<AuroraHomeTab> {
     return GestureDetector(
       onTap: () => context.push('/book'),
       child: Container(
-      padding: const EdgeInsets.all(AuroraSpacing.lg),
-      decoration: BoxDecoration(
-        gradient: AuroraColors.emberGradient,
-        borderRadius: BorderRadius.circular(AuroraRadius.lg),
-        boxShadow: AuroraShadows.emberGlow,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tr('scheduleTitle'),
-                  style: AuroraText.titleMedium.copyWith(
-                    color: AuroraColors.pearl,
-                    height: 1.2,
+        padding: const EdgeInsets.all(AuroraSpacing.lg),
+        decoration: BoxDecoration(
+          gradient: AuroraColors.emberGradient,
+          borderRadius: BorderRadius.circular(AuroraRadius.lg),
+          boxShadow: AuroraShadows.emberGlow,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tr('scheduleTitle'),
+                    style: AuroraText.titleMedium.copyWith(
+                      color: AuroraColors.pearl,
+                      height: 1.2,
+                    ),
                   ),
-                ),
-                const SizedBox(height: AuroraSpacing.xs),
-                Text(
-                  tr('scheduleSub'),
-                  style: AuroraText.bodySmall.copyWith(
-                    color: AuroraColors.pearl.withValues(alpha: 0.85),
+                  const SizedBox(height: AuroraSpacing.xs),
+                  Text(
+                    tr('scheduleSub'),
+                    style: AuroraText.bodySmall.copyWith(
+                      color: AuroraColors.pearl.withValues(alpha: 0.85),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: AuroraColors.pearl.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: AuroraColors.pearl.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.schedule,
+                color: AuroraColors.pearl,
+                size: 30,
+              ),
             ),
-            child: Icon(
-              Icons.schedule,
-              color: AuroraColors.pearl,
-              size: 30,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
     );
   }
 }

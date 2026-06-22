@@ -6,7 +6,7 @@ import '../../core/graphql/gql/carpool_gql.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 
 /// شاشة Carpool — يطلب الراكب مشاركة رحلة مع راكب آخر بنفس المسار.
 class AuroraCarpoolScreen extends StatefulWidget {
@@ -25,8 +25,8 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
 
   Map<String, dynamic>? _origin;
   Map<String, dynamic>? _destination;
-  TimeOfDay _time = TimeOfDay(
-      hour: DateTime.now().hour + 1, minute: DateTime.now().minute);
+  TimeOfDay _time =
+      TimeOfDay(hour: DateTime.now().hour + 1, minute: DateTime.now().minute);
   DateTime _date = DateTime.now();
   int _maxRiders = 3;
   String _trustMode = 'open';
@@ -54,12 +54,10 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
           variables: const {'regionId': AppConfig.defaultRegionId},
         )),
       ]);
-      final reqs =
-          (results[0].data?['carpoolRequests'] as List<dynamic>? ?? [])
-              .cast<Map<String, dynamic>>();
-      final places =
-          (results[1].data?['savedPlaces'] as List<dynamic>? ?? [])
-              .cast<Map<String, dynamic>>();
+      final reqs = (results[0].data?['carpoolRequests'] as List<dynamic>? ?? [])
+          .cast<Map<String, dynamic>>();
+      final places = (results[1].data?['savedPlaces'] as List<dynamic>? ?? [])
+          .cast<Map<String, dynamic>>();
       final svc = (results[2].data?['services'] as List<dynamic>? ?? [])
           .cast<Map<String, dynamic>>();
       final ride = svc.firstWhere(
@@ -89,8 +87,7 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
   }
 
   Future<void> _pickTime() async {
-    final picked =
-        await showTimePicker(context: context, initialTime: _time);
+    final picked = await showTimePicker(context: context, initialTime: _time);
     if (picked != null && mounted) setState(() => _time = picked);
   }
 
@@ -103,8 +100,8 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
       _toast(tr('noServiceAvailable'));
       return;
     }
-    final scheduled = DateTime(
-        _date.year, _date.month, _date.day, _time.hour, _time.minute);
+    final scheduled =
+        DateTime(_date.year, _date.month, _date.day, _time.hour, _time.minute);
     if (scheduled.isBefore(DateTime.now().add(const Duration(minutes: 5)))) {
       _toast(tr('carpoolFutureTime'));
       return;
@@ -165,15 +162,13 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
         title: Text(tr('carpool'), style: AuroraText.titleSmall),
       ),
       body: _loading
-          ? Center(
-              child: AuroraLoader(size: 36))
+          ? const Center(child: AuroraLoader(size: 36))
           : ListView(
               padding: const EdgeInsets.all(AuroraSpacing.lg),
               children: [
                 _form(),
                 const SizedBox(height: AuroraSpacing.lg),
-                Text(tr('myCarpoolRequests'),
-                    style: AuroraText.titleSmall),
+                Text(tr('myCarpoolRequests'), style: AuroraText.titleSmall),
                 const SizedBox(height: AuroraSpacing.sm),
                 if (_items.isEmpty)
                   Padding(
@@ -209,9 +204,7 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
               _origin, (v) => setState(() => _origin = v), tr('from')),
           const SizedBox(height: AuroraSpacing.sm),
           _placeDropdown(
-              _destination,
-              (v) => setState(() => _destination = v),
-              tr('to')),
+              _destination, (v) => setState(() => _destination = v), tr('to')),
           const SizedBox(height: AuroraSpacing.sm),
           Row(
             children: [
@@ -263,11 +256,10 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
     );
   }
 
-  Widget _placeDropdown(
-      Map<String, dynamic>? value, ValueChanged<Map<String, dynamic>?> onChanged,
-      String hint) {
+  Widget _placeDropdown(Map<String, dynamic>? value,
+      ValueChanged<Map<String, dynamic>?> onChanged, String hint) {
     return DropdownButtonFormField<Map<String, dynamic>>(
-      value: value,
+      initialValue: value,
       dropdownColor: AuroraColors.coal,
       style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
       decoration: InputDecoration(
@@ -309,8 +301,8 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
             Icon(icon, color: AuroraColors.ember, size: 18),
             const SizedBox(width: AuroraSpacing.sm),
             Text(label,
-                style: AuroraText.bodyMedium
-                    .copyWith(color: AuroraColors.pearl)),
+                style:
+                    AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl)),
           ],
         ),
       ),
@@ -331,7 +323,8 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
         color: AuroraColors.coal,
         borderRadius: BorderRadius.circular(AuroraRadius.md),
         border: Border.all(
-          color: status == 'matched' ? AuroraColors.success : AuroraColors.border,
+          color:
+              status == 'matched' ? AuroraColors.success : AuroraColors.border,
         ),
       ),
       child: Column(
@@ -344,8 +337,8 @@ class _AuroraCarpoolScreenState extends State<AuroraCarpoolScreen> {
               Expanded(
                 child: Text(
                   scheduled.replaceAll('T', ' '),
-                  style: AuroraText.bodyMedium
-                      .copyWith(color: AuroraColors.pearl),
+                  style:
+                      AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
                 ),
               ),
               Text(tr('carpool_status_$status'),

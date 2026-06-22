@@ -111,7 +111,8 @@ class _GlowPulseState extends State<GlowPulse>
     return AnimatedBuilder(
       animation: _c,
       builder: (_, child) {
-        final blur = widget.minBlur + (widget.maxBlur - widget.minBlur) * _c.value;
+        final blur =
+            widget.minBlur + (widget.maxBlur - widget.minBlur) * _c.value;
         return DecoratedBox(
           decoration: BoxDecoration(
             boxShadow: [

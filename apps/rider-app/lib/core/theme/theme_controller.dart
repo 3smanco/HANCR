@@ -54,8 +54,7 @@ class ThemeController extends ChangeNotifier {
       case 'vip':
         return 'vip';
       case 'system':
-        final b =
-            WidgetsBinding.instance.platformDispatcher.platformBrightness;
+        final b = WidgetsBinding.instance.platformDispatcher.platformBrightness;
         return b == Brightness.light ? 'light' : 'dark';
       default:
         return 'dark';
@@ -87,7 +86,10 @@ class ThemeController extends ChangeNotifier {
 
   /// يغيّر تفضيل المظهر ويحفظه ويعيد بناء MaterialApp بالسكين الجديد.
   Future<void> setAppearanceMode(String mode) async {
-    if (mode != 'system' && mode != 'light' && mode != 'dark' && mode != 'vip') {
+    if (mode != 'system' &&
+        mode != 'light' &&
+        mode != 'dark' &&
+        mode != 'vip') {
       return;
     }
     if (mode == _appearanceMode) return;

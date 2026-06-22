@@ -16,7 +16,8 @@ class AppConfig {
   AppConfig._();
 
   // ── Environment ───────────────────────────────────────────────────────────
-  static const String env = String.fromEnvironment('ENV', defaultValue: 'development');
+  static const String env =
+      String.fromEnvironment('ENV', defaultValue: 'development');
   static bool get isProduction => env == 'production';
   static bool get isStaging => env == 'staging';
   static bool get isDevelopment => env == 'development';

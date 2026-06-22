@@ -6,7 +6,7 @@ import '../../blocs/sos/sos_state.dart';
 import '../../core/models/sos_model.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 import 'aurora_add_contact_sheet.dart';
 
 /// AuroraEmergencyContactsScreen — قائمة جهات الطوارئ بنمط Aurora.
@@ -86,7 +86,7 @@ class _ContactsView extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, SosState state) {
     if (state is SosInitial || state is SosLoading) {
-      return Center(
+      return const Center(
         child: AuroraLoader(size: 36),
       );
     }
@@ -97,8 +97,7 @@ class _ContactsView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline,
-                  color: AuroraColors.danger, size: 64),
+              Icon(Icons.error_outline, color: AuroraColors.danger, size: 64),
               const SizedBox(height: AuroraSpacing.md),
               Text(state.message, style: AuroraText.bodyMedium),
               const SizedBox(height: AuroraSpacing.lg),
@@ -253,8 +252,7 @@ class _ContactsView extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon:
-                Icon(Icons.delete_outline, color: AuroraColors.danger),
+            icon: Icon(Icons.delete_outline, color: AuroraColors.danger),
             onPressed: () => _confirmDelete(context, c),
           ),
         ],
@@ -268,7 +266,8 @@ class _ContactsView extends StatelessWidget {
     required Color textColor,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.sm, vertical: 2),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AuroraSpacing.sm, vertical: 2),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(AuroraRadius.xs),

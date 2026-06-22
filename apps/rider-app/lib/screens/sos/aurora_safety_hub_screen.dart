@@ -15,8 +15,8 @@ class AuroraSafetyHubScreen extends StatelessWidget {
       body: AuroraBackground(
         child: SafeArea(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(AuroraSpacing.lg, 0,
-                AuroraSpacing.lg, AuroraSpacing.xl),
+            padding: const EdgeInsets.fromLTRB(
+                AuroraSpacing.lg, 0, AuroraSpacing.lg, AuroraSpacing.xl),
             children: [
               // ─── Hero ───
               const SizedBox(height: AuroraSpacing.sm),
@@ -42,7 +42,8 @@ class AuroraSafetyHubScreen extends StatelessWidget {
               const SizedBox(height: AuroraSpacing.md),
               Center(
                 child: Text(tr('safetyHub'),
-                    style: AuroraText.displayMedium, textAlign: TextAlign.center),
+                    style: AuroraText.displayMedium,
+                    textAlign: TextAlign.center),
               ),
               const SizedBox(height: AuroraSpacing.xl),
 
@@ -234,8 +235,8 @@ class _SafetyPreferencesScreenState extends State<_SafetyPreferencesScreen> {
     );
   }
 
-  Widget _switchRow(String label, String sub, bool value,
-      ValueChanged<bool> onChanged) {
+  Widget _switchRow(
+      String label, String sub, bool value, ValueChanged<bool> onChanged) {
     return Container(
       margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
       padding: const EdgeInsets.symmetric(
@@ -260,7 +261,7 @@ class _SafetyPreferencesScreenState extends State<_SafetyPreferencesScreen> {
           Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: AuroraColors.ember),
+              activeThumbColor: AuroraColors.ember),
         ],
       ),
     );
@@ -318,8 +319,7 @@ class _SafetyInfoScreen extends StatelessWidget {
                       const SizedBox(width: AuroraSpacing.sm),
                       Expanded(
                         child: Text(b,
-                            style: AuroraText.bodyMedium
-                                .copyWith(height: 1.5)),
+                            style: AuroraText.bodyMedium.copyWith(height: 1.5)),
                       ),
                     ],
                   ),

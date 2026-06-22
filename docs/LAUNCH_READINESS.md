@@ -1,6 +1,6 @@
 # HANCR Launch Readiness
 
-Last verified server state: `/opt/hancr` on `main` commit `a421105`.
+Last verified server state: `/opt/hancr` on `main` commit `e050122`.
 
 ## Green Checks
 
@@ -66,3 +66,5 @@ git push origin feat/nearby-drivers
 ```
 
 The workflow should run the same gates as `npm run ci:verify`.
+
+`npm run ci:verify` also runs `flutter analyze --no-pub` for both mobile apps.

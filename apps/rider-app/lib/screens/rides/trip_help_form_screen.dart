@@ -124,8 +124,7 @@ class _TripHelpFormScreenState extends State<TripHelpFormScreen> {
                         fillColor: AuroraColors.ash,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AuroraRadius.md),
-                          borderSide:
-                              BorderSide(color: AuroraColors.border),
+                          borderSide: BorderSide(color: AuroraColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AuroraRadius.md),

@@ -5,7 +5,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 
 /// شات الدعم الحي بين الراكب وموظف خدمة العملاء.
 class SupportChatScreen extends StatefulWidget {
@@ -76,9 +76,9 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
       final client = await GraphQLClientManager.get();
       _sub = client
           .subscribe(SubscriptionOptions(
-            document: gql(supportMessageAddedSubscription),
-            variables: {'conversationId': _conversationId},
-          ))
+        document: gql(supportMessageAddedSubscription),
+        variables: {'conversationId': _conversationId},
+      ))
           .listen((result) {
         final m = result.data?['supportMessageAdded'] as Map<String, dynamic>?;
         if (m == null || !mounted) return;
@@ -134,17 +134,15 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
         children: [
           Expanded(
             child: _loading
-                ? Center(
-                    child:
-                        AuroraLoader(size: 36))
+                ? const Center(child: AuroraLoader(size: 36))
                 : _messages.isEmpty
                     ? Center(
                         child: Padding(
                           padding: const EdgeInsets.all(AuroraSpacing.xl),
                           child: Text(tr('supportChatEmpty'),
                               textAlign: TextAlign.center,
-                              style: AuroraText.bodySmall.copyWith(
-                                  color: AuroraColors.textSecondary)),
+                              style: AuroraText.bodySmall
+                                  .copyWith(color: AuroraColors.textSecondary)),
                         ),
                       )
                     : ListView.builder(
@@ -168,8 +166,8 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(
             horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
-        constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.72),
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
         decoration: BoxDecoration(
           color: mine ? AuroraColors.ember : AuroraColors.ash,
           borderRadius: BorderRadius.only(

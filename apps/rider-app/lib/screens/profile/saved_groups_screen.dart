@@ -4,7 +4,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 
 /// المجموعات المحفوظة — شخصية/مهنية، مع إنشاء/تعديل/حذف وأعضاء بالهاتف.
 class SavedGroupsScreen extends StatefulWidget {
@@ -40,9 +40,9 @@ class _SavedGroupsScreenState extends State<SavedGroupsScreen> {
       if (res.hasException) throw res.exception!;
       if (!mounted) return;
       setState(() {
-        _groups =
-            (res.data?['mySavedGroups'] as List?)?.cast<Map<String, dynamic>>() ??
-                [];
+        _groups = (res.data?['mySavedGroups'] as List?)
+                ?.cast<Map<String, dynamic>>() ??
+            [];
         _loading = false;
       });
     } catch (_) {
@@ -95,8 +95,7 @@ class _SavedGroupsScreenState extends State<SavedGroupsScreen> {
         child: SafeArea(
           top: false,
           child: _loading
-              ? Center(
-                  child: AuroraLoader(size: 36))
+              ? const Center(child: AuroraLoader(size: 36))
               : _error != null
                   ? Center(
                       child: Column(
@@ -152,8 +151,7 @@ class _SavedGroupsScreenState extends State<SavedGroupsScreen> {
               trailing: IconButton(
                 icon: Icon(Icons.delete_outline,
                     color: AuroraColors.danger, size: 20),
-                onPressed:
-                    _busy ? null : () => _delete(g['id'] as int),
+                onPressed: _busy ? null : () => _delete(g['id'] as int),
               ),
             );
           }),
@@ -214,9 +212,10 @@ class _GroupEditor extends StatefulWidget {
 class _GroupEditorState extends State<_GroupEditor> {
   late final TextEditingController _name =
       TextEditingController(text: widget.group?['name'] as String? ?? '');
-  late String _type =
-      (widget.group?['type'] as String?) == 'business' ? 'business' : 'personal';
-  late List<Map<String, dynamic>> _members = [
+  late String _type = (widget.group?['type'] as String?) == 'business'
+      ? 'business'
+      : 'personal';
+  late final List<Map<String, dynamic>> _members = [
     ...((widget.group?['members'] as List?)?.cast<Map<String, dynamic>>() ?? [])
         .map((m) => {'name': m['name'], 'phone': m['phone']}),
   ];
@@ -264,15 +263,16 @@ class _GroupEditorState extends State<_GroupEditor> {
       ),
     );
     if (ok == true && phoneCtl.text.trim().isNotEmpty) {
-      setState(() => _members.add(
-          {'name': nameCtl.text.trim(), 'phone': phoneCtl.text.trim()}));
+      setState(() => _members
+          .add({'name': nameCtl.text.trim(), 'phone': phoneCtl.text.trim()}));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AuroraSpacing.lg),
         child: Column(
@@ -364,7 +364,8 @@ class _GroupEditorState extends State<_GroupEditor> {
           ),
           child: Text(label,
               style: AuroraText.bodySmall.copyWith(
-                  color: sel ? AuroraColors.pearl : AuroraColors.textSecondary)),
+                  color:
+                      sel ? AuroraColors.pearl : AuroraColors.textSecondary)),
         ),
       ),
     );

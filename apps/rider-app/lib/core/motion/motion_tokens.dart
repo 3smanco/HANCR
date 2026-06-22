@@ -17,7 +17,8 @@ class Motion {
   static const Duration sheet = Duration(milliseconds: 380); // bottom sheets
   static const Duration slow = Duration(milliseconds: 500);
   static const Duration map = Duration(milliseconds: 500); // map zoom
-  static const Duration driverMove = Duration(milliseconds: 800); // interpolation
+  static const Duration driverMove =
+      Duration(milliseconds: 800); // interpolation
   static const Duration pulse = Duration(milliseconds: 1400); // نبض حي
   static const Duration shimmer = Duration(milliseconds: 1200);
 

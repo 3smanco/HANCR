@@ -24,14 +24,30 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
   @override
   Widget build(BuildContext context) {
     final options = <(String, String, String, IconData)>[
-      ('system', tr('appearanceSystem'), tr('appearanceSystemSub'),
-          Icons.brightness_auto_outlined),
-      ('light', tr('appearanceLight'), tr('appearanceLightSub'),
-          Icons.light_mode_outlined),
-      ('dark', tr('appearanceDark'), tr('appearanceDarkSub'),
-          Icons.dark_mode_outlined),
-      ('vip', tr('appearanceVip'), tr('appearanceVipSub'),
-          Icons.workspace_premium_outlined),
+      (
+        'system',
+        tr('appearanceSystem'),
+        tr('appearanceSystemSub'),
+        Icons.brightness_auto_outlined
+      ),
+      (
+        'light',
+        tr('appearanceLight'),
+        tr('appearanceLightSub'),
+        Icons.light_mode_outlined
+      ),
+      (
+        'dark',
+        tr('appearanceDark'),
+        tr('appearanceDarkSub'),
+        Icons.dark_mode_outlined
+      ),
+      (
+        'vip',
+        tr('appearanceVip'),
+        tr('appearanceVipSub'),
+        Icons.workspace_premium_outlined
+      ),
     ];
     return Scaffold(
       backgroundColor: AuroraColors.obsidian,

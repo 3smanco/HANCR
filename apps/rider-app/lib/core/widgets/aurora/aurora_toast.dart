@@ -53,9 +53,11 @@ class AuroraToast {
 
   /// Success toast (green).
   static void success(BuildContext context, String message) =>
-      show(context, message, icon: Icons.check_circle, color: AuroraColors.success);
+      show(context, message,
+          icon: Icons.check_circle, color: AuroraColors.success);
 
   /// Error toast (red).
   static void error(BuildContext context, String message) =>
-      show(context, message, icon: Icons.error_outline, color: AuroraColors.danger);
+      show(context, message,
+          icon: Icons.error_outline, color: AuroraColors.danger);
 }

@@ -71,8 +71,7 @@ class _AuroraEmailScreenState extends State<AuroraEmailScreen> {
                         onPressed: () => context.canPop()
                             ? context.pop()
                             : context.go('/auth/phone'),
-                        icon: Icon(Icons.arrow_back,
-                            color: AuroraColors.pearl),
+                        icon: Icon(Icons.arrow_back, color: AuroraColors.pearl),
                       ),
                     ),
                     const SizedBox(height: AuroraSpacing.huge),
@@ -110,13 +109,12 @@ class _AuroraEmailScreenState extends State<AuroraEmailScreen> {
                         fillColor: AuroraColors.ash,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AuroraRadius.md),
-                          borderSide:
-                              BorderSide(color: AuroraColors.border),
+                          borderSide: BorderSide(color: AuroraColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AuroraRadius.md),
-                          borderSide: BorderSide(
-                              color: AuroraColors.ember, width: 1.5),
+                          borderSide:
+                              BorderSide(color: AuroraColors.ember, width: 1.5),
                         ),
                       ),
                     ),

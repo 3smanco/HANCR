@@ -23,9 +23,8 @@ class RiderBloc extends Bloc<RiderEvent, RiderState> {
         QueryOptions(document: gql(meQuery)),
       );
       if (result.hasException) {
-        emit(RiderError(
-            result.exception?.graphqlErrors.firstOrNull?.message ??
-                'Failed to load profile'));
+        emit(RiderError(result.exception?.graphqlErrors.firstOrNull?.message ??
+            'Failed to load profile'));
         return;
       }
       final data = result.data?['me'] as Map<String, dynamic>?;

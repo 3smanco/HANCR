@@ -80,8 +80,7 @@ class _AuroraEmailOtpScreenState extends State<AuroraEmailOtpScreen> {
                         onPressed: () => context.canPop()
                             ? context.pop()
                             : context.go('/auth/email'),
-                        icon: Icon(Icons.arrow_back,
-                            color: AuroraColors.pearl),
+                        icon: Icon(Icons.arrow_back, color: AuroraColors.pearl),
                       ),
                     ),
                     const SizedBox(height: AuroraSpacing.huge),

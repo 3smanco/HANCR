@@ -56,154 +56,155 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
       body: Stack(
         children: [
           AuroraBackground(
-        child: BlocBuilder<OrderBloc, OrderState>(
-          builder: (context, state) {
-            final order = state is OrderAwaitingReview ? state.order : null;
-            if (order == null) {
-              // لا نعلق أبداً: دوران لحظي + مهرب للرئيسية.
-              return SafeArea(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const AuroraLoader(size: 40),
-                      const SizedBox(height: AuroraSpacing.lg),
-                      TextButton(
-                        onPressed: () => context.go('/home'),
-                        child: Text(tr('backHome'),
-                            style: AuroraText.bodyMedium
-                                .copyWith(color: AuroraColors.ember)),
+            child: BlocBuilder<OrderBloc, OrderState>(
+              builder: (context, state) {
+                final order = state is OrderAwaitingReview ? state.order : null;
+                if (order == null) {
+                  // لا نعلق أبداً: دوران لحظي + مهرب للرئيسية.
+                  return SafeArea(
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const AuroraLoader(size: 40),
+                          const SizedBox(height: AuroraSpacing.lg),
+                          TextButton(
+                            onPressed: () => context.go('/home'),
+                            child: Text(tr('backHome'),
+                                style: AuroraText.bodyMedium
+                                    .copyWith(color: AuroraColors.ember)),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              );
-            }
-            return SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: AuroraSpacing.md),
-
-                    // N7 — احتفال اكتمال الرحلة
-                    const Center(child: SuccessCheck(size: 64)),
-                    const SizedBox(height: AuroraSpacing.lg),
-
-                    // ─── Header ───
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    ),
+                  );
+                }
+                return SafeArea(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AuroraSpacing.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(tr('rateTitle'), style: AuroraText.titleLarge),
-                        TextButton(
-                          onPressed: () => _skip(context, order),
-                          child: Text(
-                            tr('skip'),
-                            style: AuroraText.bodyMedium.copyWith(
-                              color: AuroraColors.textSecondary,
-                              fontWeight: FontWeight.w700,
+                        const SizedBox(height: AuroraSpacing.md),
+
+                        // N7 — احتفال اكتمال الرحلة
+                        const Center(child: SuccessCheck(size: 64)),
+                        const SizedBox(height: AuroraSpacing.lg),
+
+                        // ─── Header ───
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(tr('rateTitle'), style: AuroraText.titleLarge),
+                            TextButton(
+                              onPressed: () => _skip(context, order),
+                              child: Text(
+                                tr('skip'),
+                                style: AuroraText.bodyMedium.copyWith(
+                                  color: AuroraColors.textSecondary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
+                          ],
+                        ),
+
+                        const SizedBox(height: AuroraSpacing.lg),
+
+                        // ─── Trip summary card ───
+                        _tripSummaryCard(order),
+
+                        const SizedBox(height: AuroraSpacing.lg),
+
+                        // ─── Driver card ───
+                        _driverCard(order),
+
+                        const SizedBox(height: AuroraSpacing.xl),
+
+                        // ─── Stars rating ───
+                        Text(
+                          tr('howWasRide'),
+                          style: AuroraText.titleMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AuroraSpacing.lg),
+                        _starsRow(),
+
+                        const SizedBox(height: AuroraSpacing.md),
+                        Text(
+                          _ratingLabel(),
+                          style: AuroraText.bodyMedium.copyWith(
+                            color: AuroraColors.ember,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+
+                        const SizedBox(height: AuroraSpacing.xl),
+
+                        // ─── Tags (إيجابيات) ───
+                        if (_rating >= 4) ...[
+                          Text(
+                            tr('whatLiked'),
+                            style: AuroraText.titleSmall,
+                          ),
+                          const SizedBox(height: AuroraSpacing.md),
+                          Wrap(
+                            spacing: AuroraSpacing.sm,
+                            runSpacing: AuroraSpacing.sm,
+                            children: _tagOptions.map(_tagChip).toList(),
+                          ),
+                          const SizedBox(height: AuroraSpacing.xl),
+                        ],
+
+                        // ─── Tip ───
+                        if (_rating >= 4) ...[
+                          Text(
+                            tr('tipDriver'),
+                            style: AuroraText.titleSmall,
+                          ),
+                          const SizedBox(height: AuroraSpacing.md),
+                          Row(
+                            children: _tips.map(_tipChip).toList(),
+                          ),
+                          const SizedBox(height: AuroraSpacing.xl),
+                        ],
+
+                        // ─── Comment ───
+                        Text(tr('extraComment'), style: AuroraText.titleSmall),
+                        const SizedBox(height: AuroraSpacing.md),
+                        TextField(
+                          controller: _commentCtrl,
+                          maxLines: 3,
+                          style: AuroraText.bodyMedium.copyWith(
+                            color: AuroraColors.pearl,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: tr('shareExperience'),
                           ),
                         ),
+
+                        const SizedBox(height: AuroraSpacing.xl),
+
+                        // ─── Submit ───
+                        AuroraButton.primary(
+                          label: _tip > 0
+                              ? '${tr('sendRating')} (+${_tip.toStringAsFixed(0)} ${order.currency})'
+                              : tr('sendRating'),
+                          icon: Icons.send_rounded,
+                          loading: state is OrderLoading,
+                          onPressed: () => _submit(context, order),
+                        ),
+
+                        const SizedBox(height: AuroraSpacing.huge),
                       ],
                     ),
-
-                    const SizedBox(height: AuroraSpacing.lg),
-
-                    // ─── Trip summary card ───
-                    _tripSummaryCard(order),
-
-                    const SizedBox(height: AuroraSpacing.lg),
-
-                    // ─── Driver card ───
-                    _driverCard(order),
-
-                    const SizedBox(height: AuroraSpacing.xl),
-
-                    // ─── Stars rating ───
-                    Text(
-                      tr('howWasRide'),
-                      style: AuroraText.titleMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AuroraSpacing.lg),
-                    _starsRow(),
-
-                    const SizedBox(height: AuroraSpacing.md),
-                    Text(
-                      _ratingLabel(),
-                      style: AuroraText.bodyMedium.copyWith(
-                        color: AuroraColors.ember,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    const SizedBox(height: AuroraSpacing.xl),
-
-                    // ─── Tags (إيجابيات) ───
-                    if (_rating >= 4) ...[
-                      Text(
-                        tr('whatLiked'),
-                        style: AuroraText.titleSmall,
-                      ),
-                      const SizedBox(height: AuroraSpacing.md),
-                      Wrap(
-                        spacing: AuroraSpacing.sm,
-                        runSpacing: AuroraSpacing.sm,
-                        children: _tagOptions.map(_tagChip).toList(),
-                      ),
-                      const SizedBox(height: AuroraSpacing.xl),
-                    ],
-
-                    // ─── Tip ───
-                    if (_rating >= 4) ...[
-                      Text(
-                        tr('tipDriver'),
-                        style: AuroraText.titleSmall,
-                      ),
-                      const SizedBox(height: AuroraSpacing.md),
-                      Row(
-                        children: _tips.map(_tipChip).toList(),
-                      ),
-                      const SizedBox(height: AuroraSpacing.xl),
-                    ],
-
-                    // ─── Comment ───
-                    Text(tr('extraComment'), style: AuroraText.titleSmall),
-                    const SizedBox(height: AuroraSpacing.md),
-                    TextField(
-                      controller: _commentCtrl,
-                      maxLines: 3,
-                      style: AuroraText.bodyMedium.copyWith(
-                        color: AuroraColors.pearl,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: tr('shareExperience'),
-                      ),
-                    ),
-
-                    const SizedBox(height: AuroraSpacing.xl),
-
-                    // ─── Submit ───
-                    AuroraButton.primary(
-                      label: _tip > 0
-                          ? '${tr('sendRating')} (+${_tip.toStringAsFixed(0)} ${order.currency})'
-                          : tr('sendRating'),
-                      icon: Icons.send_rounded,
-                      loading: state is OrderLoading,
-                      onPressed: () => _submit(context, order),
-                    ),
-
-                    const SizedBox(height: AuroraSpacing.huge),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
+                  ),
+                );
+              },
+            ),
+          ),
           // احتفال إتمام الرحلة (يُشغَّل مرة عند الدخول)
           const Positioned.fill(child: ConfettiBurst(play: true)),
         ],
@@ -253,7 +254,8 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Text(
                   order.currency,
-                  style: AuroraText.titleSmall.copyWith(color: AuroraColors.pearl),
+                  style:
+                      AuroraText.titleSmall.copyWith(color: AuroraColors.pearl),
                 ),
               ),
             ],
@@ -317,7 +319,8 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
             child: Center(
               child: Text(
                 name.isNotEmpty ? name[0].toUpperCase() : '?',
-                style: AuroraText.titleLarge.copyWith(color: AuroraColors.pearl),
+                style:
+                    AuroraText.titleLarge.copyWith(color: AuroraColors.pearl),
               ),
             ),
           ),
@@ -437,8 +440,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
           onTap: () => setState(() => _tip = amount),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
-            padding:
-                const EdgeInsets.symmetric(vertical: AuroraSpacing.md),
+            padding: const EdgeInsets.symmetric(vertical: AuroraSpacing.md),
             decoration: BoxDecoration(
               color: selected ? AuroraColors.ember : AuroraColors.ash,
               borderRadius: BorderRadius.circular(AuroraRadius.md),

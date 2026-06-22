@@ -36,7 +36,7 @@ class HancrSearchBar extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.search_rounded,
                 size: 22,
                 color: HancrColors.textPrimary,
@@ -89,7 +89,7 @@ class _TimePill extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              const Icon(
                 Icons.access_time_rounded,
                 size: 14,
                 color: HancrColors.textPrimary,
@@ -103,7 +103,7 @@ class _TimePill extends StatelessWidget {
                   color: HancrColors.textPrimary,
                 ),
               ),
-              Icon(
+              const Icon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 16,
                 color: HancrColors.textPrimary,

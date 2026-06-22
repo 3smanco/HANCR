@@ -14,7 +14,6 @@ import '../../core/models/driver_model.dart';
 import '../../core/services/document_upload_service.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../core/motion/motion.dart';
 import '../sos/driver_emergency_contacts_screen.dart';
 import '../wallet/aurora_driver_wallet_screen.dart';
 import '../wallet/aurora_payout_methods_screen.dart';
@@ -35,12 +34,15 @@ class AuroraDriverProfileTab extends StatelessWidget {
           child: BlocBuilder<DriverBloc, DriverState>(
             builder: (ctx, state) {
               final name = state is DriverLoaded
-                  ? [state.driver.firstName, state.driver.lastName]
-                      .where((s) => s.isNotEmpty)
-                      .join(' ')
+                  ? [
+                      state.driver.firstName,
+                      state.driver.lastName,
+                    ].where((s) => s.isNotEmpty).join(' ')
                   : tr('driver');
               return ListView(
-                padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.lg),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AuroraSpacing.lg,
+                ),
                 children: [
                   const SizedBox(height: AuroraSpacing.md),
                   Row(
@@ -49,9 +51,9 @@ class AuroraDriverProfileTab extends StatelessWidget {
                       Text(tr('myAccount'), style: AuroraText.displayMedium),
                       _circleBtn(
                         icon: Icons.logout,
-                        onTap: () => context
-                            .read<AuthBloc>()
-                            .add(const AuthLogoutRequested()),
+                        onTap: () => context.read<AuthBloc>().add(
+                          const AuthLogoutRequested(),
+                        ),
                       ),
                     ],
                   ),
@@ -65,35 +67,42 @@ class AuroraDriverProfileTab extends StatelessWidget {
                   // Quick tiles
                   Row(
                     children: [
-                      Expanded(child: _quickTile(
-                        icon: Icons.account_balance_wallet,
-                        label: tr('wallet'),
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (_) =>
-                                  const AuroraDriverWalletScreen()),
+                      Expanded(
+                        child: _quickTile(
+                          icon: Icons.account_balance_wallet,
+                          label: tr('wallet'),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const AuroraDriverWalletScreen(),
+                            ),
+                          ),
                         ),
-                      )),
+                      ),
                       const SizedBox(width: AuroraSpacing.md),
-                      Expanded(child: _quickTile(
-                        icon: Icons.shield,
-                        label: tr('emergencyContacts'),
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
+                      Expanded(
+                        child: _quickTile(
+                          icon: Icons.shield,
+                          label: tr('emergencyContacts'),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
                               builder: (_) =>
-                                  const DriverEmergencyContactsScreen()),
+                                  const DriverEmergencyContactsScreen(),
+                            ),
+                          ),
                         ),
-                      )),
+                      ),
                       const SizedBox(width: AuroraSpacing.md),
-                      Expanded(child: _quickTile(
-                        icon: Icons.support_agent,
-                        label: tr('support'),
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (_) =>
-                                  const AuroraHelpCenterScreen()),
+                      Expanded(
+                        child: _quickTile(
+                          icon: Icons.support_agent,
+                          label: tr('support'),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const AuroraHelpCenterScreen(),
+                            ),
+                          ),
                         ),
-                      )),
+                      ),
                     ],
                   ),
 
@@ -112,7 +121,8 @@ class AuroraDriverProfileTab extends StatelessWidget {
                           icon: Icons.directions_car,
                           label: tr('carData'),
                           subtitle: state is DriverLoaded
-                              ? '${state.driver.carBrand ?? ''} ${state.driver.carModel ?? ''}'.trim()
+                              ? '${state.driver.carBrand ?? ''} ${state.driver.carModel ?? ''}'
+                                    .trim()
                               : '—',
                           onTap: () {
                             final s = state;
@@ -144,8 +154,7 @@ class AuroraDriverProfileTab extends StatelessWidget {
                           label: tr('payout_methods'),
                           onTap: () => Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  const AuroraPayoutMethodsScreen(),
+                              builder: (_) => const AuroraPayoutMethodsScreen(),
                             ),
                           ),
                         ),
@@ -155,8 +164,7 @@ class AuroraDriverProfileTab extends StatelessWidget {
                           label: tr('announcements'),
                           onTap: () => Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  const AuroraAnnouncementsScreen(),
+                              builder: (_) => const AuroraAnnouncementsScreen(),
                             ),
                           ),
                         ),
@@ -164,7 +172,11 @@ class AuroraDriverProfileTab extends StatelessWidget {
                         _menuItem(
                           icon: Icons.settings,
                           label: tr('settings'),
-                          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DriverLanguageScreen())),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const DriverLanguageScreen(),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -207,7 +219,9 @@ class AuroraDriverProfileTab extends StatelessWidget {
                 const SizedBox(height: AuroraSpacing.sm),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: AuroraSpacing.sm, vertical: 4),
+                    horizontal: AuroraSpacing.sm,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AuroraColors.successBg,
                     borderRadius: BorderRadius.circular(AuroraRadius.pill),
@@ -215,8 +229,11 @@ class AuroraDriverProfileTab extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.verified,
-                          color: AuroraColors.success, size: 12),
+                      Icon(
+                        Icons.verified,
+                        color: AuroraColors.success,
+                        size: 12,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         tr('verifiedDriver'),
@@ -302,7 +319,10 @@ class AuroraDriverProfileTab extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(label, style: AuroraText.titleSmall.copyWith(fontSize: 14)),
+                    Text(
+                      label,
+                      style: AuroraText.titleSmall.copyWith(fontSize: 14),
+                    ),
                     if (subtitle != null) ...[
                       const SizedBox(height: 2),
                       Text(
@@ -315,8 +335,11 @@ class AuroraDriverProfileTab extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_left,
-                  color: AuroraColors.textSecondary, size: 20),
+              const Icon(
+                Icons.chevron_left,
+                color: AuroraColors.textSecondary,
+                size: 20,
+              ),
             ],
           ),
         ),
@@ -337,13 +360,23 @@ class AuroraDriverProfileTab extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _genderChip(context, 'M',
-                    tr('gender_male'), Icons.male, gender == 'M'),
+                child: _genderChip(
+                  context,
+                  'M',
+                  tr('gender_male'),
+                  Icons.male,
+                  gender == 'M',
+                ),
               ),
               const SizedBox(width: AuroraSpacing.sm),
               Expanded(
-                child: _genderChip(context, 'F',
-                    tr('gender_female'), Icons.female, gender == 'F'),
+                child: _genderChip(
+                  context,
+                  'F',
+                  tr('gender_female'),
+                  Icons.female,
+                  gender == 'F',
+                ),
               ),
             ],
           ),
@@ -358,39 +391,50 @@ class AuroraDriverProfileTab extends StatelessWidget {
             if (state.driver.kidsApproved && state.driver.nightApproved)
               const SizedBox(height: AuroraSpacing.xs),
             if (state.driver.nightApproved)
-              _verifiedBadge(
-                  Icons.nightlight_round, tr('verified_night')),
+              _verifiedBadge(Icons.nightlight_round, tr('verified_night')),
           ],
         ],
       ),
     );
   }
 
-  Widget _genderChip(BuildContext ctx, String value, String label,
-      IconData icon, bool selected) {
+  Widget _genderChip(
+    BuildContext ctx,
+    String value,
+    String label,
+    IconData icon,
+    bool selected,
+  ) {
     return InkWell(
       onTap: () => _saveGender(ctx, value),
       borderRadius: BorderRadius.circular(AuroraRadius.md),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: selected ? AuroraColors.ember.withValues(alpha: 0.12) : AuroraColors.ash,
+          color: selected
+              ? AuroraColors.ember.withValues(alpha: 0.12)
+              : AuroraColors.ash,
           borderRadius: BorderRadius.circular(AuroraRadius.md),
           border: Border.all(
-              color: selected ? AuroraColors.ember : AuroraColors.border),
+            color: selected ? AuroraColors.ember : AuroraColors.border,
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon,
-                size: 18,
-                color: selected ? AuroraColors.ember : AuroraColors.pearl),
+            Icon(
+              icon,
+              size: 18,
+              color: selected ? AuroraColors.ember : AuroraColors.pearl,
+            ),
             const SizedBox(width: 6),
-            Text(label,
-                style: AuroraText.bodyMedium.copyWith(
-                  color: selected ? AuroraColors.ember : AuroraColors.pearl,
-                  fontWeight: FontWeight.w700,
-                )),
+            Text(
+              label,
+              style: AuroraText.bodyMedium.copyWith(
+                color: selected ? AuroraColors.ember : AuroraColors.pearl,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ],
         ),
       ),
@@ -400,22 +444,27 @@ class AuroraDriverProfileTab extends StatelessWidget {
   Future<void> _saveGender(BuildContext ctx, String value) async {
     try {
       final client = await GraphQLClientManager.get();
-      await client.mutate(MutationOptions(
-        document: gql(updateDriverProfileMutation),
-        variables: {
-          'input': {'gender': value},
-        },
-      ));
+      await client.mutate(
+        MutationOptions(
+          document: gql(updateDriverProfileMutation),
+          variables: {
+            'input': {'gender': value},
+          },
+        ),
+      );
       if (!ctx.mounted) return;
       ctx.read<DriverBloc>().add(const DriverLoadRequested());
       ScaffoldMessenger.of(ctx).showSnackBar(
-        SnackBar(content: Text(tr('saved')), backgroundColor: AuroraColors.success),
+        SnackBar(
+          content: Text(tr('saved')),
+          backgroundColor: AuroraColors.success,
+        ),
       );
     } catch (e) {
       if (!ctx.mounted) return;
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        ctx,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -428,13 +477,10 @@ class AuroraDriverProfileTab extends StatelessWidget {
             color: AuroraColors.successBg,
             borderRadius: BorderRadius.circular(AuroraRadius.sm),
           ),
-          child:
-              Icon(icon, size: 14, color: AuroraColors.success),
+          child: Icon(icon, size: 14, color: AuroraColors.success),
         ),
         const SizedBox(width: AuroraSpacing.sm),
-        Expanded(
-          child: Text(label, style: AuroraText.bodyMedium),
-        ),
+        Expanded(child: Text(label, style: AuroraText.bodyMedium)),
         Icon(Icons.verified, color: AuroraColors.success, size: 18),
       ],
     );
@@ -508,8 +554,9 @@ void _showCarEditSheet(BuildContext context, DriverModel d) {
           style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
           decoration: InputDecoration(
             labelText: label,
-            labelStyle: AuroraText.bodySmall
-                .copyWith(color: AuroraColors.textSecondary),
+            labelStyle: AuroraText.bodySmall.copyWith(
+              color: AuroraColors.textSecondary,
+            ),
             filled: true,
             fillColor: AuroraColors.coal,
             border: OutlineInputBorder(
@@ -525,7 +572,9 @@ void _showCarEditSheet(BuildContext context, DriverModel d) {
     isScrollControlled: true,
     backgroundColor: AuroraColors.obsidian,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(AuroraRadius.xl)),
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(AuroraRadius.xl),
+      ),
     ),
     builder: (ctx) => Padding(
       padding: EdgeInsets.only(
@@ -538,8 +587,10 @@ void _showCarEditSheet(BuildContext context, DriverModel d) {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(tr('carData'),
-              style: AuroraText.titleSmall.copyWith(color: AuroraColors.pearl)),
+          Text(
+            tr('carData'),
+            style: AuroraText.titleSmall.copyWith(color: AuroraColors.pearl),
+          ),
           const SizedBox(height: AuroraSpacing.md),
           field(tr('carBrand'), brand),
           field(tr('carModel'), model),
@@ -550,18 +601,27 @@ void _showCarEditSheet(BuildContext context, DriverModel d) {
           AuroraButton(
             label: tr('save'),
             onPressed: () {
-              bloc.add(DriverUpdateRequested(
-                carBrand: brand.text.trim().isEmpty ? null : brand.text.trim(),
-                carModel: model.text.trim().isEmpty ? null : model.text.trim(),
-                carColor: color.text.trim().isEmpty ? null : color.text.trim(),
-                plateNumber:
-                    plate.text.trim().isEmpty ? null : plate.text.trim(),
-                carYear: int.tryParse(year.text.trim()),
-              ));
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(tr('saved'))),
+              bloc.add(
+                DriverUpdateRequested(
+                  carBrand: brand.text.trim().isEmpty
+                      ? null
+                      : brand.text.trim(),
+                  carModel: model.text.trim().isEmpty
+                      ? null
+                      : model.text.trim(),
+                  carColor: color.text.trim().isEmpty
+                      ? null
+                      : color.text.trim(),
+                  plateNumber: plate.text.trim().isEmpty
+                      ? null
+                      : plate.text.trim(),
+                  carYear: int.tryParse(year.text.trim()),
+                ),
               );
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(tr('saved'))));
             },
           ),
         ],
@@ -588,8 +648,9 @@ class _ProfileAvatarState extends State<_ProfileAvatar> {
       context: context,
       backgroundColor: AuroraColors.coal,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(AuroraRadius.xl)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AuroraRadius.xl),
+        ),
       ),
       builder: (ctx) => SafeArea(
         child: Column(
@@ -613,31 +674,42 @@ class _ProfileAvatarState extends State<_ProfileAvatar> {
     );
     if (source == null) return;
     final file = await DocumentUploadService.capture(
-        source: source, frontCamera: source == ImageSource.camera);
+      source: source,
+      frontCamera: source == ImageSource.camera,
+    );
     if (file == null) return;
     setState(() => _busy = true);
     try {
-      final res = await DocumentUploadService.upload(type: 'avatar', file: file);
+      final res = await DocumentUploadService.upload(
+        type: 'avatar',
+        file: file,
+      );
       final client = await GraphQLClientManager.get();
-      await client.mutate(MutationOptions(
-        document: gql(updateDriverProfileMutation),
-        variables: {
-          'input': {'avatarUrl': res.publicUrl},
-        },
-      ));
+      await client.mutate(
+        MutationOptions(
+          document: gql(updateDriverProfileMutation),
+          variables: {
+            'input': {'avatarUrl': res.publicUrl},
+          },
+        ),
+      );
       if (!mounted) return;
       context.read<DriverBloc>().add(const DriverLoadRequested());
       Haptics.success();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(tr('photoUpdated')),
-        backgroundColor: AuroraColors.smoke,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(tr('photoUpdated')),
+          backgroundColor: AuroraColors.smoke,
+        ),
+      );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(e.toString().replaceFirst('Exception: ', '')),
-          backgroundColor: AuroraColors.danger,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: AuroraColors.danger,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -661,16 +733,17 @@ class _ProfileAvatarState extends State<_ProfileAvatar> {
               borderRadius: BorderRadius.circular(AuroraRadius.md),
               boxShadow: AuroraShadows.iconGlow,
               image: url != null
-                  ? DecorationImage(
-                      image: NetworkImage(url), fit: BoxFit.cover)
+                  ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover)
                   : null,
             ),
             child: url == null
                 ? Center(
                     child: Text(
                       widget.initial,
-                      style: AuroraText.displayMedium
-                          .copyWith(color: AuroraColors.pearl, fontSize: 28),
+                      style: AuroraText.displayMedium.copyWith(
+                        color: AuroraColors.pearl,
+                        fontSize: 28,
+                      ),
                     ),
                   )
                 : null,
@@ -682,9 +755,7 @@ class _ProfileAvatarState extends State<_ProfileAvatar> {
                   color: AuroraColors.obsidian.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(AuroraRadius.md),
                 ),
-                child: const Center(
-                  child: AuroraLoader(size: 20, stroke: 2),
-                ),
+                child: const Center(child: AuroraLoader(size: 20, stroke: 2)),
               ),
             ),
           Positioned(
@@ -697,8 +768,11 @@ class _ProfileAvatarState extends State<_ProfileAvatar> {
                 shape: BoxShape.circle,
                 border: Border.all(color: AuroraColors.coal, width: 2),
               ),
-              child: const Icon(Icons.camera_alt,
-                  color: Color(0xFFFFF5EE), size: 12),
+              child: const Icon(
+                Icons.camera_alt,
+                color: Color(0xFFFFF5EE),
+                size: 12,
+              ),
             ),
           ),
         ],

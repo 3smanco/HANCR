@@ -73,7 +73,8 @@ class AuroraTabSwitcher extends StatelessWidget {
                             color: selected
                                 ? AuroraColors.pearl
                                 : AuroraColors.textSecondary,
-                            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                            fontWeight:
+                                selected ? FontWeight.w700 : FontWeight.w500,
                           ),
                         ),
                       ],

@@ -45,9 +45,7 @@ class AuroraIconTile extends StatelessWidget {
                     : AuroraColors.ash,
                 borderRadius: BorderRadius.circular(AuroraRadius.lg),
                 border: Border.all(
-                  color: selected
-                      ? AuroraColors.ember
-                      : AuroraColors.border,
+                  color: selected ? AuroraColors.ember : AuroraColors.border,
                   width: selected ? 1.5 : 1,
                 ),
                 boxShadow: selected ? AuroraShadows.iconGlow : null,
@@ -57,7 +55,7 @@ class AuroraIconTile extends StatelessWidget {
                 children: [
                   // Icon مع glow halo
                   Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       boxShadow: AuroraShadows.iconGlow,
                     ),

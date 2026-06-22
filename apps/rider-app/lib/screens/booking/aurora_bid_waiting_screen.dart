@@ -133,15 +133,17 @@ class _AuroraBidWaitingScreenState extends State<AuroraBidWaitingScreen> {
               ),
 
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AuroraSpacing.lg),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AuroraSpacing.lg),
                 child: Row(
                   children: [
                     if (_status == 'Open')
                       const AuroraLoader(size: 16, stroke: 2),
                     const SizedBox(width: AuroraSpacing.sm),
                     Text(
-                      _offers.isEmpty ? tr('waitingOffers') : tr('offersReceived'),
+                      _offers.isEmpty
+                          ? tr('waitingOffers')
+                          : tr('offersReceived'),
                       style: AuroraText.titleSmall,
                     ),
                   ],
@@ -172,7 +174,8 @@ class _AuroraBidWaitingScreenState extends State<AuroraBidWaitingScreen> {
                         padding: const EdgeInsets.all(AuroraSpacing.lg),
                         itemCount: _offers.length,
                         // N7 — كل عرض جديد يقفز للداخل (bid bounce)
-                        itemBuilder: (_, i) => _offerCard(_offers[i]).popIn(index: i),
+                        itemBuilder: (_, i) =>
+                            _offerCard(_offers[i]).popIn(index: i),
                       ),
               ),
             ],
@@ -208,8 +211,8 @@ class _AuroraBidWaitingScreenState extends State<AuroraBidWaitingScreen> {
               shape: BoxShape.circle,
             ),
             child: Text(name.isNotEmpty ? name[0].toUpperCase() : '?',
-                style: AuroraText.titleSmall
-                    .copyWith(color: AuroraColors.pearl)),
+                style:
+                    AuroraText.titleSmall.copyWith(color: AuroraColors.pearl)),
           ),
           const SizedBox(width: AuroraSpacing.md),
           Expanded(

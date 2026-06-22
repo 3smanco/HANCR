@@ -27,7 +27,9 @@ class SosBloc extends Bloc<SosEvent, SosState> {
     _telemetry = Timer.periodic(const Duration(seconds: 3), (_) async {
       try {
         final pos = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+          ),
         ).timeout(const Duration(seconds: 5));
         final client = await GraphQLClientManager.get();
         await client.mutate(MutationOptions(

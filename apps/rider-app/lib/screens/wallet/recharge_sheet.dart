@@ -97,8 +97,8 @@ class _RechargeSheetState extends State<RechargeSheet> {
                 spacing: 8,
                 runSpacing: 8,
                 children: _quickAmounts.map((amt) {
-                  final selected = _selectedAmount == amt &&
-                      _customController.text.isEmpty;
+                  final selected =
+                      _selectedAmount == amt && _customController.text.isEmpty;
                   return GestureDetector(
                     onTap: () {
                       setState(() {
@@ -122,11 +122,10 @@ class _RechargeSheetState extends State<RechargeSheet> {
                         ),
                       ),
                       child: Text(
-                        '${amt.toStringAsFixed(0)}',
+                        amt.toStringAsFixed(0),
                         style: TextStyle(
-                          color: selected
-                              ? Colors.white
-                              : HancrColors.textPrimary,
+                          color:
+                              selected ? Colors.white : HancrColors.textPrimary,
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                         ),
@@ -141,11 +140,12 @@ class _RechargeSheetState extends State<RechargeSheet> {
               // ───── Custom amount ─────
               TextField(
                 controller: _customController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 onChanged: (_) => setState(() => _selectedAmount = null),
                 decoration: InputDecoration(
                   labelText: 'أو أدخل مبلغاً مخصصاً',
-                  prefixIcon: Icon(Icons.edit_outlined, size: 18),
+                  prefixIcon: const Icon(Icons.edit_outlined, size: 18),
                   suffix: Text(widget.currency),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -216,7 +216,7 @@ class _RechargeSheetState extends State<RechargeSheet> {
               Center(
                 child: Text(
                   'الحد الأقصى للمرة الواحدة: 5,000 ${widget.currency}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: HancrColors.textHint,
                     fontSize: 11,
                   ),
@@ -279,8 +279,9 @@ class _GatewayOption extends StatelessWidget {
             children: [
               Icon(
                 _icon,
-                color:
-                    selected ? HancrColors.violetDeep : HancrColors.textSecondary,
+                color: selected
+                    ? HancrColors.violetDeep
+                    : HancrColors.textSecondary,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -294,11 +295,8 @@ class _GatewayOption extends StatelessWidget {
                 ),
               ),
               Icon(
-                selected
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_off,
-                color:
-                    selected ? HancrColors.violet : HancrColors.textHint,
+                selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                color: selected ? HancrColors.violet : HancrColors.textHint,
                 size: 20,
               ),
             ],

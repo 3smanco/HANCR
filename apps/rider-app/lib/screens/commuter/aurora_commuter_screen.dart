@@ -4,7 +4,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/commuter_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 import 'aurora_commuter_setup_screen.dart';
 
 /// شاشة اشتراكات Commuter — قائمة الاشتراكات النشطة + زر إضافة.
@@ -35,8 +35,7 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
         document: gql(commuterSubscriptionsQuery),
         fetchPolicy: FetchPolicy.networkOnly,
       ));
-      final list =
-          (res.data?['commuterSubscriptions'] as List<dynamic>?) ?? [];
+      final list = (res.data?['commuterSubscriptions'] as List<dynamic>?) ?? [];
       if (!mounted) return;
       final all = list.map((e) => e as Map<String, dynamic>).toList();
       setState(() {
@@ -57,7 +56,10 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
       final client = await GraphQLClientManager.get();
       await client.mutate(MutationOptions(
         document: gql(updateCommuterSubscriptionMutation),
-        variables: {'id': id, 'input': {'active': active}},
+        variables: {
+          'id': id,
+          'input': {'active': active}
+        },
       ));
       _load();
     } catch (_) {}
@@ -99,8 +101,7 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
         ],
       ),
       body: _loading
-          ? Center(
-              child: AuroraLoader(size: 36))
+          ? const Center(child: AuroraLoader(size: 36))
           : _subs.isEmpty
               ? _empty()
               : RefreshIndicator(
@@ -124,16 +125,13 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.commute,
-                size: 64, color: AuroraColors.textSecondary),
+            Icon(Icons.commute, size: 64, color: AuroraColors.textSecondary),
             const SizedBox(height: AuroraSpacing.md),
             Text(tr('commuterEmpty'),
-                textAlign: TextAlign.center,
-                style: AuroraText.titleSmall),
+                textAlign: TextAlign.center, style: AuroraText.titleSmall),
             const SizedBox(height: AuroraSpacing.sm),
             Text(tr('commuterEmptyHint'),
-                textAlign: TextAlign.center,
-                style: AuroraText.bodySmall),
+                textAlign: TextAlign.center, style: AuroraText.bodySmall),
             const SizedBox(height: AuroraSpacing.lg),
             AuroraButton.primary(
               label: tr('createCommuter'),
@@ -182,8 +180,7 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
           const SizedBox(height: 4),
           Row(
             children: [
-              Icon(Icons.location_on,
-                  size: 16, color: AuroraColors.ember),
+              Icon(Icons.location_on, size: 16, color: AuroraColors.ember),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(s['workAddress'] as String? ?? '',
@@ -204,10 +201,7 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
               if (returnT != null)
                 _chip(Icons.arrow_back, '${tr('returnLeg')} $returnT'),
               _chip(Icons.calendar_today, _daysLabel(days)),
-              _chip(
-                  planType == 'monthly'
-                      ? Icons.calendar_month
-                      : Icons.today,
+              _chip(planType == 'monthly' ? Icons.calendar_month : Icons.today,
                   tr('plan_$planType')),
             ],
           ),
@@ -216,15 +210,14 @@ class _AuroraCommuterScreenState extends State<AuroraCommuterScreen> {
             children: [
               Switch(
                 value: active,
-                activeColor: AuroraColors.ember,
+                activeThumbColor: AuroraColors.ember,
                 onChanged: (v) => _toggleActive(s['id'] as int, v),
               ),
               Text(active ? tr('active') : tr('paused'),
                   style: AuroraText.bodySmall),
               const Spacer(),
               IconButton(
-                icon: Icon(Icons.delete_outline,
-                    color: AuroraColors.danger),
+                icon: Icon(Icons.delete_outline, color: AuroraColors.danger),
                 onPressed: () => _delete(s['id'] as int),
               ),
             ],

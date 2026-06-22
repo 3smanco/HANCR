@@ -180,7 +180,7 @@ class AuroraButton extends StatelessWidget {
                   )
                 else if (icon != null) ...[
                   Icon(icon, color: _textColor(isDisabled), size: _iconSize),
-                  SizedBox(width: AuroraSpacing.sm),
+                  const SizedBox(width: AuroraSpacing.sm),
                 ],
                 if (!loading)
                   Text(
@@ -188,8 +188,9 @@ class AuroraButton extends StatelessWidget {
                     style: _textStyle.copyWith(color: _textColor(isDisabled)),
                   ),
                 if (trailingIcon != null && !loading) ...[
-                  SizedBox(width: AuroraSpacing.sm),
-                  Icon(trailingIcon, color: _textColor(isDisabled), size: _iconSize),
+                  const SizedBox(width: AuroraSpacing.sm),
+                  Icon(trailingIcon,
+                      color: _textColor(isDisabled), size: _iconSize),
                 ],
               ],
             ),
@@ -206,7 +207,7 @@ class AuroraButton extends StatelessWidget {
         return AuroraColors.emberGradient;
       case AuroraButtonVariant.danger:
         return LinearGradient(
-          colors: [AuroraColors.danger, Color(0xFFCC2424)],
+          colors: [AuroraColors.danger, const Color(0xFFCC2424)],
         );
       default:
         return null;

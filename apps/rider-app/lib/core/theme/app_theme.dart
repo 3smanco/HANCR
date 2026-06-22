@@ -15,9 +15,12 @@ class HancrColors {
 
   // ===== Brand Primary — مُعاد تعيينها لـ Aurora (obsidian + ember) =====
   static const Color navy = Color(0xFF0A0807); // obsidian — الهوية الأساسية
-  static const Color violet = Color(0xFFFF7A1A); // ember — الإجراء الرئيسي (CTA)
-  static const Color violetDeep = Color(0xFFE55F00); // ember-deep — hover/pressed
-  static const Color violetLight = Color(0xFF6B3920); // ember-mute — chip/accent bg
+  static const Color violet =
+      Color(0xFFFF7A1A); // ember — الإجراء الرئيسي (CTA)
+  static const Color violetDeep =
+      Color(0xFFE55F00); // ember-deep — hover/pressed
+  static const Color violetLight =
+      Color(0xFF6B3920); // ember-mute — chip/accent bg
   static const Color purple = Color(0xFFA89B96); // muted — ثانوي (subtitles)
   static const Color cream = Color(0xFF13100E); // coal — خلفية داكنة
 
@@ -536,16 +539,14 @@ class AppTheme {
       // ===== Switch =====
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith(
-          (states) =>
-              states.contains(WidgetState.selected)
-                  ? Colors.white
-                  : Colors.white,
+          (states) => states.contains(WidgetState.selected)
+              ? Colors.white
+              : Colors.white,
         ),
         trackColor: WidgetStateProperty.resolveWith(
-          (states) =>
-              states.contains(WidgetState.selected)
-                  ? HancrColors.violet
-                  : HancrColors.borderStrong,
+          (states) => states.contains(WidgetState.selected)
+              ? HancrColors.violet
+              : HancrColors.borderStrong,
         ),
         trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
       ),

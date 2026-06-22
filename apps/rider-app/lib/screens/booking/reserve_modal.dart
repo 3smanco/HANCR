@@ -83,7 +83,8 @@ class _AdvancedReserveModalState extends State<AdvancedReserveModal> {
               child: Text(
                 df.format(_selected),
                 textAlign: TextAlign.center,
-                style: AuroraText.titleLarge.copyWith(color: AuroraColors.ember),
+                style:
+                    AuroraText.titleLarge.copyWith(color: AuroraColors.ember),
               ),
             ),
 
@@ -100,8 +101,8 @@ class _AdvancedReserveModalState extends State<AdvancedReserveModal> {
                 child: CupertinoDatePicker(
                   mode: CupertinoDatePickerMode.dateAndTime,
                   use24hFormat: false,
-                  minimumDate:
-                      DateTime.now().add(const Duration(minutes: _minLeadMinutes)),
+                  minimumDate: DateTime.now()
+                      .add(const Duration(minutes: _minLeadMinutes)),
                   maximumDate: DateTime.now().add(const Duration(days: 30)),
                   initialDateTime: _selected,
                   minuteInterval: 5,
@@ -118,7 +119,8 @@ class _AdvancedReserveModalState extends State<AdvancedReserveModal> {
                 child: Text(
                   tr('reserveAtLeast2h'),
                   textAlign: TextAlign.center,
-                  style: AuroraText.bodySmall.copyWith(color: AuroraColors.danger),
+                  style:
+                      AuroraText.bodySmall.copyWith(color: AuroraColors.danger),
                 ),
               ),
 
@@ -156,8 +158,9 @@ class _AdvancedReserveModalState extends State<AdvancedReserveModal> {
               child: AuroraButton.primary(
                 label: '${tr('reservePrefix')} ${widget.categoryName}',
                 icon: Icons.event_available,
-                onPressed:
-                    _isValid ? () => Navigator.of(context).pop(_selected) : null,
+                onPressed: _isValid
+                    ? () => Navigator.of(context).pop(_selected)
+                    : null,
               ),
             ),
           ],

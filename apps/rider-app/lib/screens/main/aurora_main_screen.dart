@@ -120,7 +120,8 @@ class _ServicesTab extends StatelessWidget {
             _section(tr('goAnywhere')),
             const SizedBox(height: AuroraSpacing.md),
             _grid(context, [
-              _ServiceItem(icon: Icons.local_taxi, label: tr('ride'), isRide: true),
+              _ServiceItem(
+                  icon: Icons.local_taxi, label: tr('ride'), isRide: true),
               _ServiceItem(
                   icon: Icons.schedule,
                   label: tr('scheduledRide'),
@@ -172,8 +173,7 @@ class _ServicesTab extends StatelessWidget {
     );
   }
 
-  Widget _section(String title) =>
-      Text(title, style: AuroraText.titleMedium);
+  Widget _section(String title) => Text(title, style: AuroraText.titleMedium);
 
   /// شريط بطل: تدرّج ember + ثلاث مركبات مرسومة بالكود.
   Widget _carHero() {
@@ -194,8 +194,7 @@ class _ServicesTab extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          const CarArt(type: CarType.sedan, size: Size(96, 52))
-              .popIn(index: 0),
+          const CarArt(type: CarType.sedan, size: Size(96, 52)).popIn(index: 0),
           const CarArt(type: CarType.suv, size: Size(96, 52)).popIn(index: 1),
           const CarArt(type: CarType.bike, size: Size(70, 52)).popIn(index: 2),
         ],
@@ -217,7 +216,6 @@ class _ServicesTab extends StatelessWidget {
       itemBuilder: (ctx, i) => AuroraIconTile(
         icon: items[i].icon,
         label: items[i].label,
-        badge: items[i].badge,
         size: 80,
         onTap: () {
           final item = items[i];
@@ -241,7 +239,8 @@ class _ServicesTab extends StatelessWidget {
               ));
             } else if (route == 'vip') {
               // VIP = حجز فوري بخدمة VIP مع إمكانية تفضيل سائق
-              ctx.push('/book', extra: {'preferServiceType': 'RideSharing', 'vip': true});
+              ctx.push('/book',
+                  extra: {'preferServiceType': 'RideSharing', 'vip': true});
             } else {
               // commuter | school | medical → AuroraCommuterScreen
               Navigator.of(ctx).push(MaterialPageRoute(
@@ -267,16 +266,16 @@ class _ServicesTab extends StatelessWidget {
 class _ServiceItem {
   final IconData icon;
   final String label;
-  final String? badge;
   final bool isRide;
+
   /// إن لم يكن null، يفتح شاشة الحجز بنوع خدمة مُفضَّل (أو رحلة عادية عند '').
   final String? bookServiceType;
+
   /// مسار شاشة مخصّصة: 'school' | 'medical' | 'vip' | 'airport' | 'commuter'
   final String? customRoute;
   const _ServiceItem(
       {required this.icon,
       required this.label,
-      this.badge,
       this.isRide = false,
       this.customRoute,
       this.bookServiceType});

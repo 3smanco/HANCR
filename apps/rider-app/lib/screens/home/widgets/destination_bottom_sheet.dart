@@ -13,8 +13,7 @@ class DestinationBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<DestinationBottomSheet> createState() =>
-      _DestinationBottomSheetState();
+  State<DestinationBottomSheet> createState() => _DestinationBottomSheetState();
 }
 
 class _DestinationBottomSheetState extends State<DestinationBottomSheet> {
@@ -124,13 +123,13 @@ class _DestinationBottomSheetState extends State<DestinationBottomSheet> {
                 autofocus: true,
                 decoration: InputDecoration(
                   hintText: 'Search destination',
-                  prefixIcon: Icon(
+                  prefixIcon: const Icon(
                     Icons.location_on,
                     color: HancrColors.accent,
                   ),
                   suffixIcon: _ctrl.text.isNotEmpty
                       ? IconButton(
-                          icon: Icon(Icons.clear),
+                          icon: const Icon(Icons.clear),
                           onPressed: () => _ctrl.clear(),
                         )
                       : null,
@@ -155,7 +154,7 @@ class _DestinationBottomSheetState extends State<DestinationBottomSheet> {
                         color: HancrColors.surfaceVariant,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.location_on_outlined,
                         color: HancrColors.textSecondary,
                         size: 20,

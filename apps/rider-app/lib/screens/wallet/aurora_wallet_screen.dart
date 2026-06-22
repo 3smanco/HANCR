@@ -366,8 +366,8 @@ class _WalletView extends StatelessWidget {
               if (isPending || isFailed) ...[
                 const SizedBox(height: 2),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 6, vertical: 1),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                   decoration: BoxDecoration(
                     color: isPending
                         ? AuroraColors.warningBg
@@ -507,8 +507,8 @@ class _PromoCodeSectionState extends State<_PromoCodeSection> {
                 child: TextField(
                   controller: _code,
                   textCapitalization: TextCapitalization.characters,
-                  style: AuroraText.bodyMedium
-                      .copyWith(color: AuroraColors.pearl),
+                  style:
+                      AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
                   decoration: InputDecoration(
                     hintText: tr('addPromoCode'),
                     hintStyle: AuroraText.bodySmall,

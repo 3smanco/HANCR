@@ -66,8 +66,9 @@ class AuroraProfileTab extends StatelessWidget {
                     Text(tr('myAccount'), style: AuroraText.displayMedium),
                     _circleIconButton(
                       icon: Icons.logout,
-                      onTap: () =>
-                          context.read<AuthBloc>().add(const AuthLogoutRequested()),
+                      onTap: () => context
+                          .read<AuthBloc>()
+                          .add(const AuthLogoutRequested()),
                     ),
                   ],
                 ),
@@ -164,8 +165,7 @@ class AuroraProfileTab extends StatelessWidget {
                   title: tr('family'),
                   subtitle: tr('familySub'),
                   icon: Icons.family_restroom_outlined,
-                  onTap: () =>
-                      _open(context, const AuroraFamilyManageScreen()),
+                  onTap: () => _open(context, const AuroraFamilyManageScreen()),
                 ),
                 const SizedBox(height: AuroraSpacing.md),
 
@@ -223,8 +223,7 @@ class AuroraProfileTab extends StatelessWidget {
                 AuroraListRow(
                   icon: Icons.manage_accounts_outlined,
                   title: tr('manageAccount'),
-                  onTap: () =>
-                      _open(context, const AccountManagementScreen()),
+                  onTap: () => _open(context, const AccountManagementScreen()),
                 ),
                 AuroraListRow(
                   icon: Icons.elderly_outlined,
@@ -263,7 +262,9 @@ class AuroraProfileTab extends StatelessWidget {
     String? avatarUrl;
     if (state is RiderLoaded) {
       final r = state.rider;
-      name = [r.firstName, r.lastName].where((s) => s != null && s.isNotEmpty).join(' ');
+      name = [r.firstName, r.lastName]
+          .where((s) => s != null && s.isNotEmpty)
+          .join(' ');
       if (name.isEmpty) name = r.phoneNumber;
       email = r.email ?? r.phoneNumber;
       avatarUrl = r.avatarUrl;
@@ -364,9 +365,7 @@ class AuroraProfileTab extends StatelessWidget {
           padding: const EdgeInsets.symmetric(
               horizontal: AuroraSpacing.md, vertical: 6),
           decoration: BoxDecoration(
-            color: primary
-                ? AuroraColors.ember
-                : AuroraColors.ash,
+            color: primary ? AuroraColors.ember : AuroraColors.ash,
             borderRadius: BorderRadius.circular(AuroraRadius.pill),
             border: Border.all(
               color: primary ? AuroraColors.ember : AuroraColors.border,
@@ -418,7 +417,7 @@ class AuroraProfileTab extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   boxShadow: AuroraShadows.iconGlow,
                 ),
@@ -449,38 +448,38 @@ class AuroraProfileTab extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-      padding: const EdgeInsets.all(AuroraSpacing.lg),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [gradient[0].withValues(alpha: 0.25), AuroraColors.coal],
+        padding: const EdgeInsets.all(AuroraSpacing.lg),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [gradient[0].withValues(alpha: 0.25), AuroraColors.coal],
+          ),
+          borderRadius: BorderRadius.circular(AuroraRadius.lg),
+          border: Border.all(color: gradient[0].withValues(alpha: 0.4)),
         ),
-        borderRadius: BorderRadius.circular(AuroraRadius.lg),
-        border: Border.all(color: gradient[0].withValues(alpha: 0.4)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: AuroraText.titleSmall),
-                const SizedBox(height: 4),
-                Text(subtitle, style: AuroraText.bodySmall),
-              ],
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AuroraText.titleSmall),
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: AuroraText.bodySmall),
+                ],
+              ),
             ),
-          ),
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: gradient),
-              shape: BoxShape.circle,
-              boxShadow: AuroraShadows.iconGlow,
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: gradient),
+                shape: BoxShape.circle,
+                boxShadow: AuroraShadows.iconGlow,
+              ),
+              child: Icon(icon, color: AuroraColors.pearl, size: 28),
             ),
-            child: Icon(icon, color: AuroraColors.pearl, size: 28),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
@@ -609,7 +608,8 @@ class AuroraProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _circleIconButton({required IconData icon, required VoidCallback onTap}) {
+  Widget _circleIconButton(
+      {required IconData icon, required VoidCallback onTap}) {
     return Container(
       width: 44,
       height: 44,

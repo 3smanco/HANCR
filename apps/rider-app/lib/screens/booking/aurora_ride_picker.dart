@@ -26,7 +26,8 @@ class _AuroraRidePickerState extends State<AuroraRidePicker> {
     return Container(
       decoration: BoxDecoration(
         color: AuroraColors.obsidian,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AuroraRadius.xl)),
+        borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(AuroraRadius.xl)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -87,8 +88,7 @@ class _AuroraRidePickerState extends State<AuroraRidePicker> {
                     ),
                   ),
                 ),
-                Icon(Icons.chevron_right,
-                    color: AuroraColors.textSecondary),
+                Icon(Icons.chevron_right, color: AuroraColors.textSecondary),
               ],
             ),
           ),
@@ -227,9 +227,7 @@ class _AuroraRidePickerState extends State<AuroraRidePicker> {
                 Text(
                   o.priceLabel,
                   style: AuroraText.titleMedium.copyWith(
-                    color: isSelected
-                        ? AuroraColors.ember
-                        : AuroraColors.pearl,
+                    color: isSelected ? AuroraColors.ember : AuroraColors.pearl,
                   ),
                 ),
               ],

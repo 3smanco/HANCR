@@ -51,8 +51,7 @@ class _AuroraSosCompactButtonState extends State<AuroraSosCompactButton>
   Widget build(BuildContext context) {
     return BlocBuilder<SosBloc, SosState>(
       builder: (context, state) {
-        final hasActive =
-            state is SosLoaded && state.activeIncident != null;
+        final hasActive = state is SosLoaded && state.activeIncident != null;
         return SizedBox(
           width: 56,
           height: 56,
@@ -69,8 +68,8 @@ class _AuroraSosCompactButtonState extends State<AuroraSosCompactButton>
                       height: 40 + 24 * v,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color:
-                            AuroraColors.danger.withValues(alpha: 0.3 * (1 - v)),
+                        color: AuroraColors.danger
+                            .withValues(alpha: 0.3 * (1 - v)),
                       ),
                     );
                   },
@@ -115,8 +114,7 @@ class _AuroraSosCompactButtonState extends State<AuroraSosCompactButton>
       final addNow = await _showAuroraDialog<bool>(
         context: context,
         title: tr('noContactsTitle'),
-        body:
-            tr('noContactsBody'),
+        body: tr('noContactsBody'),
         confirmLabel: tr('addNow'),
         cancelLabel: tr('activateWithout'),
         confirmIsPrimary: true,
@@ -136,8 +134,7 @@ class _AuroraSosCompactButtonState extends State<AuroraSosCompactButton>
     final confirmed = await _showAuroraDialog<bool>(
       context: context,
       title: tr('sosActivateConfirm'),
-      body:
-          tr('sosActivateBody'),
+      body: tr('sosActivateBody'),
       confirmLabel: tr('yesActivate'),
       cancelLabel: tr('cancel'),
       confirmIsDanger: true,
@@ -161,8 +158,7 @@ class _AuroraSosCompactButtonState extends State<AuroraSosCompactButton>
     final result = await _showAuroraDialog<bool>(
       context: context,
       title: '🚨 طوارئ نشطة',
-      body:
-          'تم إشعار $contactsNotified جهة طوارئ.\nهل أنت بأمان الآن؟',
+      body: 'تم إشعار $contactsNotified جهة طوارئ.\nهل أنت بأمان الآن؟',
       confirmLabel: tr('yesSafe'),
       cancelLabel: tr('noContinueDanger'),
     );
@@ -238,8 +234,7 @@ class AuroraSosExpandedButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SosBloc, SosState>(
       builder: (context, state) {
-        final hasActive =
-            state is SosLoaded && state.activeIncident != null;
+        final hasActive = state is SosLoaded && state.activeIncident != null;
         if (hasActive) {
           return AuroraActiveSosBanner(
             incidentId: state.activeIncident!.id,
@@ -329,7 +324,8 @@ class AuroraActiveSosBanner extends StatelessWidget {
             icon: Icons.local_phone,
             onPressed: () {
               final state = context.read<RiderBloc>().state;
-              final code = state is RiderLoaded ? state.rider.countryCode : null;
+              final code =
+                  state is RiderLoaded ? state.rider.countryCode : null;
               final number = EmergencyNumbers.forCountryCode(code);
               launchUrl(Uri.parse('tel:$number'));
             },
@@ -342,8 +338,7 @@ class AuroraActiveSosBanner extends StatelessWidget {
               final ok = await _showAuroraDialog<bool>(
                 context: context,
                 title: tr('cancelAlarm'),
-                body:
-                    tr('areYouSafe'),
+                body: tr('areYouSafe'),
                 confirmLabel: tr('yesSafe'),
                 cancelLabel: 'لا',
               );

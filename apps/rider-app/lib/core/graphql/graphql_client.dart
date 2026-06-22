@@ -21,8 +21,9 @@ class GraphQLClientManager {
 
   static Future<GraphQLClient> _build() async {
     final token = await StorageService.getToken() ?? '';
-    final authHeader =
-        token.isNotEmpty ? {'Authorization': 'Bearer $token'} : <String, String>{};
+    final authHeader = token.isNotEmpty
+        ? {'Authorization': 'Bearer $token'}
+        : <String, String>{};
 
     final httpLink = HttpLink(
       AppConfig.graphqlUrl,

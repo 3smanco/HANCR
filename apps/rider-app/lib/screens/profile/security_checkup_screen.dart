@@ -52,9 +52,8 @@ class SecurityCheckupScreen extends StatelessWidget {
                     title: tr('twoFactor'),
                     subtitle: twoFa ? tr('twoFaOn') : tr('taskEnable2fa'),
                     done: twoFa,
-                    onTap: () => Navigator.of(context)
-                        .push(MaterialPageRoute(
-                            builder: (_) => TwoFactorScreen(enabled: twoFa))),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => TwoFactorScreen(enabled: twoFa))),
                   ),
                   _task(
                     context,
@@ -129,7 +128,8 @@ class SecurityCheckupScreen extends StatelessWidget {
           Text(allGood ? tr('checkupAllGood') : tr('checkupHasGaps'),
               textAlign: TextAlign.center,
               style: AuroraText.bodyMedium.copyWith(
-                  color: allGood ? AuroraColors.success : AuroraColors.warning)),
+                  color:
+                      allGood ? AuroraColors.success : AuroraColors.warning)),
         ],
       ),
     );
@@ -145,12 +145,14 @@ class SecurityCheckupScreen extends StatelessWidget {
   }) {
     final Widget trailing;
     if (done == true) {
-      trailing = Icon(Icons.check_circle, color: AuroraColors.success, size: 22);
+      trailing =
+          Icon(Icons.check_circle, color: AuroraColors.success, size: 22);
     } else if (done == false) {
-      trailing = Icon(Icons.error_outline, color: AuroraColors.warning, size: 22);
+      trailing =
+          Icon(Icons.error_outline, color: AuroraColors.warning, size: 22);
     } else {
-      trailing = Icon(Icons.chevron_left,
-          color: AuroraColors.textSecondary, size: 20);
+      trailing =
+          Icon(Icons.chevron_left, color: AuroraColors.textSecondary, size: 20);
     }
     return Container(
       margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),

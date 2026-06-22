@@ -4,7 +4,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 import 'aurora_family_screen.dart';
 
 /// إدارة العائلة الفعلية — مرتبطة بالخادم (hancr_pool):
@@ -102,8 +102,7 @@ class _AuroraFamilyManageScreenState extends State<AuroraFamilyManageScreen> {
         child: SafeArea(
           top: false,
           child: _loading
-              ? Center(
-                  child: AuroraLoader(size: 36))
+              ? const Center(child: AuroraLoader(size: 36))
               : _error != null
                   ? _errorView()
                   : _pool == null
@@ -150,8 +149,8 @@ class _AuroraFamilyManageScreenState extends State<AuroraFamilyManageScreen> {
         AuroraButton.secondary(
           label: tr('inviteViaShare'),
           icon: Icons.ios_share,
-          onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => const AuroraFamilyScreen())),
+          onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AuroraFamilyScreen())),
         ),
       ],
     );
@@ -160,8 +159,8 @@ class _AuroraFamilyManageScreenState extends State<AuroraFamilyManageScreen> {
   Future<void> _createFamily() async {
     final name = await _promptText(tr('familyNameHint'), tr('createFamily'));
     if (name == null) return;
-    final pool = await _run(
-        createFamilyMutation, {'name': name}, 'createFamily');
+    final pool =
+        await _run(createFamilyMutation, {'name': name}, 'createFamily');
     if (pool != null && mounted) setState(() => _pool = pool);
   }
 
@@ -237,8 +236,7 @@ class _AuroraFamilyManageScreenState extends State<AuroraFamilyManageScreen> {
                     Text(m['riderName'] as String? ?? '—',
                         style: AuroraText.bodyMedium
                             .copyWith(color: AuroraColors.pearl)),
-                    Text(
-                        isOwnerMember ? tr('roleOwner') : (m['phone'] ?? ''),
+                    Text(isOwnerMember ? tr('roleOwner') : (m['phone'] ?? ''),
                         style: AuroraText.caption),
                   ],
                 ),
@@ -246,16 +244,13 @@ class _AuroraFamilyManageScreenState extends State<AuroraFamilyManageScreen> {
               if (isOwner && !isOwnerMember) ...[
                 IconButton(
                   icon: Icon(Icons.tune, color: AuroraColors.ember, size: 20),
-                  onPressed: _busy
-                      ? null
-                      : () => _editLimit(m['id'] as int, limit),
+                  onPressed:
+                      _busy ? null : () => _editLimit(m['id'] as int, limit),
                 ),
                 IconButton(
                   icon: Icon(Icons.person_remove_outlined,
                       color: AuroraColors.danger, size: 20),
-                  onPressed: _busy
-                      ? null
-                      : () => _removeMember(m['id'] as int),
+                  onPressed: _busy ? null : () => _removeMember(m['id'] as int),
                 ),
               ],
             ],
@@ -267,9 +262,8 @@ class _AuroraFamilyManageScreenState extends State<AuroraFamilyManageScreen> {
               child: LinearProgressIndicator(
                 value: limit > 0 ? (spent / limit).clamp(0, 1) : 0,
                 backgroundColor: AuroraColors.smoke,
-                color: spent >= limit
-                    ? AuroraColors.danger
-                    : AuroraColors.success,
+                color:
+                    spent >= limit ? AuroraColors.danger : AuroraColors.success,
                 minHeight: 6,
               ),
             ),
@@ -289,11 +283,14 @@ class _AuroraFamilyManageScreenState extends State<AuroraFamilyManageScreen> {
     if (phone == null) return;
     final limit = await _promptText(tr('spendLimitHint'), tr('spendLimit'),
         keyboard: TextInputType.number, optional: true);
-    final pool = await _run(inviteFamilyMemberMutation, {
-      'phone': phone,
-      if (limit != null && limit.isNotEmpty)
-        'monthlySpendLimit': double.tryParse(limit),
-    }, 'inviteFamilyMember');
+    final pool = await _run(
+        inviteFamilyMemberMutation,
+        {
+          'phone': phone,
+          if (limit != null && limit.isNotEmpty)
+            'monthlySpendLimit': double.tryParse(limit),
+        },
+        'inviteFamilyMember');
     if (pool != null && mounted) setState(() => _pool = pool);
   }
 
@@ -302,18 +299,21 @@ class _AuroraFamilyManageScreenState extends State<AuroraFamilyManageScreen> {
         keyboard: TextInputType.number,
         optional: true,
         initial: current?.toStringAsFixed(0));
-    final pool = await _run(updateFamilyMemberLimitMutation, {
-      'memberId': memberId,
-      'monthlySpendLimit':
-          (limit != null && limit.isNotEmpty) ? double.tryParse(limit) : null,
-    }, 'updateFamilyMemberLimit');
+    final pool = await _run(
+        updateFamilyMemberLimitMutation,
+        {
+          'memberId': memberId,
+          'monthlySpendLimit': (limit != null && limit.isNotEmpty)
+              ? double.tryParse(limit)
+              : null,
+        },
+        'updateFamilyMemberLimit');
     if (pool != null && mounted) setState(() => _pool = pool);
   }
 
   Future<void> _removeMember(int memberId) async {
     if (!await _confirm(tr('removeMemberConfirm'))) return;
-    final pool = await _run(
-        removeFamilyMemberMutation, {'memberId': memberId},
+    final pool = await _run(removeFamilyMemberMutation, {'memberId': memberId},
         'removeFamilyMember');
     if (pool != null && mounted) setState(() => _pool = pool);
   }
@@ -338,9 +338,7 @@ class _AuroraFamilyManageScreenState extends State<AuroraFamilyManageScreen> {
 
   // ─── حوارات مساعدة ───
   Future<String?> _promptText(String hint, String title,
-      {TextInputType? keyboard,
-      bool optional = false,
-      String? initial}) async {
+      {TextInputType? keyboard, bool optional = false, String? initial}) async {
     final ctl = TextEditingController(text: initial);
     return showDialog<String>(
       context: context,
@@ -369,8 +367,8 @@ class _AuroraFamilyManageScreenState extends State<AuroraFamilyManageScreen> {
               if (v.isEmpty && !optional) return;
               Navigator.pop(ctx, v);
             },
-            child:
-                Text(tr('confirm'), style: TextStyle(color: AuroraColors.ember)),
+            child: Text(tr('confirm'),
+                style: TextStyle(color: AuroraColors.ember)),
           ),
         ],
       ),

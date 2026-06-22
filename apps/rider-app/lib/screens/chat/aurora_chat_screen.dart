@@ -7,7 +7,7 @@ import '../../core/graphql/gql/order_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/services/rider_upload_service.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 
 /// شاشة دردشة الراكب مع السائق أثناء الرحلة.
 class AuroraChatScreen extends StatefulWidget {
@@ -88,24 +88,26 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
       final client = await GraphQLClientManager.get();
       _sub = client
           .subscribe(SubscriptionOptions(
-            document: gql(orderMessageAddedSubscription),
-            variables: {'orderId': widget.orderId},
-          ))
+        document: gql(orderMessageAddedSubscription),
+        variables: {'orderId': widget.orderId},
+      ))
           .listen((result) {
         final m = result.data?['orderMessageAdded'] as Map<String, dynamic>?;
         if (m == null || !mounted) return;
         if (_messages.any((x) => x['id'] == m['id'])) return;
         setState(() => _messages.add(m));
         _scrollToEnd();
-        if (m['senderType'] != 'rider') _markRead(); // وصلت رسالة → علّمها مقروءة
+        if (m['senderType'] != 'rider') {
+          _markRead(); // وصلت رسالة → علّمها مقروءة
+        }
       });
 
       // "يكتب الآن"
       _typingSub = client
           .subscribe(SubscriptionOptions(
-            document: gql(orderTypingSubscription),
-            variables: {'orderId': widget.orderId},
-          ))
+        document: gql(orderTypingSubscription),
+        variables: {'orderId': widget.orderId},
+      ))
           .listen((_) {
         if (!mounted) return;
         setState(() => _otherTyping = true);
@@ -117,9 +119,9 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
       // قراءة الطرف الآخر لرسائلي → ✓✓
       _readSub = client
           .subscribe(SubscriptionOptions(
-            document: gql(orderMessagesReadSubscription),
-            variables: {'orderId': widget.orderId},
-          ))
+        document: gql(orderMessagesReadSubscription),
+        variables: {'orderId': widget.orderId},
+      ))
           .listen((_) {
         if (!mounted) return;
         setState(() {
@@ -212,7 +214,8 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
                 style: AuroraText.titleSmall),
             if (_otherTyping)
               Text(tr('typingNow'),
-                  style: AuroraText.caption.copyWith(color: AuroraColors.ember)),
+                  style:
+                      AuroraText.caption.copyWith(color: AuroraColors.ember)),
           ],
         ),
       ),
@@ -220,14 +223,12 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
         children: [
           Expanded(
             child: _loading
-                ? Center(
-                    child:
-                        AuroraLoader(size: 36))
+                ? const Center(child: AuroraLoader(size: 36))
                 : _messages.isEmpty
                     ? Center(
                         child: Text(tr('noMessagesYet'),
-                            style: AuroraText.bodySmall.copyWith(
-                                color: AuroraColors.textSecondary)))
+                            style: AuroraText.bodySmall
+                                .copyWith(color: AuroraColors.textSecondary)))
                     : ListView.builder(
                         controller: _scroll,
                         padding: const EdgeInsets.all(AuroraSpacing.md),
@@ -253,8 +254,8 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
             ? const EdgeInsets.all(4)
             : const EdgeInsets.symmetric(
                 horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
-        constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.72),
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
         decoration: BoxDecoration(
           color: mine ? AuroraColors.ember : AuroraColors.ash,
           borderRadius: BorderRadius.only(
@@ -272,11 +273,13 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(AuroraRadius.sm),
                 child: Image.network(imageUrl,
-                    width: 200, fit: BoxFit.cover,
+                    width: 200,
+                    fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => const SizedBox(
                         width: 200,
                         height: 120,
-                        child: Icon(Icons.broken_image, color: Colors.white54))),
+                        child:
+                            Icon(Icons.broken_image, color: Colors.white54))),
               ),
             if ((m['message'] as String? ?? '').isNotEmpty)
               Padding(
@@ -318,8 +321,8 @@ class _AuroraChatScreenState extends State<AuroraChatScreen> {
             Expanded(
               child: TextField(
                 controller: _ctrl,
-                style: AuroraText.bodyMedium
-                    .copyWith(color: AuroraColors.pearl),
+                style:
+                    AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
                 minLines: 1,
                 maxLines: 4,
                 textInputAction: TextInputAction.send,

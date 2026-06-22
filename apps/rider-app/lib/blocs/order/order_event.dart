@@ -28,13 +28,17 @@ class OrderCreateRequested extends OrderEvent {
   final DateTime? scheduledAt;
   final String? couponCode;
   final String? paymentMode;
+
   /// محطات وسيطة بين الانطلاق والوجهة (Multi-stop)
   final List<GeoPoint> stops;
   final List<String> stopAddresses;
+
   /// وضع العائلة — يفضّل سائقة وسلوكاً عائلياً
   final bool familyMode;
+
   /// G1 — وضع الليل: سعر ثابت + مشاركة موقع مع جهات الطوارئ
   final bool nightShift;
+
   /// سائق مفضّل (VIP) — لو متاح وقريب يحجز له مباشرة
   final int? preferredDriverId;
 

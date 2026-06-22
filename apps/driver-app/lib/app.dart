@@ -84,7 +84,8 @@ class _HancrCaptainAppState extends State<HancrCaptainApp> {
           if (auth.isNewDriver) {
             return loc == '/onboarding' ? null : '/onboarding';
           }
-          if (loc == '/splash' || loc.startsWith('/auth') ||
+          if (loc == '/splash' ||
+              loc.startsWith('/auth') ||
               loc == '/onboarding') {
             return '/home';
           }
@@ -94,44 +95,52 @@ class _HancrCaptainAppState extends State<HancrCaptainApp> {
       },
       routes: [
         GoRoute(
-            path: '/splash',
-            pageBuilder: (_, __) => AppTransitions.fade(const SplashScreen())),
+          path: '/splash',
+          pageBuilder: (_, _) => AppTransitions.fade(const SplashScreen()),
+        ),
         GoRoute(
-            path: '/auth/phone',
-            pageBuilder: (_, __) =>
-                AppTransitions.sharedAxis(const AuroraPhoneScreen())),
+          path: '/auth/phone',
+          pageBuilder: (_, _) =>
+              AppTransitions.sharedAxis(const AuroraPhoneScreen()),
+        ),
         GoRoute(
           path: '/auth/otp',
           pageBuilder: (_, state) {
             final extra = state.extra as Map<String, dynamic>?;
-            return AppTransitions.sharedAxis(AuroraOtpScreen(
-              phone: extra?['phone'] as String? ?? '',
-              devOtp: extra?['devOtp'] as String?,
-            ));
+            return AppTransitions.sharedAxis(
+              AuroraOtpScreen(
+                phone: extra?['phone'] as String? ?? '',
+                devOtp: extra?['devOtp'] as String?,
+              ),
+            );
           },
         ),
         GoRoute(
-            path: '/auth/email',
-            pageBuilder: (_, __) =>
-                AppTransitions.sharedAxis(const AuroraEmailScreen())),
+          path: '/auth/email',
+          pageBuilder: (_, _) =>
+              AppTransitions.sharedAxis(const AuroraEmailScreen()),
+        ),
         GoRoute(
           path: '/auth/email-otp',
           pageBuilder: (_, state) {
             final extra = state.extra as Map<String, dynamic>?;
-            return AppTransitions.sharedAxis(AuroraEmailOtpScreen(
-              email: extra?['email'] as String? ?? '',
-              devOtp: extra?['devOtp'] as String?,
-            ));
+            return AppTransitions.sharedAxis(
+              AuroraEmailOtpScreen(
+                email: extra?['email'] as String? ?? '',
+                devOtp: extra?['devOtp'] as String?,
+              ),
+            );
           },
         ),
         GoRoute(
-            path: '/onboarding',
-            pageBuilder: (_, __) =>
-                AppTransitions.slideUp(const AuroraOnboardingScreen())),
+          path: '/onboarding',
+          pageBuilder: (_, _) =>
+              AppTransitions.slideUp(const AuroraOnboardingScreen()),
+        ),
         GoRoute(
-            path: '/home',
-            pageBuilder: (_, __) =>
-                AppTransitions.fade(const AuroraDriverHome())),
+          path: '/home',
+          pageBuilder: (_, _) => AppTransitions.fade(const AuroraDriverHome()),
+        ),
       ],
     );
   }
@@ -180,8 +189,9 @@ class _HancrCaptainAppState extends State<HancrCaptainApp> {
                   themeMode: ThemeMode.dark,
                   // بوابة تقليل الحركة (إعداد النظام) — كوكبت السائق يبقى داكناً.
                   builder: (context, child) {
-                    Motion.reduceMotion =
-                        MediaQuery.of(context).disableAnimations;
+                    Motion.reduceMotion = MediaQuery.of(
+                      context,
+                    ).disableAnimations;
                     return child ?? const SizedBox.shrink();
                   },
                   routerConfig: _router,
@@ -226,11 +236,15 @@ class _StreamGroup {
     ctrl = StreamController<T>(
       onListen: () {
         for (final s in streams) {
-          subs.add(s.listen(
-            ctrl.add,
-            onError: ctrl.addError,
-            onDone: () { if (--active == 0) ctrl.close(); },
-          ));
+          subs.add(
+            s.listen(
+              ctrl.add,
+              onError: ctrl.addError,
+              onDone: () {
+                if (--active == 0) ctrl.close();
+              },
+            ),
+          );
         }
       },
       onCancel: () {

@@ -30,10 +30,12 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
   Future<void> _fetch() async {
     try {
       final client = await GraphQLClientManager.get();
-      final res = await client.query(QueryOptions(
-        document: gql(availableBidsQuery),
-        fetchPolicy: FetchPolicy.networkOnly,
-      ));
+      final res = await client.query(
+        QueryOptions(
+          document: gql(availableBidsQuery),
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
       if (!mounted) return;
       setState(() {
         _bids = ((res.data?['availableBids'] as List<dynamic>?) ?? [])
@@ -47,13 +49,16 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
 
   Future<void> _submit(Map<String, dynamic> bid) async {
     final ctrl = TextEditingController(
-        text: '${(bid['riderProposedPrice'] as num?)?.toStringAsFixed(0) ?? ''}');
+      text: (bid['riderProposedPrice'] as num?)?.toStringAsFixed(0) ?? '',
+    );
     final price = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AuroraColors.ash,
-        title: Text(tr('yourOffer'),
-            style: TextStyle(color: AuroraColors.pearl)),
+        title: Text(
+          tr('yourOffer'),
+          style: TextStyle(color: AuroraColors.pearl),
+        ),
         content: TextField(
           controller: ctrl,
           keyboardType: TextInputType.number,
@@ -67,14 +72,18 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(tr('cancel'),
-                style: const TextStyle(color: AuroraColors.textSecondary)),
+            child: Text(
+              tr('cancel'),
+              style: const TextStyle(color: AuroraColors.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () =>
                 Navigator.pop(ctx, double.tryParse(ctrl.text.trim())),
-            child: Text(tr('send'),
-                style: TextStyle(color: AuroraColors.ember)),
+            child: Text(
+              tr('send'),
+              style: TextStyle(color: AuroraColors.ember),
+            ),
           ),
         ],
       ),
@@ -82,16 +91,19 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
     if (price == null || price < 1) return;
     try {
       final client = await GraphQLClientManager.get();
-      final res = await client.mutate(MutationOptions(
-        document: gql(submitBidOfferMutation),
-        variables: {'bidId': bid['id'], 'offeredPrice': price},
-      ));
+      final res = await client.mutate(
+        MutationOptions(
+          document: gql(submitBidOfferMutation),
+          variables: {'bidId': bid['id'], 'offeredPrice': price},
+        ),
+      );
       if (res.hasException) throw res.exception!;
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(tr('offerSent')),
-            backgroundColor: AuroraColors.success),
+          content: Text(tr('offerSent')),
+          backgroundColor: AuroraColors.success,
+        ),
       );
       _fetch();
     } catch (e) {
@@ -117,36 +129,44 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
         backgroundColor: AuroraColors.obsidian,
         elevation: 0,
         iconTheme: IconThemeData(color: AuroraColors.pearl),
-        title: Text(tr('availableBids'),
-            style: TextStyle(
-                color: AuroraColors.pearl, fontWeight: FontWeight.w700)),
+        title: Text(
+          tr('availableBids'),
+          style: TextStyle(
+            color: AuroraColors.pearl,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
       body: _loading
           ? const Center(child: AuroraLoader(size: 40))
           : _bids.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.gavel,
-                          color: AuroraColors.textSecondary, size: 56),
-                      const SizedBox(height: 12),
-                      Text(tr('noBids'),
-                          style: const TextStyle(
-                              color: AuroraColors.textSecondary)),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.gavel,
+                    color: AuroraColors.textSecondary,
+                    size: 56,
                   ),
-                )
-              : RefreshIndicator(
-                  color: AuroraColors.ember,
-                  backgroundColor: AuroraColors.ash,
-                  onRefresh: _fetch,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _bids.length,
-                    itemBuilder: (_, i) => _bidCard(_bids[i]),
+                  const SizedBox(height: 12),
+                  Text(
+                    tr('noBids'),
+                    style: const TextStyle(color: AuroraColors.textSecondary),
                   ),
-                ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              color: AuroraColors.ember,
+              backgroundColor: AuroraColors.ash,
+              onRefresh: _fetch,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _bids.length,
+                itemBuilder: (_, i) => _bidCard(_bids[i]),
+              ),
+            ),
     );
   }
 
@@ -168,15 +188,15 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.my_location,
-                  color: AuroraColors.success, size: 16),
+              Icon(Icons.my_location, color: AuroraColors.success, size: 16),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(b['originAddress'] as String? ?? '—',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        color: AuroraColors.pearl, fontSize: 13)),
+                child: Text(
+                  b['originAddress'] as String? ?? '—',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: AuroraColors.pearl, fontSize: 13),
+                ),
               ),
             ],
           ),
@@ -186,11 +206,12 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
               Icon(Icons.location_on, color: AuroraColors.ember, size: 16),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(b['destinationAddress'] as String? ?? '—',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        color: AuroraColors.pearl, fontSize: 13)),
+                child: Text(
+                  b['destinationAddress'] as String? ?? '—',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: AuroraColors.pearl, fontSize: 13),
+                ),
               ),
             ],
           ),
@@ -201,46 +222,63 @@ class _DriverBidsScreenState extends State<DriverBidsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${tr('riderProposed')} • ${dist.toStringAsFixed(1)} كم',
-                        style: const TextStyle(
-                            color: AuroraColors.textSecondary, fontSize: 11)),
-                    Text('${price.toStringAsFixed(0)} $cur',
-                        style: TextStyle(
-                            color: AuroraColors.ember,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 18)),
+                    Text(
+                      '${tr('riderProposed')} • ${dist.toStringAsFixed(1)} كم',
+                      style: const TextStyle(
+                        color: AuroraColors.textSecondary,
+                        fontSize: 11,
+                      ),
+                    ),
+                    Text(
+                      '${price.toStringAsFixed(0)} $cur',
+                      style: TextStyle(
+                        color: AuroraColors.ember,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
+                      ),
+                    ),
                   ],
                 ),
               ),
               if (offered)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: AuroraColors.successBg,
                     borderRadius: BorderRadius.circular(999),
                   ),
-                  child: Text(tr('offered'),
-                      style: TextStyle(
-                          color: AuroraColors.success,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12)),
+                  child: Text(
+                    tr('offered'),
+                    style: TextStyle(
+                      color: AuroraColors.success,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
                 )
               else
                 GestureDetector(
                   onTap: () => _submit(b),
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 9,
+                    ),
                     decoration: BoxDecoration(
                       gradient: AuroraColors.emberGradient,
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    child: Text(tr('submitOffer'),
-                        style: TextStyle(
-                            color: AuroraColors.pearl,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13)),
+                    child: Text(
+                      tr('submitOffer'),
+                      style: TextStyle(
+                        color: AuroraColors.pearl,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
                   ),
                 ),
             ],

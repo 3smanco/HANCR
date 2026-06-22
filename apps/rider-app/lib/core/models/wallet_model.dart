@@ -90,8 +90,9 @@ extension WalletTransactionTypeX on WalletTransactionType {
 }
 
 extension WalletTransactionDirectionX on WalletTransactionDirection {
-  static WalletTransactionDirection fromString(String s) =>
-      s == 'Credit' ? WalletTransactionDirection.credit : WalletTransactionDirection.debit;
+  static WalletTransactionDirection fromString(String s) => s == 'Credit'
+      ? WalletTransactionDirection.credit
+      : WalletTransactionDirection.debit;
 
   bool get isCredit => this == WalletTransactionDirection.credit;
   String get sign => isCredit ? '+' : '−';
