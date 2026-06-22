@@ -1,5 +1,6 @@
 import { Resolver, Query, Mutation, Args, Int, Float } from '@nestjs/graphql';
 import { UseGuards, BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Throttle } from '@nestjs/throttler';
@@ -30,6 +31,7 @@ export class WalletResolver {
   constructor(
     private readonly walletService: WalletService,
     private readonly paymentGateway: PaymentGatewayService,
+    private readonly config: ConfigService,
     @InjectRepository(AppConfigEntity)
     private readonly appConfigRepo: Repository<AppConfigEntity>,
   ) {}
@@ -39,6 +41,45 @@ export class WalletResolver {
     const cfg = await this.appConfigRepo.find({ take: 1 });
     const flags = cfg[0]?.featureFlags as Record<string, unknown> | undefined;
     return flags?.[CARD_PAYMENTS_FLAG] === true;
+  }
+
+  private configValue(key: string): string | undefined {
+    const value = this.config.get<string>(key)?.trim();
+    return value || undefined;
+  }
+
+  private paymentWebhookUrl(gateway: PaymentGateway): string | undefined {
+    const configured = this.configValue('PAYMENT_WEBHOOK_URL');
+    if (!configured) return undefined;
+
+    const gatewaySegment = encodeURIComponent(gateway.toLowerCase());
+    if (configured.includes('{gateway}') || configured.includes(':gateway')) {
+      return configured
+        .replaceAll('{gateway}', gatewaySegment)
+        .replaceAll(':gateway', gatewaySegment);
+    }
+
+    const trimmed = configured.replace(/\/+$/, '');
+    if (new RegExp(`/${gatewaySegment}$`, 'i').test(trimmed)) {
+      return trimmed;
+    }
+    return `${trimmed}/${gatewaySegment}`;
+  }
+
+  private paymentReturnUrl(internalRef: string): string | undefined {
+    const configured = this.configValue('PAYMENT_RETURN_URL');
+    const fallback = this.configValue('PUBLIC_BASE_URL');
+    const value = configured ?? fallback;
+    if (!value) return undefined;
+
+    if (value.includes('{ref}')) {
+      return value.replaceAll('{ref}', encodeURIComponent(internalRef));
+    }
+    if (configured) {
+      const separator = value.includes('?') ? '&' : '?';
+      return `${value}${separator}ref=${encodeURIComponent(internalRef)}`;
+    }
+    return value.replace(/\/+$/, '');
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -164,10 +205,13 @@ export class WalletResolver {
       description: `Wallet recharge via ${gateway}`,
     });
 
+    const internalRef = String(pending.transactionId);
     const checkout = await this.paymentGateway.createCheckout(gateway, {
       amount,
       currency,
-      internalRef: String(pending.transactionId),
+      internalRef,
+      webhookUrl: this.paymentWebhookUrl(gateway),
+      returnUrl: this.paymentReturnUrl(internalRef),
     });
 
     await this.walletService.updateTransactionStatus(

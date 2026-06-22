@@ -43,7 +43,7 @@ PUBLIC_API_URL=http://34.18.212.201
 PUBLIC_ADMIN_URL=http://34.18.212.201/admin
 CORS_ORIGINS=http://34.18.212.201,https://hancr.com,https://www.hancr.com,https://admin.hancr.com
 ADMIN_CORS_ORIGINS=http://34.18.212.201,https://admin.hancr.com
-PAYMENT_WEBHOOK_URL=http://34.18.212.201/rider/wallet/webhook
+PAYMENT_WEBHOOK_URL=http://34.18.212.201/rider/wallet/webhook/{gateway}
 
 # Default region
 DEFAULT_LAT=24.7136

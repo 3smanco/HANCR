@@ -46,6 +46,15 @@ function isPlaceholder(value) {
   );
 }
 
+function hasConfiguredValue(key) {
+  const value = valueOf(key);
+  return hasKey(key) && value && (template || !isPlaceholder(value));
+}
+
+function configuredKeys(keys) {
+  return keys.filter(hasConfiguredValue);
+}
+
 function add(level, group, key, message) {
   rows.push({ level, group, key, message });
 }
@@ -80,6 +89,76 @@ function warnKey(group, key, message = 'not configured') {
   }
 }
 
+function requireHttpsUrl(group, key, message = 'must be a production https URL') {
+  const value = valueOf(key);
+  if (!hasKey(key) || !value) {
+    add('fail', group, key, 'missing');
+    return;
+  }
+  if (!template && isPlaceholder(value)) {
+    add('fail', group, key, 'placeholder value');
+    return;
+  }
+
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
+    add('fail', group, key, 'invalid URL');
+    return;
+  }
+
+  if (strict && parsed.protocol !== 'https:') {
+    add('fail', group, key, message);
+    return;
+  }
+
+  if (
+    strict &&
+    ['localhost', '127.0.0.1', '0.0.0.0', '::1'].includes(parsed.hostname)
+  ) {
+    add('fail', group, key, 'must not point to a local host in production');
+    return;
+  }
+
+  add('pass', group, key, 'configured');
+}
+
+function requireHttpsOriginList(group, key) {
+  const value = valueOf(key);
+  if (!hasKey(key) || !value) {
+    add('fail', group, key, 'missing');
+    return;
+  }
+  if (!template && isPlaceholder(value)) {
+    add('fail', group, key, 'placeholder value');
+    return;
+  }
+
+  const origins = value.split(',').map((origin) => origin.trim()).filter(Boolean);
+  for (const origin of origins) {
+    let parsed;
+    try {
+      parsed = new URL(origin);
+    } catch {
+      add('fail', group, key, `invalid origin: ${origin}`);
+      return;
+    }
+
+    if (strict && parsed.protocol !== 'https:') {
+      add('fail', group, key, `origin must use https: ${origin}`);
+      return;
+    }
+
+    if (parsed.pathname !== '/' || parsed.search || parsed.hash) {
+      add('fail', group, key, `origin must not include a path/query: ${origin}`);
+      return;
+    }
+  }
+
+  add('pass', group, key, 'origins are valid');
+}
+
 function currentGitSha() {
   if (template) return '';
   try {
@@ -94,10 +173,7 @@ function currentGitSha() {
 }
 
 function requireAny(group, keys, message) {
-  const configured = keys.filter((key) => {
-    const value = valueOf(key);
-    return hasKey(key) && value && (template || !isPlaceholder(value));
-  });
+  const configured = configuredKeys(keys);
   if (configured.length === 0) {
     add('fail', group, keys.join(' | '), message);
   } else {
@@ -106,10 +182,7 @@ function requireAny(group, keys, message) {
 }
 
 function warnAny(group, keys, message) {
-  const configured = keys.filter((key) => {
-    const value = valueOf(key);
-    return hasKey(key) && value && (template || !isPlaceholder(value));
-  });
+  const configured = configuredKeys(keys);
   if (configured.length === 0) {
     add('warn', group, keys.join(' | '), message);
   } else {
@@ -152,8 +225,8 @@ if (!template) {
   }
 }
 
-requireKey('security', 'CORS_ORIGINS');
-requireKey('security', 'ADMIN_CORS_ORIGINS');
+requireHttpsOriginList('security', 'CORS_ORIGINS');
+requireHttpsOriginList('security', 'ADMIN_CORS_ORIGINS');
 if (!template) {
   for (const key of ['CORS_ORIGINS', 'ADMIN_CORS_ORIGINS']) {
     if (valueOf(key).split(',').some((origin) => origin.trim() === '*')) {
@@ -180,10 +253,10 @@ if (allowTestPhones.toLowerCase() === 'true') {
 requireKey('maps', 'GOOGLE_MAPS_API_KEY');
 warnKey('maps', 'NEXT_PUBLIC_GOOGLE_MAPS_KEY', 'admin live map needs a browser key');
 
-requireKey('urls', 'PUBLIC_BASE_URL');
-requireKey('urls', 'PUBLIC_API_URL');
-requireKey('urls', 'PUBLIC_ADMIN_URL');
-requireKey('urls', 'NEXT_PUBLIC_ADMIN_API_URL');
+requireHttpsUrl('urls', 'PUBLIC_BASE_URL');
+requireHttpsUrl('urls', 'PUBLIC_API_URL');
+requireHttpsUrl('urls', 'PUBLIC_ADMIN_URL');
+requireHttpsUrl('urls', 'NEXT_PUBLIC_ADMIN_API_URL');
 
 for (const key of [
   'TWILIO_ACCOUNT_SID',
@@ -219,6 +292,35 @@ warnAny(
   ['HYPERPAY_ACCESS_TOKEN', 'MOYASAR_API_KEY', 'STRIPE_SECRET_KEY'],
   'no payment gateway configured',
 );
+
+const paymentGateways = configuredKeys([
+  'HYPERPAY_ACCESS_TOKEN',
+  'MOYASAR_API_KEY',
+  'STRIPE_SECRET_KEY',
+]);
+if (paymentGateways.length > 0) {
+  requireHttpsUrl(
+    'payments',
+    'PAYMENT_WEBHOOK_URL',
+    'must be https when a payment gateway is configured',
+  );
+
+  if (hasConfiguredValue('HYPERPAY_ACCESS_TOKEN')) {
+    requireKey('payments', 'HYPERPAY_ENTITY_ID');
+    requireHttpsUrl('payments', 'HYPERPAY_BASE_URL');
+    requireKey('payments', 'HYPERPAY_WEBHOOK_SECRET', { minLength: 16 });
+  }
+
+  if (hasConfiguredValue('MOYASAR_API_KEY')) {
+    requireKey('payments', 'MOYASAR_WEBHOOK_SECRET', { minLength: 16 });
+  }
+
+  if (hasConfiguredValue('STRIPE_SECRET_KEY')) {
+    requireKey('payments', 'STRIPE_WEBHOOK_SECRET', { minLength: 16 });
+    warnKey('payments', 'STRIPE_PUBLISHABLE_KEY', 'Flutter/web clients need it');
+  }
+}
+
 warnAny(
   'payouts',
   ['HYPERPAY_PAYOUT_TOKEN', 'MOYASAR_PAYOUT_TOKEN', 'STRIPE_SECRET_KEY'],

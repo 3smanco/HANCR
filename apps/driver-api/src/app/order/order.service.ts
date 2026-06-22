@@ -6,6 +6,7 @@ import {
   ForbiddenException,
   Inject,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
@@ -61,6 +62,7 @@ export class OrderService {
     private readonly pushNotifications: PushNotificationService,
     private readonly walletService: WalletService,
     private readonly paymentGatewayService: PaymentGatewayService,
+    private readonly config: ConfigService,
     private readonly sosService: SosService,
 
     @Inject(PUB_SUB)
@@ -90,6 +92,45 @@ export class OrderService {
       .catch((e) =>
         this.logger.warn(`Push to rider #${riderId} failed: ${(e as Error).message}`),
       );
+  }
+
+  private configValue(key: string): string | undefined {
+    const value = this.config.get<string>(key)?.trim();
+    return value || undefined;
+  }
+
+  private paymentWebhookUrl(gateway: PaymentGateway): string | undefined {
+    const configured = this.configValue('PAYMENT_WEBHOOK_URL');
+    if (!configured) return undefined;
+
+    const gatewaySegment = encodeURIComponent(gateway.toLowerCase());
+    if (configured.includes('{gateway}') || configured.includes(':gateway')) {
+      return configured
+        .replaceAll('{gateway}', gatewaySegment)
+        .replaceAll(':gateway', gatewaySegment);
+    }
+
+    const trimmed = configured.replace(/\/+$/, '');
+    if (new RegExp(`/${gatewaySegment}$`, 'i').test(trimmed)) {
+      return trimmed;
+    }
+    return `${trimmed}/${gatewaySegment}`;
+  }
+
+  private paymentReturnUrl(internalRef: string): string | undefined {
+    const configured = this.configValue('PAYMENT_RETURN_URL');
+    const fallback = this.configValue('PUBLIC_BASE_URL');
+    const value = configured ?? fallback;
+    if (!value) return undefined;
+
+    if (value.includes('{ref}')) {
+      return value.replaceAll('{ref}', encodeURIComponent(internalRef));
+    }
+    if (configured) {
+      const separator = value.includes('?') ? '&' : '?';
+      return `${value}${separator}ref=${encodeURIComponent(internalRef)}`;
+    }
+    return value.replace(/\/+$/, '');
   }
 
   // =============================================
@@ -666,12 +707,15 @@ export class OrderService {
       });
 
       try {
+        const internalRef = String(pending.transactionId);
         const checkout = await this.paymentGatewayService.createCheckout(
           gateway,
           {
             amount: total,
             currency: order.currency,
-            internalRef: String(pending.transactionId),
+            internalRef,
+            webhookUrl: this.paymentWebhookUrl(gateway),
+            returnUrl: this.paymentReturnUrl(internalRef),
           },
         );
         await this.walletService.updateTransactionStatus(
