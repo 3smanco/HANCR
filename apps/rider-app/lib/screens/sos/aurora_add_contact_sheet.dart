@@ -38,7 +38,8 @@ class _AuroraAddContactSheetState extends State<AuroraAddContactSheet> {
     return Container(
       decoration: BoxDecoration(
         color: AuroraColors.coal,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AuroraRadius.xxl)),
+        borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(AuroraRadius.xxl)),
         border: Border(
           top: BorderSide(color: AuroraColors.borderGlow),
           left: BorderSide(color: AuroraColors.border),
@@ -122,9 +123,8 @@ class _AuroraAddContactSheetState extends State<AuroraAddContactSheet> {
                   color: AuroraColors.ash,
                   borderRadius: BorderRadius.circular(AuroraRadius.md),
                   border: Border.all(
-                    color: _autoShare
-                        ? AuroraColors.ember
-                        : AuroraColors.border,
+                    color:
+                        _autoShare ? AuroraColors.ember : AuroraColors.border,
                   ),
                 ),
                 child: Row(
@@ -217,9 +217,7 @@ class _AuroraAddContactSheetState extends State<AuroraAddContactSheet> {
         padding: const EdgeInsets.symmetric(
             horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
         decoration: BoxDecoration(
-          color: selected
-              ? AuroraColors.ember
-              : AuroraColors.ash,
+          color: selected ? AuroraColors.ember : AuroraColors.ash,
           borderRadius: BorderRadius.circular(AuroraRadius.pill),
           border: Border.all(
             color: selected ? AuroraColors.ember : AuroraColors.border,

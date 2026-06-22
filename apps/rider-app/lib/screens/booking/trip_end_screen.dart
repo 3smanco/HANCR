@@ -248,7 +248,7 @@ class _TripEndScreenState extends State<TripEndScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (selected) ...[
-                            Icon(
+                            const Icon(
                               Icons.check_rounded,
                               size: 14,
                               color: HancrColors.violetDeep,
@@ -291,7 +291,7 @@ class _TripEndScreenState extends State<TripEndScreen> {
               if (_rating >= 4) ...[
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.volunteer_activism_rounded,
                       size: 18,
                       color: HancrColors.violet,
@@ -360,7 +360,8 @@ class _TripEndScreenState extends State<TripEndScreen> {
             HancrCard(
               child: Column(
                 children: [
-                  _row('المبلغ المدفوع', '${widget.fareAmount.toStringAsFixed(2)} ر.س'),
+                  _row('المبلغ المدفوع',
+                      '${widget.fareAmount.toStringAsFixed(2)} ر.س'),
                   if (_tip > 0) ...[
                     const SizedBox(height: HancrSpacing.xs),
                     _row('بقشيش', '+${_tip.toStringAsFixed(2)} ر.س',
@@ -392,9 +393,8 @@ class _TripEndScreenState extends State<TripEndScreen> {
   }
 
   Widget _initialAvatar() {
-    final initial = widget.driverName.isNotEmpty
-        ? widget.driverName[0].toUpperCase()
-        : 'H';
+    final initial =
+        widget.driverName.isNotEmpty ? widget.driverName[0].toUpperCase() : 'H';
     return Center(
       child: Text(
         initial,
@@ -407,8 +407,7 @@ class _TripEndScreenState extends State<TripEndScreen> {
     );
   }
 
-  Widget _row(String label, String value,
-      {bool bold = false, Color? accent}) {
+  Widget _row(String label, String value, {bool bold = false, Color? accent}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

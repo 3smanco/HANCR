@@ -36,7 +36,8 @@ class HancrButton extends StatelessWidget {
     bool loading = false,
     bool fullWidth = true,
     HancrButtonSize size = HancrButtonSize.large,
-  }) => HancrButton(
+  }) =>
+      HancrButton(
         key: key,
         label: label,
         onPressed: onPressed,
@@ -53,7 +54,8 @@ class HancrButton extends StatelessWidget {
     IconData? icon,
     bool loading = false,
     bool fullWidth = true,
-  }) => HancrButton(
+  }) =>
+      HancrButton(
         key: key,
         label: label,
         onPressed: onPressed,
@@ -69,7 +71,8 @@ class HancrButton extends StatelessWidget {
     required VoidCallback? onPressed,
     IconData? icon,
     bool fullWidth = true,
-  }) => HancrButton(
+  }) =>
+      HancrButton(
         key: key,
         label: label,
         onPressed: onPressed,
@@ -83,7 +86,8 @@ class HancrButton extends StatelessWidget {
     required String label,
     required VoidCallback? onPressed,
     IconData? icon,
-  }) => HancrButton(
+  }) =>
+      HancrButton(
         key: key,
         label: label,
         onPressed: onPressed,
@@ -98,7 +102,8 @@ class HancrButton extends StatelessWidget {
     required VoidCallback? onPressed,
     IconData? icon,
     bool fullWidth = true,
-  }) => HancrButton(
+  }) =>
+      HancrButton(
         key: key,
         label: label,
         onPressed: onPressed,
@@ -162,7 +167,8 @@ class HancrButton extends StatelessWidget {
     final c = _colors();
     final isDisabled = onPressed == null || loading;
     final effectiveBg = isDisabled
-        ? c.bg.withValues(alpha: variant == HancrButtonVariant.outline ? 1 : 0.4)
+        ? c.bg
+            .withValues(alpha: variant == HancrButtonVariant.outline ? 1 : 0.4)
         : c.bg;
     final effectiveFg = isDisabled ? c.fg.withValues(alpha: 0.6) : c.fg;
 

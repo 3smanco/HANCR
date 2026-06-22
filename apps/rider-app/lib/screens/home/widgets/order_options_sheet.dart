@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../blocs/order/order_bloc.dart';
 import '../../../blocs/order/order_event.dart';
@@ -132,7 +132,7 @@ class _OrderOptionsSheetState extends State<OrderOptionsSheet> {
                         color: HancrColors.primary.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.directions_car,
                         color: HancrColors.primary,
                       ),
@@ -155,9 +155,10 @@ class _OrderOptionsSheetState extends State<OrderOptionsSheet> {
                     ),
                     Text(
                       '~${widget.service.baseFare.toStringAsFixed(0)} SAR',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: HancrColors.primary,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: HancrColors.primary,
+                              ),
                     ),
                   ],
                 ),

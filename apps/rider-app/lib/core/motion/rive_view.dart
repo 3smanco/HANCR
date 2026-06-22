@@ -47,8 +47,9 @@ class RiveView extends StatelessWidget {
             _path,
             artboard: artboard,
             fit: fit,
-            stateMachines:
-                stateMachine != null ? <String>[stateMachine!] : const <String>[],
+            stateMachines: stateMachine != null
+                ? <String>[stateMachine!]
+                : const <String>[],
           ),
         );
       },

@@ -67,8 +67,7 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
                   _tile(
                     icon: Icons.g_mobiledata,
                     title: 'Google',
-                    subtitle:
-                        googleLinked ? tr('linked') : tr('notLinked'),
+                    subtitle: googleLinked ? tr('linked') : tr('notLinked'),
                     trailing: googleLinked
                         ? _badge(tr('linked'), AuroraColors.ember)
                         : TextButton(
@@ -142,8 +141,7 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
         borderRadius: BorderRadius.circular(AuroraRadius.pill),
         border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
-      child: Text(text,
-          style: AuroraText.caption.copyWith(color: color)),
+      child: Text(text, style: AuroraText.caption.copyWith(color: color)),
     );
   }
 

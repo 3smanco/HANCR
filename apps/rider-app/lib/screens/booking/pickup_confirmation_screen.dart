@@ -146,12 +146,11 @@ class _PickupConfirmationScreenState extends State<PickupConfirmationScreen>
                             decoration: BoxDecoration(
                               color: HancrColors.violet,
                               shape: BoxShape.circle,
-                              border:
-                                  Border.all(color: Colors.white, width: 3),
+                              border: Border.all(color: Colors.white, width: 3),
                               boxShadow: [
                                 BoxShadow(
-                                  color: HancrColors.violet
-                                      .withValues(alpha: 0.5),
+                                  color:
+                                      HancrColors.violet.withValues(alpha: 0.5),
                                   blurRadius: 8,
                                   spreadRadius: 1,
                                 ),
@@ -261,7 +260,7 @@ class _PickupConfirmationScreenState extends State<PickupConfirmationScreen>
                         ),
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.payments_rounded,
                               size: 20,
                               color: HancrColors.violetDeep,

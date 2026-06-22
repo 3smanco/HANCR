@@ -51,7 +51,11 @@ class _SuccessCheckState extends State<SuccessCheck> {
             ),
           )
               .animate()
-              .scaleXY(begin: 0.2, end: 1.4, duration: Motion.slow, curve: Motion.decelerate)
+              .scaleXY(
+                  begin: 0.2,
+                  end: 1.4,
+                  duration: Motion.slow,
+                  curve: Motion.decelerate)
               .fadeOut(duration: Motion.slow),
           // دائرة مصمتة + علامة الصح
           Container(
@@ -63,9 +67,8 @@ class _SuccessCheckState extends State<SuccessCheck> {
               color: AuroraColors.obsidian,
               size: widget.size * 0.42,
             ),
-          )
-              .animate(onComplete: (_) => widget.onDone?.call())
-              .scaleXY(begin: 0, end: 1, duration: Motion.base, curve: Motion.spring),
+          ).animate(onComplete: (_) => widget.onDone?.call()).scaleXY(
+              begin: 0, end: 1, duration: Motion.base, curve: Motion.spring),
         ],
       ),
     );

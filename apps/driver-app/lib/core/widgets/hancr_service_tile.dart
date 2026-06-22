@@ -53,7 +53,7 @@ class HancrServiceTile extends StatelessWidget {
                               width: 56,
                               height: 56,
                               fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) => Icon(
+                              errorBuilder: (_, _, _) => Icon(
                                 icon,
                                 size: 36,
                                 color: iconColor ?? HancrColors.navy,
@@ -68,11 +68,7 @@ class HancrServiceTile extends StatelessWidget {
                   ),
                 ),
                 if (badge != null)
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: HancrBadge.promo(badge!),
-                  ),
+                  Positioned(top: 6, right: 6, child: HancrBadge.promo(badge!)),
               ],
             ),
           ),

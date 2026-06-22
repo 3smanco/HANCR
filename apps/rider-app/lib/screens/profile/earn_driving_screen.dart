@@ -63,8 +63,8 @@ class EarnDrivingScreen extends StatelessWidget {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   color: AuroraColors.smoke,
-                                  borderRadius: BorderRadius.circular(
-                                      AuroraRadius.md),
+                                  borderRadius:
+                                      BorderRadius.circular(AuroraRadius.md),
                                 ),
                                 child: Icon(b.$1,
                                     color: AuroraColors.ember, size: 22),
@@ -72,11 +72,9 @@ class EarnDrivingScreen extends StatelessWidget {
                               const SizedBox(width: AuroraSpacing.md),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(b.$2,
-                                        style: AuroraText.titleSmall),
+                                    Text(b.$2, style: AuroraText.titleSmall),
                                     const SizedBox(height: 2),
                                     Text(b.$3, style: AuroraText.bodySmall),
                                   ],

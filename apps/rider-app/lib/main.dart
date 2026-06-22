@@ -18,7 +18,7 @@ Future<void> main() async {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.error_outline, color: Color(0xFFFF7A1A), size: 48),
+          const Icon(Icons.error_outline, color: Color(0xFFFF7A1A), size: 48),
           const SizedBox(height: 16),
           const Text(
             'حدث خطأ غير متوقع',

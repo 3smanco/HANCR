@@ -26,7 +26,8 @@ class HancrCard extends StatelessWidget {
     EdgeInsets padding = const EdgeInsets.all(HancrSpacing.lg),
     EdgeInsets? margin,
     VoidCallback? onTap,
-  }) => HancrCard(
+  }) =>
+      HancrCard(
         key: key,
         padding: padding,
         margin: margin,
@@ -41,7 +42,8 @@ class HancrCard extends StatelessWidget {
     EdgeInsets padding = const EdgeInsets.all(HancrSpacing.lg),
     EdgeInsets? margin,
     VoidCallback? onTap,
-  }) => HancrCard(
+  }) =>
+      HancrCard(
         key: key,
         padding: padding,
         margin: margin,
@@ -56,7 +58,8 @@ class HancrCard extends StatelessWidget {
     EdgeInsets padding = const EdgeInsets.all(HancrSpacing.lg),
     EdgeInsets? margin,
     VoidCallback? onTap,
-  }) => HancrCard(
+  }) =>
+      HancrCard(
         key: key,
         padding: padding,
         margin: margin,

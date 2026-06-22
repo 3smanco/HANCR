@@ -95,8 +95,7 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
             Icon(Icons.verified_user, color: AuroraColors.ember, size: 56),
             const SizedBox(height: AuroraSpacing.lg),
             Text(tr('twoFactor'),
-                textAlign: TextAlign.center,
-                style: AuroraText.displayMedium),
+                textAlign: TextAlign.center, style: AuroraText.displayMedium),
             const SizedBox(height: AuroraSpacing.sm),
             Text(tr('enterAuthCode'),
                 textAlign: TextAlign.center, style: AuroraText.bodyMedium),
@@ -107,10 +106,10 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
               maxLength: 10,
               textAlign: TextAlign.center,
               autofocus: true,
-              style: AuroraText.titleLarge.copyWith(
-                  color: AuroraColors.pearl, letterSpacing: 4),
-              decoration: const InputDecoration(
-                  counterText: '', hintText: '000000'),
+              style: AuroraText.titleLarge
+                  .copyWith(color: AuroraColors.pearl, letterSpacing: 4),
+              decoration:
+                  const InputDecoration(counterText: '', hintText: '000000'),
               onSubmitted: (_) => _submitTwoFa(),
             ),
             const SizedBox(height: AuroraSpacing.lg),
@@ -161,7 +160,8 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
             }
             return SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.xxl),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AuroraSpacing.xxl),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -239,32 +239,32 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                     Shake(
                       trigger: _failCount,
                       child: PinCodeTextField(
-                      appContext: context,
-                      length: 6,
-                      controller: _otpCtrl,
-                      keyboardType: TextInputType.number,
-                      animationType: AnimationType.fade,
-                      cursorColor: AuroraColors.ember,
-                      enableActiveFill: true,
-                      textStyle: AuroraText.titleLarge.copyWith(
-                        color: AuroraColors.pearl,
+                        appContext: context,
+                        length: 6,
+                        controller: _otpCtrl,
+                        keyboardType: TextInputType.number,
+                        animationType: AnimationType.fade,
+                        cursorColor: AuroraColors.ember,
+                        enableActiveFill: true,
+                        textStyle: AuroraText.titleLarge.copyWith(
+                          color: AuroraColors.pearl,
+                        ),
+                        pinTheme: PinTheme(
+                          shape: PinCodeFieldShape.box,
+                          borderRadius: BorderRadius.circular(AuroraRadius.md),
+                          fieldHeight: 56,
+                          fieldWidth: 48,
+                          activeColor: AuroraColors.ember,
+                          selectedColor: AuroraColors.ember,
+                          inactiveColor: AuroraColors.border,
+                          activeFillColor: AuroraColors.smoke,
+                          selectedFillColor: AuroraColors.smoke,
+                          inactiveFillColor: AuroraColors.ash,
+                          borderWidth: 1.5,
+                        ),
+                        onCompleted: _verify,
+                        onChanged: (_) {},
                       ),
-                      pinTheme: PinTheme(
-                        shape: PinCodeFieldShape.box,
-                        borderRadius: BorderRadius.circular(AuroraRadius.md),
-                        fieldHeight: 56,
-                        fieldWidth: 48,
-                        activeColor: AuroraColors.ember,
-                        selectedColor: AuroraColors.ember,
-                        inactiveColor: AuroraColors.border,
-                        activeFillColor: AuroraColors.smoke,
-                        selectedFillColor: AuroraColors.smoke,
-                        inactiveFillColor: AuroraColors.ash,
-                        borderWidth: 1.5,
-                      ),
-                      onCompleted: _verify,
-                      onChanged: (_) {},
-                    ),
                     ),
 
                     const SizedBox(height: AuroraSpacing.lg),
@@ -274,8 +274,8 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                       controller: _referralCtrl,
                       textCapitalization: TextCapitalization.characters,
                       textAlign: TextAlign.center,
-                      style: AuroraText.bodyMedium
-                          .copyWith(color: AuroraColors.pearl, letterSpacing: 2),
+                      style: AuroraText.bodyMedium.copyWith(
+                          color: AuroraColors.pearl, letterSpacing: 2),
                       decoration: InputDecoration(
                         hintText: tr('referralCodeOptional'),
                         hintStyle: AuroraText.bodySmall
@@ -286,13 +286,12 @@ class _AuroraOtpScreenState extends State<AuroraOtpScreen> {
                         fillColor: AuroraColors.ash,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AuroraRadius.md),
-                          borderSide:
-                              BorderSide(color: AuroraColors.border),
+                          borderSide: BorderSide(color: AuroraColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AuroraRadius.md),
-                          borderSide: BorderSide(
-                              color: AuroraColors.ember, width: 1.5),
+                          borderSide:
+                              BorderSide(color: AuroraColors.ember, width: 1.5),
                         ),
                       ),
                     ),

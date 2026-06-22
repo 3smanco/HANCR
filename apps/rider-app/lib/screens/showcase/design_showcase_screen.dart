@@ -32,7 +32,7 @@ class _DesignShowcaseScreenState extends State<DesignShowcaseScreen> {
         appBar: AppBar(
           title: const Text('HANCR Design System'),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_rounded),
+            icon: const Icon(Icons.arrow_back_rounded),
             onPressed: () => Navigator.maybePop(context),
           ),
         ),
@@ -324,9 +324,9 @@ class _DesignShowcaseScreenState extends State<DesignShowcaseScreen> {
 
               // ============ Cards ============
               _section('🗂️ البطاقات'),
-              HancrCard(
+              const HancrCard(
                 child: Row(
-                  children: const [
+                  children: [
                     Icon(Icons.info_outline_rounded,
                         color: HancrColors.violet, size: 20),
                     SizedBox(width: HancrSpacing.md),
@@ -341,8 +341,8 @@ class _DesignShowcaseScreenState extends State<DesignShowcaseScreen> {
               ),
               const SizedBox(height: HancrSpacing.md),
               HancrCard.elevated(
-                child: Row(
-                  children: const [
+                child: const Row(
+                  children: [
                     Icon(Icons.layers_rounded,
                         color: HancrColors.violet, size: 20),
                     SizedBox(width: HancrSpacing.md),
@@ -358,8 +358,8 @@ class _DesignShowcaseScreenState extends State<DesignShowcaseScreen> {
               const SizedBox(height: HancrSpacing.md),
               HancrCard.selected(
                 onTap: () => _snack('Selected card'),
-                child: Row(
-                  children: const [
+                child: const Row(
+                  children: [
                     Icon(Icons.check_circle_rounded,
                         color: HancrColors.violet, size: 20),
                     SizedBox(width: HancrSpacing.md),
@@ -380,8 +380,8 @@ class _DesignShowcaseScreenState extends State<DesignShowcaseScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: const [
+                    const Row(
+                      children: [
                         HancrTierBadge(tier: 'gold'),
                         SizedBox(width: HancrSpacing.sm),
                         Text(
@@ -418,8 +418,7 @@ class _DesignShowcaseScreenState extends State<DesignShowcaseScreen> {
                         value: 0.815,
                         minHeight: 8,
                         backgroundColor: Colors.white24,
-                        valueColor:
-                            AlwaysStoppedAnimation(HancrColors.violet),
+                        valueColor: AlwaysStoppedAnimation(HancrColors.violet),
                       ),
                     ),
                   ],
@@ -429,16 +428,16 @@ class _DesignShowcaseScreenState extends State<DesignShowcaseScreen> {
 
               // ============ Inputs ============
               _section('📝 حقول الإدخال'),
-              TextField(
-                decoration: const InputDecoration(
+              const TextField(
+                decoration: InputDecoration(
                   labelText: 'الاسم الكامل',
                   hintText: 'أدخل اسمك',
                   prefixIcon: Icon(Icons.person_outline_rounded),
                 ),
               ),
               const SizedBox(height: HancrSpacing.md),
-              TextField(
-                decoration: const InputDecoration(
+              const TextField(
+                decoration: InputDecoration(
                   labelText: 'رقم الجوال',
                   hintText: '5XX XXX XXX',
                   prefixIcon: Padding(
@@ -542,8 +541,8 @@ class _ColorPalette extends StatelessWidget {
       spacing: HancrSpacing.sm,
       runSpacing: HancrSpacing.sm,
       children: swatches.map((s) {
-        final isDark = ThemeData.estimateBrightnessForColor(s.$2) ==
-            Brightness.dark;
+        final isDark =
+            ThemeData.estimateBrightnessForColor(s.$2) == Brightness.dark;
         return Container(
           width: 88,
           height: 72,

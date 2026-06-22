@@ -125,14 +125,12 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
               Row(
                 children: [
                   Icon(_enabled ? Icons.verified_user : Icons.shield_outlined,
-                      color: _enabled
-                          ? AuroraColors.success
-                          : AuroraColors.ember,
+                      color:
+                          _enabled ? AuroraColors.success : AuroraColors.ember,
                       size: 28),
                   const SizedBox(width: AuroraSpacing.md),
                   Expanded(
-                    child: Text(
-                        _enabled ? tr('twoFaOn') : tr('twoFaOff'),
+                    child: Text(_enabled ? tr('twoFaOn') : tr('twoFaOff'),
                         style: AuroraText.titleSmall),
                   ),
                 ],
@@ -222,8 +220,8 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
       controller: _codeCtl,
       keyboardType: TextInputType.number,
       maxLength: 6,
-      style: AuroraText.titleMedium.copyWith(
-          color: AuroraColors.pearl, letterSpacing: 6),
+      style: AuroraText.titleMedium
+          .copyWith(color: AuroraColors.pearl, letterSpacing: 6),
       decoration: const InputDecoration(counterText: '', hintText: '000000'),
     );
   }

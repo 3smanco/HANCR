@@ -85,8 +85,8 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
 
   /// يولّد علامة سيارة top-down مرسومة بالكود (CarMarkerFactory موحّد).
   Future<void> _buildCarIcon() async {
-    final dpr = WidgetsBinding.instance.platformDispatcher.views.first
-        .devicePixelRatio;
+    final dpr =
+        WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
     final icon = await CarMarkerFactory.car(
       px: 62,
       dpr: dpr,
@@ -131,7 +131,9 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
     if ((order.driverName ?? '').isNotEmpty) {
       lines.add('${tr('driver')}: ${order.driverName}');
     }
-    final car = [order.carBrand, order.carModel].where((s) => (s ?? '').isNotEmpty).join(' ');
+    final car = [order.carBrand, order.carModel]
+        .where((s) => (s ?? '').isNotEmpty)
+        .join(' ');
     if (car.isNotEmpty || (order.plateNumber ?? '').isNotEmpty) {
       lines.add('${tr('car')}: $car'
           '${(order.plateNumber ?? '').isNotEmpty ? ' • ${order.plateNumber}' : ''}');
@@ -143,8 +145,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
       lines.add('${tr('liveLocation')}: '
           'https://www.google.com/maps/search/?api=1&query=${_lastDriverLoc!.lat},${_lastDriverLoc!.lng}');
     }
-    await Share.share(lines.join('\n'),
-        subject: tr('shareRideTitle'));
+    await Share.share(lines.join('\n'), subject: tr('shareRideTitle'));
   }
 
   /// يضبط الكاميرا لتضمّ الانطلاق والوجهة وموقع السائق.
@@ -488,7 +489,8 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
     return Container(
       decoration: BoxDecoration(
         color: AuroraColors.obsidian,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AuroraRadius.xl)),
+        borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(AuroraRadius.xl)),
         boxShadow: AuroraShadows.floatingNav,
       ),
       child: SafeArea(
@@ -534,8 +536,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
                       child: _action(
                         icon: Icons.phone,
                         label: tr('call'),
-                        onTap: () =>
-                            launchPhoneCall(rowCtx, order.driverPhone),
+                        onTap: () => launchPhoneCall(rowCtx, order.driverPhone),
                       ),
                     ),
                     const SizedBox(width: AuroraSpacing.sm),
@@ -615,9 +616,8 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
   Widget _driverInfoRow(OrderModel order) {
     final name = order.driverName ?? tr('driver');
     final rating = order.driverRating?.toStringAsFixed(1) ?? '—';
-    final car = [order.carBrand, order.carModel]
-        .where((s) => s != null)
-        .join(' ');
+    final car =
+        [order.carBrand, order.carModel].where((s) => s != null).join(' ');
     final plate = order.plateNumber ?? '';
 
     return Row(
@@ -654,8 +654,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
                     ),
                   ),
                   const SizedBox(width: AuroraSpacing.xs),
-                  Icon(Icons.star,
-                      color: AuroraColors.gold, size: 14),
+                  Icon(Icons.star, color: AuroraColors.gold, size: 14),
                   const SizedBox(width: 2),
                   Text(
                     rating,
@@ -808,7 +807,8 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
               onPressed: () => Navigator.pop(dCtx),
               child: Text(
                 tr('undo'),
-                style: AuroraText.bodyMedium.copyWith(color: AuroraColors.ember),
+                style:
+                    AuroraText.bodyMedium.copyWith(color: AuroraColors.ember),
               ),
             ),
             ElevatedButton(
@@ -821,7 +821,8 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
               ),
               child: Text(
                 tr('cancelRide'),
-                style: AuroraText.buttonMedium.copyWith(color: AuroraColors.pearl),
+                style:
+                    AuroraText.buttonMedium.copyWith(color: AuroraColors.pearl),
               ),
             ),
           ],

@@ -6,7 +6,7 @@ import '../../core/graphql/gql/flight_gql.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 
 /// شاشة Airport Pickup — يدخل الراكب رقم رحلة طيران وعنوان التوصيل،
 /// ونتعقّب رحلته آلياً ونحجز طلباً قبل الوصول الفعلي بـ 30 دقيقة.
@@ -59,13 +59,11 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
       final flights =
           (results[0].data?['flightTrackings'] as List<dynamic>? ?? [])
               .cast<Map<String, dynamic>>();
-      final places =
-          (results[1].data?['savedPlaces'] as List<dynamic>? ?? [])
-              .cast<Map<String, dynamic>>();
+      final places = (results[1].data?['savedPlaces'] as List<dynamic>? ?? [])
+          .cast<Map<String, dynamic>>();
       final svc = (results[2].data?['services'] as List<dynamic>? ?? [])
           .cast<Map<String, dynamic>>();
-      final ride = svc.firstWhere(
-          (s) => s['serviceType'] == 'RideSharing',
+      final ride = svc.firstWhere((s) => s['serviceType'] == 'RideSharing',
           orElse: () => svc.isNotEmpty ? svc.first : {});
       if (!mounted) return;
       setState(() {
@@ -161,8 +159,7 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
         title: Text(tr('airportPickup'), style: AuroraText.titleSmall),
       ),
       body: _loading
-          ? Center(
-              child: AuroraLoader(size: 36))
+          ? const Center(child: AuroraLoader(size: 36))
           : ListView(
               padding: const EdgeInsets.all(AuroraSpacing.lg),
               children: [
@@ -174,8 +171,8 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
                   Padding(
                     padding: const EdgeInsets.all(AuroraSpacing.lg),
                     child: Center(
-                      child: Text(tr('noTrackings'),
-                          style: AuroraText.bodySmall),
+                      child:
+                          Text(tr('noTrackings'), style: AuroraText.bodySmall),
                     ),
                   )
                 else
@@ -236,7 +233,7 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
           ),
           const SizedBox(height: AuroraSpacing.sm),
           DropdownButtonFormField<Map<String, dynamic>>(
-            value: _selectedPlace,
+            initialValue: _selectedPlace,
             dropdownColor: AuroraColors.coal,
             style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
             decoration: InputDecoration(
@@ -246,8 +243,7 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
                 borderRadius: BorderRadius.circular(AuroraRadius.md),
                 borderSide: BorderSide.none,
               ),
-              prefixIcon:
-                  Icon(Icons.location_on, color: AuroraColors.ember),
+              prefixIcon: Icon(Icons.location_on, color: AuroraColors.ember),
             ),
             hint: Text(tr('pickPickupPlace'),
                 style: AuroraText.bodyMedium
@@ -301,7 +297,8 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
                     style: AuroraText.bodyMedium
                         .copyWith(color: AuroraColors.pearl)),
                 if (scheduled != null)
-                  Text('ETA: ${scheduled.substring(0, 16).replaceAll('T', ' ')}',
+                  Text(
+                      'ETA: ${scheduled.substring(0, 16).replaceAll('T', ' ')}',
                       style: AuroraText.bodySmall),
                 Text('${tr('flight_status')}: ${tr('flight_$status')}',
                     style: AuroraText.bodySmall),
@@ -310,8 +307,7 @@ class _AuroraAirportScreenState extends State<AuroraAirportScreen> {
           ),
           if (status == 'tracking')
             IconButton(
-              icon:
-                  Icon(Icons.close, color: AuroraColors.danger),
+              icon: Icon(Icons.close, color: AuroraColors.danger),
               onPressed: () => _cancel(t['id'] as int),
             ),
         ],

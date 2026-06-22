@@ -118,7 +118,7 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
         title: const Text('Hancr Miles 🏆'),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh_rounded),
+            icon: const Icon(Icons.refresh_rounded),
             onPressed: _load,
           ),
         ],
@@ -174,7 +174,8 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
         const SizedBox(height: HancrSpacing.xxl),
 
         // ─── Perks ───
-        _SectionTitle(title: tr('yourBenefits'), icon: Icons.workspace_premium_rounded),
+        _SectionTitle(
+            title: tr('yourBenefits'), icon: Icons.workspace_premium_rounded),
         const SizedBox(height: HancrSpacing.md),
         HancrCard(
           padding: EdgeInsets.zero,
@@ -190,7 +191,8 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
               _PerkRow(
                 icon: Icons.cancel_outlined,
                 label: tr('freeCancel'),
-                value: l.hasFreeCancellation ? tr('enabled') : tr('notAvailable'),
+                value:
+                    l.hasFreeCancellation ? tr('enabled') : tr('notAvailable'),
                 active: l.hasFreeCancellation,
               ),
               if (l.surgeImmunityUntil != null) ...[
@@ -209,7 +211,8 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
         const SizedBox(height: HancrSpacing.xxl),
 
         // ─── Rewards Catalog ───
-        _SectionTitle(title: tr('availableRewards'), icon: Icons.redeem_rounded),
+        _SectionTitle(
+            title: tr('availableRewards'), icon: Icons.redeem_rounded),
         const SizedBox(height: HancrSpacing.md),
         GridView.count(
           shrinkWrap: true,
@@ -274,19 +277,19 @@ class _LoyaltyTabState extends State<LoyaltyTab> {
                 text: tr('earn1Mile'),
                 color: HancrColors.violet,
               ),
-              SizedBox(height: HancrSpacing.md),
+              const SizedBox(height: HancrSpacing.md),
               _EarnRow(
                 icon: Icons.star_rounded,
                 text: tr('rateEarn'),
                 color: HancrColors.warning,
               ),
-              SizedBox(height: HancrSpacing.md),
+              const SizedBox(height: HancrSpacing.md),
               _EarnRow(
                 icon: Icons.card_giftcard_rounded,
                 text: tr('promoDouble'),
                 color: HancrColors.success,
               ),
-              SizedBox(height: HancrSpacing.md),
+              const SizedBox(height: HancrSpacing.md),
               _EarnRow(
                 icon: Icons.group_add_rounded,
                 text: tr('inviteEarn500'),
@@ -378,14 +381,14 @@ class _TierHero extends StatelessWidget {
                   const SizedBox(width: HancrSpacing.sm),
                   Text(
                     tr('yourTier'),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const Spacer(),
-                  Icon(
+                  const Icon(
                     Icons.workspace_premium_rounded,
                     color: Colors.white24,
                     size: 24,
@@ -447,7 +450,8 @@ class _TierHero extends StatelessWidget {
                   children: [
                     Text(
                       tr('yourProgress'),
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                     Text(
                       'للمستوى ${_nextTierLabel()}',
@@ -590,9 +594,7 @@ class _PerkRow extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: active
-                  ? HancrColors.successBg
-                  : HancrColors.surfaceMute,
+              color: active ? HancrColors.successBg : HancrColors.surfaceMute,
               borderRadius: BorderRadius.circular(HancrRadius.sm),
             ),
             child: Icon(
@@ -685,7 +687,7 @@ class _RewardCard extends StatelessWidget {
             const SizedBox(height: HancrSpacing.sm),
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.stars_rounded,
                   size: 14,
                   color: HancrColors.violet,
@@ -764,11 +766,11 @@ class _ErrorState extends StatelessWidget {
             Container(
               width: 80,
               height: 80,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: HancrColors.errorBg,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.error_outline_rounded,
                 size: 40,
                 color: HancrColors.error,
@@ -777,7 +779,7 @@ class _ErrorState extends StatelessWidget {
             const SizedBox(height: HancrSpacing.lg),
             Text(
               tr('loadError'),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: HancrColors.textPrimary,
@@ -821,11 +823,11 @@ class _EmptyState extends StatelessWidget {
             Container(
               width: 80,
               height: 80,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: HancrColors.violetLight,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.stars_rounded,
                 size: 40,
                 color: HancrColors.violet,
@@ -834,7 +836,7 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: HancrSpacing.lg),
             Text(
               tr('startFirstRide'),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 color: HancrColors.textPrimary,
@@ -844,7 +846,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               tr('startFirstRideSub'),
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 color: HancrColors.textSecondary,
               ),

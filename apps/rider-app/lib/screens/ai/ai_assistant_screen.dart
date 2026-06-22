@@ -140,7 +140,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
     await _tts.stop();
     setState(() => _listening = true);
     await _stt.listen(
-      localeId: 'ar_SA',
+      listenOptions: SpeechListenOptions(localeId: 'ar_SA'),
       onResult: (r) {
         setState(() => _ctrl.text = r.recognizedWords);
         if (r.finalResult && r.recognizedWords.trim().isNotEmpty) {
@@ -160,7 +160,8 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AuroraColors.pearl),
-          onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/home'),
         ),
         title: Row(children: [
           Container(
@@ -171,7 +172,8 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                   colors: [AuroraColors.ember, AuroraColors.emberMute]),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.auto_awesome, color: Colors.white, size: 18),
+            child:
+                const Icon(Icons.auto_awesome, color: Colors.white, size: 18),
           ),
           const SizedBox(width: 10),
           Text('مساعد HANCR',
@@ -182,7 +184,8 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
           IconButton(
             tooltip: 'قراءة صوتية',
             icon: Icon(_speak ? Icons.volume_up : Icons.volume_off,
-                color: _speak ? AuroraColors.ember : AuroraColors.textSecondary),
+                color:
+                    _speak ? AuroraColors.ember : AuroraColors.textSecondary),
             onPressed: () {
               setState(() => _speak = !_speak);
               if (!_speak) _tts.stop();
@@ -218,16 +221,15 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 5),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.78),
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
         decoration: BoxDecoration(
           color: isUser ? AuroraColors.ember : AuroraColors.ash,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AuroraColors.border),
         ),
         child: typing
-            ? Text('يكتب…',
-                style: TextStyle(color: AuroraColors.textSecondary))
+            ? Text('يكتب…', style: TextStyle(color: AuroraColors.textSecondary))
             : Text(
                 m.text,
                 textDirection: TextDirection.rtl,
@@ -303,7 +305,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
               color: _busy ? AuroraColors.emberMute : AuroraColors.ember,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.send, color: Colors.white, size: 20),
+            child: const Icon(Icons.send, color: Colors.white, size: 20),
           ),
         ),
       ]),

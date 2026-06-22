@@ -200,7 +200,8 @@ class OrderModel extends Equatable {
   factory OrderModel.fromJson(Map<String, dynamic> json) => OrderModel(
         id: json['id'] as int,
         type: json['type'] as String? ?? 'Ride',
-        status: OrderStatus.fromString(json['status'] as String? ?? 'Requested'),
+        status:
+            OrderStatus.fromString(json['status'] as String? ?? 'Requested'),
         costBest: (json['costBest'] as num?)?.toDouble() ?? 0,
         costAfterCoupon: (json['costAfterCoupon'] as num?)?.toDouble() ?? 0,
         paidAmount: (json['paidAmount'] as num?)?.toDouble() ?? 0,
@@ -211,8 +212,7 @@ class OrderModel extends Equatable {
                 ?.map((p) => GeoPoint.fromJson(p as Map<String, dynamic>))
                 .toList() ??
             [],
-        addresses:
-            (json['addresses'] as List<dynamic>?)?.cast<String>() ?? [],
+        addresses: (json['addresses'] as List<dynamic>?)?.cast<String>() ?? [],
         etaPickup: json['etaPickup'] != null
             ? DateTime.tryParse(json['etaPickup'] as String)
             : null,

@@ -272,9 +272,10 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
                     // شريط الحالة يتبع السكين (أيقونات داكنة على الفاتح).
                     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
                       statusBarColor: Colors.transparent,
-                      statusBarIconBrightness: AuroraColors.activeSkin == 'light'
-                          ? Brightness.dark
-                          : Brightness.light,
+                      statusBarIconBrightness:
+                          AuroraColors.activeSkin == 'light'
+                              ? Brightness.dark
+                              : Brightness.light,
                       statusBarBrightness: AuroraColors.activeSkin == 'light'
                           ? Brightness.light
                           : Brightness.dark,

@@ -7,7 +7,7 @@ import '../../core/graphql/gql/commuter_gql.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 
 /// شاشة إنشاء اشتراك Commuter — تختار المنزل والعمل والتوقيتات والأيام.
 class AuroraCommuterSetupScreen extends StatefulWidget {
@@ -23,8 +23,7 @@ class AuroraCommuterSetupScreen extends StatefulWidget {
       _AuroraCommuterSetupScreenState();
 }
 
-class _AuroraCommuterSetupScreenState
-    extends State<AuroraCommuterSetupScreen> {
+class _AuroraCommuterSetupScreenState extends State<AuroraCommuterSetupScreen> {
   // المنزل والعمل
   LatLng? _home;
   String _homeAddr = '';
@@ -91,20 +90,19 @@ class _AuroraCommuterSetupScreenState
       ));
       final services = (svc.data?['services'] as List<dynamic>? ?? [])
           .cast<Map<String, dynamic>>();
-      final ride =
-          services.firstWhere((s) => s['serviceType'] == 'RideSharing',
-              orElse: () => services.isNotEmpty ? services.first : {});
+      final ride = services.firstWhere((s) => s['serviceType'] == 'RideSharing',
+          orElse: () => services.isNotEmpty ? services.first : {});
       if (!mounted) return;
       setState(() {
         _savedPlaces = list;
         if (home != null) {
-          _home = LatLng((home['lat'] as num).toDouble(),
-              (home['lng'] as num).toDouble());
+          _home = LatLng(
+              (home['lat'] as num).toDouble(), (home['lng'] as num).toDouble());
           _homeAddr = home['address'] as String? ?? '';
         }
         if (work != null) {
-          _work = LatLng((work['lat'] as num).toDouble(),
-              (work['lng'] as num).toDouble());
+          _work = LatLng(
+              (work['lat'] as num).toDouble(), (work['lng'] as num).toDouble());
           _workAddr = work['address'] as String? ?? '';
         }
         _serviceId = ride['id'] as int?;
@@ -134,13 +132,11 @@ class _AuroraCommuterSetupScreenState
             if (_savedPlaces.isEmpty)
               Padding(
                 padding: const EdgeInsets.all(AuroraSpacing.md),
-                child: Text(tr('noSavedPlaces'),
-                    style: AuroraText.bodySmall),
+                child: Text(tr('noSavedPlaces'), style: AuroraText.bodySmall),
               )
             else
               ..._savedPlaces.map((p) => ListTile(
-                    leading: Icon(Icons.bookmark,
-                        color: AuroraColors.ember),
+                    leading: Icon(Icons.bookmark, color: AuroraColors.ember),
                     title: Text(p['label'] as String? ?? '',
                         style: AuroraText.bodyMedium
                             .copyWith(color: AuroraColors.pearl)),
@@ -261,8 +257,7 @@ class _AuroraCommuterSetupScreenState
         title: Text(tr('createCommuter'), style: AuroraText.titleSmall),
       ),
       body: _loadingPlaces
-          ? Center(
-              child: AuroraLoader(size: 36))
+          ? const Center(child: AuroraLoader(size: 36))
           : ListView(
               padding: const EdgeInsets.all(AuroraSpacing.lg),
               children: [
@@ -299,8 +294,7 @@ class _AuroraCommuterSetupScreenState
                       filled: true,
                       fillColor: AuroraColors.coal,
                       border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(AuroraRadius.md),
+                        borderRadius: BorderRadius.circular(AuroraRadius.md),
                         borderSide: BorderSide.none,
                       ),
                     ),
@@ -316,8 +310,7 @@ class _AuroraCommuterSetupScreenState
                       filled: true,
                       fillColor: AuroraColors.coal,
                       border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(AuroraRadius.md),
+                        borderRadius: BorderRadius.circular(AuroraRadius.md),
                         borderSide: BorderSide.none,
                       ),
                     ),
@@ -338,8 +331,7 @@ class _AuroraCommuterSetupScreenState
                       filled: true,
                       fillColor: AuroraColors.coal,
                       border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(AuroraRadius.md),
+                        borderRadius: BorderRadius.circular(AuroraRadius.md),
                         borderSide: BorderSide.none,
                       ),
                     ),
@@ -348,7 +340,7 @@ class _AuroraCommuterSetupScreenState
                   SwitchListTile(
                     value: _wheelchair,
                     onChanged: (v) => setState(() => _wheelchair = v),
-                    activeColor: AuroraColors.ember,
+                    activeThumbColor: AuroraColors.ember,
                     title: Text(tr('wheelchairNeeded'),
                         style: AuroraText.bodyMedium
                             .copyWith(color: AuroraColors.pearl)),
@@ -521,7 +513,7 @@ class _AuroraCommuterSetupScreenState
         children: [
           Switch(
             value: selected,
-            activeColor: AuroraColors.ember,
+            activeThumbColor: AuroraColors.ember,
             onChanged: onChanged,
           ),
           Icon(icon, color: AuroraColors.ember, size: 18),
@@ -534,8 +526,8 @@ class _AuroraCommuterSetupScreenState
           TextButton(
             onPressed: selected ? onTime : null,
             child: Text(_hhmm(time),
-                style: AuroraText.titleSmall
-                    .copyWith(color: AuroraColors.ember)),
+                style:
+                    AuroraText.titleSmall.copyWith(color: AuroraColors.ember)),
           ),
         ],
       ),

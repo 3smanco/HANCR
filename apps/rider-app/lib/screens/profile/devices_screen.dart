@@ -4,7 +4,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 
 /// أجهزة/جلسات الراكب — عرض وإبطال جهاز بعينه (مرتبط بالخادم).
 class DevicesScreen extends StatefulWidget {
@@ -39,9 +39,9 @@ class _DevicesScreenState extends State<DevicesScreen> {
       if (res.hasException) throw res.exception!;
       if (!mounted) return;
       setState(() {
-        _devices = (res.data?['myDevices'] as List?)
-                ?.cast<Map<String, dynamic>>() ??
-            [];
+        _devices =
+            (res.data?['myDevices'] as List?)?.cast<Map<String, dynamic>>() ??
+                [];
         _loading = false;
       });
     } catch (_) {
@@ -67,8 +67,8 @@ class _DevicesScreenState extends State<DevicesScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child:
-                Text(tr('confirm'), style: TextStyle(color: AuroraColors.danger)),
+            child: Text(tr('confirm'),
+                style: TextStyle(color: AuroraColors.danger)),
           ),
         ],
       ),
@@ -87,8 +87,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AuroraColors.coal,
-        content:
-            Text(tr('signOutOthersConfirm'), style: AuroraText.bodyMedium),
+        content: Text(tr('signOutOthersConfirm'), style: AuroraText.bodyMedium),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -105,8 +104,8 @@ class _DevicesScreenState extends State<DevicesScreen> {
     );
     if (ok != true) return;
     final client = await GraphQLClientManager.get();
-    await client.mutate(
-        MutationOptions(document: gql(revokeOtherDevicesMutation)));
+    await client
+        .mutate(MutationOptions(document: gql(revokeOtherDevicesMutation)));
     await _load();
   }
 
@@ -135,8 +134,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
         child: SafeArea(
           top: false,
           child: _loading
-              ? Center(
-                  child: AuroraLoader(size: 36))
+              ? const Center(child: AuroraLoader(size: 36))
               : _error != null
                   ? Center(
                       child: Column(
@@ -155,10 +153,10 @@ class _DevicesScreenState extends State<DevicesScreen> {
                       padding: const EdgeInsets.all(AuroraSpacing.lg),
                       children: [
                         Text(tr('devicesInfo'),
-                            style:
-                                AuroraText.bodySmall.copyWith(height: 1.5)),
+                            style: AuroraText.bodySmall.copyWith(height: 1.5)),
                         const SizedBox(height: AuroraSpacing.md),
-                        if (_devices.where((d) => d['current'] != true)
+                        if (_devices
+                            .where((d) => d['current'] != true)
                             .isNotEmpty) ...[
                           AuroraButton.secondary(
                             label: tr('signOutOthers'),
@@ -170,8 +168,8 @@ class _DevicesScreenState extends State<DevicesScreen> {
                         ..._devices.map(_deviceTile),
                         if (_devices.isEmpty)
                           Padding(
-                            padding: const EdgeInsets.only(
-                                top: AuroraSpacing.xl),
+                            padding:
+                                const EdgeInsets.only(top: AuroraSpacing.xl),
                             child: Center(
                               child: Text(tr('noDevices'),
                                   style: AuroraText.bodySmall),

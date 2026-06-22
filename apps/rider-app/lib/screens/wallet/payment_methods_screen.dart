@@ -6,7 +6,7 @@ import '../../core/graphql/gql/company_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 
 /// طرق الدفع — خيارات حقيقية من PaymentMode (نقد/محفظة/شركة) مع تحديد
 /// الافتراضي. إضافة بطاقة معلّقة على تفعيل بوابة الدفع (owner action).
@@ -74,8 +74,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
         child: SafeArea(
           top: false,
           child: _loading
-              ? Center(
-                  child: AuroraLoader(size: 36))
+              ? const Center(child: AuroraLoader(size: 36))
               : ListView(
                   padding: const EdgeInsets.all(AuroraSpacing.lg),
                   children: [
@@ -144,7 +143,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             ),
             if (sel)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: AuroraColors.ember.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(AuroraRadius.pill),

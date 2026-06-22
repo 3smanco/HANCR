@@ -70,7 +70,8 @@ class AuroraBottomNav extends StatelessWidget {
               ),
               child: Icon(
                 selected ? item.activeIcon : item.icon,
-                color: selected ? AuroraColors.ember : AuroraColors.textSecondary,
+                color:
+                    selected ? AuroraColors.ember : AuroraColors.textSecondary,
                 size: 22,
               ),
             ),
@@ -78,7 +79,8 @@ class AuroraBottomNav extends StatelessWidget {
             Text(
               item.label,
               style: AuroraText.caption.copyWith(
-                color: selected ? AuroraColors.ember : AuroraColors.textSecondary,
+                color:
+                    selected ? AuroraColors.ember : AuroraColors.textSecondary,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),

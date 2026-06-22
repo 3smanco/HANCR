@@ -120,13 +120,13 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       final client = await GraphQLClientManager.get();
       _sub = client
           .subscribe(SubscriptionOptions(
-            document: gql(driverLocationUpdatedSubscription),
-            variables: {'driverId': event.driverId},
-          ))
+        document: gql(driverLocationUpdatedSubscription),
+        variables: {'driverId': event.driverId},
+      ))
           .listen(
         (result) {
-          final data = result.data?['driverLocationUpdated']
-              as Map<String, dynamic>?;
+          final data =
+              result.data?['driverLocationUpdated'] as Map<String, dynamic>?;
           if (data != null) {
             add(_TrackingLocationReceived(DriverLocation.fromJson(data)));
           }

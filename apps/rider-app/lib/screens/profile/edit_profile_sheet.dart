@@ -15,7 +15,8 @@ Future<void> showEditProfileSheet(BuildContext context) {
     isScrollControlled: true,
     backgroundColor: AuroraColors.coal,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(AuroraRadius.lg)),
+      borderRadius:
+          BorderRadius.vertical(top: Radius.circular(AuroraRadius.lg)),
     ),
     builder: (_) => const _EditProfileSheet(),
   );

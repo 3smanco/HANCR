@@ -35,7 +35,8 @@ Future<void> openExternalNav(
     context: context,
     backgroundColor: AuroraColors.coal,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(AuroraRadius.xl)),
+      borderRadius:
+          BorderRadius.vertical(top: Radius.circular(AuroraRadius.xl)),
     ),
     builder: (ctx) => SafeArea(
       child: Column(
@@ -48,19 +49,21 @@ Future<void> openExternalNav(
           ListTile(
             leading: Icon(Icons.map, color: AuroraColors.ember),
             title: Text(tr('googleMaps'),
-                style: AuroraText.bodyMedium
-                    .copyWith(color: AuroraColors.pearl)),
+                style:
+                    AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl)),
             onTap: () {
               Navigator.pop(ctx);
-              _launch(context, Uri.parse(
-                  'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving'));
+              _launch(
+                  context,
+                  Uri.parse(
+                      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving'));
             },
           ),
           ListTile(
             leading: Icon(Icons.navigation, color: AuroraColors.info),
             title: Text(tr('waze'),
-                style: AuroraText.bodyMedium
-                    .copyWith(color: AuroraColors.pearl)),
+                style:
+                    AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl)),
             onTap: () {
               Navigator.pop(ctx);
               _launch(context,

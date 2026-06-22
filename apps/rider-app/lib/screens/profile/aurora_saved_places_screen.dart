@@ -155,8 +155,7 @@ class _AuroraSavedPlacesScreenState extends State<AuroraSavedPlacesScreen> {
             const SizedBox(height: AuroraSpacing.sm),
             TextField(
               controller: ctrl,
-              style:
-                  AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
+              style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
               decoration: InputDecoration(
                 hintText: tr('placeLabelHint'),
                 filled: true,
@@ -206,9 +205,9 @@ class _AuroraSavedPlacesScreenState extends State<AuroraSavedPlacesScreen> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AuroraColors.ember,
         onPressed: _busy ? null : _addFlow,
-        icon: Icon(Icons.add, color: Colors.white),
-        label: Text(tr('addPlace'),
-            style: const TextStyle(color: Colors.white)),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label:
+            Text(tr('addPlace'), style: const TextStyle(color: Colors.white)),
       ),
       body: AuroraBackground(
         child: SafeArea(
@@ -265,8 +264,7 @@ class _AuroraSavedPlacesScreenState extends State<AuroraSavedPlacesScreen> {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.delete_outline,
-                color: AuroraColors.textSecondary),
+            icon: Icon(Icons.delete_outline, color: AuroraColors.textSecondary),
             onPressed: _busy ? null : () => _delete(p),
           ),
         ],

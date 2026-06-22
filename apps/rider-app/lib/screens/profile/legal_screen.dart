@@ -7,8 +7,8 @@ import '../../core/widgets/aurora/aurora.dart';
 class LegalScreen extends StatelessWidget {
   const LegalScreen({super.key});
 
-  Future<void> _open(String url) => launchUrl(Uri.parse(url),
-      mode: LaunchMode.externalApplication);
+  Future<void> _open(String url) =>
+      launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
 
   @override
   Widget build(BuildContext context) {

@@ -184,8 +184,7 @@ class SosIncidentModel extends Equatable {
   factory SosIncidentModel.fromJson(Map<String, dynamic> json) =>
       SosIncidentModel(
         id: json['id'] as int,
-        triggeredBy:
-            SosTriggeredByX.fromString(json['triggeredBy'] as String),
+        triggeredBy: SosTriggeredByX.fromString(json['triggeredBy'] as String),
         triggeredById: json['triggeredById'] as int,
         orderId: json['orderId'] as int?,
         latitude: (json['latitude'] as num).toDouble(),

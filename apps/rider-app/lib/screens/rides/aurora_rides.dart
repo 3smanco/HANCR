@@ -61,9 +61,8 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
           return RefreshIndicator(
             color: AuroraColors.ember,
             backgroundColor: AuroraColors.ash,
-            onRefresh: () async => context
-                .read<OrderBloc>()
-                .add(const OrderHistoryRequested()),
+            onRefresh: () async =>
+                context.read<OrderBloc>().add(const OrderHistoryRequested()),
             child: ListView.builder(
               padding: EdgeInsets.fromLTRB(AuroraSpacing.lg, AuroraSpacing.lg,
                   AuroraSpacing.lg, widget.bottomInset),
@@ -94,22 +93,22 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
             color: AuroraColors.ash,
             borderRadius: BorderRadius.circular(AuroraRadius.md),
           ),
-          child: Row(
+          child: const Row(
             children: [
-              const SkeletonBox(width: 44, height: 44, radius: AuroraRadius.sm),
-              const SizedBox(width: AuroraSpacing.md),
+              SkeletonBox(width: 44, height: 44, radius: AuroraRadius.sm),
+              SizedBox(width: AuroraSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     SkeletonBox(width: 160, height: 13),
                     SizedBox(height: 8),
                     SkeletonBox(width: 90, height: 10),
                   ],
                 ),
               ),
-              const SizedBox(width: AuroraSpacing.md),
-              const SkeletonBox(width: 48, height: 13),
+              SizedBox(width: AuroraSpacing.md),
+              SkeletonBox(width: 48, height: 13),
             ],
           ),
         ),
@@ -197,7 +196,8 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
         borderRadius: BorderRadius.circular(AuroraRadius.pill),
       ),
       child: Text(tr('canceled'),
-          style: AuroraText.caption.copyWith(color: AuroraColors.textSecondary)),
+          style:
+              AuroraText.caption.copyWith(color: AuroraColors.textSecondary)),
     );
   }
 }
@@ -287,8 +287,8 @@ class _UpcomingRidesViewState extends State<UpcomingRidesView> {
       _load();
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(tr('somethingWrong'))));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(tr('somethingWrong'))));
       }
     }
   }
@@ -312,8 +312,7 @@ class _UpcomingRidesViewState extends State<UpcomingRidesView> {
         padding: EdgeInsets.fromLTRB(AuroraSpacing.lg, AuroraSpacing.lg,
             AuroraSpacing.lg, widget.bottomInset),
         itemCount: _orders.length,
-        itemBuilder: (_, i) =>
-            _upcomingCard(_orders[i]).fadeSlideIn(index: i),
+        itemBuilder: (_, i) => _upcomingCard(_orders[i]).fadeSlideIn(index: i),
       ),
     );
   }
@@ -333,8 +332,8 @@ class _UpcomingRidesViewState extends State<UpcomingRidesView> {
       );
 
   Widget _upcomingCard(OrderModel o) {
-    final df = DateFormat('EEEE d MMM • h:mm a',
-        LocaleController.instance.value.languageCode);
+    final df = DateFormat(
+        'EEEE d MMM • h:mm a', LocaleController.instance.value.languageCode);
     final when = o.expectedTimestamp;
     return Container(
       margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
@@ -369,7 +368,9 @@ class _UpcomingRidesViewState extends State<UpcomingRidesView> {
                         style: AuroraText.titleSmall),
                     const SizedBox(height: 2),
                     Text(
-                      when != null ? df.format(when.toLocal()) : tr('scheduled'),
+                      when != null
+                          ? df.format(when.toLocal())
+                          : tr('scheduled'),
                       style: AuroraText.caption
                           .copyWith(color: AuroraColors.ember),
                     ),
@@ -502,8 +503,8 @@ class RideDetailsScreen extends StatelessWidget {
                           color: AuroraColors.border, width: 2, thickness: 2),
                     ),
                   ),
-                  _routeRow(
-                      Icons.location_on, AuroraColors.ember, order.destinationAddress),
+                  _routeRow(Icons.location_on, AuroraColors.ember,
+                      order.destinationAddress),
                 ],
               )),
               const SizedBox(height: AuroraSpacing.md),
@@ -521,14 +522,13 @@ class RideDetailsScreen extends StatelessWidget {
               // المساعدة الخاصة بالرحلة
               Text(tr('help'), style: AuroraText.titleSmall),
               const SizedBox(height: AuroraSpacing.sm),
-              _helpRow(context, Icons.luggage_outlined, tr('helpLostItem'),
-                  'other'),
-              _helpRow(context, Icons.shield_outlined, tr('helpSafety'),
-                  'safety'),
-              _helpRow(context, Icons.receipt_long_outlined, tr('helpFare'),
-                  'fare'),
-              _helpRow(context, Icons.help_outline, tr('helpGeneral'),
-                  'other'),
+              _helpRow(
+                  context, Icons.luggage_outlined, tr('helpLostItem'), 'other'),
+              _helpRow(
+                  context, Icons.shield_outlined, tr('helpSafety'), 'safety'),
+              _helpRow(
+                  context, Icons.receipt_long_outlined, tr('helpFare'), 'fare'),
+              _helpRow(context, Icons.help_outline, tr('helpGeneral'), 'other'),
             ],
           ),
         ),
@@ -543,10 +543,13 @@ class RideDetailsScreen extends StatelessWidget {
       ..writeln('HANCR — ${tr('rideDetails')}')
       ..writeln('${tr('date')}: ${df.format(order.createdOn)}')
       ..writeln('${order.originAddress} → ${order.destinationAddress}')
-      ..writeln('${tr('distance')}: ${order.distanceLabel} · ${tr('duration')}: ${order.durationLabel}')
-      ..writeln('${tr('cost')}: ${order.costBest.toStringAsFixed(2)} ${order.currency}');
+      ..writeln(
+          '${tr('distance')}: ${order.distanceLabel} · ${tr('duration')}: ${order.durationLabel}')
+      ..writeln(
+          '${tr('cost')}: ${order.costBest.toStringAsFixed(2)} ${order.currency}');
     if (order.paidAmount > 0) {
-      b.writeln('${tr('paid')}: ${order.paidAmount.toStringAsFixed(2)} ${order.currency}');
+      b.writeln(
+          '${tr('paid')}: ${order.paidAmount.toStringAsFixed(2)} ${order.currency}');
     }
     if (order.driverName != null) {
       b.writeln('${tr('driver')}: ${order.driverName}');
@@ -566,8 +569,7 @@ class RideDetailsScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(AuroraRadius.lg),
           border: Border.all(color: AuroraColors.border),
         ),
-        child: Icon(Icons.map_outlined,
-            color: AuroraColors.textHint, size: 40),
+        child: Icon(Icons.map_outlined, color: AuroraColors.textHint, size: 40),
       );
     }
     final coords = pts.map((p) => LatLng(p.lat, p.lng)).toList();
@@ -672,8 +674,7 @@ class RideDetailsScreen extends StatelessWidget {
           collapsedIconColor: AuroraColors.textSecondary,
           leading: Icon(Icons.receipt_long_outlined, color: AuroraColors.ember),
           title: Text(tr('viewReceipt'),
-              style:
-                  AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl)),
+              style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl)),
           childrenPadding: const EdgeInsets.fromLTRB(
               AuroraSpacing.lg, 0, AuroraSpacing.lg, AuroraSpacing.md),
           children: [

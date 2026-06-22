@@ -27,7 +27,8 @@ class _AuroraLoaderState extends State<AuroraLoader>
   @override
   void initState() {
     super.initState();
-    _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100));
+    _c = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1100));
     if (Motion.decorative) _c.repeat();
   }
 

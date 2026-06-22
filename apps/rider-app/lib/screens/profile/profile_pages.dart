@@ -17,7 +17,7 @@ import '../../core/models/order_model.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/account_version.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 import '../../core/widgets/rider_avatar.dart';
 import '../rides/aurora_rides.dart';
 import 'aurora_saved_places_screen.dart';
@@ -99,11 +99,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: BlocBuilder<RiderBloc, RiderState>(
         builder: (context, state) {
           _seed(state);
-          final name = [_first.text, _last.text]
-              .where((s) => s.isNotEmpty)
-              .join(' ');
-          final avatarUrl =
-              state is RiderLoaded ? state.rider.avatarUrl : null;
+          final name =
+              [_first.text, _last.text].where((s) => s.isNotEmpty).join(' ');
+          final avatarUrl = state is RiderLoaded ? state.rider.avatarUrl : null;
           return ListView(
             padding: const EdgeInsets.all(AuroraSpacing.lg),
             children: [
@@ -302,7 +300,8 @@ class _HelpRecentRidesState extends State<_HelpRecentRides> {
                 MaterialPageRoute(builder: (_) => const RidesHistoryScreen()),
               ),
               child: Text(tr('viewAll'),
-                  style: AuroraText.bodySmall.copyWith(color: AuroraColors.ember)),
+                  style:
+                      AuroraText.bodySmall.copyWith(color: AuroraColors.ember)),
             ),
           ],
         ),
@@ -379,8 +378,8 @@ class _HelpTopics extends StatelessWidget {
           children: topics.map((t) {
             return GestureDetector(
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => _HelpTopicScreen(
-                    icon: t.$1, title: t.$2, body: t.$3),
+                builder: (_) =>
+                    _HelpTopicScreen(icon: t.$1, title: t.$2, body: t.$3),
               )),
               child: Container(
                 width: (MediaQuery.of(context).size.width -
@@ -516,7 +515,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
     return _AuroraPage(
       title: tr('inviteFriends'),
       child: _loading
-          ? Center(
+          ? const Center(
               child: Padding(
                 padding: EdgeInsets.all(AuroraSpacing.xxl),
                 child: AuroraLoader(size: 36),
@@ -541,8 +540,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
                 ),
                 const SizedBox(height: AuroraSpacing.lg),
                 Text(tr('inviteHeadline'),
-                    textAlign: TextAlign.center,
-                    style: AuroraText.titleMedium),
+                    textAlign: TextAlign.center, style: AuroraText.titleMedium),
                 const SizedBox(height: 6),
                 Text(
                   tr('inviteDesc'),
@@ -565,8 +563,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
                               color: AuroraColors.ember, letterSpacing: 2)),
                       GestureDetector(
                         onTap: _copy,
-                        child:
-                            Icon(Icons.copy, color: AuroraColors.pearl),
+                        child: Icon(Icons.copy, color: AuroraColors.pearl),
                       ),
                     ],
                   ),
@@ -672,7 +669,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // ─── تفضيلات الركوب ───
           _sectionLabel(tr('ridePreferences')),
-          _switchRow(tr('reserve'), _reserve, (v) => setState(() => _reserve = v)),
+          _switchRow(
+              tr('reserve'), _reserve, (v) => setState(() => _reserve = v)),
           _switchRow(tr('taxis'), _taxis, (v) => setState(() => _taxis = v)),
           _switchRow(tr('commuteAlerts'), _commute,
               (v) => setState(() => _commute = v)),
@@ -683,8 +681,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // ─── الإشعارات ───
           _sectionLabel(tr('notifications')),
-          _switchRow(tr('rideNotifs'), _notif, (v) => setState(() => _notif = v)),
-          _switchRow(tr('promoNotifs'), _promo, (v) => setState(() => _promo = v)),
+          _switchRow(
+              tr('rideNotifs'), _notif, (v) => setState(() => _notif = v)),
+          _switchRow(
+              tr('promoNotifs'), _promo, (v) => setState(() => _promo = v)),
           const SizedBox(height: AuroraSpacing.lg),
 
           // ─── اللغة ───
@@ -701,11 +701,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: Text(LocaleController.instance.currentLanguage.nativeName,
                   style: AuroraText.bodyMedium
                       .copyWith(color: AuroraColors.pearl)),
-              trailing: Icon(Icons.chevron_left,
-                  color: AuroraColors.textSecondary),
+              trailing:
+                  Icon(Icons.chevron_left, color: AuroraColors.textSecondary),
               onTap: () async {
-                await Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => const LanguageScreen()));
+                await Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LanguageScreen()));
                 if (mounted) setState(() {});
               },
             ),
@@ -727,8 +727,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: _showAccountSwitcher),
           _navRow(Icons.logout, tr('signOut'),
               danger: true,
-              onTap: () =>
-                  _confirmLogout(tr('signOut'), tr('signOutConfirm'))),
+              onTap: () => _confirmLogout(tr('signOut'), tr('signOutConfirm'))),
         ],
       ),
     );
@@ -803,7 +802,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       backgroundColor: AuroraColors.coal,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AuroraRadius.lg)),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AuroraRadius.lg)),
       ),
       builder: (ctx) => SafeArea(
         child: Column(
@@ -926,7 +926,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AuroraColors.ember,
+            activeThumbColor: AuroraColors.ember,
           ),
         ],
       ),
@@ -958,13 +958,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 class _SettingsDetailScreen extends StatefulWidget {
   const _SettingsDetailScreen({
     required this.title,
-    this.infoText,
     this.toggles = const [],
     this.linkLabel,
     this.linkUrl,
   });
   final String title;
-  final String? infoText;
   final List<(String, String, bool)> toggles; // (label, sub, initial)
   final String? linkLabel;
   final String? linkUrl;
@@ -974,8 +972,7 @@ class _SettingsDetailScreen extends StatefulWidget {
 }
 
 class _SettingsDetailScreenState extends State<_SettingsDetailScreen> {
-  late final List<bool> _vals =
-      widget.toggles.map((t) => t.$3).toList();
+  late final List<bool> _vals = widget.toggles.map((t) => t.$3).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -984,19 +981,6 @@ class _SettingsDetailScreenState extends State<_SettingsDetailScreen> {
       child: ListView(
         padding: const EdgeInsets.all(AuroraSpacing.lg),
         children: [
-          if (widget.infoText != null)
-            Container(
-              padding: const EdgeInsets.all(AuroraSpacing.lg),
-              margin: const EdgeInsets.only(bottom: AuroraSpacing.md),
-              decoration: BoxDecoration(
-                color: AuroraColors.ash,
-                borderRadius: BorderRadius.circular(AuroraRadius.md),
-                border: Border.all(color: AuroraColors.border),
-              ),
-              child: Text(widget.infoText!,
-                  style: AuroraText.bodyMedium
-                      .copyWith(color: AuroraColors.textSecondary, height: 1.5)),
-            ),
           ...List.generate(widget.toggles.length, (i) {
             final t = widget.toggles[i];
             return Container(
@@ -1023,7 +1007,7 @@ class _SettingsDetailScreenState extends State<_SettingsDetailScreen> {
                   Switch(
                     value: _vals[i],
                     onChanged: (v) => setState(() => _vals[i] = v),
-                    activeColor: AuroraColors.ember,
+                    activeThumbColor: AuroraColors.ember,
                   ),
                 ],
               ),

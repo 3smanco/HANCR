@@ -7,7 +7,7 @@ import '../../core/i18n/app_localization.dart';
 import '../../core/models/order_model.dart';
 import '../../core/models/service_model.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 
 /// Grocery Run — يطلب الراكب من سائق شراء قائمة بقالة ضمن ميزانية محددة
 /// وتوصيلها إلى عنوانه. يُستخدم نوع خدمة PackageDelivery الموجود + shoppingList.
@@ -204,65 +204,66 @@ class _AuroraGroceryScreenState extends State<AuroraGroceryScreen> {
         title: Text(tr('groceryRun'), style: AuroraText.titleSmall),
       ),
       body: _loading
-          ? Center(
-              child: AuroraLoader(size: 36))
+          ? const Center(child: AuroraLoader(size: 36))
           : ListView(
               padding: const EdgeInsets.all(AuroraSpacing.lg),
-                children: [
-                  _placeDropdown(_store, (v) => setState(() => _store = v),
-                      tr('pickStore'), Icons.storefront),
-                  const SizedBox(height: AuroraSpacing.sm),
-                  _placeDropdown(
-                      _deliverTo,
-                      (v) => setState(() => _deliverTo = v),
-                      tr('deliverTo'),
-                      Icons.home_outlined),
-                  const SizedBox(height: AuroraSpacing.lg),
-                  Text(tr('shoppingList'), style: AuroraText.titleSmall),
-                  const SizedBox(height: AuroraSpacing.sm),
-                  if (_items.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: AuroraSpacing.sm),
-                      child: Text(tr('noItemsYet'),
-                          style: AuroraText.bodySmall.copyWith(
-                              color: AuroraColors.textSecondary)),
-                    )
-                  else
-                    ..._items.asMap().entries.map((e) => _itemTile(e.key, e.value)),
-                  const SizedBox(height: AuroraSpacing.sm),
-                  _addItemForm(),
-                  const SizedBox(height: AuroraSpacing.lg),
-                  TextField(
-                    controller: _budgetCtrl,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: tr('budget'),
-                      filled: true,
-                      fillColor: AuroraColors.coal,
-                      prefixIcon: Icon(Icons.payments,
-                          color: AuroraColors.ember),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AuroraRadius.md),
-                        borderSide: BorderSide.none,
-                      ),
+              children: [
+                _placeDropdown(_store, (v) => setState(() => _store = v),
+                    tr('pickStore'), Icons.storefront),
+                const SizedBox(height: AuroraSpacing.sm),
+                _placeDropdown(
+                    _deliverTo,
+                    (v) => setState(() => _deliverTo = v),
+                    tr('deliverTo'),
+                    Icons.home_outlined),
+                const SizedBox(height: AuroraSpacing.lg),
+                Text(tr('shoppingList'), style: AuroraText.titleSmall),
+                const SizedBox(height: AuroraSpacing.sm),
+                if (_items.isEmpty)
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: AuroraSpacing.sm),
+                    child: Text(tr('noItemsYet'),
+                        style: AuroraText.bodySmall
+                            .copyWith(color: AuroraColors.textSecondary)),
+                  )
+                else
+                  ..._items
+                      .asMap()
+                      .entries
+                      .map((e) => _itemTile(e.key, e.value)),
+                const SizedBox(height: AuroraSpacing.sm),
+                _addItemForm(),
+                const SizedBox(height: AuroraSpacing.lg),
+                TextField(
+                  controller: _budgetCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: tr('budget'),
+                    filled: true,
+                    fillColor: AuroraColors.coal,
+                    prefixIcon: Icon(Icons.payments, color: AuroraColors.ember),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AuroraRadius.md),
+                      borderSide: BorderSide.none,
                     ),
-                    style: AuroraText.bodyMedium
-                        .copyWith(color: AuroraColors.pearl),
                   ),
-                  const SizedBox(height: AuroraSpacing.lg),
-                  AuroraButton.primary(
-                    label: tr('orderGrocery'),
-                    icon: Icons.shopping_basket,
-                    onPressed: _submit,
-                  ),
-                  const SizedBox(height: AuroraSpacing.xs),
-                  Text(tr('groceryHint'),
-                      textAlign: TextAlign.center,
-                      style: AuroraText.bodySmall
-                          .copyWith(color: AuroraColors.textSecondary)),
-                ],
-              ),
+                  style:
+                      AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
+                ),
+                const SizedBox(height: AuroraSpacing.lg),
+                AuroraButton.primary(
+                  label: tr('orderGrocery'),
+                  icon: Icons.shopping_basket,
+                  onPressed: _submit,
+                ),
+                const SizedBox(height: AuroraSpacing.xs),
+                Text(tr('groceryHint'),
+                    textAlign: TextAlign.center,
+                    style: AuroraText.bodySmall
+                        .copyWith(color: AuroraColors.textSecondary)),
+              ],
+            ),
     );
   }
 
@@ -272,7 +273,7 @@ class _AuroraGroceryScreenState extends State<AuroraGroceryScreen> {
       String hint,
       IconData icon) {
     return DropdownButtonFormField<Map<String, dynamic>>(
-      value: value,
+      initialValue: value,
       dropdownColor: AuroraColors.coal,
       style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
       decoration: InputDecoration(
@@ -310,8 +311,7 @@ class _AuroraGroceryScreenState extends State<AuroraGroceryScreen> {
       child: Row(
         children: [
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
               color: AuroraColors.ember,
               borderRadius: BorderRadius.circular(AuroraRadius.sm),
@@ -332,8 +332,8 @@ class _AuroraGroceryScreenState extends State<AuroraGroceryScreen> {
                         .copyWith(color: AuroraColors.pearl)),
                 if (it.note != null)
                   Text(it.note!,
-                      style: AuroraText.bodySmall.copyWith(
-                          color: AuroraColors.textSecondary)),
+                      style: AuroraText.bodySmall
+                          .copyWith(color: AuroraColors.textSecondary)),
               ],
             ),
           ),
@@ -365,26 +365,23 @@ class _AuroraGroceryScreenState extends State<AuroraGroceryScreen> {
                     hintText: tr('itemName'),
                     border: InputBorder.none,
                   ),
-                  style: AuroraText.bodyMedium
-                      .copyWith(color: AuroraColors.pearl),
+                  style:
+                      AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
                 ),
               ),
               IconButton(
                 icon: Icon(Icons.remove_circle_outline,
                     color: AuroraColors.textSecondary),
-                onPressed: _itemQty > 1
-                    ? () => setState(() => _itemQty--)
-                    : null,
+                onPressed:
+                    _itemQty > 1 ? () => setState(() => _itemQty--) : null,
               ),
               Text('$_itemQty',
                   style: AuroraText.titleSmall
                       .copyWith(color: AuroraColors.pearl)),
               IconButton(
-                icon: Icon(Icons.add_circle_outline,
-                    color: AuroraColors.ember),
-                onPressed: _itemQty < 20
-                    ? () => setState(() => _itemQty++)
-                    : null,
+                icon: Icon(Icons.add_circle_outline, color: AuroraColors.ember),
+                onPressed:
+                    _itemQty < 20 ? () => setState(() => _itemQty++) : null,
               ),
             ],
           ),

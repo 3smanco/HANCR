@@ -13,9 +13,24 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = <(IconData, String, String, String)>[
-      (Icons.local_offer, tr('notifOfferTitle'), tr('notifOfferBody'), tr('hourAgo')),
-      (Icons.verified, tr('notifWelcomeTitle'), tr('notifWelcomeBody'), tr('yesterday')),
-      (Icons.bolt, tr('notifSurgeTitle'), tr('notifSurgeBody'), tr('yesterday')),
+      (
+        Icons.local_offer,
+        tr('notifOfferTitle'),
+        tr('notifOfferBody'),
+        tr('hourAgo')
+      ),
+      (
+        Icons.verified,
+        tr('notifWelcomeTitle'),
+        tr('notifWelcomeBody'),
+        tr('yesterday')
+      ),
+      (
+        Icons.bolt,
+        tr('notifSurgeTitle'),
+        tr('notifSurgeBody'),
+        tr('yesterday')
+      ),
     ];
     return Scaffold(
       backgroundColor: AuroraColors.obsidian,
@@ -63,8 +78,8 @@ class NotificationsScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Flexible(
-                                  child: Text(n.$2,
-                                      style: AuroraText.titleSmall)),
+                                  child:
+                                      Text(n.$2, style: AuroraText.titleSmall)),
                               Text(n.$4, style: AuroraText.caption),
                             ],
                           ),
@@ -93,8 +108,18 @@ class OffersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final offers = <(String, String, String, Color)>[
-      ('WELCOME', tr('offerWelcomeTitle'), tr('offerWelcomeSub'), AuroraColors.ember),
-      ('WEEKEND', tr('offerWeekendTitle'), tr('offerWeekendSub'), AuroraColors.info),
+      (
+        'WELCOME',
+        tr('offerWelcomeTitle'),
+        tr('offerWelcomeSub'),
+        AuroraColors.ember
+      ),
+      (
+        'WEEKEND',
+        tr('offerWeekendTitle'),
+        tr('offerWeekendSub'),
+        AuroraColors.info
+      ),
       ('NIGHT', tr('offerNightTitle'), tr('offerNightSub'), AuroraColors.gold),
     ];
     return Scaffold(
@@ -138,14 +163,15 @@ class OffersScreen extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: AuroraColors.obsidian.withValues(alpha: 0.5),
+                              color:
+                                  AuroraColors.obsidian.withValues(alpha: 0.5),
                               borderRadius:
                                   BorderRadius.circular(AuroraRadius.sm),
                               border: Border.all(color: color),
                             ),
                             child: Text('${tr('codePrefix')} ${o.$1}',
-                                style: AuroraText.caption
-                                    .copyWith(color: color)),
+                                style:
+                                    AuroraText.caption.copyWith(color: color)),
                           ),
                         ],
                       ),

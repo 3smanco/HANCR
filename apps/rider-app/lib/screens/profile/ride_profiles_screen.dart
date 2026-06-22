@@ -6,7 +6,7 @@ import '../../core/graphql/gql/company_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 
 /// ملفات الركوب — التبديل بين الشخصي والأعمال (Company F2).
 class RideProfilesScreen extends StatefulWidget {
@@ -145,8 +145,7 @@ class _RideProfilesScreenState extends State<RideProfilesScreen> {
         child: SafeArea(
           top: false,
           child: _loading
-              ? Center(
-                  child: AuroraLoader(size: 36))
+              ? const Center(child: AuroraLoader(size: 36))
               : ListView(
                   padding: const EdgeInsets.all(AuroraSpacing.lg),
                   children: [
@@ -175,8 +174,7 @@ class _RideProfilesScreenState extends State<RideProfilesScreen> {
     );
   }
 
-  Widget _profileTile(
-      String value, IconData icon, String title, String sub) {
+  Widget _profileTile(String value, IconData icon, String title, String sub) {
     final sel = _selected == value;
     return GestureDetector(
       onTap: _busy ? null : () => _select(value),

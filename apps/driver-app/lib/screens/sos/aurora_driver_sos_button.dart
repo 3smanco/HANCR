@@ -61,14 +61,16 @@ class _AuroraDriverSosButtonState extends State<AuroraDriverSosButton>
               if (active)
                 AnimatedBuilder(
                   animation: _pulse,
-                  builder: (_, __) {
+                  builder: (_, _) {
                     final v = _pulse.value;
                     return Container(
                       width: 40 + 24 * v,
                       height: 40 + 24 * v,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AuroraColors.danger.withValues(alpha: 0.3 * (1 - v)),
+                        color: AuroraColors.danger.withValues(
+                          alpha: 0.3 * (1 - v),
+                        ),
                       ),
                     );
                   },
@@ -87,8 +89,10 @@ class _AuroraDriverSosButtonState extends State<AuroraDriverSosButton>
                     customBorder: const CircleBorder(),
                     onTap: active
                         ? () => _showActiveDialog(
-                            ctx, state.activeIncident!.id,
-                            state.activeIncident!.contactsNotified)
+                            ctx,
+                            state.activeIncident!.id,
+                            state.activeIncident!.contactsNotified,
+                          )
                         : () => _confirmTrigger(ctx, state),
                     child: Icon(
                       Icons.warning_amber_rounded,
@@ -116,9 +120,11 @@ class _AuroraDriverSosButtonState extends State<AuroraDriverSosButton>
       );
       if (!context.mounted) return;
       if (add == true) {
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => const DriverEmergencyContactsScreen(),
-        ));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const DriverEmergencyContactsScreen(),
+          ),
+        );
         return;
       }
       if (add != false) return;
@@ -133,19 +139,25 @@ class _AuroraDriverSosButtonState extends State<AuroraDriverSosButton>
     );
     if (!context.mounted) return;
     if (ok == true) {
-      context.read<SosBloc>().add(SosTriggered(
-            latitude: widget.latitude,
-            longitude: widget.longitude,
-            orderId: widget.orderId,
-          ));
+      context.read<SosBloc>().add(
+        SosTriggered(
+          latitude: widget.latitude,
+          longitude: widget.longitude,
+          orderId: widget.orderId,
+        ),
+      );
     }
   }
 
   Future<void> _showActiveDialog(
-      BuildContext context, int incidentId, int notified) async {
+    BuildContext context,
+    int incidentId,
+    int notified,
+  ) async {
     final driverState = context.read<DriverBloc>().state;
-    final code =
-        driverState is DriverLoaded ? driverState.driver.countryCode : null;
+    final code = driverState is DriverLoaded
+        ? driverState.driver.countryCode
+        : null;
     final emergencyNo = EmergencyNumbers.forCountryCode(code);
     final ok = await _showAuroraDialog<bool>(
       context: context,

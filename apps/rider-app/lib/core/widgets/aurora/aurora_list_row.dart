@@ -45,14 +45,12 @@ class AuroraListRow extends StatelessWidget {
           children: [
             Flexible(
               child: Text(title,
-                  style:
-                      AuroraText.bodyMedium.copyWith(color: titleColor)),
+                  style: AuroraText.bodyMedium.copyWith(color: titleColor)),
             ),
             if (badge != null) ...[
               const SizedBox(width: AuroraSpacing.sm),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: const Color(0x333B82F6),
                   borderRadius: BorderRadius.circular(AuroraRadius.pill),

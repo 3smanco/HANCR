@@ -34,6 +34,8 @@ class PushService {
       FlutterLocalNotificationsPlugin();
 
   String? _cachedToken;
+  String? get cachedToken => _cachedToken;
+
   bool _initialized = false;
 
   // GraphQL: register the token in rider-api
@@ -71,8 +73,7 @@ class PushService {
       // Android notification channel (required for Android 8+)
       await _localNotifications
           .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >()
+              AndroidFlutterLocalNotificationsPlugin>()
           ?.createNotificationChannel(
             const AndroidNotificationChannel(
               _channelId,
@@ -178,16 +179,16 @@ class PushService {
         notification.hashCode,
         notification.title,
         notification.body,
-        NotificationDetails(
+        const NotificationDetails(
           android: AndroidNotificationDetails(
             _channelId,
             _channelName,
             channelDescription: _channelDesc,
             importance: Importance.high,
             priority: Priority.high,
-            color: const Color(0xFFFF7A1A), // HANCR ember (Aurora)
+            color: Color(0xFFFF7A1A), // HANCR ember (Aurora)
           ),
-          iOS: const DarwinNotificationDetails(),
+          iOS: DarwinNotificationDetails(),
         ),
         payload: message.data.toString(),
       );

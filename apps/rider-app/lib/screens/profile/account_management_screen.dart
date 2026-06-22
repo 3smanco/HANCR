@@ -60,8 +60,8 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                 height: 48,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: AuroraSpacing.lg),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AuroraSpacing.lg),
                   itemCount: tabs.length,
                   itemBuilder: (_, i) {
                     final sel = _tab == i;
@@ -77,17 +77,17 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                                   color: sel
                                       ? AuroraColors.pearl
                                       : AuroraColors.textSecondary,
-                                  fontWeight: sel
-                                      ? FontWeight.w700
-                                      : FontWeight.w500,
+                                  fontWeight:
+                                      sel ? FontWeight.w700 : FontWeight.w500,
                                 )),
                             const SizedBox(height: 6),
                             Container(
                               height: 3,
                               width: 28,
                               decoration: BoxDecoration(
-                                color:
-                                    sel ? AuroraColors.ember : Colors.transparent,
+                                color: sel
+                                    ? AuroraColors.ember
+                                    : Colors.transparent,
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
@@ -158,11 +158,14 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
         const SizedBox(height: AuroraSpacing.xl),
         Row(
           children: [
-            _dash(Icons.person_outline, tr('amPersonal'), () => setState(() => _tab = 1)),
+            _dash(Icons.person_outline, tr('amPersonal'),
+                () => setState(() => _tab = 1)),
             const SizedBox(width: AuroraSpacing.sm),
-            _dash(Icons.verified_user_outlined, tr('amSecurity'), () => setState(() => _tab = 2)),
+            _dash(Icons.verified_user_outlined, tr('amSecurity'),
+                () => setState(() => _tab = 2)),
             const SizedBox(width: AuroraSpacing.sm),
-            _dash(Icons.lock_outline, tr('amPrivacy'), () => setState(() => _tab = 3)),
+            _dash(Icons.lock_outline, tr('amPrivacy'),
+                () => setState(() => _tab = 3)),
           ],
         ),
         const SizedBox(height: AuroraSpacing.xl),
@@ -223,7 +226,8 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
               const SizedBox(height: AuroraSpacing.sm),
               Text(label,
                   textAlign: TextAlign.center,
-                  style: AuroraText.caption.copyWith(color: AuroraColors.pearl)),
+                  style:
+                      AuroraText.caption.copyWith(color: AuroraColors.pearl)),
             ],
           ),
         ),
@@ -244,8 +248,8 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
           decoration: BoxDecoration(
             color: AuroraColors.success.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(AuroraRadius.md),
-            border: Border.all(
-                color: AuroraColors.success.withValues(alpha: 0.4)),
+            border:
+                Border.all(color: AuroraColors.success.withValues(alpha: 0.4)),
           ),
           child: Row(
             children: [
@@ -260,8 +264,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
           ),
         ),
         _infoTile(tr('fullName'), name.isEmpty ? '—' : name),
-        _infoTile(tr('email'), email.isEmpty ? '—' : email,
-            verified: hasEmail),
+        _infoTile(tr('email'), email.isEmpty ? '—' : email, verified: hasEmail),
         _infoTile(tr('phoneNumber'), phone.isEmpty ? '—' : phone,
             verified: phone.isNotEmpty),
         const SizedBox(height: AuroraSpacing.md),
@@ -287,8 +290,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
           twoFactorEnabled ? tr('twoFaOn') : tr('twoFaOff'),
           () => Navigator.of(context)
               .push(MaterialPageRoute(
-                  builder: (_) =>
-                      TwoFactorScreen(enabled: twoFactorEnabled)))
+                  builder: (_) => TwoFactorScreen(enabled: twoFactorEnabled)))
               .then((_) => setState(() {})),
         ),
         _secNavRow(
@@ -302,8 +304,8 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
           Icons.devices_outlined,
           tr('myDevices'),
           tr('manageDevices'),
-          () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const DevicesScreen())),
+          () => Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => const DevicesScreen())),
         ),
         const SizedBox(height: AuroraSpacing.md),
         Text(tr('securityInfo'),
@@ -387,8 +389,8 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
       ValueChanged<bool> onChanged) {
     return Container(
       margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
-      padding: const EdgeInsets.symmetric(
-          horizontal: AuroraSpacing.lg, vertical: 4),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AuroraSpacing.lg, vertical: 4),
       decoration: BoxDecoration(
         color: AuroraColors.ash,
         borderRadius: BorderRadius.circular(AuroraRadius.md),
@@ -426,7 +428,8 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AuroraColors.coal,
         title: Text(tr('deleteAccount'), style: AuroraText.titleSmall),
-        content: Text(tr('deleteAccountConfirm1'), style: AuroraText.bodyMedium),
+        content:
+            Text(tr('deleteAccountConfirm1'), style: AuroraText.bodyMedium),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -447,7 +450,8 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AuroraColors.coal,
         title: Text(tr('deleteAccount'), style: AuroraText.titleSmall),
-        content: Text(tr('deleteAccountConfirm2'), style: AuroraText.bodyMedium),
+        content:
+            Text(tr('deleteAccountConfirm2'), style: AuroraText.bodyMedium),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

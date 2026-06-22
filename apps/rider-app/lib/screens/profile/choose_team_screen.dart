@@ -19,32 +19,81 @@ class _Team {
 
 const _continents = <String, List<_Team>>{
   'teamMena': [
-    _Team('SA', 'teamSA', [Color(0xFF165D31), Color(0xFF165D31)], Axis.vertical),
-    _Team('QA', 'teamQA', [Color(0xFF8A1538), Color(0xFFFFFFFF)], Axis.horizontal),
-    _Team('AE', 'teamAE', [Color(0xFF00843D), Color(0xFFFFFFFF), Color(0xFF000000)], Axis.vertical),
-    _Team('EG', 'teamEG', [Color(0xFFCE1126), Color(0xFFFFFFFF), Color(0xFF000000)], Axis.vertical),
+    _Team(
+        'SA', 'teamSA', [Color(0xFF165D31), Color(0xFF165D31)], Axis.vertical),
+    _Team('QA', 'teamQA', [Color(0xFF8A1538), Color(0xFFFFFFFF)],
+        Axis.horizontal),
+    _Team(
+        'AE',
+        'teamAE',
+        [Color(0xFF00843D), Color(0xFFFFFFFF), Color(0xFF000000)],
+        Axis.vertical),
+    _Team(
+        'EG',
+        'teamEG',
+        [Color(0xFFCE1126), Color(0xFFFFFFFF), Color(0xFF000000)],
+        Axis.vertical),
   ],
   'teamEurope': [
-    _Team('FR', 'teamFR', [Color(0xFF0055A4), Color(0xFFFFFFFF), Color(0xFFEF4135)], Axis.horizontal),
-    _Team('DE', 'teamDE', [Color(0xFF000000), Color(0xFFDD0000), Color(0xFFFFCE00)], Axis.vertical),
-    _Team('IT', 'teamIT', [Color(0xFF008C45), Color(0xFFFFFFFF), Color(0xFFCD212A)], Axis.horizontal),
-    _Team('ES', 'teamES', [Color(0xFFAA151B), Color(0xFFF1BF00), Color(0xFFAA151B)], Axis.vertical),
-    _Team('NL', 'teamNL', [Color(0xFFAE1C28), Color(0xFFFFFFFF), Color(0xFF21468B)], Axis.vertical),
-    _Team('PT', 'teamPT', [Color(0xFF006600), Color(0xFFFF0000)], Axis.horizontal),
+    _Team(
+        'FR',
+        'teamFR',
+        [Color(0xFF0055A4), Color(0xFFFFFFFF), Color(0xFFEF4135)],
+        Axis.horizontal),
+    _Team(
+        'DE',
+        'teamDE',
+        [Color(0xFF000000), Color(0xFFDD0000), Color(0xFFFFCE00)],
+        Axis.vertical),
+    _Team(
+        'IT',
+        'teamIT',
+        [Color(0xFF008C45), Color(0xFFFFFFFF), Color(0xFFCD212A)],
+        Axis.horizontal),
+    _Team(
+        'ES',
+        'teamES',
+        [Color(0xFFAA151B), Color(0xFFF1BF00), Color(0xFFAA151B)],
+        Axis.vertical),
+    _Team(
+        'NL',
+        'teamNL',
+        [Color(0xFFAE1C28), Color(0xFFFFFFFF), Color(0xFF21468B)],
+        Axis.vertical),
+    _Team('PT', 'teamPT', [Color(0xFF006600), Color(0xFFFF0000)],
+        Axis.horizontal),
   ],
   'teamAmericas': [
-    _Team('US', 'teamUS', [Color(0xFFB22234), Color(0xFFFFFFFF), Color(0xFF3C3B6E)], Axis.vertical),
-    _Team('BR', 'teamBR', [Color(0xFF009C3B), Color(0xFFFFDF00)], Axis.vertical, dot: Color(0xFF002776)),
-    _Team('AR', 'teamAR', [Color(0xFF74ACDF), Color(0xFFFFFFFF), Color(0xFF74ACDF)], Axis.vertical),
+    _Team(
+        'US',
+        'teamUS',
+        [Color(0xFFB22234), Color(0xFFFFFFFF), Color(0xFF3C3B6E)],
+        Axis.vertical),
+    _Team('BR', 'teamBR', [Color(0xFF009C3B), Color(0xFFFFDF00)], Axis.vertical,
+        dot: Color(0xFF002776)),
+    _Team(
+        'AR',
+        'teamAR',
+        [Color(0xFF74ACDF), Color(0xFFFFFFFF), Color(0xFF74ACDF)],
+        Axis.vertical),
   ],
   'teamAsia': [
-    _Team('JP', 'teamJP', [Color(0xFFFFFFFF), Color(0xFFFFFFFF)], Axis.vertical, dot: Color(0xFFBC002D)),
-    _Team('IN', 'teamIN', [Color(0xFFFF9933), Color(0xFFFFFFFF), Color(0xFF138808)], Axis.vertical, dot: Color(0xFF000080)),
-    _Team('TR', 'teamTR', [Color(0xFFE30A17), Color(0xFFE30A17)], Axis.vertical, dot: Color(0xFFFFFFFF)),
+    _Team('JP', 'teamJP', [Color(0xFFFFFFFF), Color(0xFFFFFFFF)], Axis.vertical,
+        dot: Color(0xFFBC002D)),
+    _Team(
+        'IN',
+        'teamIN',
+        [Color(0xFFFF9933), Color(0xFFFFFFFF), Color(0xFF138808)],
+        Axis.vertical,
+        dot: Color(0xFF000080)),
+    _Team('TR', 'teamTR', [Color(0xFFE30A17), Color(0xFFE30A17)], Axis.vertical,
+        dot: Color(0xFFFFFFFF)),
   ],
   'teamOceania': [
-    _Team('AU', 'teamAU', [Color(0xFF00247D), Color(0xFF00247D)], Axis.vertical),
-    _Team('NZ', 'teamNZ', [Color(0xFF00247D), Color(0xFF00247D)], Axis.vertical),
+    _Team(
+        'AU', 'teamAU', [Color(0xFF00247D), Color(0xFF00247D)], Axis.vertical),
+    _Team(
+        'NZ', 'teamNZ', [Color(0xFF00247D), Color(0xFF00247D)], Axis.vertical),
   ],
 };
 
@@ -215,9 +264,8 @@ class _ChooseTeamScreenState extends State<ChooseTeamScreen> {
   Widget _flag(_Team t) {
     final bands = Flex(
       direction: t.axis,
-      children: t.bands
-          .map((c) => Expanded(child: Container(color: c)))
-          .toList(),
+      children:
+          t.bands.map((c) => Expanded(child: Container(color: c))).toList(),
     );
     if (t.dot == null) return bands;
     return Stack(

@@ -34,6 +34,8 @@ class PushService {
       FlutterLocalNotificationsPlugin();
 
   String? _cachedToken;
+  String? get cachedToken => _cachedToken;
+
   bool _initialized = false;
 
   // GraphQL: register the token in driver-api
@@ -130,9 +132,7 @@ class PushService {
   Future<void> clearWithBackend() async {
     try {
       final client = await GraphQLClientManager.get();
-      await client.mutate(
-        MutationOptions(document: gql(_clearTokenMutation)),
-      );
+      await client.mutate(MutationOptions(document: gql(_clearTokenMutation)));
       await FirebaseMessaging.instance.deleteToken();
       _cachedToken = null;
       debugPrint('[Push] Token cleared');

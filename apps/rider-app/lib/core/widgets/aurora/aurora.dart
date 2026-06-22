@@ -2,6 +2,8 @@
 /// كل المكونات بـ import واحد:
 /// `import '../core/widgets/aurora/aurora.dart';`
 
+library;
+
 export '../../theme/aurora_theme.dart';
 export 'aurora_background.dart';
 export 'aurora_bottom_nav.dart';

@@ -79,7 +79,8 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
               'quietRide': event.quietRide,
               'audioOff': event.audioOff,
               'numberMasked': event.numberMasked,
-              if (event.receiverName != null) 'receiverName': event.receiverName,
+              if (event.receiverName != null)
+                'receiverName': event.receiverName,
               if (event.receiverPhone != null)
                 'receiverPhone': event.receiverPhone,
               if (event.bookedHours != null) 'bookedHours': event.bookedHours,
@@ -102,8 +103,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         emit(OrderError(msg));
         return;
       }
-      final data =
-          result.data?['createOrder'] as Map<String, dynamic>?;
+      final data = result.data?['createOrder'] as Map<String, dynamic>?;
       if (data == null) {
         emit(const OrderError('Order creation failed'));
         return;
@@ -199,8 +199,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       );
       _sub = stream.listen((result) {
         if (result.hasException) return;
-        final data =
-            result.data?['orderUpdated'] as Map<String, dynamic>?;
+        final data = result.data?['orderUpdated'] as Map<String, dynamic>?;
         if (data != null) {
           add(OrderUpdatedFromSubscription(OrderModel.fromJson(data)));
         }
@@ -231,10 +230,10 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
           variables: {'limit': limit, 'offset': event.page * limit},
         ),
       );
-      final list =
-          (result.data?['orderHistory'] as List<dynamic>?) ?? [];
-      final orders =
-          list.map((e) => OrderModel.fromJson(e as Map<String, dynamic>)).toList();
+      final list = (result.data?['orderHistory'] as List<dynamic>?) ?? [];
+      final orders = list
+          .map((e) => OrderModel.fromJson(e as Map<String, dynamic>))
+          .toList();
       emit(OrderHistoryLoaded(
         orders: orders,
         hasMore: orders.length == limit,

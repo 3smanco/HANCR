@@ -62,7 +62,9 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
       }
       final p = await Geolocator.getLastKnownPosition() ??
           await Geolocator.getCurrentPosition(
-            timeLimit: const Duration(seconds: 5),
+            locationSettings: const LocationSettings(
+              timeLimit: Duration(seconds: 5),
+            ),
           );
       final dial = dialCodeFromCoords(p.latitude, p.longitude);
       if (dial != null && mounted) {
@@ -391,8 +393,7 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
           children: [
             Expanded(child: Divider(color: AuroraColors.border, height: 1)),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: AuroraSpacing.md),
+              padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.md),
               child: Text(
                 tr('orContinueWith'),
                 style: AuroraText.bodySmall

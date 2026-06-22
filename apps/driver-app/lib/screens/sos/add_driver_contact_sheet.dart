@@ -130,7 +130,9 @@ class _AddDriverContactSheetState extends State<AddDriverContactSheet> {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: selected
                             ? HancrColors.violet
@@ -161,7 +163,9 @@ class _AddDriverContactSheetState extends State<AddDriverContactSheet> {
               // ───── Auto-share toggle ─────
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 8),
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: HancrColors.surfaceMute,
                   borderRadius: BorderRadius.circular(12),
@@ -170,13 +174,10 @@ class _AddDriverContactSheetState extends State<AddDriverContactSheet> {
                   contentPadding: EdgeInsets.zero,
                   value: _autoShare,
                   onChanged: (v) => setState(() => _autoShare = v),
-                  activeColor: HancrColors.violet,
+                  activeThumbColor: HancrColors.violet,
                   title: Text(
                     tr('autoShareRides'),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
                     tr('autoShareSub'),
@@ -194,13 +195,13 @@ class _AddDriverContactSheetState extends State<AddDriverContactSheet> {
                 onPressed: _isValid
                     ? () {
                         context.read<SosBloc>().add(
-                              SosContactAdded(
-                                name: _nameCtrl.text.trim(),
-                                phoneNumber: _phoneCtrl.text.trim(),
-                                relation: _relation,
-                                autoShareTrips: _autoShare,
-                              ),
-                            );
+                          SosContactAdded(
+                            name: _nameCtrl.text.trim(),
+                            phoneNumber: _phoneCtrl.text.trim(),
+                            relation: _relation,
+                            autoShareTrips: _autoShare,
+                          ),
+                        );
                         Navigator.of(context).pop();
                       }
                     : null,

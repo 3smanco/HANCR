@@ -130,8 +130,8 @@ class _AuroraInboxScreenState extends State<AuroraInboxScreen> {
                 height: 44,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: AuroraSpacing.lg),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AuroraSpacing.lg),
                   itemCount: filters.length,
                   separatorBuilder: (_, __) =>
                       const SizedBox(width: AuroraSpacing.sm),
@@ -210,8 +210,7 @@ class _AuroraInboxScreenState extends State<AuroraInboxScreen> {
           Expanded(
             child: TextField(
               controller: _code,
-              style:
-                  AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
+              style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
               textCapitalization: TextCapitalization.characters,
               decoration: InputDecoration(
                 hintText: tr('addOfferCode'),

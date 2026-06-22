@@ -27,13 +27,17 @@ class SosBloc extends Bloc<SosEvent, SosState> {
     _telemetry = Timer.periodic(const Duration(seconds: 3), (_) async {
       try {
         final pos = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+          ),
         ).timeout(const Duration(seconds: 5));
         final client = await GraphQLClientManager.get();
-        await client.mutate(MutationOptions(
-          document: gql(updateDriverSosLocationMutation),
-          variables: {'latitude': pos.latitude, 'longitude': pos.longitude},
-        ));
+        await client.mutate(
+          MutationOptions(
+            document: gql(updateDriverSosLocationMutation),
+            variables: {'latitude': pos.latitude, 'longitude': pos.longitude},
+          ),
+        );
       } catch (_) {
         // تجاهل أخطاء عابرة.
       }
@@ -62,20 +66,24 @@ class SosBloc extends Bloc<SosEvent, SosState> {
     emit(const SosLoading());
     try {
       final client = await GraphQLClientManager.get();
-      final contactsRes = await client.query(QueryOptions(
-        document: gql(myDriverEmergencyContactsQuery),
-        fetchPolicy: FetchPolicy.networkOnly,
-      ));
+      final contactsRes = await client.query(
+        QueryOptions(
+          document: gql(myDriverEmergencyContactsQuery),
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
       if (contactsRes.hasException) throw contactsRes.exception!;
       final contacts = (contactsRes.data!['myDriverEmergencyContacts'] as List)
           .cast<Map<String, dynamic>>()
           .map(EmergencyContactModel.fromJson)
           .toList();
 
-      final incRes = await client.query(QueryOptions(
-        document: gql(myActiveDriverSosQuery),
-        fetchPolicy: FetchPolicy.networkOnly,
-      ));
+      final incRes = await client.query(
+        QueryOptions(
+          document: gql(myActiveDriverSosQuery),
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
       SosIncidentModel? active;
       if (!incRes.hasException && incRes.data?['myActiveDriverSos'] != null) {
         active = SosIncidentModel.fromJson(
@@ -102,26 +110,30 @@ class SosBloc extends Bloc<SosEvent, SosState> {
     if (s is! SosLoaded) return;
     try {
       final client = await GraphQLClientManager.get();
-      final result = await client.mutate(MutationOptions(
-        document: gql(addDriverEmergencyContactMutation),
-        variables: {
-          'input': {
-            'name': event.name,
-            'phoneNumber': event.phoneNumber,
-            'relation': event.relation.gqlValue,
-            'autoShareTrips': event.autoShareTrips,
-            'priority': event.priority,
+      final result = await client.mutate(
+        MutationOptions(
+          document: gql(addDriverEmergencyContactMutation),
+          variables: {
+            'input': {
+              'name': event.name,
+              'phoneNumber': event.phoneNumber,
+              'relation': event.relation.gqlValue,
+              'autoShareTrips': event.autoShareTrips,
+              'priority': event.priority,
+            },
           },
-        },
-      ));
+        ),
+      );
       if (result.hasException) throw result.exception!;
       final contact = EmergencyContactModel.fromJson(
         result.data!['addDriverEmergencyContact'] as Map<String, dynamic>,
       );
-      emit(s.copyWith(
-        contacts: [...s.contacts, contact],
-        toast: 'تمت إضافة ${contact.name} بنجاح',
-      ));
+      emit(
+        s.copyWith(
+          contacts: [...s.contacts, contact],
+          toast: 'تمت إضافة ${contact.name} بنجاح',
+        ),
+      );
     } catch (e) {
       emit(s.copyWith(toast: 'فشل إضافة الجهة: ${_extractError(e)}'));
     }
@@ -135,46 +147,51 @@ class SosBloc extends Bloc<SosEvent, SosState> {
     if (s is! SosLoaded) return;
     try {
       final client = await GraphQLClientManager.get();
-      final result = await client.mutate(MutationOptions(
-        document: gql(removeDriverEmergencyContactMutation),
-        variables: {'contactId': event.contactId},
-      ));
+      final result = await client.mutate(
+        MutationOptions(
+          document: gql(removeDriverEmergencyContactMutation),
+          variables: {'contactId': event.contactId},
+        ),
+      );
       if (result.hasException) throw result.exception!;
-      emit(s.copyWith(
-        contacts: s.contacts.where((c) => c.id != event.contactId).toList(),
-        toast: 'تم حذف الجهة',
-      ));
+      emit(
+        s.copyWith(
+          contacts: s.contacts.where((c) => c.id != event.contactId).toList(),
+          toast: 'تم حذف الجهة',
+        ),
+      );
     } catch (e) {
       emit(s.copyWith(toast: 'فشل الحذف: ${_extractError(e)}'));
     }
   }
 
-  Future<void> _onTrigger(
-    SosTriggered event,
-    Emitter<SosState> emit,
-  ) async {
+  Future<void> _onTrigger(SosTriggered event, Emitter<SosState> emit) async {
     final s = state;
     try {
       final client = await GraphQLClientManager.get();
-      final result = await client.mutate(MutationOptions(
-        document: gql(triggerDriverSosMutation),
-        variables: {
-          'input': {
-            'latitude': event.latitude,
-            'longitude': event.longitude,
-            if (event.orderId != null) 'orderId': event.orderId,
+      final result = await client.mutate(
+        MutationOptions(
+          document: gql(triggerDriverSosMutation),
+          variables: {
+            'input': {
+              'latitude': event.latitude,
+              'longitude': event.longitude,
+              if (event.orderId != null) 'orderId': event.orderId,
+            },
           },
-        },
-      ));
+        ),
+      );
       if (result.hasException) throw result.exception!;
       final inc = SosIncidentModel.fromJson(
         result.data!['triggerDriverSos'] as Map<String, dynamic>,
       );
       if (s is SosLoaded) {
-        emit(s.copyWith(
-          activeIncident: inc,
-          toast: 'تم تفعيل الطوارئ — تم إشعار ${inc.contactsNotified} جهة',
-        ));
+        emit(
+          s.copyWith(
+            activeIncident: inc,
+            toast: 'تم تفعيل الطوارئ — تم إشعار ${inc.contactsNotified} جهة',
+          ),
+        );
         _startTelemetry();
       } else {
         add(const SosLoadRequested());
@@ -188,24 +205,20 @@ class SosBloc extends Bloc<SosEvent, SosState> {
     }
   }
 
-  Future<void> _onCancel(
-    SosCancelled event,
-    Emitter<SosState> emit,
-  ) async {
+  Future<void> _onCancel(SosCancelled event, Emitter<SosState> emit) async {
     final s = state;
     if (s is! SosLoaded) return;
     try {
       final client = await GraphQLClientManager.get();
-      final result = await client.mutate(MutationOptions(
-        document: gql(cancelDriverSosMutation),
-        variables: {'incidentId': event.incidentId},
-      ));
+      final result = await client.mutate(
+        MutationOptions(
+          document: gql(cancelDriverSosMutation),
+          variables: {'incidentId': event.incidentId},
+        ),
+      );
       if (result.hasException) throw result.exception!;
       _stopTelemetry();
-      emit(s.copyWith(
-        clearIncident: true,
-        toast: 'تم إلغاء الإنذار',
-      ));
+      emit(s.copyWith(clearIncident: true, toast: 'تم إلغاء الإنذار'));
     } catch (e) {
       emit(s.copyWith(toast: 'فشل الإلغاء: ${_extractError(e)}'));
     }

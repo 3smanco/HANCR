@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/graphql/graphql_client.dart';
@@ -45,15 +45,20 @@ class _ServiceSelectorSheetState extends State<ServiceSelectorSheet> {
         (widget.destination.lat - widget.origin.lat) * 3.14159265 / 180;
     final dLng =
         (widget.destination.lng - widget.origin.lng) * 3.14159265 / 180;
-    final a = _sin2(dLat / 2) +
-        _cos(lat1) * _cos(lat2) * _sin2(dLng / 2);
+    final a = _sin2(dLat / 2) + _cos(lat1) * _cos(lat2) * _sin2(dLng / 2);
     return (r * 2 * _atan2(_sqrt(a), _sqrt(1 - a))).round();
   }
 
   double _sin2(double x) => _sin(x) * _sin(x);
   double _sin(double x) => x - x * x * x / 6;
   double _cos(double x) => 1 - x * x / 2;
-  double _sqrt(double x) => x < 0 ? 0 : x == 0 ? 0 : x < 1 ? 1 - (1 - x) / 2 : x;
+  double _sqrt(double x) => x < 0
+      ? 0
+      : x == 0
+          ? 0
+          : x < 1
+              ? 1 - (1 - x) / 2
+              : x;
   double _atan2(double y, double x) =>
       x > 0 ? y / x : (y >= 0 ? 3.14159 : -3.14159);
 
@@ -141,7 +146,7 @@ class _ServiceSelectorSheetState extends State<ServiceSelectorSheet> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.directions_car_filled_outlined,
                         size: 56,
                         color: HancrColors.textHint,
@@ -191,10 +196,11 @@ class _ServiceSelectorSheetState extends State<ServiceSelectorSheet> {
                               width: 48,
                               height: 48,
                               decoration: BoxDecoration(
-                                color: HancrColors.primary.withValues(alpha: 0.1),
+                                color:
+                                    HancrColors.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.directions_car,
                                 color: HancrColors.primary,
                                 size: 26,
@@ -209,16 +215,14 @@ class _ServiceSelectorSheetState extends State<ServiceSelectorSheet> {
                                     children: [
                                       Text(
                                         s.name,
-                                        style: Theme.of(ctx)
-                                            .textTheme
-                                            .titleMedium,
+                                        style:
+                                            Theme.of(ctx).textTheme.titleMedium,
                                       ),
                                       if (s.isVip) ...[
                                         const SizedBox(width: 6),
                                         Container(
-                                          padding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 6, vertical: 2),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 6, vertical: 2),
                                           decoration: BoxDecoration(
                                             color: HancrColors.accent
                                                 .withValues(alpha: 0.15),
@@ -240,21 +244,18 @@ class _ServiceSelectorSheetState extends State<ServiceSelectorSheet> {
                                   const SizedBox(height: 2),
                                   Text(
                                     '${((_distanceM / 8 / 60)).ceil()} min away',
-                                    style:
-                                        Theme.of(ctx).textTheme.bodySmall,
+                                    style: Theme.of(ctx).textTheme.bodySmall,
                                   ),
                                 ],
                               ),
                             ),
                             Text(
                               '${fare.toStringAsFixed(0)} SAR',
-                              style: Theme.of(ctx)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    color: HancrColors.primary,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                              style:
+                                  Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                                        color: HancrColors.primary,
+                                        fontWeight: FontWeight.w700,
+                                      ),
                             ),
                           ],
                         ),

@@ -36,11 +36,11 @@ class AuroraCard extends StatelessWidget {
   }) =>
       AuroraCard(
         key: key,
-        child: child,
         variant: AuroraCardVariant.glass,
         padding: padding,
         radius: radius,
         onTap: onTap,
+        child: child,
       );
 
   factory AuroraCard.selected({
@@ -52,12 +52,12 @@ class AuroraCard extends StatelessWidget {
   }) =>
       AuroraCard(
         key: key,
-        child: child,
         variant: AuroraCardVariant.normal,
         padding: padding,
         radius: radius,
         onTap: onTap,
         selected: true,
+        child: child,
       );
 
   @override
@@ -67,9 +67,8 @@ class AuroraCard extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
         color: _backgroundColor,
-        gradient: variant == AuroraCardVariant.glass
-            ? AuroraColors.cardGlass
-            : null,
+        gradient:
+            variant == AuroraCardVariant.glass ? AuroraColors.cardGlass : null,
         borderRadius: effectiveRadius,
         border: Border.all(
           color: selected ? AuroraColors.ember : _borderColor,

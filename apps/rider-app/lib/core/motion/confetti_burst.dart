@@ -135,7 +135,8 @@ class _ConfettiPainter extends CustomPainter {
       canvas.translate(x, y);
       canvas.rotate(p.spin * t);
       canvas.drawRect(
-        Rect.fromCenter(center: Offset.zero, width: p.size, height: p.size * 0.5),
+        Rect.fromCenter(
+            center: Offset.zero, width: p.size, height: p.size * 0.5),
         paint,
       );
       canvas.restore();

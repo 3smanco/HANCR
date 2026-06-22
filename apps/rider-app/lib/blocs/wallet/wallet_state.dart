@@ -38,7 +38,8 @@ class WalletLoaded extends WalletState {
     return WalletLoaded(
       wallet: wallet ?? this.wallet,
       transactions: transactions ?? this.transactions,
-      activeCheckout: clearCheckout ? null : (activeCheckout ?? this.activeCheckout),
+      activeCheckout:
+          clearCheckout ? null : (activeCheckout ?? this.activeCheckout),
     );
   }
 

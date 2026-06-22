@@ -86,8 +86,7 @@ class AuroraFamilyScreen extends StatelessWidget {
                   label: tr('inviteFamily'),
                   icon: Icons.group_add_outlined,
                   onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (_) => const _FamilyAgeScreen()),
+                    MaterialPageRoute(builder: (_) => const _FamilyAgeScreen()),
                   ),
                 ),
               ),

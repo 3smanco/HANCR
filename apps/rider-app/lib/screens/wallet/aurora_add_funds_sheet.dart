@@ -32,7 +32,7 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
   static const _quick = [50, 100, 200];
 
   final _ctrl = TextEditingController(text: '25');
-  PaymentGateway _gateway = PaymentGateway.hyperPay;
+  final PaymentGateway _gateway = PaymentGateway.hyperPay;
 
   @override
   void dispose() {
@@ -111,8 +111,8 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
                     context: context,
                     builder: (_) => AlertDialog(
                       backgroundColor: AuroraColors.ash,
-                      title: Text(tr('termsTitle'),
-                          style: AuroraText.titleSmall),
+                      title:
+                          Text(tr('termsTitle'), style: AuroraText.titleSmall),
                       content: Text(
                         tr('termsBody'),
                         style: AuroraText.bodySmall,
@@ -132,7 +132,8 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
                   ),
                   child: Text(
                     tr('applyTerms'),
-                    style: TextStyle(decoration: TextDecoration.underline),
+                    style:
+                        const TextStyle(decoration: TextDecoration.underline),
                   ),
                 ),
 
@@ -247,9 +248,11 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
           Expanded(
             child: TextField(
               controller: _ctrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d{0,5}(\.\d{0,2})?')),
+                FilteringTextInputFormatter.allow(
+                    RegExp(r'^\d{0,5}(\.\d{0,2})?')),
               ],
               onChanged: (_) => setState(() {}),
               textAlign: TextAlign.center,
@@ -357,8 +360,8 @@ class _AuroraAddFundsSheetState extends State<AuroraAddFundsSheet> {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Center(
-              child: Icon(Icons.credit_card,
-                  color: AuroraColors.pearl, size: 14),
+              child:
+                  Icon(Icons.credit_card, color: AuroraColors.pearl, size: 14),
             ),
           ),
           const SizedBox(width: AuroraSpacing.md),

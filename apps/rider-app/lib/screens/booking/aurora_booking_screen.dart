@@ -65,7 +65,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
       const GeoPoint(lat: AppConfig.defaultLat, lng: AppConfig.defaultLng);
   GeoPoint _destination =
       const GeoPoint(lat: AppConfig.defaultLat, lng: AppConfig.defaultLng);
-  String _originLabel = tr('myLocation');
+  final String _originLabel = tr('myLocation');
   String _destinationLabel = tr('moveMapHint');
 
   _BookingStep _step = _BookingStep.pickDestination;
@@ -141,13 +141,13 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     return (_routeFare ?? 0).round();
   }
 
-
   @override
   void initState() {
     super.initState();
     if (widget.presetDestination != null) {
       _destination = widget.presetDestination!;
-      _destinationLabel = widget.presetDestinationLabel ?? tr('selectedDestination');
+      _destinationLabel =
+          widget.presetDestinationLabel ?? tr('selectedDestination');
     }
     _initLocation();
     _loadMyCompany();
@@ -187,7 +187,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           rotation: (p['heading'] as num?)?.toDouble() ?? 0,
           anchor: const Offset(0.5, 0.5),
           flat: true,
-          zIndex: 1,
+          zIndexInt: 1,
         ));
       }
       setState(() {
@@ -210,7 +210,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
       ));
       final hist = await client.query(QueryOptions(
         document: gql(orderHistoryQuery),
-        variables: {'limit': 12, 'offset': 0},
+        variables: const {'limit': 12, 'offset': 0},
         fetchPolicy: FetchPolicy.networkOnly,
       ));
       if (!mounted) return;
@@ -240,8 +240,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   }
 
   /// يثبّت وجهة مختارة (من اختصار/أخيرة) ويحرّك الكاميرا.
-  Future<void> _chooseDestination(
-      double lat, double lng, String label) async {
+  Future<void> _chooseDestination(double lat, double lng, String label) async {
     FocusScope.of(context).unfocus();
     setState(() {
       _predictions = [];
@@ -354,8 +353,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
       }
       setState(() {
         _services = list;
-        _selectedService =
-            preferred ?? (list.isNotEmpty ? list.first : null);
+        _selectedService = preferred ?? (list.isNotEmpty ? list.first : null);
         _loadingServices = false;
       });
       if (_selectedService != null) _loadRoute();
@@ -382,7 +380,8 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
             TextField(
               controller: labelCtrl,
               style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
-              decoration: _fieldDecoration(tr('placeLabel'), Icons.label_outline),
+              decoration:
+                  _fieldDecoration(tr('placeLabel'), Icons.label_outline),
             ),
             const SizedBox(height: AuroraSpacing.sm),
             StatefulBuilder(
@@ -454,7 +453,8 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
       setState(() => _predictions = []);
       return;
     }
-    _searchDebounce = Timer(const Duration(milliseconds: 350), () => _runSearch(q));
+    _searchDebounce =
+        Timer(const Duration(milliseconds: 350), () => _runSearch(q));
   }
 
   Future<void> _runSearch(String q) async {
@@ -765,8 +765,8 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   InputDecoration _fieldDecoration(String hint, IconData icon) =>
       InputDecoration(
         hintText: hint,
-        hintStyle: AuroraText.bodyMedium
-            .copyWith(color: AuroraColors.textSecondary),
+        hintStyle:
+            AuroraText.bodyMedium.copyWith(color: AuroraColors.textSecondary),
         prefixIcon: Icon(icon, color: AuroraColors.ember, size: 20),
         filled: true,
         fillColor: AuroraColors.ash,
@@ -784,7 +784,9 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     final price = double.tryParse(_bidPriceCtrl.text.trim()) ?? 0;
     if (price < 1) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr('yourPrice')), backgroundColor: AuroraColors.smoke),
+        SnackBar(
+            content: Text(tr('yourPrice')),
+            backgroundColor: AuroraColors.smoke),
       );
       return;
     }
@@ -891,8 +893,8 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                   polylines: _polylines,
                   markers: _driverMarkers,
                   onCameraMove: (pos) {
-                    _destination =
-                        GeoPoint(lat: pos.target.latitude, lng: pos.target.longitude);
+                    _destination = GeoPoint(
+                        lat: pos.target.latitude, lng: pos.target.longitude);
                   },
                   onCameraIdle: () {
                     if (_step == _BookingStep.pickDestination) {
@@ -907,7 +909,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               if (_step == _BookingStep.pickDestination)
                 Center(
                   child: Padding(
-                    padding: EdgeInsets.only(bottom: 40),
+                    padding: const EdgeInsets.only(bottom: 40),
                     child: Icon(Icons.location_on,
                         color: AuroraColors.ember, size: 48),
                   ),
@@ -1039,8 +1041,8 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               icon: Icon(Icons.add_location_alt_outlined,
                   color: AuroraColors.ember, size: 18),
               label: Text(tr('addStop'),
-                  style: AuroraText.bodySmall
-                      .copyWith(color: AuroraColors.ember)),
+                  style:
+                      AuroraText.bodySmall.copyWith(color: AuroraColors.ember)),
             ),
           const SizedBox(height: AuroraSpacing.sm),
           AuroraButton.primary(
@@ -1117,8 +1119,11 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                   final lat = (p['lat'] as num?)?.toDouble();
                   final lng = (p['lng'] as num?)?.toDouble();
                   if (lat == null || lng == null) return;
-                  _chooseDestination(lat, lng,
-                      (p['label'] as String?) ?? (p['address'] as String? ?? ''));
+                  _chooseDestination(
+                      lat,
+                      lng,
+                      (p['label'] as String?) ??
+                          (p['address'] as String? ?? ''));
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -1153,8 +1158,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           (r) => InkWell(
             onTap: () => _chooseDestination(r.lat, r.lng, r.label),
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: AuroraSpacing.sm),
+              padding: const EdgeInsets.symmetric(vertical: AuroraSpacing.sm),
               child: Row(
                 children: [
                   Icon(Icons.history,
@@ -1195,8 +1199,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               horizontal: AuroraSpacing.sm, vertical: AuroraSpacing.md),
           child: Row(
             children: [
-              Icon(Icons.place_outlined,
-                  color: AuroraColors.ember, size: 20),
+              Icon(Icons.place_outlined, color: AuroraColors.ember, size: 20),
               const SizedBox(width: AuroraSpacing.md),
               Expanded(
                 child: Column(
@@ -1293,7 +1296,8 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           // ─── توصيل الأمانات: بيانات المستلم ───
           if (_isDelivery) ...[
             Text(tr('receiverInfo'),
-                style: AuroraText.titleSmall.copyWith(color: AuroraColors.pearl)),
+                style:
+                    AuroraText.titleSmall.copyWith(color: AuroraColors.pearl)),
             const SizedBox(height: AuroraSpacing.sm),
             TextField(
               controller: _receiverNameCtrl,
@@ -1439,7 +1443,9 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: _prefChip(Icons.volume_off, tr('quietRide'),
+                    child: _prefChip(
+                        Icons.volume_off,
+                        tr('quietRide'),
                         _quietRide,
                         () => setState(() => _quietRide = !_quietRide)),
                   ),
@@ -1601,8 +1607,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               else
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: AuroraSpacing.md,
-                      vertical: AuroraSpacing.sm),
+                      horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
                   decoration: BoxDecoration(
                     color: AuroraColors.success.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AuroraRadius.md),
@@ -1739,8 +1744,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     final widgets = <Widget>[];
     final shown = <int>{};
     groups.forEach((sectionKey, names) {
-      final inGroup =
-          _services.where((s) => names.contains(s.nameEn)).toList();
+      final inGroup = _services.where((s) => names.contains(s.nameEn)).toList();
       if (inGroup.isEmpty) return;
       widgets.add(_sectionHeader(tr(sectionKey)));
       for (final s in inGroup) {
@@ -1827,8 +1831,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               ),
             ),
             if (selected)
-              Icon(Icons.check_circle,
-                  color: AuroraColors.ember, size: 22),
+              Icon(Icons.check_circle, color: AuroraColors.ember, size: 22),
           ],
         ),
       ),
@@ -1843,8 +1846,8 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         decoration: BoxDecoration(
           color: on ? AuroraColors.smoke : AuroraColors.ash,
           borderRadius: BorderRadius.circular(AuroraRadius.sm),
-          border: Border.all(
-              color: on ? AuroraColors.ember : AuroraColors.border),
+          border:
+              Border.all(color: on ? AuroraColors.ember : AuroraColors.border),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1891,8 +1894,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline,
-              color: AuroraColors.danger, size: 18),
+          Icon(Icons.error_outline, color: AuroraColors.danger, size: 18),
           const SizedBox(width: AuroraSpacing.sm),
           Expanded(
               child: Text(msg,
@@ -1901,8 +1903,8 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           TextButton(
             onPressed: _loadServices,
             child: Text('إعادة',
-                style: AuroraText.bodySmall
-                    .copyWith(color: AuroraColors.ember)),
+                style:
+                    AuroraText.bodySmall.copyWith(color: AuroraColors.ember)),
           ),
         ],
       ),
@@ -1922,10 +1924,8 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           constraints: BoxConstraints(maxHeight: maxH),
           decoration: BoxDecoration(
             color: AuroraColors.coal.withValues(alpha: 0.92),
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border(
-                top: BorderSide(color: AuroraColors.borderStrong)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border(top: BorderSide(color: AuroraColors.borderStrong)),
             boxShadow: const [
               BoxShadow(
                   color: Color(0x66000000),

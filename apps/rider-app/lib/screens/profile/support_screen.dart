@@ -4,7 +4,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 import '../support/support_chat_screen.dart';
 
 /// الدعم والشكاوى — تقديم شكوى وعرض حالتها وخطّها الزمني (read-only).
@@ -49,9 +49,9 @@ class _SupportScreenState extends State<SupportScreen> {
       if (res.hasException) throw res.exception!;
       if (!mounted) return;
       setState(() {
-        _complaints =
-            (res.data?['myComplaints'] as List?)?.cast<Map<String, dynamic>>() ??
-                [];
+        _complaints = (res.data?['myComplaints'] as List?)
+                ?.cast<Map<String, dynamic>>() ??
+            [];
         _loading = false;
       });
     } catch (_) {
@@ -89,8 +89,8 @@ class _SupportScreenState extends State<SupportScreen> {
           IconButton(
             tooltip: tr('liveSupport'),
             icon: Icon(Icons.forum_outlined, color: AuroraColors.ember),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => const SupportChatScreen())),
+            onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SupportChatScreen())),
           ),
         ],
       ),
@@ -105,8 +105,7 @@ class _SupportScreenState extends State<SupportScreen> {
         child: SafeArea(
           top: false,
           child: _loading
-              ? Center(
-                  child: AuroraLoader(size: 36))
+              ? const Center(child: AuroraLoader(size: 36))
               : _error != null
                   ? Center(child: Text(_error!, style: AuroraText.bodyMedium))
                   : _complaints.isEmpty
@@ -139,8 +138,7 @@ class _SupportScreenState extends State<SupportScreen> {
           iconColor: AuroraColors.ember,
           collapsedIconColor: AuroraColors.textSecondary,
           title: Text(tr('cat_${c['category']}'),
-              style:
-                  AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl)),
+              style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl)),
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Container(
@@ -150,8 +148,8 @@ class _SupportScreenState extends State<SupportScreen> {
                 borderRadius: BorderRadius.circular(AuroraRadius.pill),
               ),
               child: Text(tr('cstatus_$status'),
-                  style: AuroraText.caption
-                      .copyWith(color: _statusColor(status))),
+                  style:
+                      AuroraText.caption.copyWith(color: _statusColor(status))),
             ),
           ),
           childrenPadding: const EdgeInsets.fromLTRB(
@@ -179,9 +177,8 @@ class _SupportScreenState extends State<SupportScreen> {
                     children: [
                       Icon(mine ? Icons.reply : Icons.circle,
                           size: mine ? 12 : 8,
-                          color: mine
-                              ? AuroraColors.pearl
-                              : AuroraColors.ember),
+                          color:
+                              mine ? AuroraColors.pearl : AuroraColors.ember),
                       const SizedBox(width: AuroraSpacing.sm),
                       Expanded(
                         child: Text(
@@ -233,8 +230,8 @@ class _SupportScreenState extends State<SupportScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(tr('submit'),
-                style: TextStyle(color: AuroraColors.ember)),
+            child:
+                Text(tr('submit'), style: TextStyle(color: AuroraColors.ember)),
           ),
         ],
       ),
@@ -315,8 +312,8 @@ class _SupportScreenState extends State<SupportScreen> {
                 TextField(
                   controller: descCtl,
                   maxLines: 4,
-                  style: AuroraText.bodyMedium
-                      .copyWith(color: AuroraColors.pearl),
+                  style:
+                      AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
                   decoration: InputDecoration(
                     hintText: tr('complaintDescHint'),
                     filled: true,

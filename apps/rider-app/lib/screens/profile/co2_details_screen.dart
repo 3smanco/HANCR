@@ -31,8 +31,7 @@ class Co2DetailsScreen extends StatelessWidget {
           top: false,
           child: BlocBuilder<RiderBloc, RiderState>(
             builder: (context, state) {
-              final rides =
-                  state is RiderLoaded ? state.rider.totalRides : 0;
+              final rides = state is RiderLoaded ? state.rider.totalRides : 0;
               final km = rides * _kmPerRide;
               final totalKg = km * _kgPerKm;
               final savedKg = totalKg * _savedFactor;
@@ -57,21 +56,19 @@ class Co2DetailsScreen extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        Icon(Icons.eco,
-                            color: AuroraColors.success, size: 44),
+                        Icon(Icons.eco, color: AuroraColors.success, size: 44),
                         const SizedBox(height: AuroraSpacing.md),
                         Text('${savedKg.toStringAsFixed(1)} ${tr('kg')}',
                             style: AuroraText.displayMedium
                                 .copyWith(color: AuroraColors.success)),
                         const SizedBox(height: 4),
-                        Text(tr('co2SavedLabel'),
-                            style: AuroraText.bodyMedium),
+                        Text(tr('co2SavedLabel'), style: AuroraText.bodyMedium),
                       ],
                     ),
                   ),
                   const SizedBox(height: AuroraSpacing.lg),
-                  _statRow(Icons.directions_car_outlined, tr('co2Rides'),
-                      '$rides'),
+                  _statRow(
+                      Icons.directions_car_outlined, tr('co2Rides'), '$rides'),
                   _statRow(Icons.route_outlined, tr('co2Distance'),
                       '${km.toStringAsFixed(0)} ${tr('km')}'),
                   _statRow(Icons.cloud_outlined, tr('co2Total'),

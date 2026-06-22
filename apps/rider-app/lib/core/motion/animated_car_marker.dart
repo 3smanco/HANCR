@@ -38,8 +38,7 @@ class CarMarkerFactory {
       targetHeight: (px * dpr).round(),
     );
     final frame = await codec.getNextFrame();
-    final bytes =
-        await frame.image.toByteData(format: ui.ImageByteFormat.png);
+    final bytes = await frame.image.toByteData(format: ui.ImageByteFormat.png);
     final desc = BitmapDescriptor.bytes(
       bytes!.buffer.asUint8List(),
       imagePixelRatio: dpr,

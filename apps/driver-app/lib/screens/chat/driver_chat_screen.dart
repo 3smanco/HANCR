@@ -51,10 +51,12 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
   Future<void> _markRead() async {
     try {
       final client = await GraphQLClientManager.get();
-      await client.mutate(MutationOptions(
-        document: gql(markOrderMessagesReadMutation),
-        variables: {'orderId': widget.orderId},
-      ));
+      await client.mutate(
+        MutationOptions(
+          document: gql(markOrderMessagesReadMutation),
+          variables: {'orderId': widget.orderId},
+        ),
+      );
     } catch (_) {}
   }
 
@@ -63,21 +65,25 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
     if (now.difference(_lastTypingSent).inMilliseconds < 2000) return;
     _lastTypingSent = now;
     GraphQLClientManager.get().then((client) {
-      client.mutate(MutationOptions(
-        document: gql(setOrderTypingMutation),
-        variables: {'orderId': widget.orderId},
-      ));
+      client.mutate(
+        MutationOptions(
+          document: gql(setOrderTypingMutation),
+          variables: {'orderId': widget.orderId},
+        ),
+      );
     });
   }
 
   Future<void> _load() async {
     try {
       final client = await GraphQLClientManager.get();
-      final res = await client.query(QueryOptions(
-        document: gql(orderMessagesQuery),
-        variables: {'orderId': widget.orderId},
-        fetchPolicy: FetchPolicy.networkOnly,
-      ));
+      final res = await client.query(
+        QueryOptions(
+          document: gql(orderMessagesQuery),
+          variables: {'orderId': widget.orderId},
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
       final list = (res.data?['orderMessages'] as List<dynamic>?) ?? [];
       if (!mounted) return;
       setState(() {
@@ -95,10 +101,12 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
   Future<void> _subscribe() async {
     try {
       final client = await GraphQLClientManager.get();
-      final stream = client.subscribe(SubscriptionOptions(
-        document: gql(orderMessageAddedSubscription),
-        variables: {'orderId': widget.orderId},
-      ));
+      final stream = client.subscribe(
+        SubscriptionOptions(
+          document: gql(orderMessageAddedSubscription),
+          variables: {'orderId': widget.orderId},
+        ),
+      );
       _sub = stream.listen((result) {
         final m = result.data?['orderMessageAdded'] as Map<String, dynamic>?;
         if (m == null || !mounted) return;
@@ -109,40 +117,48 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
       });
 
       _typingSub = client
-          .subscribe(SubscriptionOptions(
-            document: gql(orderTypingSubscription),
-            variables: {'orderId': widget.orderId},
-          ))
+          .subscribe(
+            SubscriptionOptions(
+              document: gql(orderTypingSubscription),
+              variables: {'orderId': widget.orderId},
+            ),
+          )
           .listen((_) {
-        if (!mounted) return;
-        setState(() => _otherTyping = true);
-        _typingClear?.cancel();
-        _typingClear = Timer(const Duration(seconds: 3),
-            () => mounted ? setState(() => _otherTyping = false) : null);
-      });
+            if (!mounted) return;
+            setState(() => _otherTyping = true);
+            _typingClear?.cancel();
+            _typingClear = Timer(
+              const Duration(seconds: 3),
+              () => mounted ? setState(() => _otherTyping = false) : null,
+            );
+          });
 
       _readSub = client
-          .subscribe(SubscriptionOptions(
-            document: gql(orderMessagesReadSubscription),
-            variables: {'orderId': widget.orderId},
-          ))
+          .subscribe(
+            SubscriptionOptions(
+              document: gql(orderMessagesReadSubscription),
+              variables: {'orderId': widget.orderId},
+            ),
+          )
           .listen((_) {
-        if (!mounted) return;
-        setState(() {
-          for (final m in _messages) {
-            if (m['senderType'] == 'driver') m['isRead'] = true;
-          }
-        });
-      });
+            if (!mounted) return;
+            setState(() {
+              for (final m in _messages) {
+                if (m['senderType'] == 'driver') m['isRead'] = true;
+              }
+            });
+          });
     } catch (_) {}
   }
 
   void _scrollToEnd() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scroll.hasClients) {
-        _scroll.animateTo(_scroll.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut);
+        _scroll.animateTo(
+          _scroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
       }
     });
   }
@@ -154,10 +170,12 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
     _ctrl.clear();
     try {
       final client = await GraphQLClientManager.get();
-      final res = await client.mutate(MutationOptions(
-        document: gql(sendOrderMessageMutation),
-        variables: {'orderId': widget.orderId, 'message': text},
-      ));
+      final res = await client.mutate(
+        MutationOptions(
+          document: gql(sendOrderMessageMutation),
+          variables: {'orderId': widget.orderId, 'message': text},
+        ),
+      );
       final m = res.data?['sendOrderMessage'] as Map<String, dynamic>?;
       if (m != null && mounted && !_messages.any((x) => x['id'] == m['id'])) {
         setState(() => _messages.add(m));
@@ -179,11 +197,15 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.riderName ?? tr('chatWithRider'),
-                style: AuroraText.titleSmall),
+            Text(
+              widget.riderName ?? tr('chatWithRider'),
+              style: AuroraText.titleSmall,
+            ),
             if (_otherTyping)
-              Text(tr('typingNow'),
-                  style: AuroraText.caption.copyWith(color: AuroraColors.ember)),
+              Text(
+                tr('typingNow'),
+                style: AuroraText.caption.copyWith(color: AuroraColors.ember),
+              ),
           ],
         ),
       ),
@@ -192,19 +214,23 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
           Expanded(
             child: _loading
                 ? Center(
-                    child:
-                        CircularProgressIndicator(color: AuroraColors.ember))
+                    child: CircularProgressIndicator(color: AuroraColors.ember),
+                  )
                 : _messages.isEmpty
-                    ? Center(
-                        child: Text(tr('noMessagesYet'),
-                            style: AuroraText.bodySmall.copyWith(
-                                color: AuroraColors.textSecondary)))
-                    : ListView.builder(
-                        controller: _scroll,
-                        padding: const EdgeInsets.all(AuroraSpacing.md),
-                        itemCount: _messages.length,
-                        itemBuilder: (_, i) => _bubble(_messages[i]),
+                ? Center(
+                    child: Text(
+                      tr('noMessagesYet'),
+                      style: AuroraText.bodySmall.copyWith(
+                        color: AuroraColors.textSecondary,
                       ),
+                    ),
+                  )
+                : ListView.builder(
+                    controller: _scroll,
+                    padding: const EdgeInsets.all(AuroraSpacing.md),
+                    itemCount: _messages.length,
+                    itemBuilder: (_, i) => _bubble(_messages[i]),
+                  ),
           ),
           _inputBar(),
         ],
@@ -223,9 +249,12 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
         padding: imageUrl != null
             ? const EdgeInsets.all(4)
             : const EdgeInsets.symmetric(
-                horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
+                horizontal: AuroraSpacing.md,
+                vertical: AuroraSpacing.sm,
+              ),
         constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.72),
+          maxWidth: MediaQuery.of(context).size.width * 0.72,
+        ),
         decoration: BoxDecoration(
           color: mine ? AuroraColors.ember : AuroraColors.ash,
           borderRadius: BorderRadius.only(
@@ -242,31 +271,39 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
             if (imageUrl != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(AuroraRadius.sm),
-                child: Image.network(imageUrl,
-                    width: 200, fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const SizedBox(
-                        width: 200,
-                        height: 120,
-                        child: Icon(Icons.broken_image, color: Colors.white54))),
+                child: Image.network(
+                  imageUrl,
+                  width: 200,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const SizedBox(
+                    width: 200,
+                    height: 120,
+                    child: Icon(Icons.broken_image, color: Colors.white54),
+                  ),
+                ),
               ),
             if ((m['message'] as String? ?? '').isNotEmpty)
               Padding(
                 padding: imageUrl != null
                     ? const EdgeInsets.fromLTRB(6, 6, 6, 2)
                     : EdgeInsets.zero,
-                child: Text(m['message'] as String,
-                    style: AuroraText.bodyMedium.copyWith(
-                        color:
-                            mine ? AuroraColors.obsidian : AuroraColors.pearl)),
+                child: Text(
+                  m['message'] as String,
+                  style: AuroraText.bodyMedium.copyWith(
+                    color: mine ? AuroraColors.obsidian : AuroraColors.pearl,
+                  ),
+                ),
               ),
             if (mine)
               Padding(
                 padding: const EdgeInsets.only(top: 2, right: 2),
-                child: Icon(isRead ? Icons.done_all : Icons.done,
-                    size: 14,
-                    color: isRead
-                        ? AuroraColors.obsidian
-                        : AuroraColors.obsidian.withValues(alpha: 0.5)),
+                child: Icon(
+                  isRead ? Icons.done_all : Icons.done,
+                  size: 14,
+                  color: isRead
+                      ? AuroraColors.obsidian
+                      : AuroraColors.obsidian.withValues(alpha: 0.5),
+                ),
               ),
           ],
         ),
@@ -285,8 +322,9 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
             Expanded(
               child: TextField(
                 controller: _ctrl,
-                style: AuroraText.bodyMedium
-                    .copyWith(color: AuroraColors.pearl),
+                style: AuroraText.bodyMedium.copyWith(
+                  color: AuroraColors.pearl,
+                ),
                 minLines: 1,
                 maxLines: 4,
                 textInputAction: TextInputAction.send,
@@ -294,12 +332,15 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
                 onSubmitted: (_) => _send(),
                 decoration: InputDecoration(
                   hintText: tr('typeMessage'),
-                  hintStyle: AuroraText.bodySmall
-                      .copyWith(color: AuroraColors.textSecondary),
+                  hintStyle: AuroraText.bodySmall.copyWith(
+                    color: AuroraColors.textSecondary,
+                  ),
                   filled: true,
                   fillColor: AuroraColors.ash,
                   contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AuroraSpacing.md, vertical: 10),
+                    horizontal: AuroraSpacing.md,
+                    vertical: 10,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AuroraRadius.pill),
                     borderSide: BorderSide.none,
@@ -317,8 +358,11 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
                   color: AuroraColors.ember,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(_sending ? Icons.hourglass_empty : Icons.send,
-                    color: AuroraColors.obsidian, size: 20),
+                child: Icon(
+                  _sending ? Icons.hourglass_empty : Icons.send,
+                  color: AuroraColors.obsidian,
+                  size: 20,
+                ),
               ),
             ),
           ],

@@ -5,7 +5,7 @@ import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/bundle_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
- import '../../core/motion/motion.dart';
+import '../../core/motion/motion.dart';
 
 /// F1 — Ride Bundles: تصفّح + شراء + متابعة الحزم.
 class AuroraBundlesScreen extends StatefulWidget {
@@ -62,8 +62,7 @@ class _AuroraBundlesScreenState extends State<AuroraBundlesScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AuroraColors.coal,
-        title: Text(tr('bundleConfirmTitle'),
-            style: AuroraText.titleSmall),
+        title: Text(tr('bundleConfirmTitle'), style: AuroraText.titleSmall),
         content: Text(
           '${bundle['name']}\n${bundle['ridesCount']} × ${tr('bundleRidesCount')} — ${bundle['price']} ${bundle['currency']}\n${tr('bundleConfirmBody')}',
           style: AuroraText.bodyMedium,
@@ -104,8 +103,8 @@ class _AuroraBundlesScreenState extends State<AuroraBundlesScreen> {
     }
   }
 
-  void _toast(String s) => ScaffoldMessenger.of(context)
-      .showSnackBar(SnackBar(content: Text(s)));
+  void _toast(String s) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(s)));
 
   String _fmtDate(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -143,8 +142,7 @@ class _AuroraBundlesScreenState extends State<AuroraBundlesScreen> {
         title: Text(tr('rideBundles'), style: AuroraText.titleSmall),
       ),
       body: _loading
-          ? Center(
-              child: AuroraLoader(size: 36))
+          ? const Center(child: AuroraLoader(size: 36))
           : RefreshIndicator(
               onRefresh: _bootstrap,
               color: AuroraColors.ember,
@@ -161,8 +159,7 @@ class _AuroraBundlesScreenState extends State<AuroraBundlesScreen> {
                     ..._mine.map(_entCard),
                     const SizedBox(height: AuroraSpacing.lg),
                   ],
-                  Text(tr('availableBundles'),
-                      style: AuroraText.titleSmall),
+                  Text(tr('availableBundles'), style: AuroraText.titleSmall),
                   const SizedBox(height: AuroraSpacing.sm),
                   if (_available.isEmpty)
                     Padding(
@@ -195,20 +192,18 @@ class _AuroraBundlesScreenState extends State<AuroraBundlesScreen> {
           Row(
             children: [
               Expanded(
-                child: Text('${b['name']}',
-                    style: AuroraText.titleSmall),
+                child: Text('${b['name']}', style: AuroraText.titleSmall),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: AuroraColors.ember,
                   borderRadius: BorderRadius.circular(AuroraRadius.sm),
                 ),
                 child: Text(
                   '${b['price']} ${b['currency']}',
-                  style: AuroraText.bodySmall
-                      .copyWith(color: Colors.white),
+                  style: AuroraText.bodySmall.copyWith(color: Colors.white),
                 ),
               ),
             ],
@@ -216,11 +211,13 @@ class _AuroraBundlesScreenState extends State<AuroraBundlesScreen> {
           const SizedBox(height: AuroraSpacing.xs),
           Text(
             '${b['ridesCount']} ${tr('bundleRidesCount')} · ${b['validityDays']} ${tr('day')}',
-            style: AuroraText.bodySmall.copyWith(color: AuroraColors.textSecondary),
+            style: AuroraText.bodySmall
+                .copyWith(color: AuroraColors.textSecondary),
           ),
           Text(
             '${tr('bundleMaxDistance')}: ${maxKm == 0 ? tr('bundleUnlimited') : '$maxKm km'}',
-            style: AuroraText.bodySmall.copyWith(color: AuroraColors.textSecondary),
+            style: AuroraText.bodySmall
+                .copyWith(color: AuroraColors.textSecondary),
           ),
           const SizedBox(height: AuroraSpacing.sm),
           SizedBox(
@@ -257,12 +254,11 @@ class _AuroraBundlesScreenState extends State<AuroraBundlesScreen> {
           Row(
             children: [
               Expanded(
-                child: Text('${e['bundleName']}',
-                    style: AuroraText.titleSmall),
+                child: Text('${e['bundleName']}', style: AuroraText.titleSmall),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: _statusColor(status).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(AuroraRadius.sm),
@@ -280,12 +276,14 @@ class _AuroraBundlesScreenState extends State<AuroraBundlesScreen> {
           ),
           Text(
             '${tr('bundleMaxDistance')}: ${maxKm == 0 ? tr('bundleUnlimited') : '$maxKm km'}',
-            style: AuroraText.bodySmall.copyWith(color: AuroraColors.textSecondary),
+            style: AuroraText.bodySmall
+                .copyWith(color: AuroraColors.textSecondary),
           ),
           if (exp != null)
             Text(
               '${tr('bundleExpiresOn')}: ${_fmtDate(exp)}',
-              style: AuroraText.bodySmall.copyWith(color: AuroraColors.textSecondary),
+              style: AuroraText.bodySmall
+                  .copyWith(color: AuroraColors.textSecondary),
             ),
         ],
       ),

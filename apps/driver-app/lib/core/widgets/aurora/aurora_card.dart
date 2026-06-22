@@ -33,15 +33,14 @@ class AuroraCard extends StatelessWidget {
     EdgeInsets? padding,
     double radius = AuroraRadius.lg,
     VoidCallback? onTap,
-  }) =>
-      AuroraCard(
-        key: key,
-        child: child,
-        variant: AuroraCardVariant.glass,
-        padding: padding,
-        radius: radius,
-        onTap: onTap,
-      );
+  }) => AuroraCard(
+    key: key,
+    variant: AuroraCardVariant.glass,
+    padding: padding,
+    radius: radius,
+    onTap: onTap,
+    child: child,
+  );
 
   factory AuroraCard.selected({
     Key? key,
@@ -49,16 +48,15 @@ class AuroraCard extends StatelessWidget {
     EdgeInsets? padding,
     double radius = AuroraRadius.lg,
     VoidCallback? onTap,
-  }) =>
-      AuroraCard(
-        key: key,
-        child: child,
-        variant: AuroraCardVariant.normal,
-        padding: padding,
-        radius: radius,
-        onTap: onTap,
-        selected: true,
-      );
+  }) => AuroraCard(
+    key: key,
+    variant: AuroraCardVariant.normal,
+    padding: padding,
+    radius: radius,
+    onTap: onTap,
+    selected: true,
+    child: child,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -78,8 +76,8 @@ class AuroraCard extends StatelessWidget {
         boxShadow: selected
             ? AuroraShadows.selectionGlow
             : variant == AuroraCardVariant.elevated
-                ? AuroraShadows.cardDepth
-                : null,
+            ? AuroraShadows.cardDepth
+            : null,
       ),
       child: ClipRRect(
         borderRadius: effectiveRadius,
@@ -106,9 +104,9 @@ class AuroraCard extends StatelessWidget {
   }
 
   Widget get _content => Padding(
-        padding: padding ?? const EdgeInsets.all(AuroraSpacing.lg),
-        child: child,
-      );
+    padding: padding ?? const EdgeInsets.all(AuroraSpacing.lg),
+    child: child,
+  );
 
   Color get _backgroundColor {
     switch (variant) {
