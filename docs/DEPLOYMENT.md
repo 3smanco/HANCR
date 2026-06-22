@@ -8,7 +8,7 @@ Before every public launch or production deploy, run:
 
 ```bash
 npm run readiness:template
-node tools/production-readiness-check.mjs --env .env --strict
+npm run readiness:prod
 ```
 
 The strict check prints only variable names, never secret values. Treat any

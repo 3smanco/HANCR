@@ -1,7 +1,30 @@
 const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+const dotenv = require('dotenv');
 
 const root = process.env.HANCR_ROOT || '/opt/hancr';
 const nodeEnv = process.env.NODE_ENV || 'production';
+const loadedEnv = {};
+
+function loadEnvFile(fileName) {
+  const filePath = path.join(root, fileName);
+  if (!fs.existsSync(filePath)) return;
+
+  const parsed = dotenv.parse(fs.readFileSync(filePath, 'utf8'));
+  for (const [key, value] of Object.entries(parsed)) {
+    if (process.env[key] == null) {
+      process.env[key] = value;
+    }
+    if (loadedEnv[key] == null) {
+      loadedEnv[key] = process.env[key];
+    }
+  }
+}
+
+loadEnvFile('.env.prod');
+loadEnvFile('.env.production');
+loadEnvFile('.env');
 
 function gitSha() {
   try {
@@ -16,6 +39,7 @@ function gitSha() {
 }
 
 const commonApiEnv = {
+  ...loadedEnv,
   NODE_ENV: nodeEnv,
   TS_NODE_PROJECT: `${root}/tsconfig.base.json`,
   SENTRY_RELEASE: process.env.SENTRY_RELEASE || gitSha(),
@@ -74,6 +98,7 @@ module.exports = {
       args: ['-c', 'npx next start -p 3003'],
       interpreter: 'none',
       env: {
+        ...loadedEnv,
         NODE_ENV: nodeEnv,
         NEXT_PUBLIC_ADMIN_API_URL:
           process.env.NEXT_PUBLIC_ADMIN_API_URL ||
