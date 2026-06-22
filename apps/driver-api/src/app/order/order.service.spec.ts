@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { OrderService } from './order.service';
 import {
@@ -12,6 +13,7 @@ import {
   OrderStatus,
   DriverStatus,
   PaymentMode,
+  PaymentGateway,
   WalletOwnerType,
   WalletTransactionType,
 } from '@hancr/database';
@@ -35,6 +37,7 @@ describe('OrderService', () => {
   let orderRedis: jest.Mocked<OrderRedisService>;
   let pushNotifications: jest.Mocked<PushNotificationService>;
   let walletService: jest.Mocked<WalletService>;
+  let paymentGatewayService: jest.Mocked<PaymentGatewayService>;
   let sosService: jest.Mocked<SosService>;
   let pubSub: jest.Mocked<RedisPubSub>;
 
@@ -129,6 +132,18 @@ describe('OrderService', () => {
           },
         },
         {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) =>
+              ({
+                PAYMENT_WEBHOOK_URL:
+                  'https://api.hancr.test/rider/wallet/webhook/{gateway}',
+                PUBLIC_BASE_URL: 'https://hancr.test',
+              })[key],
+            ),
+          },
+        },
+        {
           provide: SosService,
           useValue: {
             shareTripWithContacts: jest.fn().mockResolvedValue(0),
@@ -150,6 +165,7 @@ describe('OrderService', () => {
     orderRedis = module.get(OrderRedisService);
     pushNotifications = module.get(PushNotificationService);
     walletService = module.get(WalletService);
+    paymentGatewayService = module.get(PaymentGatewayService);
     sosService = module.get(SosService);
     pubSub = module.get(PUB_SUB);
 
@@ -423,14 +439,10 @@ describe('OrderService', () => {
         newBalance: 0,
         currency: 'SAR',
       });
-      (
-        service as unknown as {
-          paymentGatewayService: { createCheckout: jest.Mock };
-        }
-      ).paymentGatewayService.createCheckout.mockResolvedValue({
+      paymentGatewayService.createCheckout.mockResolvedValue({
         gatewayRef: 'gw_1',
         redirectUrl: 'https://pay',
-        gateway: 'HyperPay',
+        gateway: PaymentGateway.HyperPay,
       });
 
       await service.finishRide(7, 1);
@@ -440,6 +452,15 @@ describe('OrderService', () => {
         expect.objectContaining({
           ownerType: WalletOwnerType.Rider,
           status: 'Pending',
+        }),
+      );
+      expect(paymentGatewayService.createCheckout).toHaveBeenCalledWith(
+        PaymentGateway.HyperPay,
+        expect.objectContaining({
+          internalRef: '9',
+          webhookUrl:
+            'https://api.hancr.test/rider/wallet/webhook/hyperpay',
+          returnUrl: 'https://hancr.test',
         }),
       );
       // لا يُدفع للسائق synchronously — الـ webhook يفعل ذلك بعد تأكيد البوابة
