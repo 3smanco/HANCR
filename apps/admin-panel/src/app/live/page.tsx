@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -359,15 +359,22 @@ function MapCanvas({
   onSelect: (d: Driver) => void;
 }) {
   const mapRef = useRef<google.maps.Map | null>(null);
+  const boundsPoints = useMemo(
+    () =>
+      drivers
+        .map((d) => ({ lat: Number(d.lat), lng: Number(d.lng) }))
+        .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng)),
+    [drivers],
+  );
 
   // عند تغيّر السائقين أو الدولة: لائم الحدود على السيارات الظاهرة (شاشة مسطّحة
   // مركّزة على الأسطول الفعلي بدل كرة أرضية).
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !isLoaded || drivers.length === 0) return;
+    if (!map || !isLoaded || boundsPoints.length === 0) return;
     const bounds = new google.maps.LatLngBounds();
-    for (const d of drivers) {
-      bounds.extend({ lat: d.lat as number, lng: d.lng as number });
+    for (const point of boundsPoints) {
+      bounds.extend(point);
     }
     map.fitBounds(bounds, 64);
     // لا تُفرِط في التكبير عند سيارة واحدة
@@ -375,8 +382,7 @@ function MapCanvas({
       if ((map.getZoom() ?? 0) > 15) map.setZoom(15);
     });
     return () => google.maps.event.removeListener(once);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [drivers.length, country, isLoaded]);
+  }, [boundsPoints, country, isLoaded]);
 
   if (!hasKey) {
     return (

@@ -9,6 +9,7 @@ const steps = [
   ['Type-check driver-api', 'npx', ['tsc', '--noEmit', '-p', 'apps/driver-api/tsconfig.app.json']],
   ['Type-check admin-api', 'npx', ['tsc', '--noEmit', '-p', 'apps/admin-api/tsconfig.app.json']],
   ['Check admin-panel i18n keys', 'node', ['tools/check-admin-i18n.mjs']],
+  ['Check admin-panel quality guards', 'node', ['tools/check-admin-panel-quality.mjs']],
   ['Type-check admin-panel', 'npm', ['run', 'type-check'], 'apps/admin-panel'],
   ['Lint admin-panel', 'npm', ['run', 'lint'], 'apps/admin-panel'],
   ['Build admin-panel', 'npm', ['run', 'build'], 'apps/admin-panel'],
