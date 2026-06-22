@@ -55,11 +55,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     const driver = await this.driverRepo.findOne({
       where: { id: payload.sub },
-      select: ['id', 'active', 'banned'],
+      select: ['id', 'banned'],
     });
     if (!driver) throw new UnauthorizedException('Account not found');
     if (driver.banned) throw new UnauthorizedException('Account is banned');
-    if (!driver.active) throw new UnauthorizedException('Account is not active');
 
     return { driverId: payload.sub, phone: payload.phone };
   }
