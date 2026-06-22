@@ -163,6 +163,12 @@ const String orderHistoryQuery = r'''
   }
 ''';
 
+const String nearbyDriversQuery = r'''
+  query NearbyDrivers($lat: Float!, $lng: Float!) {
+    nearbyDrivers(lat: $lat, lng: $lng) { lat lng heading }
+  }
+''';
+
 const String upcomingOrdersQuery = r'''
   query UpcomingOrders {
     upcomingOrders {

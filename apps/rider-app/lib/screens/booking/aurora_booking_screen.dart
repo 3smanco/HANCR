@@ -55,6 +55,11 @@ enum _BookingStep { pickDestination, pickService }
 class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   GoogleMapController? _mapCtrl;
 
+  // سيارات الجوار الحيّة (نقاط فقط) على الخريطة
+  final Set<Marker> _driverMarkers = {};
+  Timer? _driversTimer;
+  BitmapDescriptor? _driverPinIcon;
+
   // الموقع
   GeoPoint _origin =
       const GeoPoint(lat: AppConfig.defaultLat, lng: AppConfig.defaultLng);
@@ -147,6 +152,52 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     _initLocation();
     _loadMyCompany();
     _loadQuickPicks();
+    _startDriverFeed();
+  }
+
+  /// سيارات الجوار الحيّة — تحميل أولي + تحديث دوري كل 10 ثوانٍ.
+  void _startDriverFeed() {
+    _loadNearbyDrivers();
+    _driversTimer?.cancel();
+    _driversTimer = Timer.periodic(
+        const Duration(seconds: 10), (_) => _loadNearbyDrivers());
+  }
+
+  Future<void> _loadNearbyDrivers() async {
+    try {
+      _driverPinIcon ??= await CarMarkerFactory.car(px: 46);
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(nearbyDriversQuery),
+        variables: {'lat': _origin.lat, 'lng': _origin.lng},
+        fetchPolicy: FetchPolicy.networkOnly,
+      ));
+      if (!mounted || res.hasException) return;
+      final pins = res.data?['nearbyDrivers'] as List<dynamic>? ?? [];
+      final markers = <Marker>{};
+      for (var i = 0; i < pins.length; i++) {
+        final p = pins[i] as Map<String, dynamic>;
+        final lat = (p['lat'] as num?)?.toDouble();
+        final lng = (p['lng'] as num?)?.toDouble();
+        if (lat == null || lng == null) continue;
+        markers.add(Marker(
+          markerId: MarkerId('drv_$i'),
+          position: LatLng(lat, lng),
+          icon: _driverPinIcon!,
+          rotation: (p['heading'] as num?)?.toDouble() ?? 0,
+          anchor: const Offset(0.5, 0.5),
+          flat: true,
+          zIndex: 1,
+        ));
+      }
+      setState(() {
+        _driverMarkers
+          ..clear()
+          ..addAll(markers);
+      });
+    } catch (_) {
+      // تأثير بصري اختياري — يُتجاهل عند الفشل
+    }
   }
 
   /// Phase 2 — يحمّل الأماكن المحفوظة (Home/Work) وآخر الوجهات لعرضها كاختصارات.
@@ -787,6 +838,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   @override
   void dispose() {
     _searchDebounce?.cancel();
+    _driversTimer?.cancel();
     _searchCtrl.dispose();
     _mapCtrl?.dispose();
     super.dispose();
@@ -836,6 +888,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                   zoomControlsEnabled: false,
                   compassEnabled: false,
                   polylines: _polylines,
+                  markers: _driverMarkers,
                   onCameraMove: (pos) {
                     _destination =
                         GeoPoint(lat: pos.target.latitude, lng: pos.target.longitude);

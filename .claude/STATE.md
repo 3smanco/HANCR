@@ -4,6 +4,16 @@
 > ابدأ أي محادثة جديدة بقراءته (وحده يكفي للسياق) بدل تحميل المهارة الضخمة أو قراءة عشرات الملفات.
 > آخر تحديث: 2026-06-22
 
+## 🚖 تجديد رحلة الطلب (Uber-grade) + إصلاح خطأين حرجين (2026-06-22) — منشور حيّاً ✅
+**PR [#180](https://github.com/3smanco/HANCR/pull/180) مدموج في main (45eb540).** نُشر بالكامل ومُتحقَّق.
+- **Bug 1 (السيارات لا تظهر):** `rider pubspec` كان يسجّل `assets/images/` فقط؛ Flutter لا يحزم المجلدات الفرعية ⇒ أُضيف `- assets/images/cars/`.
+- **Bug 2 ("object is not iterable" عند الطلب):** `fare-calculator.service.ts` `for...of m.time ?? []` ينفجر مع قيمة jsonb غير مصفوفة (خدمة VIP المُنشأة بالأدمن). الإصلاح: حراسة `Array.isArray` + UPDATE تطبيعي في الـ migration (`jsonb_typeof <> 'array' → '[]'`).
+- **Backend (rider-api + db):** migration `1782200000000-AddUberCategories` (Share + Black لكل منطقة، multipliers='[]') · تحقّق ساعتين للحجز المسبق في `createOrder` · استعلام `upcomingOrders` (status=Booked) + resolver + service.
+- **App (rider):** مودال حجز مسبق Cupertino (`reserve_modal.dart`: بكرات + تحقّق ساعتين + سياسة إلغاء → `/upcoming`) · تبويبا Upcoming/Past في النشاط (`UpcomingRidesView` + `UpcomingRidesScreen`) · فئات مجمّعة (اقتصادي/مريح وفاخر/سعة وخاص) في `_groupedServices` · شريط تفضيلات (Personal/Business + زر جدولة ظاهر) · اختصارات الوجهة (Home/Work + آخر الوجهات في `_quickPicks`) · `ServiceModel.displayName` (أسماء إنجليزية على اللغة الإنجليزية).
+- **التحقق:** `flutter analyze`=0 (راكب) · rider-api `tsc`=0 · fare-calculator jest **7/7** أخضر.
+- **النشر (مُتحقَّق):** server `git pull` main + migration (`typeorm-ts-node-commonjs`، `TS_NODE_PROJECT=tsconfig.base.json`) نجح + `pm2 restart rider-api` → `api.hancr.com/rider/graphql`=200. APK الراكب (arm64، **48,091,899 بايت**) → `hancr.com/downloads/hancr-rider.apk` HTTP 200 مطابق. **المالك: ألغِ تثبيت القديم قبل الجديد.**
+- **مؤجَّل (صريح للمالك):** تجميع ركّاب Share الفعلي (pooling) · سيارات الجوار الحيّة (يحتاج `nearbyDrivers` باكإند) · Phase 7 (RideRequestPayload موحّد — داخلي، الحالة الحالية تعمل). · **Google Maps billing (بطاقة 3533 المرفوضة US$35.60)** ما زال يعطّل بلاطات الخريطة/التسعير الحيّ — إجراء المالك.
+
 ## 🚗 سيارات 3D + إصلاحات الحجز/المنطقة/اللغة (2026-06-22) — ردّاً على ملاحظات المالك
 المالك اشتكى (لقطات شاشة): السيارات القديمة (قبة برتقالية) قبيحة وكبيرة على الخريطة؛ خطأ "نقطة الالتقاط خارج المنطقة المحددة" عند الحجز (هو في قطر)؛ نصوص عربية رغم اللغة الإنجليزية؛ شاشة الحجز مزدحمة مقابل بساطة أوبر. قراراه: تبسيط الحجز (طيّ الخيارات) + رندرات 3D مثل أوبر.
 - **رندرات 3D (PNG):** المالك قدّم في `Downloads/Vector Car` ملفات PNG 3D احترافية (6400×4800، خلفية #F0F0F0 مدمجة). عُولجت بـ PowerShell+System.Drawing (تصغير 1200px + قصّ تلقائي للحدود) → `assets/images/cars/`: `car_sedan.png` (Light Car)، `car_suv.png` (Light Car 3)، `car_van.png` (Light Car 2)، `car_luxury.png` (=sedan). علامة الخريطة `car_top_down.png` = قصّ السيارة البيضاء العلوية من `on map.png` + flood-fill لجعل الخلفية الداكنة شفافة (النوافذ محفوظة). نُسخت لكلا التطبيقين.

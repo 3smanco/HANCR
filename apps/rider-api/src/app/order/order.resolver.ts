@@ -5,6 +5,7 @@ import {
   Args,
   Subscription,
   Int,
+  Float,
 } from '@nestjs/graphql';
 import { UseGuards, Inject } from '@nestjs/common';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
@@ -15,6 +16,8 @@ import { RateDriverInput } from './dto/rate-driver.input';
 import { RoutePreviewInput, RoutePreviewType } from './dto/route-preview.type';
 import { CouponPreviewType } from './dto/coupon-preview.type';
 import { CouponService } from './coupon.service';
+import { MatchingService } from './matching.service';
+import { NearbyDriverPin } from './dto/nearby-driver.type';
 import { JwtAuthGuard, CurrentUser } from '../auth/jwt-auth.guard';
 import { AuthUser } from '../auth/jwt.strategy';
 import { PUB_SUB } from '../pubsub.provider';
@@ -24,8 +27,22 @@ export class OrderResolver {
   constructor(
     private readonly orderService: OrderService,
     private readonly couponService: CouponService,
+    private readonly matchingService: MatchingService,
     @Inject(PUB_SUB) private readonly pubSub: RedisPubSub,
   ) {}
+
+  /**
+   * سائقون قريبون للعرض الحيّ على خريطة الراكب (إحداثيات فقط).
+   */
+  @Query(() => [NearbyDriverPin], { description: 'سائقون قريبون (للخريطة)' })
+  @UseGuards(JwtAuthGuard)
+  async nearbyDrivers(
+    @Args('lat', { type: () => Float }) lat: number,
+    @Args('lng', { type: () => Float }) lng: number,
+  ): Promise<NearbyDriverPin[]> {
+    const pins = await this.matchingService.nearbyDriverPins(lat, lng);
+    return pins.map((p) => ({ lat: p.lat, lng: p.lng, heading: p.heading }));
+  }
 
   /**
    * معاينة كوبون الخصم قبل الطلب
