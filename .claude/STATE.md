@@ -2,7 +2,21 @@
 
 > هذا الملف هو **المصدر الحي لحالة المشروع**. يُحدَّث بعد كل خطوة عمل.
 > ابدأ أي محادثة جديدة بقراءته (وحده يكفي للسياق) بدل تحميل المهارة الضخمة أو قراءة عشرات الملفات.
-> آخر تحديث: 2026-06-15
+> آخر تحديث: 2026-06-22
+
+## 🚗 سيارات 3D + إصلاحات الحجز/المنطقة/اللغة (2026-06-22) — ردّاً على ملاحظات المالك
+المالك اشتكى (لقطات شاشة): السيارات القديمة (قبة برتقالية) قبيحة وكبيرة على الخريطة؛ خطأ "نقطة الالتقاط خارج المنطقة المحددة" عند الحجز (هو في قطر)؛ نصوص عربية رغم اللغة الإنجليزية؛ شاشة الحجز مزدحمة مقابل بساطة أوبر. قراراه: تبسيط الحجز (طيّ الخيارات) + رندرات 3D مثل أوبر.
+- **رندرات 3D (PNG):** المالك قدّم في `Downloads/Vector Car` ملفات PNG 3D احترافية (6400×4800، خلفية #F0F0F0 مدمجة). عُولجت بـ PowerShell+System.Drawing (تصغير 1200px + قصّ تلقائي للحدود) → `assets/images/cars/`: `car_sedan.png` (Light Car)، `car_suv.png` (Light Car 3)، `car_van.png` (Light Car 2)، `car_luxury.png` (=sedan). علامة الخريطة `car_top_down.png` = قصّ السيارة البيضاء العلوية من `on map.png` + flood-fill لجعل الخلفية الداكنة شفافة (النوافذ محفوظة). نُسخت لكلا التطبيقين.
+- **`car_art.dart` (كلا التطبيقين):** أُعيد كتابته — يعرض الرندر داخل "بطاقة فاتحة" مستديرة (#F1F1F2) مثل أوبر؛ bike يبقى CustomPainter داخل نفس البطاقة. الواجهة ثابتة (type/size) + `radius`/`background` اختياريان.
+- **`animated_car_marker.dart`:** `CarMarkerFactory.car()` يحمّل `car_top_down.png` كـ BitmapDescriptor (instantiateImageCodec targetHeight يحافظ على النسبة)؛ px خُفّض إلى 62 (كان 110 — كبير). `color` صار اختيارياً مُتجاهَلاً.
+- **إصلاح "خارج المنطقة" (حرج):** كان `AppConfig.defaultRegionId=3` (السعودية) مثبّتاً. أُضيف `nearestRegionQuery` (موجود في rider-api) → `_detectRegion()` في booking يكتشف المنطقة من GPS الالتقاط ويضبط `_regionId` + العملة، ويعيد تحميل الخدمات. كل `AppConfig.defaultRegionId` في booking → `_regionId` (services/order/coupon/bid).
+- **اللغة:** "تبدأ من X ر.س" → `tr('startsFrom')` + `_routeCurrency` (من المنطقة)؛ سطر المسافة → `tr('distance')/tr('km')/tr('minShort')`؛ `'الوجهة المحددة'` → `tr('selectedDestination')`. **اسم الخدمة:** `ServiceModel.displayName` getter (يعرض nameEn للغير-عربية إن توفّر) بدل `s.name`. مفاتيح جديدة: startsFrom/selectedDestination/moreOptions.
+- **تبسيط الحجز:** التفضيلات (هدوء/موسيقى/عائلي/ليلي) + المزايدة + الجدولة + كود الخصم → داخل قسم "خيارات إضافية" (`_showOptions`) مطوي بزر `Icons.tune` + سهم دوّار. الظاهر الافتراضي: بطاقات السيارات + الدفع + زر الطلب (نمط أوبر النظيف).
+- **pubspec:** `flutter_svg ^2.0.16` + `assets/svg/` (كلاهما؛ flutter_svg لم يعد مستخدماً في CarArt لكنه يبقى للخطة)؛ driver أُضيف `assets/images/cars/`.
+- **`flutter analyze` = 0 أخطاء** (راكب 121 / سائق 19 info قديمة).
+- **⏳ APK الراكب:** يُبنى (arm64، recipe منخفض الذاكرة؛ `gradle.properties.bak` يجب استعادته بعد البناء). بعده: نشر `hancr.com/downloads/hancr-rider.apk` + **إلغاء تثبيت القديم قبل الجديد**.
+- **🔴 منفصل (إجراء المالك):** بطاقة Mastercard 3533 على حساب فوترة Google (010323-68B0F4-D97E7D) مرفوضة (US$35.60 مستحقة) → كل Maps/Places/Directions في hancr-494520 تفشل. يجب على المالك دفع/تحديث البطاقة. (مستقل عن إصلاح المنطقة أعلاه.)
+- **⏭️ التالي:** بناء/نشر APK السائق أيضاً؛ تعريب أوسع للنصوص المتبقية؛ الدفعة 0 من خطة التجديد (السكينان + motion v2 + Lottie).
 
 ## 👤 تطوير قسم "الحساب" في تطبيق الراكب — قوائم Uber الناقصة (2026-06-15) — `.claude/plans/synchronous-jingling-stream.md`
 الهدف: إضافة قوائم Uber الناقصة لقسم الحساب **بهوية HANCR الداكنة (Aurora/ember) دون حذف أو تغيير الشكل**. أُنجزت 7 مراحل (A–G)، **مبنية ومحلَّلة، غير منشورة بعد**.
@@ -280,7 +294,10 @@ flutter build apk --release --dart-define=ENV=production \
   - **بحث الأماكن بالاسم:** وحدة backend جديدة `apps/rider-api/src/app/places/` (PlacesService يوكّل Google Places Autocomplete+Details بمفتاح `GOOGLE_MAPS_API_KEY` الخادمي) + queries `searchPlaces`/`placeDetails`. شاشة الحجز: حقل بحث + اقتراحات + اختيار يحرّك الكاميرا ويضبط الوجهة. (gql + i18n `searchPlaceHint`.)
   - **⚠️ تشغيلي للمالك:** يجب **تفعيل "Places API"** على مفتاح GOOGLE_MAPS_API_KEY في Google Cloud (Directions مفعّل أصلاً)؛ وإلا تعود نتائج البحث فارغة.
   - **⚠️ بيانات:** خدمتان تظهران «؟؟؟؟» في اختيار الخدمة — اسم الخدمة في DB غالباً مخزَّن خطأً (charset/placeholder)؛ يُصلَح من لوحة الأدمن (الخدمات ← تعديل الاسم).
-  - **⏭️ نشر: rider-api restart (لا migration) + APK الراكب.**
+  - **✅ منشور (2026-06-21): rider-api restart (health=200) + APK الراكب.**
+  - **تشخيص حيّ للمفتاح (مهم):** Places **القديمة** معطّلة على المشروع (REQUEST_DENIED legacy)، و**الجديدة** محجوبة على المفتاح (`API_KEY_SERVICE_BLOCKED`, project 799007348010). حُوّل الكود إلى **Places API (New) `places:searchText`** (يعيد الاسم+العنوان+الإحداثيات في نداء واحد + حساب مسافة هافرسين + ترتيب بالأقرب → فروع مع منطقة ومسافة). APK محدّث (47,208,511 HTTP 200، PR #179).
+  - **⚠️ إجراء المالك في Google Cloud (لا أستطيعه — يحتاج حسابه):** (1) تفعيل **Places API (New)** على المشروع، (2) في Credentials → مفتاح GOOGLE_MAPS_API_KEY → API restrictions → أضِف «Places API (New)» (أو ارفع القيد). بعدها يعمل البحث فوراً بلا كود إضافي.
+  - **⚠️ أسماء الخدمات «؟؟؟؟»:** مؤكَّد من DB — services 10–15 الاسم العربي مخزَّن `?` (فساد charset عند الإدراج؛ name_en سليم: Parcel/Hourly). الإصلاح المقترح: Parcel→«توصيل طرود»، Hourly→«سائق بالساعة». **UPDATE المباشر رُفض بانتظار تأكيد المالك للأسماء** (أو تعديلها من الأدمن).
 
 - **🟥➡️🟩 إصلاح جذري: تعليق دخول السائق على شاشة اللوجو — محلول ومنشور (2026-06-21، PR #177).**
   - **السبب الجذري:** redirect في `driver-app/lib/app.dart` كان `if (auth is AuthLoading || auth is AuthInitial) → /splash`، فعند إرسال OTP (AuthLoading) يُقذف المستخدم من /auth/phone إلى /splash ويعلق (splash لا تعالج AuthOtpSent). (الراكب كان سليماً.)

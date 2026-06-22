@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../i18n/app_localization.dart';
 
 class ServiceModel extends Equatable {
   final int id;
@@ -43,6 +44,14 @@ class ServiceModel extends Equatable {
         iconUrl: json['iconUrl'] as String?,
         isVip: json['isVip'] as bool? ?? false,
       );
+
+  /// الاسم حسب لغة الواجهة: nameEn للإنجليزية (وغير العربية) إن توفّر،
+  /// وإلا الاسم العربي الافتراضي. يصحّح ظهور أسماء عربية على واجهة إنجليزية.
+  String get displayName {
+    final code = LocaleController.instance.value.languageCode;
+    if (code != 'ar' && nameEn.isNotEmpty) return nameEn;
+    return name;
+  }
 
   @override
   List<Object?> get props => [id, name, baseFare];

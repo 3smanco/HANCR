@@ -14,6 +14,7 @@ import '../../blocs/order/order_state.dart';
 import '../../core/config/app_config.dart';
 import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/rider_gql.dart';
+import '../../core/graphql/gql/order_gql.dart';
 import '../../core/graphql/gql/company_gql.dart';
 import '../../core/models/order_model.dart';
 import '../../core/models/service_model.dart';
@@ -22,6 +23,7 @@ import '../../core/widgets/aurora/aurora.dart';
 import '../../core/widgets/car_art.dart';
 import '../../core/motion/motion.dart';
 import 'aurora_bid_waiting_screen.dart';
+import 'reserve_modal.dart';
 
 /// AuroraBookingScreen — قلب تجربة الراكب: تحديد الوجهة + اختيار الخدمة + الطلب.
 ///
@@ -63,6 +65,9 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
 
   _BookingStep _step = _BookingStep.pickDestination;
 
+  // المنطقة (تُكتشف تلقائياً من GPS — تصحّح خطأ "خارج المنطقة" + العملة)
+  int _regionId = AppConfig.defaultRegionId;
+
   // الخدمات
   List<ServiceModel> _services = [];
   ServiceModel? _selectedService;
@@ -83,6 +88,12 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   bool _familyMode = false;
   bool _nightShift = false;
   bool _bidMode = false;
+  bool _showOptions = false; // طيّ التفضيلات/المزايدة/الخصم خلف "خيارات"
+  bool _businessProfile = false; // ملف Personal/Business (يوجّه الفوترة للشركة)
+
+  // Phase 2 — اختصارات سريعة في شاشة الوجهة (محفوظة + أخيرة)
+  List<Map<String, dynamic>> _savedShortcuts = [];
+  List<({String label, double lat, double lng})> _recents = [];
   final TextEditingController _bidPriceCtrl = TextEditingController();
   bool _sendingBid = false;
   DateTime? _scheduledAt;
@@ -131,10 +142,65 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     super.initState();
     if (widget.presetDestination != null) {
       _destination = widget.presetDestination!;
-      _destinationLabel = widget.presetDestinationLabel ?? 'الوجهة المحددة';
+      _destinationLabel = widget.presetDestinationLabel ?? tr('selectedDestination');
     }
     _initLocation();
     _loadMyCompany();
+    _loadQuickPicks();
+  }
+
+  /// Phase 2 — يحمّل الأماكن المحفوظة (Home/Work) وآخر الوجهات لعرضها كاختصارات.
+  Future<void> _loadQuickPicks() async {
+    try {
+      final client = await GraphQLClientManager.get();
+      final saved = await client.query(QueryOptions(
+        document: gql(savedPlacesQuery),
+        fetchPolicy: FetchPolicy.cacheAndNetwork,
+      ));
+      final hist = await client.query(QueryOptions(
+        document: gql(orderHistoryQuery),
+        variables: {'limit': 12, 'offset': 0},
+        fetchPolicy: FetchPolicy.networkOnly,
+      ));
+      if (!mounted) return;
+      final places = (saved.data?['savedPlaces'] as List<dynamic>? ?? [])
+          .cast<Map<String, dynamic>>();
+      final orders = (hist.data?['orderHistory'] as List<dynamic>? ?? [])
+          .map((e) => OrderModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+      final seen = <String>{};
+      final recents = <({String label, double lat, double lng})>[];
+      for (final o in orders) {
+        if (o.points.length < 2) continue;
+        final d = o.points.last;
+        final label = o.destinationAddress;
+        if (label == 'Unknown' || seen.contains(label)) continue;
+        seen.add(label);
+        recents.add((label: label, lat: d.lat, lng: d.lng));
+        if (recents.length >= 5) break;
+      }
+      setState(() {
+        _savedShortcuts = places;
+        _recents = recents;
+      });
+    } catch (_) {
+      // اختصارات اختيارية — تُتجاهل عند الفشل
+    }
+  }
+
+  /// يثبّت وجهة مختارة (من اختصار/أخيرة) ويحرّك الكاميرا.
+  Future<void> _chooseDestination(
+      double lat, double lng, String label) async {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _predictions = [];
+      _searchCtrl.text = label;
+      _destination = GeoPoint(lat: lat, lng: lng);
+      _destinationLabel = label;
+    });
+    await _mapCtrl?.animateCamera(
+      CameraUpdate.newLatLngZoom(LatLng(lat, lng), 16),
+    );
   }
 
   Future<void> _loadMyCompany() async {
@@ -175,8 +241,33 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
       _mapCtrl?.animateCamera(
         CameraUpdate.newLatLng(LatLng(_origin.lat, _origin.lng)),
       );
+      _detectRegion();
     } catch (_) {
       // تجاهل — نستخدم الموقع الافتراضي
+    }
+  }
+
+  /// يكتشف منطقة الراكب من إحداثيات الالتقاط (يصحّح regionId والعملة).
+  /// بدونه تُرسل الطلبات بمنطقة افتراضية خاطئة ⇒ "خارج المنطقة المحددة".
+  Future<void> _detectRegion() async {
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(nearestRegionQuery),
+        variables: {'lat': _origin.lat, 'lng': _origin.lng},
+        fetchPolicy: FetchPolicy.networkOnly,
+      ));
+      final r = res.data?['nearestRegion'] as Map<String, dynamic>?;
+      if (r == null || !mounted) return;
+      setState(() {
+        _regionId = (r['id'] as num).toInt();
+        final cur = r['currency'] as String?;
+        if (cur != null && cur.isNotEmpty) _routeCurrency = cur;
+      });
+      // أعِد تحميل الخدمات للمنطقة الصحيحة إن كانت مُحمّلة بمنطقة سابقة.
+      if (_services.isNotEmpty) _loadServices();
+    } catch (_) {
+      // فشل الاكتشاف ⇒ نُبقي الافتراضي.
     }
   }
 
@@ -189,7 +280,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
       final client = await GraphQLClientManager.get();
       final res = await client.query(QueryOptions(
         document: gql(servicesQuery),
-        variables: const {'regionId': AppConfig.defaultRegionId},
+        variables: {'regionId': _regionId},
         fetchPolicy: FetchPolicy.networkOnly,
       ));
       if (res.hasException) {
@@ -429,7 +520,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           _routeDistanceM = (d['distanceMeters'] as num?)?.toInt();
           _routeDurationS = (d['durationSeconds'] as num?)?.toInt();
           _routeFare = (d['estimatedFare'] as num?)?.toDouble();
-          _routeCurrency = d['currency'] as String? ?? 'ر.س';
+          _routeCurrency = d['currency'] as String? ?? _routeCurrency;
           _drawPolyline(d['polyline'] as String?);
           _loadingRoute = false;
         });
@@ -524,7 +615,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           originAddress: _originLabel,
           destinationAddress: _destinationLabel,
           service: service,
-          regionId: AppConfig.defaultRegionId,
+          regionId: _regionId,
           quietRide: _quietRide,
           audioOff: _audioOff,
           scheduledAt: _isDelivery || _isHourly ? null : _scheduledAt,
@@ -552,27 +643,10 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   }
 
   Future<void> _pickSchedule() async {
-    final now = DateTime.now();
-    final date = await showDatePicker(
-      context: context,
-      initialDate: now.add(const Duration(minutes: 30)),
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 14)),
-    );
-    if (date == null || !mounted) return;
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(now.add(const Duration(minutes: 30))),
-    );
-    if (time == null || !mounted) return;
-    final picked = DateTime(
-        date.year, date.month, date.day, time.hour, time.minute);
-    if (picked.isBefore(now.add(const Duration(minutes: 5)))) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr('scheduleTooSoon')), backgroundColor: AuroraColors.smoke),
-      );
-      return;
-    }
+    // مودال الحجز المسبق Cupertino (تحقّق ساعتين + سياسة إلغاء + Reserve).
+    final categoryName = _selectedService?.displayName ?? tr('reservePrefix');
+    final picked = await AdvancedReserveModal.show(context, categoryName);
+    if (picked == null || !mounted) return;
     setState(() => _scheduledAt = picked);
   }
 
@@ -600,7 +674,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         variables: {
           'code': code,
           'fare': fare,
-          'regionId': AppConfig.defaultRegionId,
+          'regionId': _regionId,
         },
         fetchPolicy: FetchPolicy.networkOnly,
       ));
@@ -676,7 +750,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
             'addresses': [_originLabel, _destinationLabel],
             'proposedPrice': price,
             'serviceId': service.id,
-            'regionId': AppConfig.defaultRegionId,
+            'regionId': _regionId,
           }
         },
       ));
@@ -740,6 +814,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               ),
             );
             ctx.go('/home');
+            ctx.push('/upcoming');
           }
           // OrderCreated / OrderActive → الـ router يوجّه تلقائياً لـ /tracking
         },
@@ -857,8 +932,16 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
             ..._predictions.map(_predictionRow),
             const SizedBox(height: AuroraSpacing.sm),
             Divider(color: AuroraColors.border, height: AuroraSpacing.lg),
-          ] else
-            const SizedBox(height: AuroraSpacing.md),
+          ] else ...[
+            // Phase 2 — اختصارات سريعة (Home/Work + آخر الوجهات)
+            if (_searchCtrl.text.isEmpty &&
+                (_savedShortcuts.isNotEmpty || _recents.isNotEmpty)) ...[
+              const SizedBox(height: AuroraSpacing.sm),
+              _quickPicks(),
+              Divider(color: AuroraColors.border, height: AuroraSpacing.lg),
+            ] else
+              const SizedBox(height: AuroraSpacing.md),
+          ],
           _routeRow(Icons.my_location, AuroraColors.success, _originLabel),
           // محطات وسيطة
           for (var i = 0; i < _stops.length; i++) ...[
@@ -959,6 +1042,86 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     );
   }
 
+  /// Phase 2 — اختصارات Home/Work + آخر الوجهات (الحالة الفارغة).
+  Widget _quickPicks() {
+    final shortcuts = _savedShortcuts.where((p) {
+      final t = (p['type'] as String?)?.toLowerCase();
+      return t == 'home' || t == 'work';
+    }).toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (shortcuts.isNotEmpty) ...[
+          const SizedBox(height: AuroraSpacing.sm),
+          Wrap(
+            spacing: AuroraSpacing.sm,
+            runSpacing: AuroraSpacing.sm,
+            children: shortcuts.map((p) {
+              final isHome = (p['type'] as String?)?.toLowerCase() == 'home';
+              return GestureDetector(
+                onTap: () {
+                  final lat = (p['lat'] as num?)?.toDouble();
+                  final lng = (p['lng'] as num?)?.toDouble();
+                  if (lat == null || lng == null) return;
+                  _chooseDestination(lat, lng,
+                      (p['label'] as String?) ?? (p['address'] as String? ?? ''));
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: AuroraColors.ash,
+                    borderRadius: BorderRadius.circular(AuroraRadius.pill),
+                    border: Border.all(color: AuroraColors.border),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                          isHome
+                              ? Icons.home_rounded
+                              : Icons.work_outline_rounded,
+                          size: 16,
+                          color: AuroraColors.ember),
+                      const SizedBox(width: 6),
+                      Text(isHome ? tr('home') : tr('work'),
+                          style: AuroraText.bodySmall
+                              .copyWith(color: AuroraColors.pearl)),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: AuroraSpacing.xs),
+        ],
+        ..._recents.map(
+          (r) => InkWell(
+            onTap: () => _chooseDestination(r.lat, r.lng, r.label),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: AuroraSpacing.sm),
+              child: Row(
+                children: [
+                  Icon(Icons.history,
+                      size: 18, color: AuroraColors.textSecondary),
+                  const SizedBox(width: AuroraSpacing.md),
+                  Expanded(
+                    child: Text(r.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AuroraText.bodyMedium
+                            .copyWith(color: AuroraColors.pearl)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   String _distLabel(int meters) {
     if (meters < 1000) return '$meters م';
     return '${(meters / 1000).toStringAsFixed(1)} كم';
@@ -1053,8 +1216,8 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                 _loadingRoute
                     ? tr('calculatingRoute')
                     : _routeDistanceM != null
-                        ? 'المسافة ${(_routeDistanceM! / 1000).toStringAsFixed(1)} كم • ${(_routeDurationS! / 60).ceil()} دقيقة (بالطريق)'
-                        : 'المسافة ~${_distanceKm().toStringAsFixed(1)} كم',
+                        ? '${tr('distance')} ${(_routeDistanceM! / 1000).toStringAsFixed(1)} ${tr('km')} • ${(_routeDurationS! / 60).ceil()} ${tr('minShort')}'
+                        : '${tr('distance')} ~${_distanceKm().toStringAsFixed(1)} ${tr('km')}',
                 style: AuroraText.bodySmall,
               ),
             ],
@@ -1069,7 +1232,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           else if (_servicesError != null)
             _errorBox(_servicesError!)
           else
-            ..._services.map(_serviceRow),
+            ..._groupedServices(),
 
           const SizedBox(height: AuroraSpacing.md),
 
@@ -1145,142 +1308,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
             const SizedBox(height: AuroraSpacing.sm),
           ],
 
-          // التفضيلات + المزايدة (للمشاوير فقط)
-          if (!_isDelivery && !_isHourly) ...[
-          Row(
-            children: [
-              Expanded(
-                child: _prefChip(Icons.volume_off, tr('quietRide'), _quietRide,
-                    () => setState(() => _quietRide = !_quietRide)),
-              ),
-              const SizedBox(width: AuroraSpacing.sm),
-              Expanded(
-                child: _prefChip(Icons.music_off, tr('noMusic'), _audioOff,
-                    () => setState(() => _audioOff = !_audioOff)),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: AuroraSpacing.sm),
-
-          // وضع العائلة (يفضّل سائقة)
-          _prefChip(
-            Icons.family_restroom,
-            tr('familyMode'),
-            _familyMode,
-            () => setState(() => _familyMode = !_familyMode),
-          ),
-
-          const SizedBox(height: AuroraSpacing.sm),
-
-          // G1 — وضع الليل (سعر ثابت + مشاركة موقع مع جهات الطوارئ)
-          _prefChip(
-            Icons.nightlight_round,
-            tr('nightShift'),
-            _nightShift,
-            () => setState(() => _nightShift = !_nightShift),
-          ),
-          if (_nightShift)
-            Padding(
-              padding: const EdgeInsets.only(top: AuroraSpacing.xs),
-              child: Text(
-                tr('nightShiftHint'),
-                style: AuroraText.bodySmall
-                    .copyWith(color: AuroraColors.textSecondary),
-              ),
-            ),
-
-          const SizedBox(height: AuroraSpacing.sm),
-
-          // وضع المزايدة (اقترح سعرك)
-          _prefChip(Icons.gavel, tr('bidMode'), _bidMode,
-              () => setState(() => _bidMode = !_bidMode)),
-          if (_bidMode) ...[
-            const SizedBox(height: AuroraSpacing.sm),
-            TextField(
-              controller: _bidPriceCtrl,
-              keyboardType: TextInputType.number,
-              style: AuroraText.titleSmall.copyWith(color: AuroraColors.pearl),
-              decoration: InputDecoration(
-                hintText: tr('yourPrice'),
-                prefixIcon:
-                    Icon(Icons.attach_money, color: AuroraColors.ember),
-                filled: true,
-                fillColor: AuroraColors.ash,
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AuroraRadius.md),
-                  borderSide: BorderSide(color: AuroraColors.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AuroraRadius.md),
-                  borderSide:
-                      BorderSide(color: AuroraColors.ember, width: 1.5),
-                ),
-              ),
-            ),
-          ],
-
-          if (!_bidMode) ...[
-            const SizedBox(height: AuroraSpacing.md),
-            InkWell(
-              onTap: _pickSchedule,
-              borderRadius: BorderRadius.circular(AuroraRadius.md),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
-                decoration: BoxDecoration(
-                  color: AuroraColors.ash,
-                  borderRadius: BorderRadius.circular(AuroraRadius.md),
-                  border: Border.all(
-                    color: _scheduledAt != null
-                        ? AuroraColors.ember
-                        : AuroraColors.border,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _scheduledAt != null
-                          ? Icons.event_available
-                          : Icons.schedule,
-                      size: 18,
-                      color: _scheduledAt != null
-                          ? AuroraColors.ember
-                          : AuroraColors.textSecondary,
-                    ),
-                    const SizedBox(width: AuroraSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        _scheduledAt != null
-                            ? _formatSchedule(_scheduledAt!)
-                            : tr('rideNow'),
-                        style: TextStyle(
-                          color: _scheduledAt != null
-                              ? AuroraColors.textPrimary
-                              : AuroraColors.textSecondary,
-                          fontWeight: _scheduledAt != null
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                    if (_scheduledAt != null)
-                      GestureDetector(
-                        onTap: () => setState(() => _scheduledAt = null),
-                        child: Icon(Icons.close,
-                            size: 18, color: AuroraColors.textSecondary),
-                      )
-                    else
-                      Icon(Icons.keyboard_arrow_down,
-                          size: 18, color: AuroraColors.textSecondary),
-                  ],
-                ),
-              ),
-            ),
-          ],
-          ], // نهاية قسم المشاوير فقط
-
-          // ─── طريقة الدفع ───
+          // ─── طريقة الدفع — تبقى ظاهرة (عرض نظيف مثل أوبر) ───
           if (!_bidMode) ...[
             const SizedBox(height: AuroraSpacing.md),
             Row(
@@ -1316,79 +1344,282 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
             ],
           ],
 
-          // ─── كود الخصم ───
-          if (!_bidMode) ...[
+          // ─── خيارات إضافية (مطوية افتراضياً — تبسيط الواجهة) ───
+          const SizedBox(height: AuroraSpacing.md),
+          InkWell(
+            onTap: () => setState(() => _showOptions = !_showOptions),
+            borderRadius: BorderRadius.circular(AuroraRadius.md),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
+              decoration: BoxDecoration(
+                color: AuroraColors.ash,
+                borderRadius: BorderRadius.circular(AuroraRadius.md),
+                border: Border.all(color: AuroraColors.border),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.tune, size: 18, color: AuroraColors.ember),
+                  const SizedBox(width: AuroraSpacing.sm),
+                  Expanded(
+                    child: Text(tr('moreOptions'),
+                        style: AuroraText.bodyMedium
+                            .copyWith(color: AuroraColors.pearl)),
+                  ),
+                  AnimatedRotation(
+                    turns: _showOptions ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(Icons.keyboard_arrow_down,
+                        size: 20, color: AuroraColors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          if (_showOptions) ...[
             const SizedBox(height: AuroraSpacing.md),
-            if (_appliedCoupon == null)
+
+            // التفضيلات + الجدولة + المزايدة (للمشاوير فقط)
+            if (!_isDelivery && !_isHourly) ...[
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _couponCtrl,
-                      textCapitalization: TextCapitalization.characters,
-                      style: AuroraText.bodyMedium
-                          .copyWith(color: AuroraColors.pearl),
-                      decoration:
-                          _fieldDecoration(tr('couponCode'), Icons.local_offer),
-                    ),
+                    child: _prefChip(Icons.volume_off, tr('quietRide'),
+                        _quietRide,
+                        () => setState(() => _quietRide = !_quietRide)),
                   ),
                   const SizedBox(width: AuroraSpacing.sm),
-                  SizedBox(
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: _couponLoading ? null : _applyCoupon,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AuroraColors.smoke,
-                        foregroundColor: AuroraColors.ember,
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(AuroraRadius.md),
-                        ),
-                      ),
-                      child: _couponLoading
-                          ? const AuroraLoader(size: 18, stroke: 2)
-                          : Text(tr('apply')),
-                    ),
+                  Expanded(
+                    child: _prefChip(Icons.music_off, tr('noMusic'), _audioOff,
+                        () => setState(() => _audioOff = !_audioOff)),
                   ),
                 ],
-              )
-            else
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
-                decoration: BoxDecoration(
-                  color: AuroraColors.success.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AuroraRadius.md),
-                  border: Border.all(
-                      color: AuroraColors.success.withValues(alpha: 0.4)),
+              ),
+              const SizedBox(height: AuroraSpacing.sm),
+              _prefChip(
+                Icons.family_restroom,
+                tr('familyMode'),
+                _familyMode,
+                () => setState(() => _familyMode = !_familyMode),
+              ),
+              const SizedBox(height: AuroraSpacing.sm),
+              _prefChip(
+                Icons.nightlight_round,
+                tr('nightShift'),
+                _nightShift,
+                () => setState(() => _nightShift = !_nightShift),
+              ),
+              if (_nightShift)
+                Padding(
+                  padding: const EdgeInsets.only(top: AuroraSpacing.xs),
+                  child: Text(
+                    tr('nightShiftHint'),
+                    style: AuroraText.bodySmall
+                        .copyWith(color: AuroraColors.textSecondary),
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    Icon(Icons.check_circle,
-                        color: AuroraColors.success, size: 18),
-                    const SizedBox(width: AuroraSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        '$_appliedCoupon — ${tr('youSaved')} ${_couponDiscount?.toStringAsFixed(0) ?? ''} $_routeCurrency',
-                        style: AuroraText.bodySmall
-                            .copyWith(color: AuroraColors.pearl),
+              const SizedBox(height: AuroraSpacing.sm),
+              _prefChip(Icons.gavel, tr('bidMode'), _bidMode,
+                  () => setState(() => _bidMode = !_bidMode)),
+              if (_bidMode) ...[
+                const SizedBox(height: AuroraSpacing.sm),
+                TextField(
+                  controller: _bidPriceCtrl,
+                  keyboardType: TextInputType.number,
+                  style:
+                      AuroraText.titleSmall.copyWith(color: AuroraColors.pearl),
+                  decoration: InputDecoration(
+                    hintText: tr('yourPrice'),
+                    prefixIcon:
+                        Icon(Icons.attach_money, color: AuroraColors.ember),
+                    filled: true,
+                    fillColor: AuroraColors.ash,
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AuroraRadius.md),
+                      borderSide: BorderSide(color: AuroraColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AuroraRadius.md),
+                      borderSide:
+                          BorderSide(color: AuroraColors.ember, width: 1.5),
+                    ),
+                  ),
+                ),
+              ],
+              if (!_bidMode) ...[
+                const SizedBox(height: AuroraSpacing.sm),
+                InkWell(
+                  onTap: _pickSchedule,
+                  borderRadius: BorderRadius.circular(AuroraRadius.md),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AuroraSpacing.md,
+                        vertical: AuroraSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: AuroraColors.ash,
+                      borderRadius: BorderRadius.circular(AuroraRadius.md),
+                      border: Border.all(
+                        color: _scheduledAt != null
+                            ? AuroraColors.ember
+                            : AuroraColors.border,
                       ),
                     ),
-                    GestureDetector(
-                      onTap: _removeCoupon,
-                      child: Icon(Icons.close,
-                          size: 18, color: AuroraColors.textSecondary),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _scheduledAt != null
+                              ? Icons.event_available
+                              : Icons.schedule,
+                          size: 18,
+                          color: _scheduledAt != null
+                              ? AuroraColors.ember
+                              : AuroraColors.textSecondary,
+                        ),
+                        const SizedBox(width: AuroraSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            _scheduledAt != null
+                                ? _formatSchedule(_scheduledAt!)
+                                : tr('rideNow'),
+                            style: TextStyle(
+                              color: _scheduledAt != null
+                                  ? AuroraColors.textPrimary
+                                  : AuroraColors.textSecondary,
+                              fontWeight: _scheduledAt != null
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                        if (_scheduledAt != null)
+                          GestureDetector(
+                            onTap: () => setState(() => _scheduledAt = null),
+                            child: Icon(Icons.close,
+                                size: 18, color: AuroraColors.textSecondary),
+                          )
+                        else
+                          Icon(Icons.keyboard_arrow_down,
+                              size: 18, color: AuroraColors.textSecondary),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+
+            // كود الخصم
+            if (!_bidMode) ...[
+              const SizedBox(height: AuroraSpacing.md),
+              if (_appliedCoupon == null)
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _couponCtrl,
+                        textCapitalization: TextCapitalization.characters,
+                        style: AuroraText.bodyMedium
+                            .copyWith(color: AuroraColors.pearl),
+                        decoration: _fieldDecoration(
+                            tr('couponCode'), Icons.local_offer),
+                      ),
+                    ),
+                    const SizedBox(width: AuroraSpacing.sm),
+                    SizedBox(
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: _couponLoading ? null : _applyCoupon,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AuroraColors.smoke,
+                          foregroundColor: AuroraColors.ember,
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AuroraRadius.md),
+                          ),
+                        ),
+                        child: _couponLoading
+                            ? const AuroraLoader(size: 18, stroke: 2)
+                            : Text(tr('apply')),
+                      ),
                     ),
                   ],
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AuroraSpacing.md,
+                      vertical: AuroraSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: AuroraColors.success.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AuroraRadius.md),
+                    border: Border.all(
+                        color: AuroraColors.success.withValues(alpha: 0.4)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle,
+                          color: AuroraColors.success, size: 18),
+                      const SizedBox(width: AuroraSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          '$_appliedCoupon — ${tr('youSaved')} ${_couponDiscount?.toStringAsFixed(0) ?? ''} $_routeCurrency',
+                          style: AuroraText.bodySmall
+                              .copyWith(color: AuroraColors.pearl),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: _removeCoupon,
+                        child: Icon(Icons.close,
+                            size: 18, color: AuroraColors.textSecondary),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            if (_couponError != null)
-              Padding(
-                padding: const EdgeInsets.only(top: AuroraSpacing.xs),
-                child: Text(_couponError!,
-                    style: AuroraText.bodySmall
-                        .copyWith(color: AuroraColors.danger)),
-              ),
+              if (_couponError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: AuroraSpacing.xs),
+                  child: Text(_couponError!,
+                      style: AuroraText.bodySmall
+                          .copyWith(color: AuroraColors.danger)),
+                ),
+            ],
+          ],
+
+          // ─── شريط التفضيلات: الملف (Personal/Business) + الجدولة ───
+          if (!_isDelivery && !_isHourly && !_bidMode) ...[
+            const SizedBox(height: AuroraSpacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: _prefsPill(
+                    icon: _businessProfile
+                        ? Icons.business_center
+                        : Icons.person_outline,
+                    label: _businessProfile ? tr('business') : tr('personal'),
+                    active: _businessProfile,
+                    onTap: () {
+                      setState(() {
+                        _businessProfile = !_businessProfile;
+                        _paymentMode = _businessProfile && _myCompany != null
+                            ? 'Company'
+                            : 'Cash';
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: AuroraSpacing.sm),
+                Expanded(
+                  child: _prefsPill(
+                    icon: Icons.schedule,
+                    label: _scheduledAt != null
+                        ? _formatSchedule(_scheduledAt!)
+                        : tr('schedule'),
+                    active: _scheduledAt != null,
+                    onTap: _pickSchedule,
+                  ),
+                ),
+              ],
+            ),
           ],
 
           const SizedBox(height: AuroraSpacing.lg),
@@ -1422,6 +1653,16 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   }
 
   CarType _carTypeFor(ServiceModel s) {
+    // تخصيص رندر السيارة حسب الفئة (يشمل فئات أوبر الجديدة).
+    switch (s.nameEn) {
+      case 'XL':
+        return CarType.van;
+      case 'Black':
+      case 'VIP':
+        return CarType.luxury;
+      case 'Comfort':
+        return CarType.suv;
+    }
     if (s.isVip) return CarType.luxury;
     switch (s.serviceType) {
       case 'PackageDelivery':
@@ -1432,6 +1673,47 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         return CarType.sedan;
     }
   }
+
+  /// يجمّع الخدمات في أقسام بأسلوب أوبر (اقتصادي / مريح وفاخر / سعة وخاص).
+  /// أي خدمة غير مصنّفة تظهر تحت "أخرى" حتى لا تختفي.
+  List<Widget> _groupedServices() {
+    const groups = <String, List<String>>{
+      'economySection': ['Economy', 'Share'],
+      'comfortSection': ['Comfort', 'Black', 'VIP'],
+      'largeSection': ['XL', 'Parcel', 'Hourly'],
+    };
+    final widgets = <Widget>[];
+    final shown = <int>{};
+    groups.forEach((sectionKey, names) {
+      final inGroup =
+          _services.where((s) => names.contains(s.nameEn)).toList();
+      if (inGroup.isEmpty) return;
+      widgets.add(_sectionHeader(tr(sectionKey)));
+      for (final s in inGroup) {
+        widgets.add(_serviceRow(s));
+        shown.add(s.id);
+      }
+    });
+    final rest = _services.where((s) => !shown.contains(s.id)).toList();
+    if (rest.isNotEmpty) {
+      widgets.add(_sectionHeader(tr('otherSection')));
+      widgets.addAll(rest.map(_serviceRow));
+    }
+    return widgets;
+  }
+
+  Widget _sectionHeader(String label) => Padding(
+        padding: const EdgeInsets.only(
+            top: AuroraSpacing.sm, bottom: AuroraSpacing.xs),
+        child: Text(
+          label,
+          style: AuroraText.caption.copyWith(
+            color: AuroraColors.textSecondary,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+          ),
+        ),
+      );
 
   Widget _serviceRow(ServiceModel s) {
     final selected = _selectedService?.id == s.id;
@@ -1454,18 +1736,14 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         child: Row(
           children: [
             Container(
-              width: 60,
-              height: 44,
-              alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: AuroraColors.coal,
-                borderRadius: BorderRadius.circular(AuroraRadius.sm),
+                borderRadius: BorderRadius.circular(AuroraRadius.sm + 2),
                 boxShadow: selected ? AuroraShadows.iconGlow : null,
               ),
               child: CarArt(
                 type: _carTypeFor(s),
-                color: selected ? AuroraColors.ember : AuroraColors.emberLight,
-                size: const Size(50, 30),
+                size: const Size(68, 46),
+                radius: AuroraRadius.sm + 2,
               ),
             ),
             const SizedBox(width: AuroraSpacing.md),
@@ -1473,7 +1751,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(s.name, style: AuroraText.titleSmall),
+                  Text(s.displayName, style: AuroraText.titleSmall),
                   const SizedBox(height: 2),
                   (selected && _routeFare != null)
                       ? CountUpText(
@@ -1486,7 +1764,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                           ),
                         )
                       : Text(
-                          'تبدأ من ${s.minimumFee.toStringAsFixed(0)} ر.س',
+                          '${tr('startsFrom')} ${s.minimumFee.toStringAsFixed(0)} $_routeCurrency',
                           style: AuroraText.bodySmall.copyWith(
                             color: AuroraColors.textSecondary,
                           ),
@@ -1538,6 +1816,16 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     required VoidCallback onTap,
   }) {
     return _prefChip(icon, label, selected, onTap);
+  }
+
+  /// كبسولة شريط التفضيلات (الملف / الجدولة).
+  Widget _prefsPill({
+    required IconData icon,
+    required String label,
+    required bool active,
+    required VoidCallback onTap,
+  }) {
+    return _prefChip(icon, label, active, onTap);
   }
 
   Widget _errorBox(String msg) {

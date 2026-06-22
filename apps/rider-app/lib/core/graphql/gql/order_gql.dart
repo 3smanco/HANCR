@@ -163,6 +163,27 @@ const String orderHistoryQuery = r'''
   }
 ''';
 
+const String upcomingOrdersQuery = r'''
+  query UpcomingOrders {
+    upcomingOrders {
+      id
+      type
+      status
+      costBest
+      costAfterCoupon
+      currency
+      distanceBest
+      durationBest
+      addresses
+      points { lat lng }
+      serviceId
+      regionId
+      expectedTimestamp
+      createdOn
+    }
+  }
+''';
+
 const String orderUpdatedSubscription = r'''
   subscription OrderUpdated {
     orderUpdated {

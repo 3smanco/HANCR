@@ -47,6 +47,17 @@ const String generateRiderUploadUrlMutation = r'''
   }
 ''';
 
+const String nearestRegionQuery = r'''
+  query NearestRegion($lat: Float!, $lng: Float!) {
+    nearestRegion(lat: $lat, lng: $lng) {
+      id
+      name
+      nameEn
+      currency
+    }
+  }
+''';
+
 const String servicesQuery = r'''
   query Services($regionId: Int!) {
     services(regionId: $regionId) {

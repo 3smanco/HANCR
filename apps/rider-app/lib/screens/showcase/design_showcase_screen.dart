@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/aurora_theme.dart';
+import '../../core/widgets/car_art.dart';
 import '../../core/widgets/hancr_widgets.dart';
 
 /// DesignShowcaseScreen — عرض حيّ لكل مكونات HANCR Design System
@@ -280,6 +282,11 @@ class _DesignShowcaseScreenState extends State<DesignShowcaseScreen> {
               ),
               const SizedBox(height: HancrSpacing.xxl),
 
+              // ============ Car Art (SVG) ============
+              _section('🚗 رسوم السيارات (SVG Assets)'),
+              _CarArtShowcase(),
+              const SizedBox(height: HancrSpacing.xxl),
+
               // ============ Trip Options ============
               _section('🚙 اختيار الفئة (Service Tier)'),
               HancrTripOption(
@@ -472,6 +479,47 @@ class _DesignShowcaseScreenState extends State<DesignShowcaseScreen> {
           color: HancrColors.navy,
         ),
       ),
+    );
+  }
+}
+
+class _CarArtShowcase extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+          decoration: BoxDecoration(
+            color: AuroraColors.ash,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AuroraColors.border),
+          ),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            alignment: WrapAlignment.spaceAround,
+            children: CarType.values.map((t) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CarArt(type: t, size: const Size(100, 64)),
+                  const SizedBox(height: 4),
+                  Text(
+                    t.name,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: AuroraColors.textHint,
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: HancrSpacing.md),
+      ],
     );
   }
 }
