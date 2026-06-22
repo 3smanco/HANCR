@@ -13,7 +13,7 @@ Question: فحص شامل لـ HANCR — التطبيقات لا تعمل بال
 4. **Admin Live Map blank — `NEXT_PUBLIC_GOOGLE_MAPS_KEY` configured nowhere** — Outsider + Expansionist. Dashboard flagship dead.
 5. **Settlement swallowed → free rides** — Contrarian + First Principles. Insufficient-balance wallet rides complete unpaid; un-transactioned debit/credit.
 6. **Hardcoded Google Maps key committed** — Contrarian (.env) + Outsider (both Android manifests).
-7. **Weak shared JWT secret `OS.009988.os` across all 3 roles** — Contrarian (also = admin password). Forge super-admin token.
+7. **Weak shared JWT secret `[REDACTED_WEAK_SECRET]` across all 3 roles** — Contrarian (also = admin password). Forge super-admin token.
 
 ## ⚔️ Where the Council Clashes / Corrections
 - **"The apps don't work"** — Outsider + Executor REFUTE the premise: crash logs (hs_err_pid, flutter_*.log) are **local tooling OOM**, NOT app defects. `flutter analyze` = 0 errors both apps; all tsc/build gates GREEN. The broken *feeling* is real but caused by **dead buttons + half-English driver app + blank live map**, not broken builds.

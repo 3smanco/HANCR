@@ -95,6 +95,17 @@ export SENTRY_DSN_DRIVER_APP="https://..."
 
 ./scripts/build-flutter-release.sh all
 ```
+The mobile Maps key is injected at build time. Do not commit it in
+`AndroidManifest.xml`, `AppDelegate.swift`, or docs. Supported sources:
+
+- Shell env: `GOOGLE_MAPS_API_KEY=...`
+- Android local file: `apps/<app>/android/local.properties` with
+  `GOOGLE_MAPS_API_KEY=...` or `MAPS_API_KEY=...`
+- iOS local file: `apps/<app>/ios/Flutter/Secrets.xcconfig` with
+  `GOOGLE_MAPS_API_KEY = ...`
+
+Production builds should fail fast when the key is missing; otherwise the app
+can ship with a blank native Maps key.
 
 ### الطريقة (ب): يدوي
 

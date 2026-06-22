@@ -8,6 +8,8 @@
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
 		<string>HANCR Captain</string>
+		<key>GoogleMapsApiKey</key>
+		<string>$(GOOGLE_MAPS_API_KEY)</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>HANCR Captain needs your location to show your position on the map and match you with nearby riders.</string>
 		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

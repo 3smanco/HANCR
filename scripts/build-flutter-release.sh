@@ -22,6 +22,20 @@ SENTRY_DSN_DRIVER="${SENTRY_DSN_DRIVER_APP:-}"
 MAPS_KEY="${GOOGLE_MAPS_API_KEY:-}"
 ENV_NAME="${ENV:-production}"
 
+read_maps_key_from_local_properties() {
+    local APP_DIR=$1
+    local LOCAL_PROPERTIES="${APP_DIR}/android/local.properties"
+    if [[ ! -f "$LOCAL_PROPERTIES" ]]; then
+        return 0
+    fi
+
+    grep -E '^(GOOGLE_MAPS_API_KEY|MAPS_API_KEY)=' "$LOCAL_PROPERTIES" \
+        | tail -n 1 \
+        | cut -d '=' -f 2- \
+        | sed 's/[[:space:]]*$//' \
+        | sed 's/^[[:space:]]*//'
+}
+
 if [[ -z "$MAPS_KEY" ]]; then
     echo "⚠ GOOGLE_MAPS_API_KEY غير معرَّفة. Maps لن يعمل في الـ release build."
 fi
@@ -30,6 +44,15 @@ build_app() {
     local APP_NAME=$1
     local SENTRY_DSN=$2
     local APP_DIR="apps/${APP_NAME}-app"
+    local APP_MAPS_KEY="$MAPS_KEY"
+    if [[ -z "$APP_MAPS_KEY" ]]; then
+        APP_MAPS_KEY="$(read_maps_key_from_local_properties "$APP_DIR")"
+    fi
+    if [[ "$ENV_NAME" == "production" && -z "$APP_MAPS_KEY" ]]; then
+        echo "Missing GOOGLE_MAPS_API_KEY/MAPS_API_KEY for ${APP_NAME} production build."
+        echo "Set it in the shell or ${APP_DIR}/android/local.properties before building."
+        return 1
+    fi
 
     if [[ ! -d "$APP_DIR" ]]; then
         echo "✗ لا يوجد مجلد $APP_DIR"
@@ -53,8 +76,8 @@ build_app() {
         --split-per-abi \
         --dart-define=ENV="$ENV_NAME" \
         --dart-define=SENTRY_DSN="$SENTRY_DSN" \
-        --dart-define=MAPS_API_KEY="$MAPS_KEY" \
-        --dart-define=MAPS_KEY="$MAPS_KEY"
+        --dart-define=MAPS_API_KEY="$APP_MAPS_KEY" \
+        --dart-define=MAPS_KEY="$APP_MAPS_KEY"
 
     # ─── Android App Bundle (للـ Play Store) ───
     echo ""
@@ -62,8 +85,8 @@ build_app() {
     flutter build appbundle --release \
         --dart-define=ENV="$ENV_NAME" \
         --dart-define=SENTRY_DSN="$SENTRY_DSN" \
-        --dart-define=MAPS_API_KEY="$MAPS_KEY" \
-        --dart-define=MAPS_KEY="$MAPS_KEY"
+        --dart-define=MAPS_API_KEY="$APP_MAPS_KEY" \
+        --dart-define=MAPS_KEY="$APP_MAPS_KEY"
 
     # ─── (اختياري) iOS ───
     if [[ "$(uname -s)" == "Darwin" ]]; then
@@ -72,8 +95,8 @@ build_app() {
         flutter build ipa --release \
             --dart-define=ENV="$ENV_NAME" \
             --dart-define=SENTRY_DSN="$SENTRY_DSN" \
-            --dart-define=MAPS_API_KEY="$MAPS_KEY" \
-            --dart-define=MAPS_KEY="$MAPS_KEY" \
+            --dart-define=MAPS_API_KEY="$APP_MAPS_KEY" \
+            --dart-define=MAPS_KEY="$APP_MAPS_KEY" \
             --export-options-plist=ios/ExportOptions.plist || \
             echo "⚠ iOS build فشل — تأكَّد من Xcode + provisioning"
     else

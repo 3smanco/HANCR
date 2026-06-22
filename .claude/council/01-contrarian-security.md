@@ -1,8 +1,8 @@
 # Contrarian — Security Red-Team Findings
 
 ## CRITICAL
-1. **Identical JWT secret across rider/driver/admin** — `.env:25-28` all = `OS.009988.os`. driver-api never reads JWT_DRIVER_SECRET (jwt.strategy.ts:26 loads JWT_SECRET). Only role separation is in-payload `payload.type` (jwt.strategy.ts:32). Forge `{type:'admin',role:'super'}` → full admin control. Fix: 3 distinct high-entropy secrets; admin-api uses ADMIN_JWT_SECRET, driver uses JWT_DRIVER_SECRET.
-2. **Weak secret reused as ADMIN_DEFAULT_PASSWORD** — `.env:25` & `.env:73` same value seeds bootstrap super admin (auth.resolver.ts:49-59). Login admin@hancr.com / OS.009988.os. Fix: random secret + separate strong password + change-on-first-login.
+1. **Identical JWT secret across rider/driver/admin** — `.env:25-28` all = `[REDACTED_WEAK_SECRET]`. driver-api never reads JWT_DRIVER_SECRET (jwt.strategy.ts:26 loads JWT_SECRET). Only role separation is in-payload `payload.type` (jwt.strategy.ts:32). Forge `{type:'admin',role:'super'}` → full admin control. Fix: 3 distinct high-entropy secrets; admin-api uses ADMIN_JWT_SECRET, driver uses JWT_DRIVER_SECRET.
+2. **Weak secret reused as ADMIN_DEFAULT_PASSWORD** — `.env:25` & `.env:73` same value seeds bootstrap super admin (auth.resolver.ts:49-59). Login admin@hancr.com / [REDACTED_WEAK_SECRET]. Fix: random secret + separate strong password + change-on-first-login.
 3. **Free wallet top-up `startWalletRecharge`** — wallet.resolver.ts:128-147: when payments_card_enabled false (default), credits balance immediately (simulated:true), no charge. Throttle 10/min, cap 5000. → 50k/min free balance. Fix: gate simulated branch behind NODE_ENV!=='production'; require gateway webhook.
 4. **`confirmWalletRecharge` rider self-confirm** — wallet.resolver.ts:189-233: rider (only JwtAuthGuard) promotes own Pending recharge to Completed credit, no signature check. Fix: delete/restrict to webhook only (wallet-webhook.controller.ts after HMAC).
 

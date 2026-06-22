@@ -1,6 +1,7 @@
 # HANCR Launch Readiness
 
-Last verified server state: `/opt/hancr` on `main` commit `e050122`.
+Verify the live server state with `git rev-parse --short HEAD` in `/opt/hancr`
+after each deploy.
 
 ## Green Checks
 
@@ -9,6 +10,7 @@ These checks are expected to pass before deploy:
 ```bash
 npm run ci:verify
 npm run readiness:template
+npm run secrets:check
 ```
 
 On the PM2 server:
@@ -67,4 +69,5 @@ git push origin feat/nearby-drivers
 
 The workflow should run the same gates as `npm run ci:verify`.
 
-`npm run ci:verify` also runs `flutter analyze --no-pub` for both mobile apps.
+`npm run ci:verify` also runs the secret hygiene check and
+`flutter analyze --no-pub` for both mobile apps.

@@ -12,7 +12,8 @@
 - **App (rider):** مودال حجز مسبق Cupertino (`reserve_modal.dart`: بكرات + تحقّق ساعتين + سياسة إلغاء → `/upcoming`) · تبويبا Upcoming/Past في النشاط (`UpcomingRidesView` + `UpcomingRidesScreen`) · فئات مجمّعة (اقتصادي/مريح وفاخر/سعة وخاص) في `_groupedServices` · شريط تفضيلات (Personal/Business + زر جدولة ظاهر) · اختصارات الوجهة (Home/Work + آخر الوجهات في `_quickPicks`) · `ServiceModel.displayName` (أسماء إنجليزية على اللغة الإنجليزية).
 - **التحقق:** `flutter analyze`=0 (راكب) · rider-api `tsc`=0 · fare-calculator jest **7/7** أخضر.
 - **النشر (مُتحقَّق):** server `git pull` main + migration (`typeorm-ts-node-commonjs`، `TS_NODE_PROJECT=tsconfig.base.json`) نجح + `pm2 restart rider-api` → `api.hancr.com/rider/graphql`=200. APK الراكب (arm64، **48,091,899 بايت**) → `hancr.com/downloads/hancr-rider.apk` HTTP 200 مطابق. **المالك: ألغِ تثبيت القديم قبل الجديد.**
-- **مؤجَّل (صريح للمالك):** تجميع ركّاب Share الفعلي (pooling) · سيارات الجوار الحيّة (يحتاج `nearbyDrivers` باكإند) · Phase 7 (RideRequestPayload موحّد — داخلي، الحالة الحالية تعمل). · **Google Maps billing (بطاقة 3533 المرفوضة US$35.60)** ما زال يعطّل بلاطات الخريطة/التسعير الحيّ — إجراء المالك.
+- **✅ سيارات الجوار الحيّة (PR [#181](https://github.com/3smanco/HANCR/pull/181)، main=c5e9d45، منشور):** `nearbyDrivers(lat,lng)` في rider-api (يعيد استخدام `MatchingService.findNearbyDrivers` / Redis GEO) + `NearbyDriverPin` type. خريطة الحجز تستطلع كل 10ث وترسم علامات سيارة top-down (`_loadNearbyDrivers` + `_driversTimer`). نُشر: server pull + `pm2 restart rider-api`=200 + APK (48,091,899) HTTP 200. التحقق: السلسلة `NearbyDrivers` موجودة في libapp.so.
+- **مؤجَّل:** تجميع ركّاب Share الفعلي (pooling — ميزة كبيرة تحتاج محرك مطابقة + دورة حياة رحلة مشتركة + تعديل تطبيق السائق + قرارات منتج؛ Share الآن فئة فردية مخفّضة) · Phase 7 (RideRequestPayload — داخلي، يعمل) · **Google Maps billing (بطاقة 3533 المرفوضة US$35.60)** يعطّل بلاطات الخريطة/التسعير الحيّ — إجراء المالك (لا أستطيع إدخال بطاقة).
 
 ## 🚗 سيارات 3D + إصلاحات الحجز/المنطقة/اللغة (2026-06-22) — ردّاً على ملاحظات المالك
 المالك اشتكى (لقطات شاشة): السيارات القديمة (قبة برتقالية) قبيحة وكبيرة على الخريطة؛ خطأ "نقطة الالتقاط خارج المنطقة المحددة" عند الحجز (هو في قطر)؛ نصوص عربية رغم اللغة الإنجليزية؛ شاشة الحجز مزدحمة مقابل بساطة أوبر. قراراه: تبسيط الحجز (طيّ الخيارات) + رندرات 3D مثل أوبر.
@@ -129,10 +130,10 @@ flutter build apk --release --dart-define=ENV=production \
 أو سكربت `scripts/build-flutter-release.sh` (يضبط ENV=production افتراضياً، لكنه يستخدم --split-per-abi؛ للنشر كملف واحد hancr-*.apk ابنِ universal كما أعلاه).
 
 ## 🗺️ سبب جذري حرج (2026-06-13) — لماذا كانت الخريطة فارغة على أندرويد
-**المانيفست كان يستخدم مفتاح الويب `AIzaSyCwLtWyS6m44JNXWjTRCyOkR83GirSkZ3o` (مقيَّد بـ HTTP referrers لـ hancr.com).** المفاتيح المقيَّدة بالـ referrer **لا تعمل أبداً مع Android Maps SDK** (تطبيقات أندرويد لا ترسل referrer) → بلاطات الخريطة لا تُحمَّل → خريطة فارغة/رمادية.
+**المانيفست كان يستخدم مفتاح الويب `[REDACTED_GOOGLE_API_KEY]` (مقيَّد بـ HTTP referrers لـ hancr.com).** المفاتيح المقيَّدة بالـ referrer **لا تعمل أبداً مع Android Maps SDK** (تطبيقات أندرويد لا ترسل referrer) → بلاطات الخريطة لا تُحمَّل → خريطة فارغة/رمادية.
 **الإصلاح الجذري (مُنجَز عبر المتصفّح في حساب المالك، مشروع hancr-494520):**
-- **مفتاح الخرائط للأندرويد (راكب+سائق) = `AIzaSyBsz0l4Vpb7FYNi6r1ZnlX62F28frgy9ys`** (اسمه "Maps Platform API Key"). قُيِّد إلى **Android apps**: `com.zancr.hancr_rider` + `com.zancr.hancr_driver`، كلاهما ببصمة الإصدار SHA-1 `B1:E0:93:51:16:22:D4:ED:F9:64:0A:B0:97:BD:F3:82:CA:5C:19:9D`. يشمل Maps SDK for Android ضمن 33 API. هذا المفتاح في مانيفست التطبيقين الآن.
-- **مفتاح الويب يبقى منفصلاً:** "HANCR" = `AIzaSyCwLtWyS6m44JNXWjTRCyOkR83GirSkZ3o` (HTTP referrers لـ hancr.com) — للموقع فقط، لم يُمَس.
+- **مفتاح الخرائط للأندرويد (راكب+سائق) = `[REDACTED_GOOGLE_API_KEY]`** (اسمه "Maps Platform API Key"). قُيِّد إلى **Android apps**: `com.zancr.hancr_rider` + `com.zancr.hancr_driver`، كلاهما ببصمة الإصدار SHA-1 `B1:E0:93:51:16:22:D4:ED:F9:64:0A:B0:97:BD:F3:82:CA:5C:19:9D`. يشمل Maps SDK for Android ضمن 33 API. هذا المفتاح في مانيفست التطبيقين الآن.
+- **مفتاح الويب يبقى منفصلاً:** "HANCR" = `[REDACTED_GOOGLE_API_KEY]` (HTTP referrers لـ hancr.com) — للموقع فقط، لم يُمَس.
 - التطبيق لا يجري أي نداء Maps/Places/Directions عبر HTTP (خرائط أصلية فقط)، لذا قيد Android apps يكفي.
 - أُثري نمط `_darkMapStyle` (booking + tracking) لإظهار الشوارع وأسماؤها + الطرق السريعة + المياه + الحدائق + المعالم + الحدود الإدارية (المناطق) + أسماء المدن/الأحياء.
 - **بعد التثبيت:** يجب على المستخدم **إلغاء تثبيت** التطبيق القديم ثم تثبيت APK الجديد (المفتاح في المانيفست يُقرأ عند البناء).

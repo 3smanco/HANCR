@@ -4,6 +4,7 @@ import { spawn } from 'child_process';
 
 const steps = [
   ['Production readiness template', 'npm', ['run', 'readiness:template']],
+  ['Secret hygiene check', 'node', ['tools/secret-hygiene-check.mjs']],
   ['Type-check rider-api', 'npx', ['tsc', '--noEmit', '-p', 'apps/rider-api/tsconfig.app.json']],
   ['Type-check driver-api', 'npx', ['tsc', '--noEmit', '-p', 'apps/driver-api/tsconfig.app.json']],
   ['Type-check admin-api', 'npx', ['tsc', '--noEmit', '-p', 'apps/admin-api/tsconfig.app.json']],
