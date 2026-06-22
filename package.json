@@ -69,7 +69,7 @@
     "helmet": "^8.2.0",
     "ioredis": "^5.4.2",
     "nestjs-throttler-storage-redis": "^0.5.1",
-    "nodemailer": "^8.0.11",
+    "nodemailer": "^9.0.1",
     "openai": "^6.42.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -83,7 +83,6 @@
     "uuid": "^11.0.3"
   },
   "devDependencies": {
-    "@nestjs/platform-express": "^11.1.24",
     "@nestjs/schematics": "^10.2.3",
     "@nestjs/testing": "^10.4.15",
     "@nx/eslint": "^20.3.3",
