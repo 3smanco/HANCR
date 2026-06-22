@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useLazyQuery } from '@apollo/client';
 import {
   Ticket,
@@ -226,14 +226,18 @@ function OfferSimulator() {
   const [regionId, setRegionId] = useState('');
   const [fare, setFare] = useState('');
 
-  const [simulate, { data, loading }] = useLazyQuery(SIMULATE_OFFER, {
+  const [simulate, { data, loading, error: simulateError }] = useLazyQuery(SIMULATE_OFFER, {
     fetchPolicy: 'network-only',
-    onError: (e) => toast.error(e.message),
   });
   const [reach, { data: reachData }] = useLazyQuery(OFFER_REACH, {
     fetchPolicy: 'network-only',
-    onError: () => undefined,
   });
+
+  useEffect(() => {
+    if (simulateError) {
+      toast.error(simulateError.message);
+    }
+  }, [simulateError]);
 
   const run = () => {
     const c = code.trim().toUpperCase();

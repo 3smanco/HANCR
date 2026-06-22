@@ -39,7 +39,6 @@ npm-debug.log*
 secrets/
 deliverables/*.apk
 deliverables/
-.github/workflows/
 
 # TypeScript incremental build artifacts
 *.tsbuildinfo

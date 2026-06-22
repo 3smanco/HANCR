@@ -46,14 +46,15 @@ export default function SmsSettingsPage() {
     onError: (e) => toast.error(e.message),
   });
 
-  const remote =
-    (data?.appConfig?.smsConfig as Record<string, unknown> | undefined) ?? {};
   const [provider, setProvider] = useState<Provider>('local');
   const [senderId, setSenderId] = useState('HANCR');
   const [active, setActive] = useState(true);
 
   useEffect(() => {
     if (!data) return;
+    const remote =
+      (data?.appConfig?.smsConfig as Record<string, unknown> | undefined) ??
+      {};
     if (typeof remote.provider === 'string') {
       setProvider(remote.provider as Provider);
     }

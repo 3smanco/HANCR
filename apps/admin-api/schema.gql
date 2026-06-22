@@ -2,8 +2,235 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddComplaintNoteInput {
+  complaintId: Int!
+  note: String!
+}
+
+input AddEmployeeInput {
+  companyId: Int!
+  riderId: Int
+  riderPhone: String
+}
+
+input AdjustLoyaltyInput {
+  delta: Int!
+  reason: String!
+  riderId: Int!
+}
+
+input AdjustWalletInput {
+  amount: Float!
+  ownerId: Int!
+  ownerType: WalletOwnerType!
+  reason: String
+}
+
+type AdminBundleType {
+  active: Boolean!
+  createdAt: DateTime!
+  currency: String!
+  id: Int!
+  maxDistanceKm: Float!
+  name: String!
+  price: Float!
+  regionId: Int!
+  ridesCount: Int!
+  validityDays: Int!
+}
+
+type AdminCompanyEmployeeType {
+  companyId: Int!
+  createdAt: DateTime!
+  id: Int!
+  monthlyPeriod: String!
+  monthlySpent: Float!
+  riderId: Int!
+  riderName: String
+  riderPhone: String
+  status: String!
+}
+
+type AdminCompanyType {
+  balance: Float!
+  contactEmail: String
+  contactPhone: String
+  createdAt: DateTime!
+  currency: String!
+  employeeCount: Int!
+  id: Int!
+  monthlyCapPerEmployee: Float!
+  name: String!
+  status: String!
+}
+
+type AdminComplaintActivityType {
+  actorId: Int
+  actorType: String!
+  createdAt: DateTime!
+  id: Int!
+  note: String
+  type: String!
+}
+
+type AdminComplaintDetailType {
+  activities: [AdminComplaintActivityType!]!
+  assignedTo: Int
+  category: String!
+  createdAt: DateTime!
+  description: String!
+  dueAt: DateTime
+  id: Int!
+  orderId: Int
+  reportedById: Int!
+  reportedByType: String!
+  reporterName: String
+  resolutionNote: String
+  resolvedAt: DateTime
+  status: String!
+}
+
+type AdminComplaintType {
+  assignedTo: Int
+  category: String!
+  createdAt: DateTime!
+  description: String!
+  dueAt: DateTime
+  id: Int!
+  orderId: Int
+  reportedById: Int!
+  reportedByType: String!
+  reporterName: String
+  resolutionNote: String
+  resolvedAt: DateTime
+  status: String!
+}
+
+type AdminCouponType {
+  active: Boolean!
+  code: String!
+  createdAt: DateTime!
+  expiresAt: DateTime
+  id: Int!
+  maxDiscount: Float!
+  maxUses: Int!
+  minFare: Float!
+  perUserLimit: Int!
+  regionIds: [Int!]!
+  type: CouponType!
+  usedCount: Int!
+  value: Float!
+}
+
+input AdminCreateDriverInput {
+  approveImmediately: Boolean = false
+  carBrand: String
+  carColor: String
+  carModel: String
+  carYear: Int
+  countryCode: String
+  firstName: String!
+  lastName: String
+  phoneNumber: String!
+  plateNumber: String
+  regionId: Int
+  serviceIds: [Int!]
+}
+
+input AdminCreateOrderInput {
+  destination: GeoPointInput!
+  destinationAddress: String
+  driverIdHint: Int
+  origin: GeoPointInput!
+  originAddress: String
+  regionId: Int!
+  riderId: Int!
+  serviceId: Int!
+}
+
+input AdminCreateRiderInput {
+  countryCode: String
+  email: String
+  firstName: String
+  lastName: String
+  phoneNumber: String!
+}
+
+type AdminDriverDetailType {
+  active: Boolean!
+  approvalStatus: String!
+  avatarUrl: String
+  balance: Float!
+  banned: Boolean!
+  carBrand: String
+  carColor: String
+  carModel: String
+  carYear: Int
+  createdAt: DateTime!
+  currency: String!
+  documents: [AdminDriverDocumentType!]!
+  firstName: String!
+  gender: String
+  id: Int!
+  kidsApproved: Boolean!
+  lastName: String!
+  nightApproved: Boolean!
+  phoneNumber: String!
+  plateNumber: String
+  rating: Float!
+  ratingCount: Int!
+  recentOrders: [AdminDriverOrderSummaryType!]!
+  recentTransactions: [AdminDriverTransactionType!]!
+  rejectionReason: String
+  reviews: [AdminDriverReviewType!]!
+  status: String!
+}
+
+type AdminDriverDocumentType {
+  driverId: Int!
+  expiresAt: DateTime
+  id: Int!
+  rejectedReason: String
+  reviewedAt: DateTime
+  reviewedBy: Int
+  status: String!
+  type: String!
+  uploadedAt: DateTime!
+  url: String!
+}
+
+type AdminDriverOrderSummaryType {
+  cost: Float!
+  createdOn: DateTime!
+  currency: String!
+  id: Int!
+  status: String!
+  type: String!
+}
+
+type AdminDriverReviewType {
+  comment: String
+  createdAt: DateTime!
+  id: Int!
+  orderId: Int!
+  rating: Float!
+}
+
+type AdminDriverTransactionType {
+  amount: Float!
+  balanceAfter: Float!
+  createdAt: DateTime!
+  currency: String!
+  description: String
+  direction: String!
+  id: Int!
+  status: String!
+  type: String!
+}
+
 type AdminDriverType {
   active: Boolean!
+  approvalStatus: String!
   avatarUrl: String
   balance: Float!
   banned: Boolean!
@@ -15,21 +242,140 @@ type AdminDriverType {
   createdAt: DateTime!
   currency: String!
   firstName: String!
+  gender: String
   id: Int!
+  kidsApproved: Boolean!
   lastName: String!
+  nightApproved: Boolean!
   phoneNumber: String!
   plateNumber: String
   rating: Float!
   ratingCount: Int!
   regionId: Float
+  rejectionReason: String
   status: String!
   updatedAt: DateTime!
+}
+
+type AdminFleetType {
+  active: Boolean!
+  balance: Float!
+  commissionPercent: Float!
+  contactEmail: String
+  contactPhone: String
+  createdAt: DateTime!
+  currency: String!
+  driverCount: Int!
+  exclusivityRegionIds: [Int!]!
+  id: Int!
+  name: String!
+  ownerName: String
+}
+
+type AdminLeadType {
+  city: String
+  company: String
+  createdAt: DateTime!
+  email: String!
+  id: Int!
+  message: String
+  name: String!
+  phone: String
+  status: String!
+  type: String!
 }
 
 type AdminLoginResponse {
   accessToken: String!
   email: String!
+  fullName: String
   role: String!
+}
+
+type AdminLoyaltyType {
+  availableMiles: Int!
+  freeUpgradesRemaining: Int!
+  hasFreeCancellation: Boolean!
+  lifetimeMiles: Int!
+  riderId: Int!
+  surgeImmunityUntil: DateTime
+  tier: String!
+  totalMiles: Int!
+  updatedAt: DateTime!
+}
+
+type AdminNearbyDriverType {
+  distanceMeters: Float!
+  driverId: Int!
+  driverName: String!
+  driverPhone: String
+  etaMinutes: Int!
+  status: String!
+}
+
+type AdminOperatorType {
+  active: Boolean!
+  createdAt: DateTime!
+  email: String!
+  fullName: String
+  id: Int!
+  lastLoginAt: DateTime
+  role: String!
+  scope: OperatorScopeType
+}
+
+type AdminOrderActivityType {
+  createdAt: DateTime!
+  id: Int!
+  type: String!
+}
+
+type AdminOrderDetailType {
+  activities: [AdminOrderActivityType!]!
+  addresses: [String!]!
+  bookedHours: Int
+  companyId: Int
+  costAfterCoupon: Float!
+  costBest: Float!
+  couponCode: String
+  createdOn: DateTime!
+  currency: String!
+  discountAmount: Float!
+  distanceBest: Int!
+  driverId: Int
+  driverName: String
+  driverPhone: String
+  durationBest: Int!
+  entitlementId: Int
+  etaPickup: DateTime
+  familyMode: Boolean
+  finishTimestamp: DateTime
+  id: Int!
+  messages: [AdminOrderMessageType!]!
+  nightShift: Boolean
+  paidAmount: Float!
+  paymentMode: String
+  points: [GeoPointType!]
+  preferFemaleDriver: Boolean
+  preferredDriverId: Int
+  providerShare: Float!
+  regionId: Int!
+  riderId: Int!
+  riderName: String
+  riderPhone: String
+  serviceId: Int!
+  serviceName: String
+  startTimestamp: DateTime
+  status: String!
+  type: String!
+}
+
+type AdminOrderMessageType {
+  id: Int!
+  message: String!
+  senderId: Int!
+  senderType: String!
+  sentAt: DateTime!
 }
 
 type AdminOrderType {
@@ -59,6 +405,23 @@ type AdminOrderType {
   updatedAt: DateTime!
 }
 
+type AdminPricingZoneType {
+  active: Boolean!
+  baseFare: Float!
+  createdAt: DateTime!
+  endsAt: DateTime
+  fleetId: Int
+  id: Int!
+  multiplier: Float!
+  name: String!
+  perKm: Float!
+  perMinute: Float!
+  polygon: String
+  regionId: Int!
+  serviceId: Int!
+  startsAt: DateTime
+}
+
 type AdminRegionType {
   bidModeEnabled: Boolean!
   boundary: JSON
@@ -71,6 +434,15 @@ type AdminRegionType {
   name: String!
   nameEn: String!
   updatedAt: DateTime!
+}
+
+type AdminRiderDetailType {
+  ordersCancelled: Int!
+  ordersCompleted: Int!
+  recentOrders: [RiderRecentOrderType!]!
+  rider: AdminRiderType!
+  savedPlaces: [RiderSavedPlaceType!]!
+  totalSpent: Float!
 }
 
 type AdminRiderType {
@@ -125,16 +497,343 @@ type AdminServiceType {
   weekdayMultipliers: JSON
 }
 
+type AdminSupportConversationDetailType {
+  assignedAgentId: Int
+  createdAt: DateTime!
+  id: Int!
+  lastMessage: String
+  lastMessageAt: DateTime
+  messages: [AdminSupportMessageType!]!
+  riderId: Int!
+  riderName: String
+  riderPhone: String
+  status: String!
+  unreadCount: Int!
+}
+
+type AdminSupportConversationType {
+  assignedAgentId: Int
+  createdAt: DateTime!
+  id: Int!
+  lastMessage: String
+  lastMessageAt: DateTime
+  riderId: Int!
+  riderName: String
+  riderPhone: String
+  status: String!
+  unreadCount: Int!
+}
+
+type AdminSupportMessageType {
+  body: String!
+  conversationId: Int!
+  createdAt: DateTime!
+  id: Int!
+  imageUrl: String
+  isRead: Boolean!
+  senderId: Int!
+  senderType: String!
+}
+
+input AdminUpdateDriverInput {
+  carBrand: String
+  carColor: String
+  carModel: String
+  carYear: Int
+  firstName: String
+  id: Int!
+  lastName: String
+  phoneNumber: String
+  plateNumber: String
+  regionId: Int
+}
+
+input AdminUpdateRiderInput {
+  email: String
+  firstName: String
+  id: Int!
+  lastName: String
+  phoneNumber: String
+}
+
+type AdminWalletTransactionType {
+  amount: Float!
+  balanceAfter: Float!
+  completedAt: DateTime
+  createdAt: DateTime!
+  currency: String!
+  description: String
+  direction: String!
+  gateway: String
+  id: Int!
+  orderId: Int
+  ownerId: Int!
+  ownerType: String!
+  status: String!
+  type: String!
+}
+
+type AnnouncementType {
+  active: Boolean!
+  body: String!
+  createdAt: DateTime!
+  endsAt: DateTime
+  id: Int!
+  startsAt: DateTime!
+  target: String!
+  title: String!
+  url: String
+}
+
 type AppConfigType {
   configKey: String!
   featureFlags: JSON
+  gatewayConfig: JSON
   homeScreenConfig: JSON
   id: Int!
   loyaltyConfig: JSON
+  operationsConfig: JSON
+  pricingRulesConfig: JSON
+  smsConfig: JSON
   themeConfig: JSON
   updatedAt: DateTime!
   updatedBy: String
   version: String!
+}
+
+type ApplicationDocUploadUrlType {
+  expiresIn: Float!
+  objectKey: String!
+  publicUrl: String!
+  uploadUrl: String!
+}
+
+input AssignDriverToFleetInput {
+  driverId: Int!
+  fleetId: Int!
+}
+
+type BroadcastResultType {
+  """عدد الإخفاقات"""
+  failed: Int!
+
+  """عدد الإشعارات المُرسَلة بنجاح"""
+  sent: Int!
+
+  """إجمالي التوكنات المستهدفة"""
+  totalTokens: Int!
+}
+
+enum BroadcastTarget {
+  All
+  Drivers
+  Riders
+}
+
+type CancelReasonType {
+  active: Boolean!
+  appliesTo: String!
+  code: String!
+  createdAt: DateTime!
+  id: Int!
+  labelAr: String!
+  labelEn: String!
+  sortOrder: Int!
+}
+
+input CitiesFilterInput {
+  countryId: Int
+  countryIso: String
+}
+
+type CityType {
+  centerLat: Float
+  centerLng: Float
+  countryId: Int!
+  enabled: Boolean!
+  id: Int!
+  name: String!
+  nameEn: String!
+  timezone: String!
+}
+
+type CompanyCountrySpend {
+  countryIso: String
+  countryName: String!
+  currency: String!
+  flag: String
+  orders: Int!
+  spentBase: Float!
+  spentNative: Float!
+}
+
+type CompanyGlobalProfile {
+  balance: Float!
+  baseCurrency: String!
+  byCountry: [CompanyCountrySpend!]!
+  companyId: Int!
+  countriesActive: Int!
+  currency: String!
+  multinational: Boolean!
+  name: String!
+  status: String!
+  totalSpentBase: Float!
+}
+
+type ComplaintListResult {
+  items: [AdminComplaintType!]!
+  limit: Int!
+  page: Int!
+  submittedCount: Int!
+  total: Int!
+  underReviewCount: Int!
+}
+
+type ConversationMessage {
+  createdAt: DateTime!
+  id: Int!
+  script: String!
+  senderId: Int!
+  senderType: String!
+  text: String!
+}
+
+type CountryLiveStats {
+  activeOrders: Int!
+  centerLat: Float
+  centerLng: Float
+  countryId: Int!
+  currency: String!
+  enabled: Boolean!
+  flag: String
+  iso2: String!
+  name: String!
+  nameEn: String!
+  onlineDrivers: Int!
+  timezone: String!
+}
+
+type CountryRevenue {
+  countryId: Int!
+  currency: String!
+  flag: String
+  growthPct: Float!
+  iso2: String!
+  name: String!
+  nameEn: String!
+  orders: Int!
+  platformBase: Float!
+  platformNative: Float!
+  revenueBase: Float!
+  revenueNative: Float!
+}
+
+type CountrySpendType {
+  countryIso: String!
+  countryName: String!
+  currency: String!
+  flag: String
+  orders: Int!
+  spentBase: Float!
+  spentNative: Float!
+}
+
+type CountryTaxRuleType {
+  label: String
+  rate: Float!
+  type: String!
+}
+
+type CountryType {
+  cityCount: Int!
+  currency: String!
+  dialCode: String
+  docRequirements: [String!]!
+  emergencyNumber: String
+  enabled: Boolean!
+  flag: String
+  id: Int!
+  iso2: String!
+  name: String!
+  nameEn: String!
+  taxRule: CountryTaxRuleType
+  timezone: String!
+  units: String!
+}
+
+enum CouponType {
+  Fixed
+  Percent
+}
+
+input CreateAnnouncementInput {
+  body: String!
+  endsAt: DateTime
+  startsAt: DateTime
+  target: String! = "all"
+  title: String!
+  url: String
+}
+
+input CreateBundleInput {
+  currency: String! = "SAR"
+  maxDistanceKm: Float! = 0
+  name: String!
+  price: Float!
+  regionId: Int!
+  ridesCount: Int!
+  validityDays: Int! = 30
+}
+
+input CreateCompanyInput {
+  contactEmail: String
+  contactPhone: String
+  currency: String! = "SAR"
+  monthlyCapPerEmployee: Float! = 0
+  name: String!
+}
+
+input CreateCouponInput {
+  code: String!
+  expiresAt: DateTime
+  maxDiscount: Float
+  maxUses: Int
+  minFare: Float
+  perUserLimit: Int
+  regionIds: [Int!]
+  type: CouponType!
+  value: Float!
+}
+
+input CreateFleetInput {
+  commissionPercent: Float! = 0
+  contactEmail: String
+  contactPhone: String
+  currency: String! = "SAR"
+  exclusivityRegionIds: [Int!]! = []
+  name: String!
+  ownerName: String
+}
+
+input CreateGiftBatchInput {
+  amount: Float!
+  currency: String! = "SAR"
+  expiresAt: DateTime
+  name: String!
+  totalCount: Int!
+}
+
+input CreateOperatorInput {
+  email: String!
+  fullName: String
+  password: String!
+  role: String!
+  scope: OperatorScopeInput
+}
+
+input CreatePayoutSessionInput {
+  driverIds: [Int!]!
+  note: String
 }
 
 input CreateRegionInput {
@@ -166,6 +865,21 @@ input CreateServiceInput {
   serviceType: String!
 }
 
+type CrossCityCountryGroup {
+  count: Int!
+  countryIso: String
+  countryName: String
+  flag: String
+  timezone: String
+}
+
+type CrossCityOps {
+  bookings: [UpcomingBooking!]!
+  byCountry: [CrossCityCountryGroup!]!
+  imminentCount: Int!
+  total: Int!
+}
+
 type DashboardStats {
   activeDrivers: Int!
   canceledOrders: Int!
@@ -183,6 +897,69 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type DocComplianceItem {
+  daysToExpiry: Int
+  expiresAt: DateTime
+  required: Boolean!
+  state: String!
+  type: String!
+}
+
+type DocExpiryAlert {
+  countryIso: String
+  countryName: String
+  daysToExpiry: Int!
+  docType: String!
+  driverId: Int!
+  driverName: String!
+  expiresAt: DateTime!
+  regionId: Int
+  severity: String!
+}
+
+type DriverApplicationListResult {
+  inReviewCount: Int!
+  items: [DriverApplicationType!]!
+  submittedCount: Int!
+  total: Int!
+}
+
+type DriverApplicationType {
+  city: String
+  createdAt: DateTime!
+  dateOfBirth: String
+  docInsuranceUrl: String
+  docLicenseUrl: String
+  docNationalIdUrl: String
+  docProfilePhotoUrl: String
+  docVehicleRegistrationUrl: String
+  email: String!
+  fullName: String!
+  id: Int!
+  nationalIdNumber: String
+  phone: String!
+  plateNumber: String
+  rejectionReason: String
+  reviewedAt: DateTime
+  status: String!
+  vehicleBrand: String
+  vehicleColor: String
+  vehicleModel: String
+  vehicleYear: Int
+}
+
+type DriverComplianceType {
+  countryIso: String
+  countryName: String
+  driverId: Int!
+  driverName: String!
+  expired: [String!]!
+  expiringSoon: [String!]!
+  items: [DocComplianceItem!]!
+  missing: [String!]!
+  status: String!
+}
+
 type DriverListResult {
   items: [AdminDriverType!]!
   limit: Int!
@@ -190,17 +967,242 @@ type DriverListResult {
   total: Int!
 }
 
+type EligibleDriverType {
+  balance: Float!
+  currency: String!
+  defaultMethodSummary: String
+  defaultPayoutMethodId: Int
+  driverId: Int!
+  driverName: String!
+  phoneNumber: String
+}
+
+type ExchangeRatesType {
+  base: String!
+  count: Float!
+  displayBase: String!
+  lastSync: DateTime
+  rates: [RateEntry!]!
+  source: String!
+}
+
+type FleetDocAlerts {
+  alerts: [DocExpiryAlert!]!
+  criticalCount: Int!
+  expiredCount: Int!
+  soonCount: Int!
+  withinDays: Int!
+}
+
+type FleetDriverType {
+  approvalStatus: String!
+  driverId: Int!
+  driverName: String!
+  phoneNumber: String
+  plateNumber: String
+}
+
+type FraudSignalType {
+  countryA: String!
+  countryB: String!
+  kind: String!
+  message: String!
+  minutesApart: Float!
+  orderIdA: Int!
+  orderIdB: Int!
+  severity: String!
+}
+
+input GenerateApplicationDocUploadUrlInput {
+  contentType: String! = "image/jpeg"
+  type: String!
+}
+
+input GeoPointInput {
+  lat: Float!
+  lng: Float!
+}
+
+type GeoPointType {
+  lat: Float!
+  lng: Float!
+}
+
+type GiftBatchExportResult {
+  batch: GiftBatchType!
+  codes: [String!]!
+}
+
+type GiftBatchType {
+  amount: Float!
+  claimedCount: Int!
+  createdAt: DateTime!
+  currency: String!
+  expiresAt: DateTime
+  id: Int!
+  name: String!
+  totalCount: Int!
+}
+
+type GlobalLiveOverview {
+  activeCountries: Int!
+  countries: [CountryLiveStats!]!
+  totalActiveOrders: Int!
+  totalOnlineDrivers: Int!
+}
+
+type GlobalLoyaltyOverview {
+  baseCurrency: String!
+  liabilityBase: Float!
+  mileValueBase: Float!
+  tiers: [TierBucket!]!
+  totalAvailableMiles: Float!
+  totalMembers: Int!
+}
+
+type GlobalRevenueMatrix {
+  baseCurrency: String!
+  countries: [CountryRevenue!]!
+  fxLastSync: DateTime
+  fxSource: String!
+  periodDays: Int!
+  totalPlatformBase: Float!
+  totalRevenueBase: Float!
+}
+
+type GlobalSosCenter {
+  byCountry: [SosCountryGroup!]!
+  criticalCount: Int!
+  incidents: [SosCenterIncident!]!
+  totalActive: Int!
+}
+
+type IntegrationCell {
+  channel: String!
+  envKey: String!
+  provider: String!
+  status: String!
+}
+
+type IntegrationCountryRow {
+  cells: [IntegrationCell!]!
+  countryIso: String
+  countryName: String!
+  enabled: Boolean!
+  flag: String
+}
+
+type IntegrationMatrix {
+  countries: [IntegrationCountryRow!]!
+  liveCount: Int!
+  pendingCount: Int!
+}
+
+type InvoiceLine {
+  amount: Float!
+  label: String!
+}
+
+type InvoiceType {
+  countryIso: String!
+  countryName: String!
+  currency: String!
+  issuedAt: DateTime
+  lines: [InvoiceLine!]!
+  net: Float!
+  orderId: Int!
+  taxAmount: Float!
+  taxLabel: String
+  taxRate: Float!
+  taxType: String!
+  total: Float!
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
+type LeadListResult {
+  contactedCount: Int!
+  items: [AdminLeadType!]!
+  limit: Int!
+  newCount: Int!
+  page: Int!
+  total: Int!
+}
+
+type LiveDriverType {
+  carBrand: String
+  carModel: String
+  countryIso: String
+  currentOrderId: Int!
+  driverId: Int!
+  driverName: String
+  driverPhone: String
+  heading: Float!
+  lat: Float!
+  lng: Float!
+  plateNumber: String
+  regionId: Int
+  status: String!
+}
+
+type LiveDriversResult {
+  drivers: [LiveDriverType!]!
+  idle: Int!
+  inRide: Int!
+  total: Int!
+}
+
 type Mutation {
+  """إضافة موظف لشركة"""
+  addCompanyEmployee(input: AddEmployeeInput!): AdminCompanyEmployeeType!
+
+  """إضافة ملاحظة على شكوى"""
+  addComplaintNote(input: AddComplaintNoteInput!): AdminComplaintDetailType!
+
+  """تعديل نقاط راكب يدوياً (موجب=إضافة، سالب=خصم)"""
+  adminAdjustRiderLoyalty(input: AdjustLoyaltyInput!): AdminLoyaltyType!
+
+  """تعديل يدوي للمحفظة (موجب=إضافة، سالب=خصم)"""
+  adminAdjustWallet(input: AdjustWalletInput!): AdminWalletTransactionType!
+
+  """تعيين سائق محدد قسراً (Admin override)"""
+  adminAssignDriver(driverId: Int!, orderId: Int!): AdminOrderDetailType!
+
+  """إنشاء سائق يدوياً"""
+  adminCreateDriver(input: AdminCreateDriverInput!): AdminDriverType!
+
+  """إنشاء طلب يدوي من قِبَل المُشغّل (Dispatcher)"""
+  adminCreateManualOrder(input: AdminCreateOrderInput!): AdminOrderDetailType!
+
+  """إنشاء راكب يدوياً"""
+  adminCreateRider(input: AdminCreateRiderInput!): AdminRiderType!
+
   """تسجيل دخول المشرف"""
   adminLogin(email: String!, password: String!): AdminLoginResponse!
 
+  """إلغاء معاملة بإنشاء معاملة معاكسة (audit)"""
+  adminReverseWalletTransaction(reason: String!, transactionId: Int!): AdminWalletTransactionType!
+
+  """تعديل بيانات سائق"""
+  adminUpdateDriver(input: AdminUpdateDriverInput!): AdminDriverType!
+
+  """تعديل بيانات راكب"""
+  adminUpdateRider(input: AdminUpdateRiderInput!): AdminRiderType!
+
   """اعتماد سائق جديد"""
   approveDriver(id: Int!): AdminDriverType!
+
+  """إسناد شكوى لموظف"""
+  assignComplaint(assigneeId: Int!, complaintId: Int!): AdminComplaintDetailType!
+
+  """تعيين سائق لأسطول"""
+  assignDriverToFleet(input: AssignDriverToFleetInput!): FleetDriverType!
+
+  """إسناد محادثة للموظف الحالي"""
+  assignSupportConversation(conversationId: Int!): Boolean!
 
   """حظر سائق"""
   banDriver(id: Int!): AdminDriverType!
@@ -208,14 +1210,121 @@ type Mutation {
   """حظر راكب"""
   banRider(id: Int!, reason: String): AdminRiderType!
 
+  """إرسال إشعار جماعي عبر FCM"""
+  broadcastNotification(body: String!, target: BroadcastTarget!, title: String!): BroadcastResultType!
+
+  """إغلاق محادثة دعم"""
+  closeSupportConversation(conversationId: Int!): Boolean!
+
+  """إنشاء إعلان"""
+  createAnnouncement(input: CreateAnnouncementInput!): AnnouncementType!
+
+  """إنشاء حزمة"""
+  createBundle(input: CreateBundleInput!): AdminBundleType!
+
+  """إنشاء شركة"""
+  createCompany(input: CreateCompanyInput!): AdminCompanyType!
+
+  """إنشاء كوبون"""
+  createCoupon(input: CreateCouponInput!): AdminCouponType!
+
+  """إنشاء أسطول"""
+  createFleet(input: CreateFleetInput!): AdminFleetType!
+
+  """إنشاء دفعة هدايا (تولّد N أكواد)"""
+  createGiftBatch(input: CreateGiftBatchInput!): GiftBatchExportResult!
+
+  """إضافة مشرف"""
+  createOperator(input: CreateOperatorInput!): AdminOperatorType!
+
+  """إنشاء جلسة دفع (draft)"""
+  createPayoutSession(input: CreatePayoutSessionInput!): PayoutSessionDetailType!
+
   """إنشاء منطقة جديدة"""
   createRegion(input: CreateRegionInput!): AdminRegionType!
 
   """إنشاء خدمة جديدة"""
   createService(input: CreateServiceInput!): AdminServiceType!
 
+  """حذف إعلان"""
+  deleteAnnouncement(id: Int!): Boolean!
+
+  """حذف حزمة"""
+  deleteBundle(id: Int!): Boolean!
+
+  """حذف سبب إلغاء"""
+  deleteCancelReason(id: Int!): Boolean!
+
+  """حذف شركة (وكل موظفيها)"""
+  deleteCompany(id: Int!): Boolean!
+
+  """حذف كوبون"""
+  deleteCoupon(id: Int!): Boolean!
+
+  """حذف أسطول (يجب أن يكون بلا سائقين)"""
+  deleteFleet(id: Int!): Boolean!
+
+  """حذف مشرف"""
+  deleteOperator(id: Int!): Boolean!
+
+  """حذف منطقة تسعير"""
+  deletePricingZone(id: Int!): Boolean!
+
+  """حذف معيار تقييم"""
+  deleteReviewParameter(id: Int!): Boolean!
+
+  """N11 — إرسال الحملات المجدولة المستحقة فوراً (يدوي)"""
+  dispatchDueCampaigns: Int!
+
+  """تصعيد حادثة (تواصل مع الشرطة)"""
+  escalateSosIncident(adminNote: String!, incidentId: Int!): SosIncidentAdminType!
+
   """إلغاء طلب قسراً"""
   forceCancel(id: Int!): AdminOrderType!
+
+  """توليد رابط رفع موقَّع لوثيقة من نموذج التسجيل العام"""
+  generateApplicationDocUploadUrl(input: GenerateApplicationDocUploadUrlInput!): ApplicationDocUploadUrlType!
+
+  """تنفيذ جلسة دفع (يخصم من محافظ السائقين)"""
+  processPayoutSession(id: Int!): PayoutSessionDetailType!
+
+  """إجراء مالي على شكوى (رد أموال/كوبون لمحفظة المُبلِّغ)"""
+  refundComplaint(amount: Float!, complaintId: Int!, voucher: Boolean = false): AdminComplaintDetailType!
+
+  """إعادة تعيين كلمة المرور"""
+  resetOperatorPassword(input: ResetOperatorPasswordInput!): AdminOperatorType!
+
+  """إغلاق حادثة بقرار الأدمن"""
+  resolveSosIncident(input: ResolveSosInput!): SosIncidentAdminType!
+
+  """مراجعة وثيقة سائق (موافقة/رفض)"""
+  reviewDriverDocument(input: ReviewDocumentInput!): AdminDriverDocumentType!
+
+  """إلغاء صلاحية موظف"""
+  revokeCompanyEmployee(id: Int!): Boolean!
+
+  """ردّ الموظف"""
+  sendAgentSupportMessage(body: String!, conversationId: Int!, imageUrl: String): AdminSupportMessageType!
+  setCityEnabled(input: SetCityEnabledInput!): CityType!
+  setCountryEnabled(input: SetCountryEnabledInput!): CountryType!
+
+  """تعيين اعتمادات السائق (مدارس / ليلي)"""
+  setDriverApproval(driverId: Int!, kidsApproved: Boolean, nightApproved: Boolean): AdminDriverType!
+
+  """تعيين حالة اعتماد السائق"""
+  setDriverStatus(input: SetDriverStatusInput!): AdminDriverDetailType!
+
+  """إرسال طلب تسجيل سائق من الموقع التسويقي"""
+  submitDriverApplication(input: SubmitDriverApplicationInput!): DriverApplicationType!
+
+  """إرسال lead من الموقع التسويقي (عام)"""
+  submitLead(input: SubmitLeadInput!): Boolean!
+
+  """تفعيل/تعطيل حزمة"""
+  toggleBundleActive(id: Int!): AdminBundleType!
+
+  """تفعيل/تعطيل كوبون"""
+  toggleCouponActive(id: Int!): AdminCouponType!
 
   """تفعيل/تعطيل منطقة"""
   toggleRegionEnabled(id: Int!): AdminRegionType!
@@ -223,20 +1332,103 @@ type Mutation {
   """تفعيل/تعطيل خدمة"""
   toggleServiceEnabled(id: Int!): AdminServiceType!
 
+  """شحن رصيد الشركة"""
+  topUpCompany(input: TopUpCompanyInput!): AdminCompanyType!
+
+  """شحن رصيد أسطول"""
+  topUpFleet(input: TopUpFleetInput!): AdminFleetType!
+
+  """إلغاء انتساب السائق"""
+  unassignDriverFromFleet(driverId: Int!): Boolean!
+
   """رفع الحظر عن سائق"""
   unbanDriver(id: Int!): AdminDriverType!
 
   """رفع الحظر عن راكب"""
   unbanRider(id: Int!): AdminRiderType!
 
+  """تعديل إعلان"""
+  updateAnnouncement(input: UpdateAnnouncementInput!): AnnouncementType!
+
   """تحديث إعداد التطبيق (SDUI)"""
   updateAppConfig(configKey: String!, input: UpdateAppConfigInput!): AppConfigType!
+
+  """تحديث حزمة"""
+  updateBundle(id: Int!, input: UpdateBundleInput!): AdminBundleType!
+
+  """تحديث شركة"""
+  updateCompany(id: Int!, input: UpdateCompanyInput!): AdminCompanyType!
+
+  """تحديث حالة شكوى"""
+  updateComplaintStatus(input: UpdateComplaintStatusInput!): AdminComplaintDetailType!
+
+  """تحديث كوبون"""
+  updateCoupon(id: Int!, input: UpdateCouponInput!): AdminCouponType!
+
+  """تحديث حالة طلب تسجيل سائق"""
+  updateDriverApplicationStatus(input: UpdateApplicationStatusInput!): DriverApplicationType!
+
+  """تحديث أسطول"""
+  updateFleet(input: UpdateFleetInput!): AdminFleetType!
+
+  """تحديث حالة lead"""
+  updateLeadStatus(input: UpdateLeadStatusInput!): AdminLeadType!
+
+  """تحديث مشرف"""
+  updateOperator(input: UpdateOperatorInput!): AdminOperatorType!
 
   """تحديث منطقة"""
   updateRegion(id: Int!, input: UpdateRegionInput!): AdminRegionType!
 
   """تحديث خدمة"""
   updateService(id: Int!, input: UpdateServiceInput!): AdminServiceType!
+
+  """إنشاء/تحديث سبب إلغاء"""
+  upsertCancelReason(input: UpsertCancelReasonInput!): CancelReasonType!
+
+  """إنشاء/تحديث منطقة تسعير"""
+  upsertPricingZone(input: UpsertPricingZoneInput!): AdminPricingZoneType!
+
+  """إنشاء/تحديث معيار تقييم"""
+  upsertReviewParameter(input: UpsertReviewParameterInput!): ReviewParameterType!
+}
+
+type OfferReachType {
+  code: String!
+  countries: [String!]!
+  global: Boolean!
+  regionCount: Int!
+}
+
+type OfferSimulationType {
+  code: String!
+  countryIso: String
+  countryName: String
+  currency: String!
+  discount: Float!
+  finalFare: Float!
+  reason: String
+  valid: Boolean!
+}
+
+input OperatorScopeInput {
+  cities: [Int!]
+  countries: [String!]
+}
+
+type OperatorScopeType {
+  cities: [Int!]
+  countries: [String!]
+}
+
+type OrderConversation {
+  driverScript: String
+  messages: [ConversationMessage!]!
+  needsTranslation: Boolean!
+  orderId: Int!
+  riderScript: String
+  translationEnvKey: String!
+  translationReady: Boolean!
 }
 
 type OrderListResult {
@@ -246,12 +1438,116 @@ type OrderListResult {
   total: Int!
 }
 
+type PayoutEntryType {
+  amount: Float!
+  completedAt: DateTime
+  createdAt: DateTime!
+  driverId: Int!
+  driverName: String
+  driverPhone: String
+  errorMessage: String
+  gatewayRef: String
+  id: Int!
+  methodSummary: String
+  payoutMethodId: Int
+  sessionId: Int!
+  status: String!
+}
+
+type PayoutSessionDetailType {
+  completedAt: DateTime
+  createdAt: DateTime!
+  currency: String!
+  driverCount: Int!
+  entries: [PayoutEntryType!]!
+  id: Int!
+  initiatedBy: Int
+  mode: String!
+  note: String
+  status: String!
+  totalAmount: Float!
+}
+
+type PayoutSessionType {
+  completedAt: DateTime
+  createdAt: DateTime!
+  currency: String!
+  driverCount: Int!
+  id: Int!
+  initiatedBy: Int
+  mode: String!
+  note: String
+  status: String!
+  totalAmount: Float!
+}
+
+type ProviderReadiness {
+  anyPayment: Boolean!
+  paymentHyperPay: Boolean!
+  paymentMoyasar: Boolean!
+  paymentStripe: Boolean!
+  smsTwilio: Boolean!
+  translation: Boolean!
+}
+
+type ProviderRoute {
+  channel: String!
+  countryIso: String
+  envKey: String!
+  provider: String!
+  ready: Boolean!
+  regionId: Int!
+  status: String!
+}
+
 type Query {
+  """عدد الحوادث النشطة (لـ dashboard badge)"""
+  activeSosCount: Int!
+
+  """قائمة الإعلانات"""
+  adminAnnouncements: [AnnouncementType!]!
+
+  """قائمة حزم الرحلات"""
+  adminBundles: [AdminBundleType!]!
+
+  """قائمة الشركات"""
+  adminCompanies: [AdminCompanyType!]!
+
+  """تفاصيل شكوى مع timeline"""
+  adminComplaintDetail(id: Int!): AdminComplaintDetailType!
+
+  """قائمة الشكاوى"""
+  adminComplaints(limit: Int! = 20, page: Int! = 1, status: String): ComplaintListResult!
+
+  """قائمة الكوبونات"""
+  adminCoupons: [AdminCouponType!]!
+
+  """تفاصيل طلب"""
+  adminDriverApplication(id: Int!): DriverApplicationType!
+
+  """طلبات تسجيل السائقين"""
+  adminDriverApplications(limit: Int! = 20, page: Int! = 1, status: String): DriverApplicationListResult!
+
+  """تفاصيل سائق (Documents/Orders/Transactions/Reviews)"""
+  adminDriverDetail(id: Int!): AdminDriverDetailType!
+
+  """قائمة الأساطيل"""
+  adminFleets: [AdminFleetType!]!
+
   """بيانات سائق"""
   adminGetDriver(id: Int!): AdminDriverType!
 
   """بيانات راكب"""
   adminGetRider(id: Int!): AdminRiderType!
+
+  """دفعات الهدايا"""
+  adminGiftBatches: [GiftBatchType!]!
+
+  """تفاصيل lead"""
+  adminLead(id: Int!): AdminLeadType!
+
+  """قائمة الـ leads (لوحة الإدارة)"""
+  adminLeads(limit: Int! = 20, page: Int! = 1, status: String, type: String): LeadListResult!
 
   """قائمة السائقين"""
   adminListDrivers(limit: Int! = 20, page: Int! = 1, pendingOnly: Boolean! = false): DriverListResult!
@@ -259,11 +1555,23 @@ type Query {
   """قائمة الركاب"""
   adminListRiders(limit: Int! = 20, page: Int! = 1): RiderListResult!
 
+  """قائمة المشرفين"""
+  adminOperators: [AdminOperatorType!]!
+
   """طلب بالمعرّف"""
   adminOrder(id: Int!): AdminOrderType!
 
+  """مرشّحون من السائقين القريبين للتعيين اليدوي"""
+  adminOrderCandidates(orderId: Int!): [AdminNearbyDriverType!]!
+
+  """تفاصيل الطلب مع timeline و chat"""
+  adminOrderDetail(id: Int!): AdminOrderDetailType!
+
   """قائمة الطلبات"""
   adminOrders(driverId: Int, limit: Int! = 20, page: Int! = 1, riderId: Int, status: String): OrderListResult!
+
+  """إحصاءات الإحالات (أعلى المُحيلين)"""
+  adminReferralStats: ReferralStatsResult!
 
   """منطقة بالمعرّف"""
   adminRegion(id: Int!): AdminRegionType!
@@ -271,11 +1579,26 @@ type Query {
   """قائمة المناطق"""
   adminRegions: [AdminRegionType!]!
 
+  """تفاصيل راكب موسَّعة (رحلات/أماكن/إنفاق)"""
+  adminRiderDetail(id: Int!): AdminRiderDetailType!
+
+  """بحث عن راكب بالهاتف لاستخدامه في إنشاء طلب يدوي"""
+  adminRiderLookup(phone: String!): [RiderLookupResult!]!
+
+  """بيانات الولاء لراكب"""
+  adminRiderLoyalty(riderId: Int!): AdminLoyaltyType!
+
   """خدمة بالمعرّف"""
   adminService(id: Int!): AdminServiceType!
 
   """قائمة الخدمات"""
   adminServices(regionId: Int): [AdminServiceType!]!
+
+  """قائمة الأرصدة لنوع مالك (Rider/Driver/Company)"""
+  adminWalletBalances(limit: Int! = 20, ownerType: WalletOwnerType!, page: Int! = 1, search: String): WalletBalanceListResult!
+
+  """سجل معاملات محفظة مالك معيّن"""
+  adminWalletTransactions(limit: Int! = 50, offset: Int! = 0, ownerId: Int!, ownerType: WalletOwnerType!): WalletTransactionsResult!
 
   """إعداد تطبيق بالمفتاح"""
   appConfig(configKey: String!): AppConfigType!
@@ -283,11 +1606,160 @@ type Query {
   """قائمة إعدادات التطبيق"""
   appConfigs: [AppConfigType!]!
 
+  """أسباب الإلغاء"""
+  cancelReasons: [CancelReasonType!]!
+
+  """فحص حالة طلب تسجيل سائق بالـ ID والجوال"""
+  checkDriverApplicationStatus(applicationId: Int!, phone: String!): DriverApplicationType
+
+  """قائمة المدن"""
+  cities(filter: CitiesFilterInput, onlyEnabled: Boolean = false): [CityType!]!
+
+  """موظفو الشركة"""
+  companyEmployees(companyId: Int!): [AdminCompanyEmployeeType!]!
+
+  """ملف شركة عالمي (MNC) — إنفاق عبر الدول"""
+  companyGlobalProfile(companyId: Int!): CompanyGlobalProfile!
+
+  """تقرير CSV لطلبات الشركة"""
+  companyOrdersCsv(companyId: Int!, from: String, to: String): String!
+
+  """قائمة الدول"""
+  countries(onlyEnabled: Boolean = false): [CountryType!]!
+
+  """الحجوزات المسبقة القادمة عبر-المدن"""
+  crossCityOps(horizonDays: Int! = 14): CrossCityOps!
+
   """إحصائيات لوحة التحكم"""
   dashboardStats: DashboardStats!
 
+  """امتثال وثائق السائق المتكيّف لكل دولة"""
+  driverCompliance(driverId: Int!): DriverComplianceType!
+
+  """سائقون مؤهَّلون للسحب (رصيد + طريقة افتراضية)"""
+  eligibleDrivers: [EligibleDriverType!]!
+
+  """أسعار الصرف الحالية ومصدرها وآخر مزامنة"""
+  exchangeRates: ExchangeRatesType!
+
+  """تنبيهات انتهاء وثائق الأسطول الإقليمية"""
+  fleetDocumentAlerts(withinDays: Int! = 30): FleetDocAlerts!
+
+  """سائقو الأسطول"""
+  fleetDrivers(fleetId: Int!): [FleetDriverType!]!
+
+  """أكواد دفعة (للتصدير CSV)"""
+  giftBatchCodes(batchId: Int!): [String!]!
+
+  """العمليات الحيّة لكل دولة (Geo-Radar)"""
+  globalLiveOverview: GlobalLiveOverview!
+
+  """نظرة عالمية على برنامج Hancr Miles"""
+  globalLoyaltyOverview: GlobalLoyaltyOverview!
+
+  """أرباح كل دولة بعملة موحّدة + نموّ الأسواق"""
+  globalRevenueMatrix(days: Int = 30): GlobalRevenueMatrix!
+
+  """مركز SOS العالمي"""
+  globalSosCenter: GlobalSosCenter!
+
+  """مصفوفة جاهزية التكامل لكل دولة"""
+  integrationMatrix: IntegrationMatrix!
+
+  """لقطة لجميع السائقين Online مع مواقعهم وحالاتهم (scope + country aware)"""
+  liveDrivers(countryIso: String): LiveDriversResult!
+
+  """تغطية عرض جغرافياً"""
+  offerReach(code: String!): OfferReachType!
+
+  """محادثة رحلة محلّلة لغوياً"""
+  orderConversation(orderId: Int!): OrderConversation!
+
+  """فاتورة طلب مُوطَّنة"""
+  orderInvoice(orderId: Int!): InvoiceType!
+
+  """تفاصيل جلسة دفع"""
+  payoutSession(id: Int!): PayoutSessionDetailType!
+
+  """قائمة جلسات الدفع"""
+  payoutSessions: [PayoutSessionType!]!
+
+  """مناطق التسعير"""
+  pricingZones: [AdminPricingZoneType!]!
+
+  """جاهزية المزوّدين الفعلية"""
+  providerReadiness: ProviderReadiness!
+
+  """قرار توجيه مزوّد لمنطقة طلب (دفع/رسائل)"""
+  providerRoute(channel: String!, regionId: Int!): ProviderRoute!
+
   """إحصائيات الإيرادات اليومية"""
   revenueStats(days: Int! = 30): [RevenueStats!]!
+
+  """معايير التقييم"""
+  reviewParameters: [ReviewParameterType!]!
+
+  """محاكاة عرض مُسوَّر جغرافياً"""
+  simulateOffer(code: String!, fare: Float!, regionId: Int!): OfferSimulationType!
+
+  """جلب حادثة بمعرّفها"""
+  sosIncident(incidentId: Int!): SosIncidentAdminType!
+
+  """قائمة حوادث الطوارئ (نشطة افتراضياً)"""
+  sosIncidents(
+    limit: Int! = 50
+    offset: Int! = 0
+
+    """فلترة بحالات معيَّنة. الافتراضي: Active فقط"""
+    statuses: [SosStatus!]
+  ): [SosIncidentAdminType!]!
+
+  """تفاصيل محادثة دعم + الرسائل"""
+  supportConversationDetail(id: Int!): AdminSupportConversationDetailType!
+
+  """طابور محادثات الدعم"""
+  supportConversations(status: String): [AdminSupportConversationType!]!
+
+  """N11 — حالة التسعير الديناميكي (surge) والمقترح"""
+  surgeState: SurgeStateType!
+
+  """ترجمة نصّ"""
+  translateText(target: String = "ar", text: String!): TranslationResult!
+
+  """ملف VIP 360 عالمي لراكب"""
+  vipProfile(riderId: Int!): VipProfileType!
+}
+
+type RateEntry {
+  currency: String!
+  rate: Float!
+}
+
+type ReferralStatRow {
+  invitedCount: Int!
+  name: String
+  phone: String
+  referralCode: String
+  riderId: Int!
+}
+
+type ReferralStatsResult {
+  topReferrers: [ReferralStatRow!]!
+  totalInvited: Int!
+}
+
+input ResetOperatorPasswordInput {
+  id: Int!
+  newPassword: String!
+}
+
+input ResolveSosInput {
+  """سبب الإغلاق / ملاحظة"""
+  adminNote: String
+  incidentId: Int!
+
+  """تم إبلاغ الشرطة"""
+  markPoliceNotified: Boolean! = false
 }
 
 type RevenueStats {
@@ -297,6 +1769,23 @@ type RevenueStats {
   revenue: Float!
 }
 
+input ReviewDocumentInput {
+  approve: Boolean!
+  documentId: Int!
+  rejectedReason: String
+}
+
+type ReviewParameterType {
+  active: Boolean!
+  code: String!
+  createdAt: DateTime!
+  id: Int!
+  labelAr: String!
+  labelEn: String!
+  sortOrder: Int!
+  target: String!
+}
+
 type RiderListResult {
   items: [AdminRiderType!]!
   limit: Int!
@@ -304,12 +1793,291 @@ type RiderListResult {
   total: Int!
 }
 
+type RiderLookupResult {
+  id: Int!
+  name: String!
+  phone: String!
+}
+
+type RiderRecentOrderType {
+  costAfterCoupon: Float!
+  createdOn: DateTime!
+  currency: String!
+  driverId: Int
+  driverName: String
+  id: Int!
+  serviceName: String
+  status: String!
+}
+
+type RiderSavedPlaceType {
+  address: String!
+  id: Int!
+  label: String!
+  lat: Float!
+  lng: Float!
+}
+
+input SetCityEnabledInput {
+  enabled: Boolean!
+  id: Int!
+}
+
+input SetCountryEnabledInput {
+  enabled: Boolean!
+  id: Int!
+}
+
+input SetDriverStatusInput {
+  approvalStatus: String!
+  driverId: Int!
+  reason: String
+}
+
+type SosCenterIncident {
+  ageMinutes: Int!
+  contactsNotified: Int!
+  countryIso: String
+  countryName: String
+  createdAt: DateTime!
+  emergencyNumber: String
+  flag: String
+  hasLiveLocation: Boolean!
+  id: Int!
+  lat: Float
+  lng: Float
+  orderId: Int
+  policeNotified: Boolean!
+  priority: String!
+  regionId: Int
+  status: String!
+  triggeredBy: String!
+  triggeredById: Int!
+}
+
+type SosCountryGroup {
+  activeCount: Int!
+  countryIso: String
+  countryName: String
+  emergencyNumber: String
+  flag: String
+}
+
+type SosIncidentAdminType {
+  adminNote: String
+  contactsNotified: Int!
+  createdAt: DateTime!
+  id: Int!
+  lastLatitude: Float
+  lastLocationAt: DateTime
+  lastLongitude: Float
+  latitude: Float!
+  longitude: Float!
+  orderId: Int
+  policeNotified: Boolean!
+  resolvedAt: DateTime
+  status: SosStatus!
+  triggeredBy: SosTriggeredBy!
+  triggeredById: Int!
+  updatedAt: DateTime!
+}
+
+type SosLocationUpdateType {
+  at: String!
+  incidentId: Int!
+  latitude: Float!
+  longitude: Float!
+}
+
+enum SosStatus {
+  Active
+  Cancelled
+  Escalated
+  Resolved
+}
+
+enum SosTriggeredBy {
+  Driver
+  Rider
+  System
+}
+
+input SubmitDriverApplicationInput {
+  city: String
+  dateOfBirth: String
+  docInsuranceUrl: String
+  docLicenseUrl: String
+  docNationalIdUrl: String
+  docProfilePhotoUrl: String
+  docVehicleRegistrationUrl: String
+  email: String!
+  fullName: String!
+  nationalIdNumber: String
+  phone: String!
+  plateNumber: String
+  vehicleBrand: String
+  vehicleColor: String
+  vehicleModel: String
+  vehicleYear: Int
+}
+
+input SubmitLeadInput {
+  city: String
+  company: String
+  email: String!
+  message: String
+  name: String!
+  phone: String
+  type: String!
+}
+
+type Subscription {
+  """حوادث SOS جديدة (live)"""
+  sosIncidentCreated: SosIncidentAdminType!
+
+  """تحديثات موقع حوادث SOS (live)"""
+  sosLocationUpdated: SosLocationUpdateType!
+
+  """رسائل الدعم الواردة (live)"""
+  supportMessageAdded(conversationId: Int!): AdminSupportMessageType!
+}
+
+type SurgeStateType {
+  autoSurge: Boolean!
+  currentMultiplier: Float!
+  driversOnline: Int!
+  recentDemand: Int!
+  suggestedMultiplier: Float!
+}
+
+type TierBucket {
+  availableMiles: Float!
+  members: Int!
+  tier: String!
+}
+
+input TopUpCompanyInput {
+  amount: Float!
+  companyId: Int!
+}
+
+input TopUpFleetInput {
+  amount: Float!
+  fleetId: Int!
+}
+
+type TranslationResult {
+  configured: Boolean!
+  detectedSourceLanguage: String
+  error: String
+  provider: String!
+  translatedText: String
+}
+
+type UpcomingBooking {
+  countryIso: String
+  countryName: String
+  currency: String
+  fare: Float
+  flag: String
+  minutesUntil: Int!
+  orderId: Int!
+  pickupAt: DateTime!
+  regionId: Int!
+  riderId: Int
+  timezone: String
+  urgency: String!
+}
+
+input UpdateAnnouncementInput {
+  active: Boolean
+  body: String
+  endsAt: DateTime
+  id: Int!
+  startsAt: DateTime
+  target: String
+  title: String
+  url: String
+}
+
 input UpdateAppConfigInput {
   featureFlags: JSON
+  gatewayConfig: JSON
   homeScreenConfig: JSON
   loyaltyConfig: JSON
+  operationsConfig: JSON
+  pricingRulesConfig: JSON
+  smsConfig: JSON
   themeConfig: JSON
   version: String
+}
+
+input UpdateApplicationStatusInput {
+  applicationId: Int!
+  rejectionReason: String
+  status: String!
+}
+
+input UpdateBundleInput {
+  active: Boolean
+  currency: String
+  maxDistanceKm: Float
+  name: String
+  price: Float
+  regionId: Int
+  ridesCount: Int
+  validityDays: Int
+}
+
+input UpdateCompanyInput {
+  contactEmail: String
+  contactPhone: String
+  monthlyCapPerEmployee: Float
+  name: String
+  status: String
+}
+
+input UpdateComplaintStatusInput {
+  complaintId: Int!
+  resolutionNote: String
+  status: String!
+}
+
+input UpdateCouponInput {
+  active: Boolean
+  expiresAt: DateTime
+  maxDiscount: Float
+  maxUses: Int
+  minFare: Float
+  perUserLimit: Int
+  regionIds: [Int!]
+  type: CouponType
+  value: Float
+}
+
+input UpdateFleetInput {
+  active: Boolean
+  commissionPercent: Float
+  contactEmail: String
+  contactPhone: String
+  exclusivityRegionIds: [Int!]
+  id: Int!
+  name: String
+  ownerName: String
+}
+
+input UpdateLeadStatusInput {
+  leadId: Int!
+  note: String
+  status: String!
+}
+
+input UpdateOperatorInput {
+  active: Boolean
+  fullName: String
+  id: Int!
+  role: String
+  scope: OperatorScopeInput
 }
 
 input UpdateRegionInput {
@@ -343,4 +2111,90 @@ input UpdateServiceInput {
   providerSharePercent: Float
   timeMultipliers: JSON
   weekdayMultipliers: JSON
+}
+
+input UpsertCancelReasonInput {
+  active: Boolean! = true
+  appliesTo: String!
+  code: String!
+  id: Int
+  labelAr: String!
+  labelEn: String!
+  sortOrder: Int! = 0
+}
+
+input UpsertPricingZoneInput {
+  active: Boolean! = true
+  baseFare: Float! = 0
+  endsAt: DateTime
+  fleetId: Int
+  id: Int
+  multiplier: Float! = 1
+  name: String!
+  perKm: Float! = 0
+  perMinute: Float! = 0
+  polygon: String
+  regionId: Int!
+  serviceId: Int!
+  startsAt: DateTime
+}
+
+input UpsertReviewParameterInput {
+  active: Boolean! = true
+  code: String!
+  id: Int
+  labelAr: String!
+  labelEn: String!
+  sortOrder: Int! = 0
+  target: String!
+}
+
+type VipProfileType {
+  avatarUrl: String
+  banned: Boolean!
+  baseCurrency: String!
+  byCountry: [CountrySpendType!]!
+  countriesVisited: Int!
+  email: String
+  fraudSignals: [FraudSignalType!]!
+  lifetimeSpendBase: Float!
+  name: String!
+  phoneNumber: String!
+  rating: Float!
+  riderId: Int!
+  tier: String!
+  totalRides: Int!
+  walletBalance: Float!
+  walletCurrency: String!
+}
+
+type WalletBalanceListResult {
+  items: [WalletBalanceRowType!]!
+  limit: Int!
+  page: Int!
+  total: Int!
+}
+
+type WalletBalanceRowType {
+  balance: Float!
+  currency: String!
+  name: String!
+  ownerId: Int!
+  ownerType: String!
+  phone: String
+  status: String
+}
+
+enum WalletOwnerType {
+  Company
+  Driver
+  Fleet
+  Rider
+}
+
+type WalletTransactionsResult {
+  items: [AdminWalletTransactionType!]!
+  total: Int!
+  totalCredits: Float!
+  totalDebits: Float!
 }

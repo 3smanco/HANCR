@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import {
   Plus,
@@ -41,9 +41,13 @@ type Operator = Record<string, unknown>;
 export default function OperatorsPage() {
   const [creating, setCreating] = useState(false);
   const [resettingId, setResettingId] = useState<number | null>(null);
-  const { data, loading, refetch } = useQuery(LIST_OPERATORS, {
-    onError: (e) => toast.error(e.message),
-  });
+  const { data, loading, refetch, error } = useQuery(LIST_OPERATORS);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message);
+    }
+  }, [error]);
 
   const [createOp, { loading: saving }] = useMutation(CREATE_OPERATOR, {
     onCompleted: () => {

@@ -20,6 +20,8 @@
     "migration:run": "typeorm migration:run -d libs/database/src/lib/data-source.ts",
     "migration:revert": "typeorm migration:revert -d libs/database/src/lib/data-source.ts",
     "migration:generate": "typeorm migration:generate -d libs/database/src/lib/data-source.ts",
+    "readiness:prod": "node tools/production-readiness-check.mjs --env .env --strict",
+    "readiness:template": "node tools/production-readiness-check.mjs --env .env.prod.example --template",
     "verify": "powershell -ExecutionPolicy Bypass -File scripts/verify.ps1"
   },
   "dependencies": {

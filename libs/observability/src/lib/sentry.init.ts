@@ -1,6 +1,18 @@
 import * as Sentry from '@sentry/node';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
 
+function isMissingDsn(dsn: string | undefined): boolean {
+  if (!dsn) return true;
+  const value = dsn.trim();
+  return (
+    value.length === 0 ||
+    /^your_/i.test(value) ||
+    /^change_me/i.test(value) ||
+    value.includes('YOUR_KEY') ||
+    value.includes('oXXX.ingest.sentry.io')
+  );
+}
+
 /**
  * تهيئة Sentry لكل APIs الـ HANCR.
  *
@@ -13,7 +25,7 @@ export function initSentry(serviceName: string): void {
   // ابحث عن DSN خاص بالخدمة أولاً، ثم العام كـ fallback
   const serviceDsnKey = `SENTRY_DSN_${serviceName.toUpperCase().replace(/-/g, '_')}`;
   const dsn = process.env[serviceDsnKey] || process.env['SENTRY_DSN'];
-  if (!dsn || dsn.startsWith('your_')) {
+  if (isMissingDsn(dsn)) {
     // dev mode — تخطَّ بصمت
     console.warn(`[Sentry] SENTRY_DSN not set for ${serviceName} — skipping init`);
     return;
