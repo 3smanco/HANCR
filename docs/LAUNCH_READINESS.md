@@ -3,6 +3,8 @@
 Verify the live server state with `git rev-parse --short HEAD` in `/opt/hancr`
 after each deploy.
 
+For the current production audit summary, see `docs/PRODUCTION_AUDIT.md`.
+
 ## Green Checks
 
 These checks are expected to pass before deploy:
