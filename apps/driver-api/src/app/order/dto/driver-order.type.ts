@@ -11,6 +11,7 @@ export class DriverOrderType {
   @Field(() => Int) id!: number;
   @Field() type!: string;
   @Field() status!: string;
+  @Field(() => Int, { nullable: true }) driverId?: number;
 
   /** الراكب */
   @Field(() => Int) riderId!: number;

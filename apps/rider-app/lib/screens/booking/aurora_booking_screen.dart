@@ -561,6 +561,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
             'origin': {'lat': _origin.lat, 'lng': _origin.lng},
             'destination': {'lat': _destination.lat, 'lng': _destination.lng},
             'serviceId': service.id,
+            'regionId': _regionId,
           }
         },
       ));

@@ -14,7 +14,6 @@ import {
   Users,
   AlertTriangle,
   CheckCircle2,
-  ListOrdered,
   Languages,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -168,7 +167,6 @@ export default function OrderDetailPage() {
         )}
         {tab === 'assign' && (
           <AssignTab
-            orderId={o.id}
             currentDriverId={o.driverId as number | null}
             candidates={candidates}
             loading={candLoading}
@@ -477,7 +475,6 @@ function MessageBubble({ m }: { m: Record<string, unknown> }) {
 }
 
 function AssignTab({
-  orderId,
   currentDriverId,
   candidates,
   loading,
@@ -485,7 +482,6 @@ function AssignTab({
   onAssign,
   onRefresh,
 }: {
-  orderId: number;
   currentDriverId: number | null;
   candidates: Record<string, unknown>[];
   loading: boolean;

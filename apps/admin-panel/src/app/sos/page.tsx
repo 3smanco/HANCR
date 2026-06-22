@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, type FC, type ReactNode } from 'react';
+import { useState, useRef, useCallback, type FC, type ReactNode } from 'react';
 import { useQuery, useMutation, useSubscription } from '@apollo/client';
 import {
   GoogleMap as GoogleMapComponent,

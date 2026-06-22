@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Throttle } from '@nestjs/throttler';
 import * as bcrypt from 'bcryptjs';
 import { AdminUserEntity } from '@hancr/database';
 import { AdminJwtPayload, requireSecret } from './admin-jwt.strategy';
@@ -48,6 +49,14 @@ class AdminAuthService implements OnModuleInit {
     const password =
       this.cfg.get<string>('ADMIN_DEFAULT_PASSWORD') ??
       'change_me_in_production';
+    if (
+      this.cfg.get<string>('NODE_ENV') === 'production' &&
+      password === 'change_me_in_production'
+    ) {
+      throw new Error(
+        '[SECURITY] ADMIN_DEFAULT_PASSWORD must be set before seeding the first production admin.',
+      );
+    }
     const passwordHash = await bcrypt.hash(password, 10);
     await this.adminRepo.save(
       this.adminRepo.create({
@@ -100,6 +109,7 @@ export class AuthResolver {
   constructor(private readonly authService: AdminAuthService) {}
 
   @Mutation(() => AdminLoginResponse, { description: 'تسجيل دخول المشرف' })
+  @Throttle({ strict: { limit: 5, ttl: 60000 } })
   adminLogin(
     @Args('email') email: string,
     @Args('password') password: string,

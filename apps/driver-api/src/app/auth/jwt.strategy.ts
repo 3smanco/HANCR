@@ -2,6 +2,9 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { DriverEntity } from '@hancr/database';
 
 /**
  * أمن: يجبر وجود سرّ قوي (≥32 محرفاً) ويرفض الإقلاع بقيمة ضعيفة/افتراضية.
@@ -32,7 +35,11 @@ export interface AuthDriver {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    @InjectRepository(DriverEntity)
+    private readonly driverRepo: Repository<DriverEntity>,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -41,10 +48,19 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  validate(payload: JwtPayload): AuthDriver {
+  async validate(payload: JwtPayload): Promise<AuthDriver> {
     if (payload.type !== 'driver') {
       throw new UnauthorizedException('Invalid token type');
     }
+
+    const driver = await this.driverRepo.findOne({
+      where: { id: payload.sub },
+      select: ['id', 'active', 'banned'],
+    });
+    if (!driver) throw new UnauthorizedException('Account not found');
+    if (driver.banned) throw new UnauthorizedException('Account is banned');
+    if (!driver.active) throw new UnauthorizedException('Account is not active');
+
     return { driverId: payload.sub, phone: payload.phone };
   }
 }
