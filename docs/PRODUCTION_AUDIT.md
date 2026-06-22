@@ -68,24 +68,25 @@ the `workflow` scope.
 
 ## Dependency Risk
 
-Production dependency audit still needs a dedicated upgrade pass:
+Production dependency audit still needs a dedicated major-upgrade pass. A
+non-breaking cleanup pass removed unused `@nestjs/platform-express`, upgraded
+`nodemailer` to `^9.0.1`, and moved admin-panel to Next `^14.2.35`.
 
-- Root production audit: 37 vulnerabilities total
+- Root production audit: 31 vulnerabilities total
   - 1 critical
-  - 10 high
-  - 26 moderate
-- Admin panel production audit: 3 vulnerabilities total
-  - 2 high
+  - 8 high
+  - 22 moderate
+- Admin panel production audit: 2 vulnerabilities total
+  - 1 high
   - 1 moderate
 
+Remaining fixes require breaking upgrades or a dedicated migration plan.
 Notable packages to review first:
 
 - `@fastify/middie` / `@nestjs/platform-fastify`
 - `fastify`
-- `nodemailer`
 - `@apollo/server` / `@nestjs/apollo`
 - `next`
-- `form-data`
 
 ## Operational Follow-ups
 
