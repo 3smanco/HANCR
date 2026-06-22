@@ -3,18 +3,24 @@
 set -e
 cd /opt/hancr
 
+if [ -f .env.prod ] && [ "${1:-}" != "--force" ]; then
+  echo ".env.prod already exists. Re-run with --force to replace it." >&2
+  exit 1
+fi
+
 # توليد passwords قوية
 DB_PASS=$(openssl rand -base64 24 | tr -d '/+=' | head -c 32)
 REDIS_PASS=$(openssl rand -base64 24 | tr -d '/+=' | head -c 32)
 JWT_SECRET=$(openssl rand -base64 48)
+JWT_DRIVER_SECRET=$(openssl rand -base64 48)
 ADMIN_JWT_SECRET=$(openssl rand -base64 48)
 ADMIN_PASS=$(openssl rand -base64 16 | tr -d '/+=' | head -c 16)
 
 cat > .env.prod <<EOF
 NODE_ENV=production
 RIDER_API_PORT=3000
-DRIVER_API_PORT=3000
-ADMIN_API_PORT=3000
+DRIVER_API_PORT=3001
+ADMIN_API_PORT=3002
 
 # Database
 DATABASE_HOST=postgres
@@ -30,6 +36,7 @@ REDIS_PASSWORD=$REDIS_PASS
 
 # JWT
 JWT_SECRET=$JWT_SECRET
+JWT_DRIVER_SECRET=$JWT_DRIVER_SECRET
 JWT_EXPIRES_IN=7d
 ADMIN_JWT_SECRET=$ADMIN_JWT_SECRET
 
@@ -44,6 +51,7 @@ PUBLIC_ADMIN_URL=http://34.18.212.201/admin
 CORS_ORIGINS=http://34.18.212.201,https://hancr.com,https://www.hancr.com,https://admin.hancr.com
 ADMIN_CORS_ORIGINS=http://34.18.212.201,https://admin.hancr.com
 PAYMENT_WEBHOOK_URL=http://34.18.212.201/rider/wallet/webhook/{gateway}
+NEXT_PUBLIC_ADMIN_API_URL=http://34.18.212.201/admin/graphql
 
 # Default region
 DEFAULT_LAT=24.7136
@@ -60,10 +68,13 @@ FIREBASE_CLIENT_EMAIL=
 TWILIO_ACCOUNT_SID=
 TWILIO_AUTH_TOKEN=
 TWILIO_FROM_NUMBER=
+ALLOW_TEST_PHONES=false
 HYPERPAY_ACCESS_TOKEN=
 MOYASAR_API_KEY=
 STRIPE_SECRET_KEY=
-SENTRY_DSN=
+SENTRY_DSN_RIDER_API=
+SENTRY_DSN_DRIVER_API=
+SENTRY_DSN_ADMIN_API=
 EOF
 
 chmod 600 .env.prod
@@ -74,6 +85,7 @@ echo "  IMPORTANT — SAVE THESE CREDENTIALS:"
 echo "═══════════════════════════════════════════════════"
 echo "  DB_PASS:        $DB_PASS"
 echo "  REDIS_PASS:     $REDIS_PASS"
+echo "  JWT_DRIVER_SECRET: generated"
 echo "  ADMIN_PASS:     $ADMIN_PASS"
 echo "  ADMIN_EMAIL:    admin@hancr.com"
 echo "═══════════════════════════════════════════════════"

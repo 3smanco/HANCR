@@ -31,6 +31,11 @@ These require external credentials or GitHub permissions:
 
 | Area | Missing item | Impact | Owner action |
 | --- | --- | --- | --- |
+| Public URLs | HTTPS domain for `PUBLIC_BASE_URL` | App links and provider callbacks still point to raw HTTP IP | Configure DNS/TLS and update `/opt/hancr/.env.prod` |
+| Public URLs | HTTPS domain for `PUBLIC_API_URL` | API references still point to raw HTTP IP | Configure `https://api.hancr.com` or the chosen production API domain |
+| Public URLs | HTTPS domain for `PUBLIC_ADMIN_URL` | Admin links still point to raw HTTP IP | Configure `https://admin.hancr.com` or the chosen production admin domain |
+| CORS | HTTPS-only `CORS_ORIGINS` | Browser clients include an HTTP server-IP origin | Remove `http://34.18.212.201` after production domains are live |
+| CORS | HTTPS-only `ADMIN_CORS_ORIGINS` | Admin browser access includes an HTTP server-IP origin | Remove `http://34.18.212.201` after production domains are live |
 | Monitoring | `SENTRY_DSN_RIDER_API` | No production error tracking for rider API | Create a Sentry project and add its DSN to `/opt/hancr/.env.prod` |
 | Monitoring | `SENTRY_DSN_DRIVER_API` | No production error tracking for driver API | Create a Sentry project and add its DSN to `/opt/hancr/.env.prod` |
 | Monitoring | `SENTRY_DSN_ADMIN_API` | No production error tracking for admin API | Create a Sentry project and add its DSN to `/opt/hancr/.env.prod` |
@@ -72,5 +77,5 @@ git push origin feat/nearby-drivers
 The workflow should run the same gates as `npm run ci:verify`.
 
 `npm run ci:verify` also runs the secret hygiene check, admin-panel i18n key
-validation, admin-panel linting, and `flutter analyze --no-pub` for both
-mobile apps.
+validation, admin-panel quality guard, admin-panel linting with
+`--max-warnings=0`, and `flutter analyze --no-pub` for both mobile apps.

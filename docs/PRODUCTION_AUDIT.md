@@ -7,11 +7,16 @@ Last reviewed: 2026-06-23
 - Server repository `/opt/hancr` is clean on `main...origin/main`.
 - Server was verified on the current `origin/main` commit during this audit.
 - No untracked server files remain from the earlier PM2/schema cleanup pass.
+- No `ecosystem.config.js.bak*`, `test.ts`, or other old backup files were
+  found at the repository root or first two levels of `/opt/hancr`.
 - Generated GraphQL schemas are clean in Git.
 - `npm run secrets:check` passes on the server.
 - `npm run admin:i18n:check` passes with 214 literal admin-panel translation keys.
+- `npm run admin:quality:check` passes and rejects hidden hook disables or
+  Apollo Client deprecated hook options.
 - `npm run ci:verify` passes locally on the `main` worktree.
-- Admin panel `next lint`, `tsc --noEmit`, and `next build` pass without warnings.
+- Admin panel `next lint --max-warnings=0`, `tsc --noEmit`, and `next build`
+  pass without warnings.
 
 ## Runtime Health
 
@@ -32,10 +37,16 @@ online.
 `npm run readiness:prod -- --compact` currently reports:
 
 ```text
-Summary: 28 pass, 7 warn, 3 fail
+Summary: 23 pass, 7 warn, 8 fail
 ```
 
-The 3 failures are all production monitoring gaps:
+The 8 failures are production launch gaps:
+
+- `CORS_ORIGINS` still includes `http://34.18.212.201`
+- `ADMIN_CORS_ORIGINS` still includes `http://34.18.212.201`
+- `PUBLIC_BASE_URL` still uses `http://34.18.212.201`
+- `PUBLIC_API_URL` still uses `http://34.18.212.201`
+- `PUBLIC_ADMIN_URL` still uses `http://34.18.212.201/admin`
 
 - `SENTRY_DSN_RIDER_API`
 - `SENTRY_DSN_DRIVER_API`
@@ -58,6 +69,8 @@ reviewed:
 
 - Admin-panel lint is part of `npm run ci:verify`.
 - Admin-panel i18n literal key validation is part of `npm run ci:verify`.
+- Admin-panel quality validation rejects hidden `react-hooks/exhaustive-deps`
+  disables and Apollo Client deprecated query/lazy-query options.
 - Generated GraphQL schemas must stay clean.
 - Secret hygiene must pass.
 - Flutter analyzers must pass for rider and driver apps.
@@ -90,7 +103,10 @@ Notable packages to review first:
 
 ## Operational Follow-ups
 
-- Add the three API Sentry DSNs and confirm readiness has zero failures.
+- Move public URLs and CORS origins from the raw HTTP server IP to production
+  HTTPS domains, then confirm readiness removes the five URL/CORS failures.
+- Add the three API Sentry DSNs and confirm readiness has zero monitoring
+  failures.
 - Decide and configure uploads, payments, payouts, email, translation, and FX.
 - Re-authenticate GitHub with workflow scope and push `.github/workflows`.
 - Review PM2 restart history; current services are online, but restart counters
