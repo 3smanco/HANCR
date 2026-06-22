@@ -184,8 +184,10 @@ requireAny(
   ['FIREBASE_PRIVATE_KEY_PATH', 'FIREBASE_PRIVATE_KEY'],
   'Firebase credentials missing',
 );
-warnKey('push', 'FIREBASE_PROJECT_ID', 'needed when using FIREBASE_PRIVATE_KEY');
-warnKey('push', 'FIREBASE_CLIENT_EMAIL', 'needed when using FIREBASE_PRIVATE_KEY');
+if (valueOf('FIREBASE_PRIVATE_KEY')) {
+  warnKey('push', 'FIREBASE_PROJECT_ID', 'needed when using FIREBASE_PRIVATE_KEY');
+  warnKey('push', 'FIREBASE_CLIENT_EMAIL', 'needed when using FIREBASE_PRIVATE_KEY');
+}
 
 warnAny(
   'uploads',
