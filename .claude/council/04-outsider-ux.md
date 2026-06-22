@@ -15,7 +15,7 @@
 6. **Service grid 3 services → identical flow** — home_tab.dart:174,180,186 ride/delivery/parcel all _startBooking, no differentiation. Fix: pass service type.
 7. **Dead scheduling control** — service_picker_screen.dart:244 "الآن" pill chevron onTap:(){}. Fix: implement schedule sheet or remove chevron.
 8. **Dev /showcase route ships, auth-bypassed** — app.dart:69-70,148-149; design_showcase_screen.dart:95 onPressed:null. Fix: guard behind kDebugMode.
-9. **Hardcoded Google Maps key in both Android manifests** — rider AndroidManifest.xml:14 + driver:15 literal AIzaSyDTvp_NShN0LVoxH6N_F2b1cD_zrfFkX14 committed. Fix: manifest placeholder from local.properties, restrict by package signature.
+9. **Hardcoded Google Maps key in both Android manifests** — rider AndroidManifest.xml:14 + driver:15 literal [REDACTED_GOOGLE_API_KEY] committed. Fix: manifest placeholder from local.properties, restrict by package signature.
 
 ## LOW
 10. **Stale admin-api/schema.gql** — lacks liveDrivers/adminRiderLookup/adminCreateManualOrder/N11 fields BUT resolvers exist (live.resolver.ts:93, order-detail.resolver.ts:62,74); code-first regenerates at boot so live API serves them. Just stale artifact. Fix: regenerate+commit or gitignore.

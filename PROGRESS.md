@@ -48,7 +48,7 @@
 
 ## ✅ Phase 10 — طلبات المستخدم الأربعة (جلسة 10)
 1. **أسفل الرئيسية:** زيادة المساحة السفلية (120px) لتجاوز الـ bottom nav العائم + **قسم عروض أفقي** يربط بصفحة العروض.
-2. **مسافة بالطريق:** تفعيل Google Directions API + مفتاح خادم `AIzaSyAk9Wgmb-cTgNA9xx2sfqOykx4KlrJ6pgI` (مقيّد بـ Directions/DistanceMatrix). `DirectionsService` في rider-api (مع احتياط haversine×1.3). `createOrder` يستخدم مسافة الطريق للأجرة. استعلام `routePreview` → التطبيق يعرض المسافة الحقيقية + الأجرة + **يرسم خط المسار (polyline)**. مؤكَّد: 7702م طريق مقابل 4754م خطي.
+2. **مسافة بالطريق:** تفعيل Google Directions API + مفتاح خادم `[REDACTED_GOOGLE_API_KEY]` (مقيّد بـ Directions/DistanceMatrix). `DirectionsService` في rider-api (مع احتياط haversine×1.3). `createOrder` يستخدم مسافة الطريق للأجرة. استعلام `routePreview` → التطبيق يعرض المسافة الحقيقية + الأجرة + **يرسم خط المسار (polyline)**. مؤكَّد: 7702م طريق مقابل 4754م خطي.
    - **مهم:** المفتاح في `/opt/hancr/.env.prod` + ecosystem.config.js (rider-api env block: `GOOGLE_MAPS_API_KEY`). إعادة التشغيل تتطلب `set -a; . ./.env.prod; set +a; export DATABASE_HOST=localhost REDIS_HOST=localhost; pm2 restart ecosystem.config.js --only rider-api --update-env` (لأن .env.prod فيه hosts خاصة بـ Docker = postgres/redis، يجب تجاوزها لـ localhost لتطبيقات pm2).
 3. **تعدد اللغات:** نظام i18n كامل (`core/i18n/app_localization.dart`) — 8 لغات: عربي/إنجليزي/أردو/هندي/بنغالي/فلبيني/فرنسي/تركي. لغة الجهاز افتراضياً، مبدّل دائم (StorageService.saveLanguage)، RTL/LTR تلقائي عبر flutter_localizations. شاشة `LanguageScreen` في الإعدادات. تُرجمت نصوص: التنقل، الرئيسية، الحجز، الإعدادات (البقية تتوسّع تدريجياً عبر `tr('key')`).
    - أُضيف `flutter_localizations` + رُفع `intl` لـ ^0.20.2.
@@ -90,7 +90,7 @@
 
 2. **أخطاء جذرية حُلّت (لا تكررها):**
    - **Redis NOAUTH:** أي `new IORedis(...)` يجب أن يمرّر `password: process.env['REDIS_PASSWORD']` (كانت pubsub.provider ناقصة).
-   - **Maps خريطة بيضاء:** مفاتيح Google Maps لـ Android يجب أن تكون مقيّدة بـ **Android apps** (package + SHA-1) لا referer. المفتاح الحالي `AIzaSyDTvp_NShN0LVoxH6N_F2b1cD_zrfFkX14` (debug SHA-1: `48:3B:B3:F2:50:4E:94:2B:7F:B1:D4:39:F1:B5:91:16:69:1B:CE:22`). Maps SDK + billing مُفعّلان.
+   - **Maps خريطة بيضاء:** مفاتيح Google Maps لـ Android يجب أن تكون مقيّدة بـ **Android apps** (package + SHA-1) لا referer. المفتاح الحالي `[REDACTED_GOOGLE_API_KEY]` (debug SHA-1: `48:3B:B3:F2:50:4E:94:2B:7F:B1:D4:39:F1:B5:91:16:69:1B:CE:22`). Maps SDK + billing مُفعّلان.
    - **تعليق splash:** redirect يجب أن يميّز `AuthInitial` (→splash) عن `AuthLoading` (يبقى في /auth أثناء OTP).
 
 3. **التصميم (Aurora):** obsidian #0A0807 · coal #13100E · ash #1F1A17 · ember #FF7A1A · emberDeep #E55F00 · pearl #FFF5EE · muted #A89B96. `HancrColors` في `app_theme.dart` (التطبيقين) أُعيد تعيينه لقيم Aurora — لا تُرجعه للقديم.
@@ -190,7 +190,7 @@
 **الجذر:** مفتاح Google Maps `AIza…Z3o` كان مُقيّداً بـ **referer (مواقع ويب)** — لا يعمل في Android SDK مطلقاً → خريطة بيضاء. كما أن "Maps SDK for Android" لم يكن مُفعّلاً.
 **الإصلاح (عبر gcloud):**
 - تفعيل `maps-android-backend.googleapis.com`.
-- إنشاء مفتاح جديد مقيّد بـ **Android apps**: `AIzaSyDTvp_NShN0LVoxH6N_F2b1cD_zrfFkX14`
+- إنشاء مفتاح جديد مقيّد بـ **Android apps**: `[REDACTED_GOOGLE_API_KEY]`
   - الحزم: `com.zancr.hancr_rider` + `com.zancr.hancr_driver`
   - SHA-1 (debug keystore الحالي): `48:3B:B3:F2:50:4E:94:2B:7F:B1:D4:39:F1:B5:91:16:69:1B:CE:22`
 - استبدال المفتاح في manifest التطبيقين + إعادة بناء + نشر (تأكّد عبر aapt).
@@ -540,12 +540,12 @@ totalRevenue: 172, platformRevenue: 37.6
 | Service | Token/Key | الاستخدام |
 |---------|-----------|----------|
 | Firebase | Project ID: `hancr-88ac0` + Service Account + VAPID | Push Notifications |
-| Google Maps | `AIzaSyCwLtWyS6m44JNXWjTRCyOkR83GirSkZ3o` | الخرائط |
+| Google Maps | `[REDACTED_GOOGLE_API_KEY]` | الخرائط |
 | Mapbox | `pk.eyJ1IjoiN2Jpa28...` | تطبيقات الجوال |
 | Twilio | SID + Auth Token + Number `+16185434043` | SMS OTP |
-| JWT Secrets | `OS.009988.os` (موحَّد للـ 3 services) | Admin/Driver/Rider |
+| JWT Secrets | `[REDACTED_WEAK_SECRET]` (موحَّد للـ 3 services) | Admin/Driver/Rider |
 | Neon (Cloud DB) | `postgresql://neondb_owner@ep-sparkling-truth...` | بديل cloud production |
-| Admin Password | `OS.009988.os` | تسجيل دخول الإدارة |
+| Admin Password | `[REDACTED_WEAK_SECRET]` | تسجيل دخول الإدارة |
 
 **ملفات أُنشئت:**
 - `E:\HANCR\secrets\firebase-adminsdk.json` — Service Account كامل
@@ -638,7 +638,7 @@ t('drivers.subtitle', { count: 12 })   // interpolation
 **اختبار End-to-End:**
 ```graphql
 # ✅ Login بكلمة المرور الجديدة من .env
-mutation { adminLogin(email: "admin@hancr.com", password: "OS.009988.os") {
+mutation { adminLogin(email: "admin@hancr.com", password: "[REDACTED_WEAK_SECRET]") {
   accessToken email role: "superadmin"
 }}
 
@@ -731,7 +731,7 @@ mutation { adminLogin(email: "admin@hancr.com", password: "OS.009988.os") {
 
 ### الخطوة 8.4 — اختبار End-to-End ✅
 - Docker + admin-api + admin-panel — كلها تعمل
-- Login بـ `OS.009988.os` نجح
+- Login بـ `[REDACTED_WEAK_SECRET]` نجح
 - AuthBootstrap يعيد التوجيه: `/dashboard` (غير مسجّل) → `/login`
 - LanguageSwitcher مرئي في الـ Login + Topbar
 - جميع الترجمات تظهر بشكل صحيح

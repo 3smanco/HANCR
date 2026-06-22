@@ -8,7 +8,10 @@ class AppConfig {
   AppConfig._();
 
   // ── Environment ───────────────────────────────────────────────────────────
-  static const String env = String.fromEnvironment('ENV', defaultValue: 'development');
+  static const String env = String.fromEnvironment(
+    'ENV',
+    defaultValue: 'development',
+  );
   static bool get isProduction => env == 'production';
   static bool get isStaging => env == 'staging';
   static bool get isDevelopment => env == 'development';
@@ -34,8 +37,8 @@ class AppConfig {
 
   // ── Google Maps ───────────────────────────────────────────────────────────
   static const String googleMapsApiKey = String.fromEnvironment(
-    'MAPS_KEY',
-    defaultValue: 'AIzaSyCwLtWyS6m44JNXWjTRCyOkR83GirSkZ3o',
+    'MAPS_API_KEY',
+    defaultValue: '',
   );
 
   // ── Google Sign-In ────────────────────────────────────────────────────────

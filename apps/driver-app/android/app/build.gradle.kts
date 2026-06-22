@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import java.util.Base64
 
 plugins {
     id("com.android.application")
@@ -13,6 +14,33 @@ val keystoreProperties = Properties()
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
+
+val localPropertiesFile = rootProject.file("local.properties")
+val localProperties = Properties()
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
+fun localSetting(name: String): String =
+    (System.getenv(name) ?: localProperties.getProperty(name) ?: "").trim()
+
+fun dartDefine(name: String): String {
+    val encoded = project.findProperty("dart-defines") as? String ?: return ""
+    return encoded
+        .split(",")
+        .mapNotNull {
+            runCatching { String(Base64.getDecoder().decode(it)) }.getOrNull()
+        }
+        .firstOrNull { it.startsWith("$name=") }
+        ?.substringAfter("=")
+        ?.trim()
+        ?: ""
+}
+
+val googleMapsApiKey = localSetting("GOOGLE_MAPS_API_KEY")
+    .ifEmpty { localSetting("MAPS_API_KEY") }
+    .ifEmpty { dartDefine("MAPS_API_KEY") }
+    .ifEmpty { dartDefine("MAPS_KEY") }
 
 android {
     namespace = "com.zancr.hancr_driver"
@@ -36,6 +64,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
+        manifestPlaceholders["googleMapsApiKey"] = googleMapsApiKey
     }
 
     signingConfigs {
