@@ -69,5 +69,6 @@ git push origin feat/nearby-drivers
 
 The workflow should run the same gates as `npm run ci:verify`.
 
-`npm run ci:verify` also runs the secret hygiene check and
-`flutter analyze --no-pub` for both mobile apps.
+`npm run ci:verify` also runs the secret hygiene check, admin-panel i18n key
+validation, admin-panel linting, and `flutter analyze --no-pub` for both
+mobile apps.
