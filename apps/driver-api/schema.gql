@@ -2,10 +2,49 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddEmergencyContactInput {
+  autoShareTrips: Boolean! = false
+  name: String!
+  phoneNumber: String!
+  priority: Int! = 0
+  relation: EmergencyContactRelation! = Family
+}
+
+input AddPayoutMethodInput {
+  accountName: String
+  bankName: String
+  iban: String
+  phoneNumber: String
+  type: String!
+}
+
 type AuthPayload {
   accessToken: String!
   driver: DriverType!
   isNewDriver: Boolean!
+}
+
+type AuthResult {
+  accessToken: String
+  driver: DriverType
+  isNewDriver: Boolean
+  message: String
+  needsPhone: Boolean!
+  pendingToken: String
+  success: Boolean!
+}
+
+type AvailableBidType {
+  alreadyOffered: Boolean!
+  currency: String!
+  destinationAddress: String
+  estimatedDistance: Int!
+  expiresAt: DateTime!
+  id: Int!
+  originAddress: String
+  regionId: Int!
+  riderProposedPrice: Float!
+  serviceId: Int!
 }
 
 type BidOfferResult {
@@ -15,10 +54,59 @@ type BidOfferResult {
   success: Boolean!
 }
 
+type ChatEventType {
+  actorType: String!
+  orderId: Int!
+}
+
+type DailyEarningType {
+  amount: Float!
+  date: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type DemandZoneType {
+  lat: Float!
+  lng: Float!
+  weight: Int!
+}
+
+type DocumentUploadUrlType {
+  expiresIn: Float!
+  objectKey: String!
+  publicUrl: String!
+  uploadUrl: String!
+}
+
+type DriverAnnouncementType {
+  body: String!
+  createdAt: DateTime!
+  id: Int!
+  title: String!
+  url: String
+}
+
+type DriverDocumentType {
+  expiresAt: DateTime
+  id: Int!
+  rejectedReason: String
+  reviewedAt: DateTime
+  status: String!
+  type: String!
+  uploadedAt: DateTime!
+  url: String!
+}
+
+type DriverEarningsSummaryType {
+  availableBalance: Int!
+  currency: String!
+  pendingPayoutAmount: Int!
+  totalEarnedAllTime: Int!
+}
 
 type DriverLocationType {
   driverId: Int!
@@ -31,34 +119,52 @@ type DriverLocationType {
 type DriverOrderType {
   addresses: [String!]!
   audioOff: Boolean!
+  bookedHours: Int
+  budget: Float
+  companyId: Int
   costAfterCoupon: Float!
   costBest: Float!
   createdOn: DateTime!
   currency: String!
   distanceBest: Int!
+  driverId: Int
   durationBest: Int!
+  entitlementId: Int
   etaPickup: DateTime
+  familyMode: Boolean
   finishTimestamp: DateTime
   id: Int!
   isBidOrder: Boolean!
+  nightShift: Boolean
   numberMasked: Boolean!
   otpCode: String
   paymentMode: String!
   points: [GeoPoint!]
+  preferFemaleDriver: Boolean
+  preferredDriverId: Int
   quietRide: Boolean!
   receiverName: String
+  receiverPhone: String
   requestedTemperature: Int
   riderId: Int!
   riderName: String
   riderPhone: String
   riderRating: Float!
+  shoppingList: [DriverShoppingItemType!]
   startTimestamp: DateTime
   status: String!
   type: String!
 }
 
+type DriverShoppingItemType {
+  name: String!
+  note: String
+  qty: Int!
+}
+
 type DriverType {
   active: Boolean!
+  approvalStatus: String!
   avatarUrl: String
   balance: Float!
   banned: Boolean!
@@ -72,14 +178,62 @@ type DriverType {
   currency: String!
   fcmToken: String
   firstName: String!
+  gender: String
   id: Int!
+  kidsApproved: Boolean!
   lastName: String!
+  nightApproved: Boolean!
   phoneNumber: String!
   plateNumber: String
   rating: Float!
   ratingCount: Int!
   regionId: Int
+  rejectionReason: String
   status: String!
+}
+
+type DriverWalletTransactionGqlType {
+  amount: Float!
+  balanceAfter: Float!
+  completedAt: DateTime
+  createdAt: DateTime!
+  currency: String!
+  description: String
+  direction: WalletTransactionDirection!
+  gateway: PaymentGateway!
+  gatewayRef: String
+  id: Int!
+  orderId: Int
+  status: WalletTransactionStatus!
+  type: WalletTransactionType!
+}
+
+type DriverWalletType {
+  balance: Float!
+  currency: String!
+}
+
+enum EmergencyContactRelation {
+  Colleague
+  Family
+  Friend
+  Other
+  Spouse
+}
+
+type EmergencyContactType {
+  autoShareTrips: Boolean!
+  createdAt: DateTime!
+  id: Int!
+  name: String!
+  phoneNumber: String!
+  priority: Int!
+  relation: EmergencyContactRelation!
+}
+
+input GenerateUploadUrlInput {
+  contentType: String! = "image/jpeg"
+  type: String!
 }
 
 type GeoPoint {
@@ -87,27 +241,56 @@ type GeoPoint {
   lng: Float!
 }
 
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
 type Mutation {
   """قبول طلب رحلة"""
   acceptOrder(orderId: Int!): DriverOrderType!
 
+  """إضافة جهة طوارئ للسائق"""
+  addDriverEmergencyContact(input: AddEmergencyContactInput!): EmergencyContactType!
+
+  """إضافة طريقة سحب"""
+  addPayoutMethod(input: AddPayoutMethodInput!): PayoutMethodType!
+
   """تأكيد وصول نقطة الانطلاق"""
   arrivedAtPickup(orderId: Int!): DriverOrderType!
+
+  """إلغاء حادثة طوارئ (إنذار خاطئ) — السائق"""
+  cancelDriverSos(incidentId: Int!): SosIncidentType!
 
   """حذف FCM token للسائق"""
   clearDriverFcmToken: Boolean!
 
+  """تأكيد تسليم أمانة عبر OTP"""
+  confirmDelivery(orderId: Int!, otp: String!): DriverOrderType!
+
   """إلغاء الطلب"""
   driverCancelOrder(orderId: Int!): DriverOrderType!
+
+  """دخول السائق عبر Google ID token"""
+  driverGoogleAuth(idToken: String!): AuthResult!
+
+  """ارسال OTP لبريد السائق"""
+  driverSendEmailOtp(email: String!): SendOtpResponse!
 
   """ارسال OTP للسائق"""
   driverSendOtp(phone: String!): SendOtpResponse!
 
+  """تحقق من OTP البريد — دخول كامل أو ربط هاتف"""
+  driverVerifyEmailOtp(code: String!, email: String!): AuthResult!
+
   """تحقق من OTP + JWT للسائق"""
-  driverVerifyOtp(code: String!, phone: String!): AuthPayload!
+  driverVerifyOtp(code: String!, pendingToken: String, phone: String!): AuthPayload!
 
   """انتهاء الرحلة"""
   finishRide(orderId: Int!): DriverOrderType!
+
+  """توليد رابط رفع موقَّع لوثيقة سائق (GCS v4 signed URL)"""
+  generateDriverDocumentUploadUrl(input: GenerateUploadUrlInput!): DocumentUploadUrlType!
 
   """تحويل حالة السائق إلى Offline"""
   goOffline: Boolean!
@@ -115,11 +298,38 @@ type Mutation {
   """تحويل حالة السائق إلى Online"""
   goOnline: Boolean!
 
+  """تعليم رسائل الراكب كمقروءة"""
+  markOrderMessagesRead(orderId: Int!): Boolean!
+
+  """تقييم الراكب بعد الرحلة"""
+  rateRider(orderId: Int!, stars: Int!): DriverOrderType!
+
+  """حذف جهة طوارئ للسائق"""
+  removeDriverEmergencyContact(contactId: Int!): Boolean!
+
+  """حذف طريقة سحب"""
+  removePayoutMethod(id: Int!): Boolean!
+
+  """طلب سحب رصيد إلى الحساب البنكي"""
+  requestWithdrawal(amount: Float!): WithdrawalRequestType!
+
+  """إرسال رسالة للراكب"""
+  sendOrderMessage(imageUrl: String, message: String!, orderId: Int!): OrderMessageType!
+
+  """تعيين طريقة سحب افتراضية"""
+  setDefaultPayoutMethod(id: Int!): PayoutMethodType!
+
+  """إشعار "يكتب الآن" للراكب"""
+  setOrderTyping(orderId: Int!): Boolean!
+
   """بدء الرحلة"""
   startRide(orderId: Int!): DriverOrderType!
 
   """تقديم عرض سعر في Bid Mode"""
   submitBidOffer(bidId: Int!, offeredPrice: Float!): BidOfferResult!
+
+  """🚨 تفعيل حادثة طوارئ — السائق"""
+  triggerDriverSos(input: TriggerSosInput!): SosIncidentType!
 
   """تحديث FCM token للسائق"""
   updateDriverFcmToken(token: String!): Boolean!
@@ -127,28 +337,137 @@ type Mutation {
   """تحديث بيانات السائق"""
   updateDriverProfile(input: UpdateDriverInput!): DriverType!
 
+  """بثّ موقع السائق الحيّ أثناء حادثة طوارئ نشطة (كل 3ث)"""
+  updateDriverSosLocation(latitude: Float!, longitude: Float!): Boolean!
+
   """تحديث موقع السائق (كل 4 ثوانٍ)"""
   updateLocation(input: UpdateLocationInput!): DriverLocationType!
+
+  """رفع/استبدال وثيقة (تعود إلى pending)"""
+  uploadDriverDocument(input: UploadDocumentInput!): DriverDocumentType!
+}
+
+type OrderMessageType {
+  id: Int!
+  imageUrl: String
+  isRead: Boolean!
+  message: String!
+  orderId: Int!
+  senderId: Int!
+  senderType: String!
+  sentAt: DateTime!
+}
+
+enum PaymentGateway {
+  ApplePay
+  GooglePay
+  HyperPay
+  Internal
+  Manual
+  Moyasar
+  Stripe
+}
+
+type PayoutMethodType {
+  accountName: String
+  bankName: String
+  createdAt: DateTime!
+  iban: String
+  id: Int!
+  isDefault: Boolean!
+  phoneNumber: String
+  type: String!
 }
 
 type Query {
+  """ثيم التطبيق الحي (SDUI) — عام بدون مصادقة"""
+  appTheme: JSON
+
+  """المزايدات المفتوحة المتاحة"""
+  availableBids: [AvailableBidType!]!
+
+  """سجل رحلات السائق المكتملة"""
+  completedOrders(limit: Int! = 20, offset: Int! = 0): [DriverOrderType!]!
+
+  """مناطق الطلب الساخنة (heatmap) من الرحلات الأخيرة"""
+  demandZones: [DemandZoneType!]!
+
   """الطلب النشط الحالي"""
   driverActiveOrder: DriverOrderType
+
+  """إعلانات السائق النشطة"""
+  driverAnnouncements: [DriverAnnouncementType!]!
 
   """بيانات السائق الحالي"""
   driverMe: DriverType!
 
+  """حادثة SOS نشطة حالياً للسائق (إن وُجدت)"""
+  myActiveDriverSos: SosIncidentType
+
+  """أرباح السائق اليومية لآخر days يوماً"""
+  myDailyEarnings(days: Int! = 7): [DailyEarningType!]!
+
+  """وثائق السائق"""
+  myDocuments: [DriverDocumentType!]!
+
+  """جهات الطوارئ المسجَّلة للسائق"""
+  myDriverEmergencyContacts: [EmergencyContactType!]!
+
+  """رصيد محفظة السائق"""
+  myDriverWallet: DriverWalletType!
+
+  """سجلّ معاملات محفظة السائق (الأحدث أولاً)"""
+  myDriverWalletTransactions(limit: Int! = 50, offset: Int! = 0): [DriverWalletTransactionGqlType!]!
+
+  """ملخّص أرباح السائق (متاح / معلَّق / كلي)"""
+  myEarningsSummary: DriverEarningsSummaryType!
+
   """الموقع الحالي للسائق"""
   myLocation: DriverLocationType
 
+  """طرق السحب المسجّلة للسائق"""
+  myPayoutMethods: [PayoutMethodType!]!
+
   """نجوم Captain Stars ونسبة العمولة"""
   myStars: StarsType!
+
+  """رسائل المحادثة لطلب"""
+  orderMessages(orderId: Int!): [OrderMessageType!]!
 }
 
 type SendOtpResponse {
   devOtp: String
   message: String!
   success: Boolean!
+}
+
+type SosIncidentType {
+  contactsNotified: Int!
+  createdAt: DateTime!
+  id: Int!
+  lastLatitude: Float
+  lastLongitude: Float
+  latitude: Float!
+  longitude: Float!
+  orderId: Int
+  policeNotified: Boolean!
+  resolvedAt: DateTime
+  status: SosStatus!
+  triggeredBy: SosTriggeredBy!
+  triggeredById: Int!
+}
+
+enum SosStatus {
+  Active
+  Cancelled
+  Escalated
+  Resolved
+}
+
+enum SosTriggeredBy {
+  Driver
+  Rider
+  System
 }
 
 type StarsType {
@@ -176,6 +495,23 @@ type Subscription {
 
   """طلبات رحلة جديدة متاحة"""
   newOrderAvailable: DriverOrderType!
+
+  """رسائل المحادثة الفورية"""
+  orderMessageAdded(orderId: Int!): OrderMessageType!
+
+  """تمّت قراءة الرسائل"""
+  orderMessagesRead(orderId: Int!): ChatEventType!
+
+  """
+  "يكتب الآن"
+  """
+  orderTyping(orderId: Int!): ChatEventType!
+}
+
+input TriggerSosInput {
+  latitude: Float!
+  longitude: Float!
+  orderId: Int
 }
 
 input UpdateDriverInput {
@@ -187,6 +523,7 @@ input UpdateDriverInput {
   carYear: Int
   fcmToken: String
   firstName: String
+  gender: String
   lastName: String
   plateNumber: String
   serviceIds: [Int!]
@@ -197,4 +534,48 @@ input UpdateLocationInput {
   lat: Float!
   lng: Float!
   serviceIds: [Int!]
+}
+
+input UploadDocumentInput {
+  expiresAt: DateTime
+  type: String!
+  url: String!
+}
+
+enum WalletTransactionDirection {
+  Credit
+  Debit
+}
+
+enum WalletTransactionStatus {
+  Completed
+  Failed
+  Pending
+  Reversed
+}
+
+enum WalletTransactionType {
+  AdminAdjustment
+  CancellationFee
+  DriverEarnings
+  DriverWithdrawal
+  LoyaltyRedemption
+  PromoBonus
+  Recharge
+  Refund
+  Tip
+  TripPayment
+}
+
+type WithdrawalRequestType {
+  """القيمة المطلوب سحبها"""
+  amount: Float!
+
+  """الرصيد بعد الحجز"""
+  balanceAfter: Float!
+  currency: String!
+  status: WalletTransactionStatus!
+
+  """معرّف معاملة السحب (Pending)"""
+  transactionId: Int!
 }

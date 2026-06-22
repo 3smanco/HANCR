@@ -2,10 +2,52 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddEmergencyContactInput {
+  autoShareTrips: Boolean! = false
+  name: String!
+  phoneNumber: String!
+  priority: Int! = 0
+  relation: EmergencyContactRelation! = Family
+}
+
+input AiMessageInput {
+  content: String!
+  role: String!
+}
+
+type AiReply {
+  reply: String!
+}
+
+type AppConfigPublicType {
+  banners: [BannerType!]!
+}
+
 type AuthPayload {
   accessToken: String!
   isNewUser: Boolean!
+  pendingToken: String
   rider: RiderType!
+  twoFactorRequired: Boolean!
+}
+
+type AuthResult {
+  accessToken: String
+  isNewUser: Boolean
+  message: String
+  needsPhone: Boolean!
+  pendingToken: String
+  rider: RiderType
+  success: Boolean!
+}
+
+type BannerType {
+  id: String!
+  imageUrl: String!
+  link: String
+  order: Int!
+  subtitle: String
+  title: String
 }
 
 type BidOfferType {
@@ -34,6 +76,117 @@ type BidType {
   status: String!
 }
 
+input CarpoolRequestInput {
+  destinationAddress: String!
+  destinationLat: Float!
+  destinationLng: Float!
+  maxRiders: Int!
+  originAddress: String!
+  originLat: Float!
+  originLng: Float!
+  regionId: Int!
+  scheduledAt: String!
+  serviceId: Int!
+  trustMode: String!
+}
+
+type CarpoolRequestType {
+  createdAt: DateTime!
+  destinationAddress: String!
+  destinationLat: Float!
+  destinationLng: Float!
+  discountPercent: Float!
+  id: Int!
+  matchId: Int
+  maxRiders: Int!
+  orderId: Int
+  originAddress: String!
+  originLat: Float!
+  originLng: Float!
+  regionId: Int!
+  scheduledAt: DateTime!
+  serviceId: Int!
+  status: String!
+  trustMode: String!
+}
+
+type ChatEventType {
+  actorType: String!
+  orderId: Int!
+}
+
+input CommuterSubscriptionInput {
+  childName: String
+  daysOfWeek: [Int!]!
+  homeAddress: String!
+  homeLat: Float!
+  homeLng: Float!
+  leadMinutes: Int
+  medicalNotes: String
+  nightShift: Boolean
+  outboundTime: String
+  parentPhone: String
+  planType: String
+  preferredDriverId: Int
+  recurrence: String
+  regionId: Int!
+  returnTime: String
+  serviceId: Int!
+  subscriptionType: String
+  wheelchairNeeded: Boolean
+  workAddress: String!
+  workLat: Float!
+  workLng: Float!
+}
+
+type CommuterSubscriptionType {
+  active: Boolean!
+  childName: String
+  createdAt: DateTime!
+  daysOfWeek: [Int!]!
+  homeAddress: String!
+  homeLat: Float!
+  homeLng: Float!
+  id: Int!
+  leadMinutes: Int!
+  medicalNotes: String
+  nightShift: Boolean!
+  outboundTime: String
+  parentPhone: String
+  planType: String!
+  preferredDriverId: Int
+  recurrence: String!
+  regionId: Int!
+  returnTime: String
+  serviceId: Int!
+  subscriptionType: String!
+  wheelchairNeeded: Boolean!
+  workAddress: String!
+  workLat: Float!
+  workLng: Float!
+}
+
+input CommuterUpdateInput {
+  active: Boolean
+  daysOfWeek: [Int!]
+  leadMinutes: Int
+  outboundTime: String
+  returnTime: String
+}
+
+type ComplaintActivityType {
+  createdAt: DateTime!
+  id: Int!
+  note: String
+  type: String!
+}
+
+type CouponPreviewType {
+  code: String!
+  costAfterCoupon: Float!
+  discountAmount: Float!
+}
+
 input CreateBidInput {
   addresses: [String!]!
   points: [GeoPointInput!]!
@@ -46,11 +199,17 @@ input CreateOrderInput {
   addresses: [String!]!
   audioOff: Boolean = false
   bookedHours: Int
+  budget: Float
+  couponCode: String
   couponId: Int
+  familyMode: Boolean
   isBidOrder: Boolean = false
+  nightShift: Boolean = false
   numberMasked: Boolean = false
   paymentMode: String = "Cash"
   points: [GeoPointInput!]!
+  preferFemaleDriver: Boolean
+  preferredDriverId: Int
   proposedPrice: Float
   quietRide: Boolean = false
   receiverName: String
@@ -59,12 +218,95 @@ input CreateOrderInput {
   requestedTemperature: Int
   scheduledAt: DateTime
   serviceId: Int!
+  shoppingList: [ShoppingListItemInput!]
 }
 
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type DeviceType {
+  createdAt: DateTime!
+  current: Boolean!
+  deviceName: String
+  id: Int!
+  lastActiveAt: DateTime!
+  platform: String
+}
+
+type DriverLocationType {
+  driverId: Int!
+  heading: Int!
+  lat: Float!
+  lng: Float!
+  updatedAt: DateTime!
+}
+
+enum EmergencyContactRelation {
+  Colleague
+  Family
+  Friend
+  Other
+  Spouse
+}
+
+type EmergencyContactType {
+  autoShareTrips: Boolean!
+  createdAt: DateTime!
+  id: Int!
+  name: String!
+  phoneNumber: String!
+  priority: Int!
+  relation: EmergencyContactRelation!
+}
+
+type FareBreakdownType {
+  base: Float!
+  beforeMinimum: Float!
+  combinedMultiplier: Float!
+  distance: Float!
+  minimumApplied: Boolean!
+  minimumFee: Float!
+  peakLabel: String
+  peakMultiplier: Float!
+  subtotal: Float!
+  surgeMultiplier: Float!
+  time: Float!
+  total: Float!
+  wait: Float!
+  zoneMultiplier: Float!
+}
+
+input FlightTrackingInput {
+  flightDate: String!
+  flightNumber: String!
+  pickupAddress: String!
+  pickupLat: Float!
+  pickupLng: Float!
+  regionId: Int!
+  serviceId: Int!
+}
+
+type FlightTrackingType {
+  createdAt: DateTime!
+  flightDate: String!
+  flightNumber: String!
+  id: Int!
+  orderId: Int
+  pickupAddress: String!
+  pickupLat: Float!
+  pickupLng: Float!
+  pickupTriggered: Boolean!
+  regionId: Int!
+  scheduledArrival: DateTime
+  serviceId: Int!
+  status: String!
+}
+
+input GenerateRiderUploadUrlInput {
+  contentType: String! = "image/jpeg"
+}
 
 input GeoPointInput {
   lat: Float!
@@ -75,6 +317,23 @@ type GeoPointType {
   lat: Float!
   lng: Float!
 }
+
+type GiftClaimResultType {
+  amount: Float!
+  currency: String!
+  newBalance: Float!
+  success: Boolean!
+}
+
+input GoogleAuthInput {
+  idToken: String!
+  referralCode: String
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 type LoyaltyType {
   availableMiles: Float!
@@ -92,23 +351,155 @@ type Mutation {
   """قبول عرض سائق في Bid Mode"""
   acceptBidOffer(offerId: Int!): BidType!
 
+  """إضافة جهة طوارئ"""
+  addEmergencyContact(input: AddEmergencyContactInput!): EmergencyContactType!
+
+  """إضافة مكان مفضّل"""
+  addSavedPlace(input: SavedPlaceInput!): SavedPlaceType!
+
+  """مساعد HANCR الذكي (محادثة)"""
+  aiAssistant(history: [AiMessageInput!], message: String!): AiReply!
+
+  """إلغاء طلب Carpool"""
+  cancelCarpoolRequest(id: Int!): Boolean!
+
+  """إلغاء تتبّع رحلة"""
+  cancelFlightTracking(id: Int!): Boolean!
+
   """إلغاء الطلب"""
   cancelOrder(orderId: Int!): OrderType!
+
+  """إلغاء حادثة طوارئ (إنذار خاطئ)"""
+  cancelSos(incidentId: Int!): SosIncidentType!
+
+  """استخدام كود هدية"""
+  claimGiftCode(code: String!): GiftClaimResultType!
 
   """حذف FCM token عند تسجيل الخروج"""
   clearFcmToken: Boolean!
 
+  """تأكيد شحن المحفظة (dev فقط)"""
+  confirmWalletRecharge(transactionId: Int!): Boolean!
+
   """فتح مزايدة جديدة (Bid Mode)"""
   createBid(input: CreateBidInput!): BidType!
+
+  """إنشاء اشتراك Commuter"""
+  createCommuterSubscription(input: CommuterSubscriptionInput!): CommuterSubscriptionType!
+
+  """إنشاء مجموعة عائلية"""
+  createFamily(name: String!): PoolType!
 
   """طلب رحلة جديدة"""
   createOrder(input: CreateOrderInput!): OrderType!
 
+  """إنشاء مجموعة محفوظة"""
+  createSavedGroup(members: [SavedGroupMemberInput!], name: String!, type: String): SavedGroupType!
+
+  """حذف اشتراك Commuter"""
+  deleteCommuterSubscription(id: Int!): Boolean!
+
+  """حذف المجموعة العائلية (المالك)"""
+  deleteFamily: Boolean!
+
+  """حذف مجموعة محفوظة"""
+  deleteSavedGroup(id: Int!): Boolean!
+
+  """حذف مكان مفضّل"""
+  deleteSavedPlace(id: Int!): Boolean!
+
+  """تعطيل 2FA بالتحقق من رمز"""
+  disableTwoFactor(code: String!): Boolean!
+
+  """تفعيل 2FA بالتحقق من رمز — يعيد أكواد الاسترداد مرّة واحدة"""
+  enableTwoFactor(code: String!): TwoFactorRecoveryType!
+
+  """رابط رفع موقّع لصورة الملف الشخصي"""
+  generateRiderUploadUrl(input: GenerateRiderUploadUrlInput!): RiderUploadUrlType!
+
+  """الدخول عبر Google ID token — دخول كامل أو رمز ربط هاتف (needsPhone)"""
+  googleAuth(input: GoogleAuthInput!): AuthResult!
+
+  """دعوة عضو للعائلة بالهاتف"""
+  inviteFamilyMember(monthlySpendLimit: Float, phone: String!): PoolType!
+
+  """مغادرة المجموعة العائلية"""
+  leaveFamily: Boolean!
+
+  """إبطال جلسة الراكب (كل التوكنات الصادرة حتى الآن)"""
+  logout: Boolean!
+
+  """تعليم رسائل السائق كمقروءة"""
+  markOrderMessagesRead(orderId: Int!): Boolean!
+
+  """شراء حزمة رحلات"""
+  purchaseBundle(bundleId: Int!): PurchaseResultType!
+
   """تقييم السائق"""
   rateDriver(input: RateDriverInput!): OrderType!
 
+  """استبدال Hancr Miles برصيد محفظة"""
+  redeemReward(miles: Int!): RedeemResultType!
+
+  """حذف جهة طوارئ"""
+  removeEmergencyContact(contactId: Int!): Boolean!
+
+  """إزالة عضو من العائلة"""
+  removeFamilyMember(memberId: Int!): PoolType!
+
+  """ردّ الراكب داخل تذكرة"""
+  replyToComplaint(complaintId: Int!, imageUrl: String, message: String!): Boolean!
+
+  """طلب حذف الحساب — يعطّله ويُبطل كل الجلسات"""
+  requestAccountDeletion: Boolean!
+
+  """طلب Carpool جديد"""
+  requestCarpool(input: CarpoolRequestInput!): CarpoolRequestType!
+
+  """إبطال جهاز/جلسة بعينها"""
+  revokeDevice(deviceId: Int!): Boolean!
+
+  """تسجيل الخروج من كل الأجهزة الأخرى (عدا الحالي)"""
+  revokeOtherDevices: Boolean!
+
+  """إرسال رمز OTP إلى البريد الإلكتروني"""
+  sendEmailOtp(input: SendEmailOtpInput!): SendOtpResponse!
+
+  """إرسال رسالة للسائق"""
+  sendOrderMessage(imageUrl: String, message: String!, orderId: Int!): OrderMessageType!
+
   """ارسال رمز OTP لرقم الهاتف للتحقق"""
   sendOtp(input: SendOtpInput!): SendOtpResponse!
+
+  """إرسال رسالة للدعم"""
+  sendSupportMessage(body: String!, conversationId: Int!, imageUrl: String): SupportMessageType!
+
+  """إشعار "يكتب الآن" للسائق"""
+  setOrderTyping(orderId: Int!): Boolean!
+
+  """إعداد ملف أعمال (ينشئ شركة ويربط الراكب بها)"""
+  setupBusinessProfile(billingEmail: String, name: String!): MyCompanyType!
+
+  """بدء إعداد 2FA — يعيد السرّ وotpauth URI"""
+  startTwoFactorSetup: TwoFactorSetupType!
+
+  """بدء عملية شحن المحفظة"""
+  startWalletRecharge(amount: Float!, gateway: PaymentGateway! = HyperPay): RechargeCheckoutType!
+
+  """تقديم شكوى من راكب"""
+  submitComplaint(input: SubmitComplaintInput!): RiderComplaintType!
+
+  """بدء تتبّع رحلة طيران"""
+  trackFlight(input: FlightTrackingInput!): FlightTrackingType!
+
+  """🚨 تفعيل حادثة طوارئ"""
+  triggerSos(input: TriggerSosInput!): SosIncidentType!
+
+  """تعديل اشتراك (إيقاف/تفعيل، أيام، أوقات)"""
+  updateCommuterSubscription(id: Int!, input: CommuterUpdateInput!): CommuterSubscriptionType!
+
+  """تعديل حدّ إنفاق عضو"""
+  updateFamilyMemberLimit(memberId: Int!, monthlySpendLimit: Float): PoolType!
 
   """تحديث FCM token للإشعارات"""
   updateFcmToken(token: String!): Boolean!
@@ -116,24 +507,67 @@ type Mutation {
   """تحديث بيانات الراكب"""
   updateProfile(input: UpdateRiderInput!): RiderType!
 
+  """تعديل مجموعة محفوظة"""
+  updateSavedGroup(id: Int!, members: [SavedGroupMemberInput!], name: String, type: String): SavedGroupType!
+
+  """بثّ موقع الراكب الحيّ أثناء حادثة طوارئ نشطة (كل 3ث)"""
+  updateSosLocation(latitude: Float!, longitude: Float!): Boolean!
+
   """التحقق من OTP للتسليم الآمن"""
   verifyDeliveryOtp(orderId: Int!, otp: String!): OrderType!
 
+  """التحقق من OTP البريد — دخول كامل أو رمز ربط هاتف (needsPhone)"""
+  verifyEmailOtp(input: VerifyEmailOtpInput!): AuthResult!
+
   """التحقق من OTP واستلام Access Token"""
   verifyOtp(input: VerifyOtpInput!): AuthPayload!
+
+  """إكمال الدخول بعد التحقق بخطوتين (TOTP أو كود استرداد)"""
+  verifyTwoFactor(code: String!, deviceName: String, pendingToken: String!, platform: String): AuthPayload!
+}
+
+type MyCompanyType {
+  companyBalance: Float!
+  companyId: Int!
+  companyName: String!
+  currency: String!
+  monthlyCapPerEmployee: Float!
+  monthlyRemaining: Float!
+  monthlySpent: Float!
+  status: String!
+}
+
+type NearbyDriverPin {
+  heading: Float!
+  lat: Float!
+  lng: Float!
+}
+
+type OrderMessageType {
+  id: Int!
+  imageUrl: String
+  isRead: Boolean!
+  message: String!
+  orderId: Int!
+  senderId: Int!
+  senderType: String!
+  sentAt: DateTime!
 }
 
 type OrderType {
   addresses: [String!]!
   audioOff: Boolean!
   bidId: Int
+  budget: Float
   carBrand: String
   carColor: String
   carModel: String
   costAfterCoupon: Float!
   costBest: Float!
+  couponCode: String
   createdOn: DateTime!
   currency: String!
+  discountAmount: Float
   distanceBest: Int!
   driverAvatarUrl: String
   driverId: Int
@@ -158,6 +592,7 @@ type OrderType {
   requestedTemperature: Int
   riderId: Int!
   serviceId: Int!
+  shoppingList: [ShoppingListItemType!]
   startTimestamp: DateTime
   status: String!
   tipAmount: Float!
@@ -165,9 +600,37 @@ type OrderType {
   updatedAt: DateTime!
 }
 
+enum PaymentGateway {
+  ApplePay
+  GooglePay
+  HyperPay
+  Internal
+  Manual
+  Moyasar
+  Stripe
+}
+
+type PlaceLocationType {
+  address: String
+  lat: Float!
+  lng: Float!
+}
+
+type PlacePredictionType {
+  distanceMeters: Int
+  lat: Float
+  lng: Float
+  placeId: String!
+  subtitle: String
+  title: String!
+}
+
 type PoolMemberType {
+  currentMonthSpend: Float!
   id: Int!
   joinedAt: DateTime!
+  monthlySpendLimit: Float
+  phone: String
   riderId: Int!
   riderName: String
   role: String!
@@ -177,36 +640,127 @@ type PoolType {
   active: Boolean!
   createdAt: DateTime!
   id: Int!
+  isOwner: Boolean!
   members: [PoolMemberType!]!
   name: String!
   ownerId: Int!
   type: String!
 }
 
+type PurchaseResultType {
+  entitlement: RiderEntitlementType!
+  newWalletBalance: Float!
+  success: Boolean!
+}
+
 type Query {
+  """الإعلانات النشطة للراكب"""
+  activeAnnouncements: [RiderAnnouncementType!]!
+
   """المزايدة النشطة الحالية"""
   activeBid: BidType
 
   """الطلب النشط الحالي"""
   activeOrder: OrderType
 
+  """قائمة المناطق المفعّلة"""
+  activeRegions: [RegionLookupType!]!
+
+  """إعدادات التطبيق العامة"""
+  appConfig: AppConfigPublicType!
+
+  """ثيم التطبيق الحي (SDUI) — عام بدون مصادقة"""
+  appTheme: JSON
+
+  """الحزم المتاحة في منطقة الراكب"""
+  availableBundles(regionId: Int!): [RideBundleType!]!
+
+  """طلبات Carpool للراكب"""
+  carpoolRequests: [CarpoolRequestType!]!
+
+  """اشتراكات التنقّل (Commuter) للراكب"""
+  commuterSubscriptions: [CommuterSubscriptionType!]!
+
+  """تتبّعات الرحلات الجوية"""
+  flightTrackings: [FlightTrackingType!]!
+
   """بيانات الراكب المسجّل"""
   me: RiderType!
+
+  """حادثة SOS نشطة حالياً (إن وُجدت)"""
+  myActiveSos: SosIncidentType
+
+  """شركة الراكب الموظف (إن وُجدت)"""
+  myCompany: MyCompanyType
+
+  """شكاوى الراكب مع حالتها وخطّها الزمني"""
+  myComplaints: [RiderComplaintType!]!
+
+  """أجهزة الراكب النشطة"""
+  myDevices: [DeviceType!]!
+
+  """جهات الطوارئ المسجَّلة للراكب"""
+  myEmergencyContacts: [EmergencyContactType!]!
+
+  """حِزَم الراكب المُشتراة"""
+  myEntitlements: [RiderEntitlementType!]!
 
   """بيانات نقاط Hancr Miles"""
   myLoyalty: LoyaltyType!
 
-  """المجموعة العائلية/المؤسسية للراكب"""
+  """المجموعة العائلية للراكب"""
   myPool: PoolType
+
+  """بيانات إحالة الراكب"""
+  myReferral: ReferralType!
+
+  """المجموعات المحفوظة للراكب"""
+  mySavedGroups: [SavedGroupType!]!
+
+  """محادثة الدعم المفتوحة للراكب (تُنشأ إن لم توجد)"""
+  mySupportConversation: SupportConversationType!
 
   """رصيد محفظة الراكب"""
   myWallet: WalletType!
 
+  """سجلّ معاملات المحفظة (الأحدث أولاً)"""
+  myWalletTransactions(limit: Int! = 50, offset: Int! = 0): [WalletTransactionGqlType!]!
+
+  """سائقون قريبون (للخريطة)"""
+  nearbyDrivers(lat: Float!, lng: Float!): [NearbyDriverPin!]!
+
+  """المنطقة التي تحتوي نقطة الإحداثيات المعطاة، أو null إن لم تُخدَم"""
+  nearestRegion(lat: Float!, lng: Float!): RegionLookupType
+
   """سجل الرحلات"""
   orderHistory(limit: Int! = 20, offset: Int! = 0): [OrderType!]!
 
+  """رسائل المحادثة لطلب"""
+  orderMessages(orderId: Int!): [OrderMessageType!]!
+
+  """إحداثيات مكان من placeId"""
+  placeDetails(placeId: String!): PlaceLocationType
+
+  """معاينة المسافة والأجرة بالطريق"""
+  routePreview(input: RoutePreviewInput!): RoutePreviewType!
+
+  """الأماكن المفضّلة للراكب"""
+  savedPlaces: [SavedPlaceType!]!
+
+  """بحث عن مكان بالاسم"""
+  searchPlaces(lat: Float, lng: Float, query: String!): [PlacePredictionType!]!
+
   """قائمة الخدمات المتاحة حسب المنطقة"""
   services(regionId: Int!): [ServiceType!]!
+
+  """رسائل محادثة الدعم"""
+  supportMessages(conversationId: Int!): [SupportMessageType!]!
+
+  """الرحلات المجدولة القادمة"""
+  upcomingOrders: [OrderType!]!
+
+  """التحقق من كود الخصم وحساب الخصم"""
+  validateCoupon(code: String!, fare: Int!, regionId: Int!): CouponPreviewType!
 }
 
 input RateDriverInput {
@@ -214,6 +768,102 @@ input RateDriverInput {
   orderId: Int!
   rating: Float!
   tip: Float
+}
+
+type RechargeCheckoutType {
+  amount: Float!
+
+  """Client secret (Stripe/Apple Pay/Google Pay)"""
+  clientSecret: String
+  currency: String!
+  gateway: PaymentGateway!
+
+  """معرّف المعاملة في الـ gateway"""
+  gatewayRef: String!
+
+  """URL لإعادة توجيه المستخدم (HyperPay/Moyasar)"""
+  redirectUrl: String
+
+  """إذا true: شُحنت المحفظة فوراً (محاكاة) لأن الدفع بالبطاقة معطّل بعد"""
+  simulated: Boolean
+
+  """معرّف المعاملة الداخلي (Pending)"""
+  transactionId: Int!
+}
+
+type RedeemResultType {
+  creditedAmount: Float!
+  currency: String!
+  redeemedMiles: Int!
+  remainingMiles: Float!
+  success: Boolean!
+}
+
+type ReferralType {
+  """كود الإحالة الخاص بالراكب"""
+  code: String
+
+  """عدد الأصدقاء المُحالين"""
+  referredCount: Int!
+
+  """عدد الإحالات التي تمّت مكافأتها"""
+  rewardedCount: Int!
+}
+
+type RegionLookupType {
+  cityId: Int
+  countryId: Int
+  currency: String!
+  id: Int!
+  name: String!
+  nameEn: String!
+}
+
+type RideBundleType {
+  active: Boolean!
+  currency: String!
+  id: Int!
+  maxDistanceKm: Float!
+  name: String!
+  price: Float!
+  regionId: Int!
+  ridesCount: Int!
+  validityDays: Int!
+}
+
+type RiderAnnouncementType {
+  body: String!
+  endsAt: DateTime
+  id: Int!
+  startsAt: DateTime!
+  title: String!
+  url: String
+}
+
+type RiderComplaintType {
+  activities: [ComplaintActivityType!]!
+  category: String!
+  createdAt: DateTime!
+  description: String
+  id: Int!
+  orderId: Int
+  resolutionNote: String
+  resolvedAt: DateTime
+  status: String!
+}
+
+type RiderEntitlementType {
+  amountPaid: Float!
+  bundleId: Int!
+  bundleName: String!
+  createdAt: DateTime!
+  currency: String!
+  expiresAt: DateTime!
+  id: Int!
+  maxDistanceKm: Float!
+  ridesRemaining: Int!
+  ridesTotal: Int!
+  status: String!
 }
 
 type RiderType {
@@ -226,12 +876,77 @@ type RiderType {
   currency: String!
   email: String
   firstName: String
+  googleLinked: Boolean!
   id: Int!
   lastLoginAt: DateTime
   lastName: String
   phoneNumber: String!
   rating: Float!
+  teamCode: String
   totalRides: Int!
+  twoFactorEnabled: Boolean!
+}
+
+type RiderUploadUrlType {
+  expiresIn: Float!
+  objectKey: String!
+  publicUrl: String!
+  uploadUrl: String!
+}
+
+input RoutePreviewInput {
+  destination: GeoPointInput!
+  origin: GeoPointInput!
+  regionId: Int
+  serviceId: Int!
+}
+
+type RoutePreviewType {
+  breakdown: FareBreakdownType
+  currency: String!
+  distanceMeters: Int!
+  durationSeconds: Int!
+  estimatedFare: Float!
+  polyline: String
+}
+
+input SavedGroupMemberInput {
+  name: String!
+  phone: String!
+}
+
+type SavedGroupMemberType {
+  name: String!
+  phone: String!
+}
+
+type SavedGroupType {
+  createdAt: DateTime!
+  id: Int!
+  members: [SavedGroupMemberType!]!
+  name: String!
+  type: String!
+}
+
+input SavedPlaceInput {
+  address: String!
+  label: String!
+  lat: Float!
+  lng: Float!
+  type: String
+}
+
+type SavedPlaceType {
+  address: String!
+  id: Int!
+  label: String!
+  lat: Float!
+  lng: Float!
+  type: String!
+}
+
+input SendEmailOtpInput {
+  email: String!
 }
 
 input SendOtpInput {
@@ -260,12 +975,110 @@ type ServiceType {
   serviceType: String!
 }
 
+input ShoppingListItemInput {
+  name: String!
+  note: String
+  qty: Int!
+}
+
+type ShoppingListItemType {
+  name: String!
+  note: String
+  qty: Int!
+}
+
+type SosIncidentType {
+  contactsNotified: Int!
+  createdAt: DateTime!
+  id: Int!
+  lastLatitude: Float
+  lastLongitude: Float
+  latitude: Float!
+  longitude: Float!
+  orderId: Int
+  policeNotified: Boolean!
+  resolvedAt: DateTime
+  status: SosStatus!
+  triggeredBy: SosTriggeredBy!
+  triggeredById: Int!
+}
+
+enum SosStatus {
+  Active
+  Cancelled
+  Escalated
+  Resolved
+}
+
+enum SosTriggeredBy {
+  Driver
+  Rider
+  System
+}
+
+input SubmitComplaintInput {
+  category: String!
+  description: String!
+  orderId: Int
+}
+
 type Subscription {
   """عروض السائقين الفورية خلال Bid Mode"""
   bidOfferReceived: BidType!
 
+  """تحديثات موقع السائق الفورية للراكب"""
+  driverLocationUpdated(driverId: Int!): DriverLocationType!
+
+  """رسائل المحادثة الفورية"""
+  orderMessageAdded(orderId: Int!): OrderMessageType!
+
+  """تمّت قراءة الرسائل"""
+  orderMessagesRead(orderId: Int!): ChatEventType!
+
+  """
+  "يكتب الآن"
+  """
+  orderTyping(orderId: Int!): ChatEventType!
+
   """تحديثات الطلب الفورية عبر WebSocket"""
   orderUpdated: OrderType!
+
+  """رسائل الدعم الفورية"""
+  supportMessageAdded(conversationId: Int!): SupportMessageType!
+}
+
+type SupportConversationType {
+  assignedAgentId: Int
+  createdAt: DateTime!
+  id: Int!
+  lastMessageAt: DateTime
+  status: String!
+}
+
+type SupportMessageType {
+  body: String!
+  conversationId: Int!
+  createdAt: DateTime!
+  id: Int!
+  imageUrl: String
+  isRead: Boolean!
+  senderId: Int!
+  senderType: String!
+}
+
+input TriggerSosInput {
+  latitude: Float!
+  longitude: Float!
+  orderId: Int
+}
+
+type TwoFactorRecoveryType {
+  recoveryCodes: [String!]!
+}
+
+type TwoFactorSetupType {
+  otpauthUri: String!
+  secret: String!
 }
 
 input UpdateRiderInput {
@@ -274,11 +1087,63 @@ input UpdateRiderInput {
   fcmToken: String
   firstName: String
   lastName: String
+  teamCode: String
+}
+
+input VerifyEmailOtpInput {
+  code: String!
+  email: String!
+  referralCode: String
 }
 
 input VerifyOtpInput {
   code: String!
+  deviceName: String
+  pendingToken: String
   phone: String!
+  platform: String
+  referralCode: String
+}
+
+enum WalletTransactionDirection {
+  Credit
+  Debit
+}
+
+type WalletTransactionGqlType {
+  amount: Float!
+  balanceAfter: Float!
+  completedAt: DateTime
+  createdAt: DateTime!
+  currency: String!
+  description: String
+  direction: WalletTransactionDirection!
+  gateway: PaymentGateway!
+  gatewayRef: String
+  id: Int!
+  orderId: Int
+  status: WalletTransactionStatus!
+  type: WalletTransactionType!
+}
+
+enum WalletTransactionStatus {
+  Completed
+  Failed
+  Pending
+  Reversed
+}
+
+enum WalletTransactionType {
+  AdminAdjustment
+  CancellationFee
+  DriverEarnings
+  DriverWithdrawal
+  LoyaltyRedemption
+  PromoBonus
+  Recharge
+  Refund
+  Tip
+  TripPayment
 }
 
 type WalletType {
