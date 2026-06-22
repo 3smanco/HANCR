@@ -2,6 +2,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { execFileSync } from 'child_process';
 import dotenv from 'dotenv';
 
 const args = new Set(process.argv.slice(2));
@@ -76,6 +77,19 @@ function warnKey(group, key, message = 'not configured') {
     add('warn', group, key, message);
   } else {
     add('pass', group, key, 'configured');
+  }
+}
+
+function currentGitSha() {
+  if (template) return '';
+  try {
+    return execFileSync('git', ['rev-parse', '--short', 'HEAD'], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    return '';
   }
 }
 
@@ -222,7 +236,17 @@ for (const key of [
     warnKey('monitoring', key, 'recommended before public launch');
   }
 }
-warnKey('monitoring', 'SENTRY_RELEASE', 'recommended for deploy traceability');
+const sentryRelease = valueOf('SENTRY_RELEASE');
+if (sentryRelease && (template || !isPlaceholder(sentryRelease))) {
+  add('pass', 'monitoring', 'SENTRY_RELEASE', 'configured');
+} else {
+  const gitSha = currentGitSha();
+  if (gitSha) {
+    add('pass', 'monitoring', 'SENTRY_RELEASE', `derived from git SHA ${gitSha}`);
+  } else {
+    add('warn', 'monitoring', 'SENTRY_RELEASE', 'recommended for deploy traceability');
+  }
+}
 
 warnAny(
   'email',
