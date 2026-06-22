@@ -62,7 +62,7 @@ module.exports = {
       args: tsNodeArgs('apps/rider-api/src/main.ts'),
       env: {
         ...commonApiEnv,
-        RIDER_API_PORT: process.env.RIDER_API_PORT || '3000',
+        RIDER_API_PORT: '3000',
       },
       autorestart: true,
       max_memory_restart: '800M',
@@ -74,7 +74,7 @@ module.exports = {
       args: tsNodeArgs('apps/driver-api/src/main.ts'),
       env: {
         ...commonApiEnv,
-        DRIVER_API_PORT: process.env.DRIVER_API_PORT || '3001',
+        DRIVER_API_PORT: '3001',
       },
       autorestart: true,
       max_memory_restart: '800M',
@@ -86,7 +86,7 @@ module.exports = {
       args: tsNodeArgs('apps/admin-api/src/main.ts'),
       env: {
         ...commonApiEnv,
-        ADMIN_API_PORT: process.env.ADMIN_API_PORT || '3002',
+        ADMIN_API_PORT: '3002',
       },
       autorestart: true,
       max_memory_restart: '800M',
