@@ -133,6 +133,7 @@ class OrderModel extends Equatable {
   final DateTime? etaPickup;
   final DateTime? startTimestamp;
   final DateTime? finishTimestamp;
+  final DateTime? expectedTimestamp; // موعد الرحلة المجدولة (Reserve)
   // Driver info
   final int? driverId;
   final String? driverName;
@@ -173,6 +174,7 @@ class OrderModel extends Equatable {
     this.etaPickup,
     this.startTimestamp,
     this.finishTimestamp,
+    this.expectedTimestamp,
     this.driverId,
     this.driverName,
     this.driverPhone,
@@ -219,6 +221,9 @@ class OrderModel extends Equatable {
             : null,
         finishTimestamp: json['finishTimestamp'] != null
             ? DateTime.tryParse(json['finishTimestamp'] as String)
+            : null,
+        expectedTimestamp: json['expectedTimestamp'] != null
+            ? DateTime.tryParse(json['expectedTimestamp'] as String)
             : null,
         driverId: json['driverId'] as int?,
         driverName: json['driverName'] as String?,

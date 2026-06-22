@@ -74,7 +74,13 @@ export class FareCalculator {
     const hour = now.getHours();
     const day = now.getDay(); // 0=الأحد
 
-    for (const t of m.time ?? []) {
+    // حراسة نوع صارمة: أعمدة jsonb قد تحوي قيمة ليست مصفوفة ({} مثلاً) فيرمي
+    // `for...of` خطأ "object is not iterable". Array.isArray يحمي لكل المناطق.
+    const times = Array.isArray(m.time) ? m.time : [];
+    const weekdays = Array.isArray(m.weekday) ? m.weekday : [];
+    const ranges = Array.isArray(m.dateRange) ? m.dateRange : [];
+
+    for (const t of times) {
       const inRange =
         t.startHour <= t.endHour
           ? hour >= t.startHour && hour < t.endHour
@@ -84,14 +90,14 @@ export class FareCalculator {
         label = 'peak_time';
       }
     }
-    for (const w of m.weekday ?? []) {
+    for (const w of weekdays) {
       if (w.weekdays?.includes(day) && w.multiplier > best) {
         best = w.multiplier;
         label = 'peak_weekday';
       }
     }
     const today = now.toISOString().slice(0, 10);
-    for (const d of m.dateRange ?? []) {
+    for (const d of ranges) {
       if (today >= d.from && today <= d.to && d.multiplier > best) {
         best = d.multiplier;
         label = d.label ?? 'season';

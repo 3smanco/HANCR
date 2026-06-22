@@ -110,6 +110,16 @@ export class OrderService {
       throw new BadRequestException('You already have an active order');
     }
 
+    // حجز مسبق (Reserve): يجب أن يكون الموعد ≥ ساعتين من الآن — يطابق تحقّق الواجهة.
+    if (input.scheduledAt) {
+      const ts = new Date(input.scheduledAt).getTime();
+      if (Number.isNaN(ts) || ts < Date.now() + 2 * 60 * 60 * 1000) {
+        throw new BadRequestException(
+          'Reservations must be made at least 2 hours in advance',
+        );
+      }
+    }
+
     // جلب الخدمة — أمن: تُقيَّد بالمنطقة المطلوبة وبكونها مُفعَّلة.
     // (كان يُجلب بالـ id فقط → يمكن تمرير خدمة منطقة أخرى/معطّلة فيُسعَّر بسعرها،
     // وregionId وهمي يتجاوز تسعير المناطق. ربط الخدمة بالمنطقة يسدّ الثغرتين.)
@@ -958,7 +968,6 @@ export class OrderService {
         { riderId, status: OrderStatus.Finished },
         { riderId, status: OrderStatus.RiderCanceled },
         { riderId, status: OrderStatus.DriverCanceled },
-        { riderId, status: OrderStatus.Booked },
       ],
       order: { createdOn: 'DESC' },
       take: limit,
@@ -966,6 +975,16 @@ export class OrderService {
       relations: ['driver'],
     });
 
+    return orders.map((o) => this.toGqlType(o));
+  }
+
+  /** الرحلات المجدولة القادمة (status=Booked) مرتبة بالموعد تصاعدياً. */
+  async getUpcomingOrders(riderId: number): Promise<OrderGqlType[]> {
+    const orders = await this.orderRepo.find({
+      where: { riderId, status: OrderStatus.Booked },
+      order: { expectedTimestamp: 'ASC' },
+      relations: ['driver'],
+    });
     return orders.map((o) => this.toGqlType(o));
   }
 

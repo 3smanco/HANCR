@@ -28,6 +28,7 @@ import 'core/models/order_model.dart';
 import 'screens/booking/aurora_booking_screen.dart';
 import 'screens/booking/pickup_confirmation_screen.dart';
 import 'screens/booking/trip_end_screen.dart';
+import 'screens/rides/aurora_rides.dart';
 import 'screens/main/aurora_main_screen.dart';
 import 'screens/showcase/design_showcase_screen.dart';
 import 'screens/wallet/aurora_wallet_screen.dart';
@@ -185,6 +186,10 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
             path: '/rate',
             pageBuilder: (_, __) =>
                 AppTransitions.slideUp(const AuroraRateDriverScreen())),
+        GoRoute(
+            path: '/upcoming',
+            pageBuilder: (_, __) =>
+                AppTransitions.slideUp(const UpcomingRidesScreen())),
         // Dev-only — visual showcase for the new design system
         GoRoute(
           path: '/showcase',

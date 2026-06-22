@@ -68,8 +68,7 @@ class _DriverCarMapState extends State<DriverCarMap>
     final dpr = WidgetsBinding
         .instance.platformDispatcher.views.first.devicePixelRatio;
     final icon = await CarMarkerFactory.car(
-      color: AuroraColors.ember,
-      px: 110,
+      px: 62,
       dpr: dpr,
     );
     if (mounted) setState(() => _carIcon = icon);

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../blocs/order/order_bloc.dart';
 import '../../blocs/order/order_event.dart';
 import '../../blocs/order/order_state.dart';
+import '../../core/graphql/graphql_client.dart';
+import '../../core/graphql/gql/order_gql.dart';
 import '../../core/models/order_model.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/widgets/aurora/aurora.dart';
@@ -195,6 +198,220 @@ class _AuroraRidesViewState extends State<AuroraRidesView> {
       ),
       child: Text(tr('canceled'),
           style: AuroraText.caption.copyWith(color: AuroraColors.textSecondary)),
+    );
+  }
+}
+
+/// تبويب "القادمة" — الرحلات المجدولة (status=Booked) عبر `upcomingOrders`.
+class UpcomingRidesView extends StatefulWidget {
+  final double bottomInset;
+  const UpcomingRidesView({super.key, this.bottomInset = AuroraSpacing.lg});
+  @override
+  State<UpcomingRidesView> createState() => _UpcomingRidesViewState();
+}
+
+class _UpcomingRidesViewState extends State<UpcomingRidesView> {
+  bool _loading = true;
+  String? _error;
+  List<OrderModel> _orders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(upcomingOrdersQuery),
+        fetchPolicy: FetchPolicy.networkOnly,
+      ));
+      if (!mounted) return;
+      if (res.hasException) {
+        setState(() {
+          _loading = false;
+          _error = tr('somethingWrong');
+        });
+        return;
+      }
+      final list = (res.data?['upcomingOrders'] as List<dynamic>? ?? [])
+          .map((e) => OrderModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+      setState(() {
+        _orders = list;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = tr('somethingWrong');
+      });
+    }
+  }
+
+  Future<void> _cancel(OrderModel o) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        backgroundColor: AuroraColors.ash,
+        title: Text(tr('cancelRide'),
+            style: AuroraText.titleSmall.copyWith(color: AuroraColors.pearl)),
+        content: Text(tr('cancelRideConfirm'),
+            style: AuroraText.bodyMedium
+                .copyWith(color: AuroraColors.textSecondary)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dctx, false),
+              child: Text(tr('back'))),
+          TextButton(
+              onPressed: () => Navigator.pop(dctx, true),
+              child: Text(tr('cancelRide'),
+                  style: TextStyle(color: AuroraColors.danger))),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      final client = await GraphQLClientManager.get();
+      await client.mutate(MutationOptions(
+        document: gql(cancelOrderMutation),
+        variables: {'orderId': o.id},
+      ));
+      _load();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(tr('somethingWrong'))));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Center(child: AuroraLoader(size: 36));
+    }
+    if (_error != null) {
+      return Center(child: Text(_error!, style: AuroraText.bodyMedium));
+    }
+    if (_orders.isEmpty) {
+      return _emptyUpcoming();
+    }
+    return RefreshIndicator(
+      color: AuroraColors.ember,
+      backgroundColor: AuroraColors.ash,
+      onRefresh: _load,
+      child: ListView.builder(
+        padding: EdgeInsets.fromLTRB(AuroraSpacing.lg, AuroraSpacing.lg,
+            AuroraSpacing.lg, widget.bottomInset),
+        itemCount: _orders.length,
+        itemBuilder: (_, i) =>
+            _upcomingCard(_orders[i]).fadeSlideIn(index: i),
+      ),
+    );
+  }
+
+  Widget _emptyUpcoming() => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.event_available_outlined,
+                color: AuroraColors.textHint, size: 64),
+            const SizedBox(height: AuroraSpacing.md),
+            Text(tr('noUpcoming'), style: AuroraText.titleMedium),
+            const SizedBox(height: 4),
+            Text(tr('noUpcomingSub'), style: AuroraText.bodySmall),
+          ],
+        ),
+      );
+
+  Widget _upcomingCard(OrderModel o) {
+    final df = DateFormat('EEEE d MMM • h:mm a',
+        LocaleController.instance.value.languageCode);
+    final when = o.expectedTimestamp;
+    return Container(
+      margin: const EdgeInsets.only(bottom: AuroraSpacing.sm),
+      padding: const EdgeInsets.all(AuroraSpacing.md),
+      decoration: BoxDecoration(
+        color: AuroraColors.ash,
+        borderRadius: BorderRadius.circular(AuroraRadius.md),
+        border: Border.all(color: AuroraColors.ember.withValues(alpha: 0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AuroraColors.coal,
+                  borderRadius: BorderRadius.circular(AuroraRadius.sm),
+                ),
+                child: Icon(Icons.event, color: AuroraColors.ember, size: 22),
+              ),
+              const SizedBox(width: AuroraSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(o.destinationAddress,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AuroraText.titleSmall),
+                    const SizedBox(height: 2),
+                    Text(
+                      when != null ? df.format(when.toLocal()) : tr('scheduled'),
+                      style: AuroraText.caption
+                          .copyWith(color: AuroraColors.ember),
+                    ),
+                  ],
+                ),
+              ),
+              Text('${o.costBest.toStringAsFixed(0)} ${o.currency}',
+                  style: AuroraText.titleSmall
+                      .copyWith(color: AuroraColors.pearl)),
+            ],
+          ),
+          const SizedBox(height: AuroraSpacing.sm),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: TextButton.icon(
+              onPressed: () => _cancel(o),
+              icon: Icon(Icons.close, size: 16, color: AuroraColors.danger),
+              label: Text(tr('cancelRide'),
+                  style: AuroraText.bodySmall
+                      .copyWith(color: AuroraColors.danger)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// صفحة "الرحلات القادمة" المستقلة — تُفتح بعد نجاح الحجز المسبق.
+class UpcomingRidesScreen extends StatelessWidget {
+  const UpcomingRidesScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AuroraColors.obsidian,
+      appBar: AppBar(
+        backgroundColor: AuroraColors.obsidian,
+        elevation: 0,
+        title: Text(tr('upcoming'), style: AuroraText.titleMedium),
+        iconTheme: IconThemeData(color: AuroraColors.pearl),
+      ),
+      body: const AuroraBackground(child: UpcomingRidesView()),
     );
   }
 }

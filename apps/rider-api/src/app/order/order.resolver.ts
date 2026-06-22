@@ -135,6 +135,15 @@ export class OrderResolver {
   }
 
   /**
+   * الرحلات المجدولة القادمة (status=Booked) — تبويب "القادمة" في النشاط.
+   */
+  @Query(() => [OrderType], { description: 'الرحلات المجدولة القادمة' })
+  @UseGuards(JwtAuthGuard)
+  upcomingOrders(@CurrentUser() user: AuthUser): Promise<OrderType[]> {
+    return this.orderService.getUpcomingOrders(user.riderId);
+  }
+
+  /**
    * Subscription — تحديثات الطلب الفورية
    * يستقبل الراكب تحديثات حالة طلبه لحظةً بلحظة
    *
