@@ -128,6 +128,25 @@ export class MatchingService {
   }
 
   /**
+   * سائقون قريبون للعرض على خريطة الراكب (إحداثيات فقط، بلا هوية/فلاتر ثقيلة).
+   * serviceId=0 ⇒ السائقون الذين يخدمون كل الفئات (الافتراضي). للتأثير البصري الحيّ.
+   */
+  async nearbyDriverPins(
+    lat: number,
+    lng: number,
+    radiusKm = 6,
+    limit = 20,
+  ): Promise<NearbyDriver[]> {
+    return this.driverRedis.findNearbyDrivers(
+      lat,
+      lng,
+      radiusKm * 1000,
+      0,
+      limit,
+    );
+  }
+
+  /**
    * حساب السعر التقريبي للرحلة
    * @param distanceMeters المسافة بالأمتار
    * @param durationSeconds المدة بالثواني
