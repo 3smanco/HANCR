@@ -41,6 +41,8 @@ function gitSha() {
 const commonApiEnv = {
   ...loadedEnv,
   NODE_ENV: nodeEnv,
+  DATABASE_HOST: process.env.PM2_DATABASE_HOST || 'localhost',
+  REDIS_HOST: process.env.PM2_REDIS_HOST || 'localhost',
   TS_NODE_PROJECT: `${root}/tsconfig.base.json`,
   SENTRY_RELEASE: process.env.SENTRY_RELEASE || gitSha(),
 };
