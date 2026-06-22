@@ -142,7 +142,7 @@ export default function CancelReasonsPage() {
   );
 }
 
-export function UpsertModal({
+function UpsertModal({
   initial,
   isParam,
   saving,

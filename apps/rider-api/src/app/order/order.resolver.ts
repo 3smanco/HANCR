@@ -77,6 +77,7 @@ export class OrderResolver {
       { lat: input.origin.lat, lng: input.origin.lng },
       { lat: input.destination.lat, lng: input.destination.lng },
       input.serviceId,
+      input.regionId,
     );
   }
 

@@ -2,6 +2,9 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { AdminUserEntity } from '@hancr/database';
 
 /**
  * أمن: يجبر وجود سرّ أدمن قوي (≥32 محرفاً) ويرفض الإقلاع بقيمة ضعيفة/افتراضية.
@@ -33,7 +36,11 @@ export interface AdminUser {
 
 @Injectable()
 export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
-  constructor(cfg: ConfigService) {
+  constructor(
+    cfg: ConfigService,
+    @InjectRepository(AdminUserEntity)
+    private readonly adminRepo: Repository<AdminUserEntity>,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -41,10 +48,19 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
     });
   }
 
-  validate(payload: AdminJwtPayload): AdminUser {
+  async validate(payload: AdminJwtPayload): Promise<AdminUser> {
     if (payload.type !== 'admin') {
       throw new UnauthorizedException('Invalid token type');
     }
-    return { adminId: payload.sub, email: payload.email, role: payload.role };
+
+    const admin = await this.adminRepo.findOne({
+      where: { id: payload.sub },
+      select: ['id', 'email', 'role', 'active'],
+    });
+    if (!admin || !admin.active) {
+      throw new UnauthorizedException('Admin account is inactive');
+    }
+
+    return { adminId: admin.id, email: admin.email, role: admin.role };
   }
 }

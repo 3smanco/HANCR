@@ -3,8 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   // تجاهل lint + tsc errors للبناء السريع
-  eslint: { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
+  eslint: { ignoreDuringBuilds: false },
+  typescript: { ignoreBuildErrors: false },
   // Allow images from any domain for profile photos
   images: {
     remotePatterns: [

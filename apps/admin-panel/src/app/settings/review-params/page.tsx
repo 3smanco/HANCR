@@ -11,7 +11,7 @@ import {
 } from '@/lib/gql';
 import { Topbar } from '@/components/layout/Topbar';
 import { SettingsTabs } from '../_SettingsTabs';
-import { UpsertModal } from '../cancel-reasons/page';
+import { UpsertReasonModal } from '../_UpsertReasonModal';
 
 type Param = Record<string, unknown>;
 
@@ -130,7 +130,7 @@ export default function ReviewParamsPage() {
       </div>
 
       {(editing || creating) && (
-        <UpsertModal
+        <UpsertReasonModal
           initial={editing}
           isParam={true}
           saving={saving}

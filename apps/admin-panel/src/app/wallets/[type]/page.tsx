@@ -62,6 +62,16 @@ export default function WalletsPage() {
 
   const limit = 20;
 
+  const { data, loading, refetch } = useQuery(WALLET_BALANCES, {
+    skip: !meta,
+    variables: {
+      ownerType: meta?.apiOwnerType ?? 'Rider',
+      page,
+      limit,
+      search: searchQuery || undefined,
+    },
+  });
+
   // Redirect if invalid type
   if (!meta) {
     return (
@@ -73,15 +83,6 @@ export default function WalletsPage() {
       </div>
     );
   }
-
-  const { data, loading, refetch } = useQuery(WALLET_BALANCES, {
-    variables: {
-      ownerType: meta.apiOwnerType,
-      page,
-      limit,
-      search: searchQuery || undefined,
-    },
-  });
 
   const items: Record<string, unknown>[] = data?.adminWalletBalances?.items ?? [];
   const total = data?.adminWalletBalances?.total ?? 0;

@@ -8,7 +8,6 @@ import {
   RefreshCw,
   Sparkles,
   Brain,
-  Users,
   Smile,
   Shield,
   Car,

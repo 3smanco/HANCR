@@ -7,7 +7,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, LessThanOrEqual, LessThan, Not, IsNull } from 'typeorm';
+import { Repository, DataSource, LessThanOrEqual, LessThan, Not, IsNull, In } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import {
@@ -46,6 +46,18 @@ import { AppConfigReader } from '../app-config/app-config-reader.service';
 // GraphQL Subscription events
 export const ORDER_UPDATED = 'ORDER_UPDATED';
 export const NEW_ORDER_AVAILABLE = 'NEW_ORDER_AVAILABLE';
+
+const CURRENT_ACTIVE_ORDER_STATUSES: OrderStatus[] = [
+  OrderStatus.Requested,
+  OrderStatus.NotFound,
+  OrderStatus.Found,
+  OrderStatus.DriverAccepted,
+  OrderStatus.WaitingForPrePay,
+  OrderStatus.Arrived,
+  OrderStatus.Started,
+  OrderStatus.WaitingForPostPay,
+  OrderStatus.WaitingForReview,
+];
 
 @Injectable()
 export class OrderService {
@@ -103,7 +115,7 @@ export class OrderService {
     const activeOrder = await this.orderRepo.findOne({
       where: {
         riderId,
-        status: OrderStatus.Requested,
+        status: In(CURRENT_ACTIVE_ORDER_STATUSES),
       },
     });
     if (activeOrder) {
@@ -490,6 +502,7 @@ export class OrderService {
         // إشعار السائقين القريبين بوجود طلب جديد (GraphQL Subscription)
         await this.pubSub.publish(NEW_ORDER_AVAILABLE, {
           newOrderAvailable: {
+            targetDriverIds: matches.map((m) => m.driver.id),
             id: savedOrder.id,
             type: savedOrder.type,
             status: OrderStatus.Found,
@@ -654,6 +667,7 @@ export class OrderService {
     origin: { lat: number; lng: number },
     destination: { lat: number; lng: number },
     serviceId: number,
+    requestedRegionId?: number,
   ): Promise<{
     distanceMeters: number;
     durationSeconds: number;
@@ -662,8 +676,25 @@ export class OrderService {
     polyline?: string;
     breakdown: FareBreakdown;
   }> {
+    const derivedRegionId = await this.resolveRegionIdFromPoint(
+      origin.lat,
+      origin.lng,
+    );
+    if (
+      requestedRegionId !== undefined &&
+      derivedRegionId !== null &&
+      derivedRegionId !== requestedRegionId
+    ) {
+      throw new BadRequestException('Pickup point is outside the selected region');
+    }
+
+    const regionId = requestedRegionId ?? derivedRegionId;
     const service = await this.serviceRepo.findOne({
-      where: { id: serviceId, enabled: true },
+      where: {
+        id: serviceId,
+        enabled: true,
+        ...(regionId !== null && regionId !== undefined ? { regionId } : {}),
+      },
     });
     if (!service) throw new NotFoundException('Service not found');
 
@@ -674,10 +705,10 @@ export class OrderService {
       service,
       origin.lat,
       origin.lng,
-      service.regionId,
+      regionId ?? service.regionId,
     );
     const surgeMultiplier = await this.appConfig.getSurgeMultiplier(
-      service.regionId,
+      regionId ?? service.regionId,
     );
     const fare = this.fareCalculator.calculate({
       distanceMeters: route.distanceMeters,
@@ -932,25 +963,12 @@ export class OrderService {
   // getActiveOrder — الطلب النشط الحالي
   // =============================================
   async getActiveOrder(riderId: number): Promise<OrderGqlType | null> {
-    const activeStatuses: OrderStatus[] = [
-      OrderStatus.Requested,
-      OrderStatus.NotFound,
-      OrderStatus.Found,
-      OrderStatus.DriverAccepted,
-      OrderStatus.WaitingForPrePay,
-      OrderStatus.Arrived,
-      OrderStatus.Started,
-      OrderStatus.WaitingForPostPay,
-      OrderStatus.WaitingForReview,
-    ];
-
-    for (const status of activeStatuses) {
-      const order = await this.orderRepo.findOne({
-        where: { riderId, status },
-        relations: ['driver'],
-      });
-      if (order) return this.toGqlType(order);
-    }
+    const order = await this.orderRepo.findOne({
+      where: { riderId, status: In(CURRENT_ACTIVE_ORDER_STATUSES) },
+      order: { createdOn: 'DESC' },
+      relations: ['driver'],
+    });
+    if (order) return this.toGqlType(order);
 
     return null;
   }
@@ -1227,6 +1245,7 @@ export class OrderService {
       });
       await this.pubSub.publish(NEW_ORDER_AVAILABLE, {
         newOrderAvailable: {
+          targetDriverIds: matches.map((m) => m.driver.id),
           id: order.id,
           type: order.type,
           status: OrderStatus.Found,
@@ -1316,7 +1335,10 @@ export class OrderService {
         if (matches.length === 0) continue;
         // إعادة بثّ subscription للسائقين الجدد
         await this.pubSub.publish(NEW_ORDER_AVAILABLE, {
-          newOrderAvailable: this.toGqlType(order),
+          newOrderAvailable: {
+            ...this.toGqlType(order),
+            targetDriverIds: matches.map((m) => m.driver.id),
+          },
         });
         // نُعلِّم الطلب كي لا يُعاد توسيعه (نمسح preferredDriverId)
         await this.orderRepo.update(order.id, { preferredDriverId: undefined });

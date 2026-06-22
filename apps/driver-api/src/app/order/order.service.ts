@@ -738,6 +738,7 @@ export class OrderService {
       id: order.id,
       type: order.type,
       status: order.status,
+      driverId: order.driverId,
       riderId: order.riderId,
       riderName: rider ? `${rider.firstName ?? ''} ${rider.lastName ?? ''}`.trim() : undefined,
       riderPhone: order.numberMasked ? undefined : rider?.phoneNumber,

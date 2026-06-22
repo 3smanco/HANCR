@@ -61,7 +61,10 @@ export class AuthService {
     const isDev = this.configService.get<string>('NODE_ENV') === 'development';
     return (
       isDev ||
-      this.configService.get<string>('ALLOW_TEST_PHONES', 'true') !== 'false'
+      this.configService.get<string>(
+        'ALLOW_TEST_PHONES',
+        isDev ? 'true' : 'false',
+      ) === 'true'
     );
   }
 
@@ -89,7 +92,10 @@ export class AuthService {
     // حتى يعمل Twilio؛ اضبطها false عند الإطلاق الحقيقي).
     const allowTestPhones =
       isDev ||
-      this.configService.get<string>('ALLOW_TEST_PHONES', 'true') !== 'false';
+      this.configService.get<string>(
+        'ALLOW_TEST_PHONES',
+        isDev ? 'true' : 'false',
+      ) === 'true';
     const isTestPhone =
       allowTestPhones && AuthService.TEST_DRIVER_PHONES.has(phone);
     const code = isTestPhone

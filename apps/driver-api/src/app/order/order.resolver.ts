@@ -105,7 +105,21 @@ export class OrderResolver {
   }
 
   /** Subscription — طلبات جديدة للسائق */
-  @Subscription(() => DriverOrderType, { description: 'طلبات رحلة جديدة متاحة' })
+  @Subscription(() => DriverOrderType, {
+    description: 'طلبات رحلة جديدة متاحة',
+    filter(
+      payload: { newOrderAvailable: DriverOrderType & { targetDriverIds?: number[] } },
+      _vars: unknown,
+      context: { req?: { user?: AuthDriver } },
+    ) {
+      const driverId = context.req?.user?.driverId;
+      return (
+        typeof driverId === 'number' &&
+        Array.isArray(payload.newOrderAvailable.targetDriverIds) &&
+        payload.newOrderAvailable.targetDriverIds.includes(driverId)
+      );
+    },
+  })
   @UseGuards(JwtAuthGuard)
   newOrderAvailable(): AsyncIterator<unknown> {
     return this.pubSub.asyncIterator(NEW_ORDER_AVAILABLE);
@@ -117,9 +131,9 @@ export class OrderResolver {
     filter(
       payload: { driverOrderUpdated: DriverOrderType },
       _vars: unknown,
-      context: { req: { user: AuthDriver } },
+      context: { req?: { user?: AuthDriver } },
     ) {
-      return true; // السائق يستقبل تحديثات طلباته
+      return payload.driverOrderUpdated.driverId === context.req?.user?.driverId;
     },
   })
   @UseGuards(JwtAuthGuard)

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import {
-  Users2,
   Plus,
   Trash2,
   X,

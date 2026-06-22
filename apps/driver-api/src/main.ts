@@ -47,8 +47,14 @@ async function bootstrap(): Promise<void> {
   const env = config.get<string>('NODE_ENV') ?? 'development';
   const corsOrigins = config.get<string>('CORS_ORIGINS') ?? '';
   const allowedOrigins =
-    env === 'production' && corsOrigins
-      ? corsOrigins.split(',').map((s) => s.trim())
+    env === 'production'
+      ? (corsOrigins
+          ? corsOrigins.split(',').map((s) => s.trim())
+          : [
+              'https://hancr.com',
+              'https://www.hancr.com',
+              'https://admin.hancr.com',
+            ])
       : true;
 
   await app.register(
