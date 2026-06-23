@@ -22,6 +22,9 @@ Last reviewed: 2026-06-23
   first super admin.
 - Admin panel session cookies are centralized in `lib/apollo.ts` and use
   `Secure` automatically when the panel is served over HTTPS.
+- API Sentry exception handling now lets Nest render HTTP responses through the
+  base HTTP exception filter while still reporting 5xx/unknown errors to Sentry
+  and preserving GraphQL rethrow behavior.
 
 ## Runtime Health
 
@@ -56,6 +59,9 @@ The 8 failures are production launch gaps:
 - `SENTRY_DSN_RIDER_API`
 - `SENTRY_DSN_DRIVER_API`
 - `SENTRY_DSN_ADMIN_API`
+
+API Sentry wiring is present in all three API entrypoints; these failures are
+missing production DSNs, not missing code initialization.
 
 The 7 warnings require provider credentials or business decisions:
 
@@ -113,6 +119,8 @@ Notable packages to review first:
   HTTPS domains, then confirm readiness removes the five URL/CORS failures.
 - Add the three API Sentry DSNs and confirm readiness has zero monitoring
   failures.
+- Re-enable mobile Sentry for rider and driver Flutter apps after resolving the
+  noted Kotlin/build issue in their `pubspec.yaml` comments.
 - Decide and configure uploads, payments, payouts, email, translation, and FX.
 - Re-authenticate GitHub with workflow scope and push `.github/workflows`.
 - Review PM2 restart history; current services are online, but restart counters
