@@ -13,7 +13,7 @@ describe('Driver AuthService OTP delivery', () => {
     jest.clearAllMocks();
   });
 
-  function serviceWithSmsFailure() {
+  function serviceWithSmsFailure(allowTestPhones = 'false') {
     const redis = {
       incr: jest.fn(async () => 1),
       expire: jest.fn(async () => 1),
@@ -22,7 +22,7 @@ describe('Driver AuthService OTP delivery', () => {
     const config = {
       get: jest.fn((key: string, fallback?: string) => {
         if (key === 'NODE_ENV') return 'production';
-        if (key === 'ALLOW_TEST_PHONES') return 'false';
+        if (key === 'ALLOW_TEST_PHONES') return allowTestPhones;
         return fallback;
       }),
     };
@@ -59,5 +59,26 @@ describe('Driver AuthService OTP delivery', () => {
       phone: '+97***55',
       gateway: 'twilio',
     });
+  });
+
+  it('ignores fixed test identities in production even when the env flag is misconfigured', async () => {
+    const { service, sms } = serviceWithSmsFailure('true');
+    const randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0);
+
+    try {
+      const result = await service.sendOtp('+97433000010');
+
+      expect(result).toMatchObject({
+        success: false,
+        devOtp: undefined,
+      });
+      expect(sms.sendOtp).toHaveBeenCalledWith(
+        '+97433000010',
+        '100000',
+        'ar',
+      );
+    } finally {
+      randomSpy.mockRestore();
+    }
   });
 });

@@ -22,6 +22,9 @@ Last reviewed: 2026-06-23
 - Production admin bootstrap now rejects missing/invalid default email values
   and weak or placeholder `ADMIN_DEFAULT_PASSWORD` values before creating the
   first super admin.
+- Rider and driver APIs now ignore `ALLOW_TEST_PHONES=true` when
+  `NODE_ENV=production`, so fixed demo OTP identities cannot be enabled by a
+  production env typo.
 - Admin panel session cookies are centralized in `lib/apollo.ts` and use
   `Secure` automatically when the panel is served over HTTPS.
 - API Sentry exception handling now lets Nest render HTTP responses through the
