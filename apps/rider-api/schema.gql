@@ -1027,7 +1027,7 @@ type Subscription {
   bidOfferReceived: BidType!
 
   """تحديثات موقع السائق الفورية للراكب"""
-  driverLocationUpdated(driverId: Int!): DriverLocationType!
+  driverLocationUpdated(driverId: Int!, orderId: Int!): DriverLocationType!
 
   """رسائل المحادثة الفورية"""
   orderMessageAdded(orderId: Int!): OrderMessageType!

@@ -15,7 +15,7 @@ import { HancrRedisModule } from '@hancr/redis';
 import { NotificationsModule } from '@hancr/notifications';
 import { WalletModule as HancrWalletModule } from '@hancr/wallet';
 import { SosModule as HancrSosModule } from '@hancr/sos';
-import { ObservabilityModule } from '@hancr/observability';
+import { ObservabilityModule, buildGraphqlContext } from '@hancr/observability';
 
 // Feature Modules
 import { AuthModule } from './auth/auth.module';
@@ -61,9 +61,7 @@ import { pubSubProvider } from './pubsub.provider';
       playground: process.env['NODE_ENV'] !== 'production',
       introspection: process.env['NODE_ENV'] !== 'production',
       subscriptions: { 'graphql-ws': true },
-      context: (ctx: { req?: unknown; request?: unknown }) => ({
-        req: ctx.req ?? ctx.request,
-      }),
+      context: buildGraphqlContext,
     }),
 
     ScheduleModule.forRoot(),

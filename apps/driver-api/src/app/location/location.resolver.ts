@@ -1,5 +1,5 @@
 import { Resolver, Mutation, Query, Args, Subscription, Int } from '@nestjs/graphql';
-import { UseGuards, Inject } from '@nestjs/common';
+import { ForbiddenException, UseGuards, Inject } from '@nestjs/common';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { LocationService } from './location.service';
 import { DriverLocationType } from './dto/driver-location.type';
@@ -82,9 +82,14 @@ export class LocationResolver {
       return payload.driverLocationUpdated.driverId === variables.driverId;
     },
   })
+  @UseGuards(JwtAuthGuard)
   driverLocationUpdated(
-    @Args('driverId', { type: () => Int }) _driverId: number,
+    @CurrentDriver() driver: AuthDriver,
+    @Args('driverId', { type: () => Int }) driverId: number,
   ): AsyncIterator<unknown> {
+    if (driver.driverId !== driverId) {
+      throw new ForbiddenException('Tracking is not allowed for this driver');
+    }
     return this.pubSub.asyncIterator(DRIVER_LOCATION_UPDATED);
   }
 }

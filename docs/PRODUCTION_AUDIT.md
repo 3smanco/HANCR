@@ -25,6 +25,12 @@ Last reviewed: 2026-06-23
 - API Sentry exception handling now lets Nest render HTTP responses through the
   base HTTP exception filter while still reporting 5xx/unknown errors to Sentry
   and preserving GraphQL rethrow behavior.
+- GraphQL WebSocket context now maps subscription `connectionParams`
+  authorization into the request headers used by JWT guards.
+- Rider live driver-location subscriptions now require an authenticated rider,
+  `orderId`, matching `driverId`, and a live trackable order status before the
+  stream opens. The duplicate driver-api location subscription is restricted to
+  the authenticated driver's own stream.
 
 ## Runtime Health
 
@@ -86,6 +92,9 @@ reviewed:
 - Secret hygiene must pass.
 - Flutter analyzers must pass for rider and driver apps.
 - Admin bootstrap credential validation is covered by an admin-api unit test.
+- Live tracking subscription authorization is covered by rider-api and
+  driver-api unit tests, and the driver subscription guard is part of
+  `npm run ci:verify`.
 
 GitHub workflow files are still prepared locally under `.github/workflows`, but
 they are not tracked because pushing workflow files requires a GitHub token with
