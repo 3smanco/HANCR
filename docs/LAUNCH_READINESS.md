@@ -13,6 +13,8 @@ For the current production audit summary, see `docs/PRODUCTION_AUDIT.md`.
   before first production admin seeding.
 - Admin panel session cookies are written through the shared Apollo helper and
   set `Secure` automatically on HTTPS.
+- API Sentry captures unexpected errors and delegates HTTP response rendering
+  back to Nest's base exception filter.
 
 ## Green Checks
 
@@ -48,6 +50,7 @@ These require external credentials or GitHub permissions:
 | Monitoring | `SENTRY_DSN_RIDER_API` | No production error tracking for rider API | Create a Sentry project and add its DSN to `/opt/hancr/.env.prod` |
 | Monitoring | `SENTRY_DSN_DRIVER_API` | No production error tracking for driver API | Create a Sentry project and add its DSN to `/opt/hancr/.env.prod` |
 | Monitoring | `SENTRY_DSN_ADMIN_API` | No production error tracking for admin API | Create a Sentry project and add its DSN to `/opt/hancr/.env.prod` |
+| Monitoring | mobile Sentry SDKs | Flutter app crash reporting is still disabled in `pubspec.yaml` | Re-enable `sentry_flutter` after the Kotlin/build issue is resolved |
 | GitHub CI | workflow write permission | CI workflow files cannot be pushed by the current OAuth token | Re-authenticate GitHub with `workflow` scope or push `.github/workflows` manually |
 
 ## Production Warnings
