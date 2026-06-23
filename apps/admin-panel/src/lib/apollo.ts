@@ -20,6 +20,20 @@ const ADMIN_API_URL =
 
 const TOKEN_COOKIE = 'hancr_admin_token';
 const ADMIN_COOKIE = 'hancr_admin_user';
+const SESSION_COOKIE_OPTIONS = {
+  expires: 7,
+  sameSite: 'Strict' as const,
+  path: '/',
+};
+const SESSION_COOKIE_REMOVE_OPTIONS = { path: '/' };
+
+function sessionCookieOptions() {
+  const secure =
+    typeof window !== 'undefined' && window.location.protocol === 'https:';
+  return secure
+    ? { ...SESSION_COOKIE_OPTIONS, secure: true }
+    : SESSION_COOKIE_OPTIONS;
+}
 
 // ─── HTTP + Auth links ──────────────────────────────────────────────────────
 const httpLink = createHttpLink({ uri: ADMIN_API_URL });
@@ -79,12 +93,12 @@ export const apolloClient = new ApolloClient({
 // ─── Token helpers ──────────────────────────────────────────────────────────
 
 export function saveAdminToken(token: string): void {
-  Cookies.set(TOKEN_COOKIE, token, { expires: 7, sameSite: 'Strict' });
+  Cookies.set(TOKEN_COOKIE, token, sessionCookieOptions());
 }
 
 export function clearAdminToken(): void {
-  Cookies.remove(TOKEN_COOKIE);
-  Cookies.remove(ADMIN_COOKIE);
+  Cookies.remove(TOKEN_COOKIE, SESSION_COOKIE_REMOVE_OPTIONS);
+  Cookies.remove(ADMIN_COOKIE, SESSION_COOKIE_REMOVE_OPTIONS);
 }
 
 export function getAdminToken(): string | undefined {
@@ -100,10 +114,7 @@ export interface AdminProfile {
 }
 
 export function saveAdminProfile(admin: AdminProfile): void {
-  Cookies.set(ADMIN_COOKIE, JSON.stringify(admin), {
-    expires: 7,
-    sameSite: 'Strict',
-  });
+  Cookies.set(ADMIN_COOKIE, JSON.stringify(admin), sessionCookieOptions());
 }
 
 export function getAdminProfile(): AdminProfile | null {

@@ -9,7 +9,6 @@ import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff, Shield, Loader2 } from 'lucide-react';
 import { ADMIN_LOGIN } from '@/lib/gql';
-import { saveAdminToken } from '@/lib/apollo';
 import { useAuthStore } from '@/store/auth';
 import { useT } from '@/i18n/LocaleProvider';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
@@ -45,7 +44,6 @@ export default function LoginPage() {
     try {
       const { data: res } = await adminLogin({ variables: data });
       const { accessToken, email, role } = res.adminLogin;
-      saveAdminToken(accessToken);
       setAdmin({ id: 1, email, role }, accessToken);
       toast.success(t('auth.login.welcomeBack', { email }));
       router.push('/dashboard');

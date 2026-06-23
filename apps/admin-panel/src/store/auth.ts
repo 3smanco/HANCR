@@ -9,6 +9,7 @@ import {
   clearAdminToken,
   getAdminToken,
   getAdminProfile,
+  saveAdminToken,
   saveAdminProfile,
   type AdminProfile,
 } from '@/lib/apollo';
@@ -27,7 +28,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   hydrated: false,
 
-  setAdmin(admin) {
+  setAdmin(admin, token) {
+    saveAdminToken(token);
     saveAdminProfile(admin);
     set({ admin, isAuthenticated: true, hydrated: true });
   },

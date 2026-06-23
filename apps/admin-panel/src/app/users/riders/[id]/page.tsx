@@ -35,6 +35,7 @@ import {
 import { Topbar } from '@/components/layout/Topbar';
 import { DispatcherDrawer } from '@/components/DispatcherDrawer';
 import { formatDate } from '@/lib/utils';
+import { getAdminToken } from '@/lib/apollo';
 
 type Tab = 'overview' | 'vip' | 'orders' | 'loyalty' | 'places';
 
@@ -370,7 +371,7 @@ function BanControls({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            authorization: `Bearer ${document.cookie.match(/hancr_admin_token=([^;]+)/)?.[1] ?? ''}`,
+            authorization: `Bearer ${getAdminToken() ?? ''}`,
           },
           body: JSON.stringify({
             query:
