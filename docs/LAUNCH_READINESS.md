@@ -19,7 +19,7 @@ For the current production audit summary, see `docs/PRODUCTION_AUDIT.md`.
   driver-location tracking is limited to the authenticated rider's active order.
 - Auth, SMS, and email logs mask phone numbers and email addresses before they
   leave the service. Disabled SMS/email dev logs do not print raw OTP bodies or
-  OTP-bearing email subjects.
+  OTP-bearing email subjects, and auth debug logs do not print OTP codes.
 
 ## Green Checks
 
@@ -93,6 +93,6 @@ git push origin feat/nearby-drivers
 
 The workflow should run the same gates as `npm run ci:verify`.
 
-`npm run ci:verify` also runs the secret hygiene check, admin-panel i18n key
-validation, admin-panel quality guard, admin-panel linting with
+`npm run ci:verify` also runs the secret hygiene check, log redaction check,
+admin-panel i18n key validation, admin-panel quality guard, admin-panel linting with
 `--max-warnings=0`, and `flutter analyze --no-pub` for both mobile apps.

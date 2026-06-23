@@ -112,9 +112,9 @@ export class AuthService {
       OTP_TTL_SECONDS,
       JSON.stringify({ code, attempts: 0 }),
     );
-    // أمن: لا نُسجّل قيمة OTP أبداً. في dev فقط للتشخيص.
+    // أمن: لا نُسجّل قيمة OTP أبداً. في dev تُعاد عبر devOtp عند السماح بذلك.
     if (isDev) {
-      this.logger.debug(`[dev] Driver OTP for ${maskedPhone}: ${code}`);
+      this.logger.debug(`[dev] Driver OTP issued for ${maskedPhone}`);
     } else {
       this.logger.log(`Driver OTP issued for ${maskedPhone}`);
     }
@@ -246,7 +246,7 @@ export class AuthService {
       JSON.stringify({ code, attempts: 0 }),
     );
     if (isDev) {
-      this.logger.debug(`[dev] Driver email OTP ${maskedEmail}: ${code}`);
+      this.logger.debug(`[dev] Driver email OTP issued for ${maskedEmail}`);
     }
 
     const res = await this.emailService.sendOtp(email, code, 'ar');

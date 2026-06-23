@@ -122,9 +122,9 @@ export class AuthService {
       otpTtl,
       JSON.stringify({ code, attempts: 0 }),
     );
-    // أمن: لا نُسجّل قيمة OTP أبداً. في dev فقط نُظهر الكود للتشخيص.
+    // أمن: لا نُسجّل قيمة OTP أبداً. في dev تُعاد عبر devOtp عند السماح بذلك.
     if (isDev) {
-      this.logger.debug(`[dev] OTP for ${maskedPhone}: ${code}`);
+      this.logger.debug(`[dev] OTP issued for ${maskedPhone}`);
     } else {
       this.logger.log(`OTP issued for ${maskedPhone}`);
     }
@@ -364,7 +364,7 @@ export class AuthService {
       otpTtl,
       JSON.stringify({ code, attempts: 0 }),
     );
-    if (isDev) this.logger.debug(`[dev] Email OTP for ${maskedEmail}: ${code}`);
+    if (isDev) this.logger.debug(`[dev] Email OTP issued for ${maskedEmail}`);
 
     const res = await this.emailService.sendOtp(email, code, 'ar');
     const expose = isDev || isTest;

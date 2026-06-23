@@ -24,6 +24,7 @@
     "readiness:prod": "node tools/production-readiness-check.mjs --env .env.prod --strict",
     "readiness:template": "node tools/production-readiness-check.mjs --env .env.prod.example --template",
     "secrets:check": "node tools/secret-hygiene-check.mjs",
+    "logs:redaction:check": "node tools/check-log-redaction.mjs",
     "admin:i18n:check": "node tools/check-admin-i18n.mjs",
     "admin:quality:check": "node tools/check-admin-panel-quality.mjs",
     "verify": "powershell -ExecutionPolicy Bypass -File scripts/verify.ps1"
