@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { maskEmail } from '@hancr/observability';
 import * as nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 
@@ -65,8 +66,12 @@ export class EmailService {
     html: string,
     text?: string,
   ): Promise<EmailResult> {
+    const maskedTo = maskEmail(to);
+
     if (!this.enabled) {
-      this.logger.debug(`[dev-email] → ${to}: ${subject}`);
+      this.logger.debug(
+        `[dev-email] would send subject(${subject.length} chars) to ${maskedTo}`,
+      );
       return { success: false, error: 'smtp_disabled' };
     }
 
@@ -78,11 +83,11 @@ export class EmailService {
         html,
         text: text ?? html.replace(/<[^>]+>/g, ''),
       });
-      this.logger.log(`Email sent → ${to} (id: ${info.messageId})`);
+      this.logger.log(`Email sent to ${maskedTo} (id: ${info.messageId})`);
       return { success: true, messageId: info.messageId };
     } catch (e) {
       const err = e as Error;
-      this.logger.warn(`Email send failed → ${to}: ${err.message}`);
+      this.logger.warn(`Email send failed to ${maskedTo}: ${err.message}`);
       return { success: false, error: err.message };
     }
   }

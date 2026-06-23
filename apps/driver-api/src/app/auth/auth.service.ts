@@ -12,7 +12,11 @@ import Redis from 'ioredis';
 import { OAuth2Client } from 'google-auth-library';
 import { DriverEntity } from '@hancr/database';
 import { SmsService, EmailService } from '@hancr/notifications';
-import { captureException } from '@hancr/observability';
+import {
+  captureException,
+  maskEmail,
+  maskPhoneNumber,
+} from '@hancr/observability';
 import { JwtPayload } from './jwt.strategy';
 
 const OTP_TTL_SECONDS = 300;
@@ -79,6 +83,7 @@ export class AuthService {
   async sendOtp(
     phone: string,
   ): Promise<{ success: boolean; message: string; devOtp?: string }> {
+    const maskedPhone = maskPhoneNumber(phone);
     const key = `hancr:otp:driver:${phone}`;
     const isDev = this.configService.get<string>('NODE_ENV') === 'development';
     // أمن: حدّ لكل رقم (3/60ث) — يمنع قصف SMS لرقم واحد عبر IPs متعدّدة.
@@ -109,9 +114,9 @@ export class AuthService {
     );
     // أمن: لا نُسجّل قيمة OTP أبداً. في dev فقط للتشخيص.
     if (isDev) {
-      this.logger.debug(`[dev] Driver OTP for ${phone}: ${code}`);
+      this.logger.debug(`[dev] Driver OTP for ${maskedPhone}: ${code}`);
     } else {
-      this.logger.log(`Driver OTP issued for ${phone}`);
+      this.logger.log(`Driver OTP issued for ${maskedPhone}`);
     }
 
     const sms = await this.smsService.sendOtp(phone, code, 'ar');
@@ -120,10 +125,12 @@ export class AuthService {
     const deliverable = sms.success || exposeDevOtp;
 
     if (!deliverable && this.smsService.enabled) {
-      this.logger.error(`Driver OTP SMS delivery failed for ${phone}: ${sms.error}`);
+      this.logger.error(
+        `Driver OTP SMS delivery failed for ${maskedPhone}: ${sms.error}`,
+      );
       captureException(
         new Error(`Driver OTP SMS delivery failed: ${sms.error}`),
-        { phone, gateway: 'twilio' },
+        { phone: maskedPhone, gateway: 'twilio' },
       );
     }
 
@@ -195,7 +202,9 @@ export class AuthService {
         serviceIds: [],
       });
       driver = await this.driverRepo.save(driver);
-      this.logger.log(`New driver registered: ${phone} (ID: ${driver.id})`);
+      this.logger.log(
+        `New driver registered: ${maskPhoneNumber(phone)} (ID: ${driver.id})`,
+      );
     }
 
     // ربط هوية Google/الإيميل بحساب الهاتف (إن مُرِّر رمز ربط صالح)
@@ -217,6 +226,7 @@ export class AuthService {
     rawEmail: string,
   ): Promise<{ success: boolean; message: string; devOtp?: string }> {
     const email = rawEmail.trim().toLowerCase();
+    const maskedEmail = maskEmail(email);
     const isDev = this.configService.get<string>('NODE_ENV') === 'development';
 
     const rlKey = `hancr:otp:rl:driver-email:${email}`;
@@ -235,14 +245,16 @@ export class AuthService {
       OTP_TTL_SECONDS,
       JSON.stringify({ code, attempts: 0 }),
     );
-    if (isDev) this.logger.debug(`[dev] Driver email OTP ${email}: ${code}`);
+    if (isDev) {
+      this.logger.debug(`[dev] Driver email OTP ${maskedEmail}: ${code}`);
+    }
 
     const res = await this.emailService.sendOtp(email, code, 'ar');
     const expose = isDev || isTest;
     const deliverable = res.success || expose;
     if (!deliverable && this.emailService.enabled) {
       captureException(new Error(`Driver email OTP failed: ${res.error}`), {
-        email,
+        email: maskedEmail,
         gateway: 'smtp',
       });
     }

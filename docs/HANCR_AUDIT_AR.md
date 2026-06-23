@@ -47,6 +47,11 @@
   - اشتراك driver-api لا يسمح للسائق إلا بتياره الخاص.
 - منع السيرفر من تغيير `apps/*/schema.gql` بعد PM2 reload عبر توليد schema
   في الذاكرة في production.
+- تقليل تسريب بيانات الاتصال في logs:
+  - تقنيع أرقام الجوال والبريد في auth/SMS/email.
+  - عدم طباعة جسم SMS في dev logs.
+  - عدم طباعة عنوان البريد عندما يحتوي OTP.
+  - إرسال سياق Sentry المقنّع بدل الرقم أو البريد الكامل في فشل OTP.
 
 ## نقاط الضعف المتبقية
 
@@ -81,8 +86,8 @@
   - root: 31 vulnerability منها 1 critical و8 high.
   - admin-panel: 2 vulnerabilities منها 1 high.
   هذه تحتاج ترقية منظمة لأنها تمس Fastify/Nest/Apollo/Next وقد تكون breaking.
-- GitHub Actions غير متتبعة على `main` لأن دفع workflow يحتاج صلاحية GitHub
-  `workflow`.
+- GitHub Actions جاهزة محليا في commit `752ada4`، لكن GitHub رفض `git push`
+  وContents API لأن التكامل الحالي لا يملك صلاحية `workflow`.
 
 ## ما يجب مراجعته قبل الإطلاق
 
