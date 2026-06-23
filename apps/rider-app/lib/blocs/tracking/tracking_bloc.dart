@@ -48,10 +48,11 @@ abstract class TrackingEvent extends Equatable {
 
 /// بدء تتبع سائق معيَّن (يفتح subscription)
 class TrackingStarted extends TrackingEvent {
+  final int orderId;
   final int driverId;
-  const TrackingStarted(this.driverId);
+  const TrackingStarted({required this.orderId, required this.driverId});
   @override
-  List<Object?> get props => [driverId];
+  List<Object?> get props => [orderId, driverId];
 }
 
 /// إيقاف تتبع
@@ -121,7 +122,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       _sub = client
           .subscribe(SubscriptionOptions(
         document: gql(driverLocationUpdatedSubscription),
-        variables: {'driverId': event.driverId},
+        variables: {'driverId': event.driverId, 'orderId': event.orderId},
       ))
           .listen(
         (result) {

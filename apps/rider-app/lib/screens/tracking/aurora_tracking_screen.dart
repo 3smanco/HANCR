@@ -211,7 +211,10 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
             listener: (ctx, state) {
               if (state is OrderActive && state.order.driverId != null) {
                 ctx.read<TrackingBloc>().add(
-                      TrackingStarted(state.order.driverId!),
+                      TrackingStarted(
+                        orderId: state.order.id,
+                        driverId: state.order.driverId!,
+                      ),
                     );
               } else {
                 ctx.read<TrackingBloc>().add(const TrackingStopped());

@@ -21,7 +21,7 @@ import { WalletModule as HancrWalletModule } from '@hancr/wallet';
 import { SosModule as HancrSosModule } from '@hancr/sos';
 
 // Observability (Sentry + Health + Throttling)
-import { ObservabilityModule } from '@hancr/observability';
+import { ObservabilityModule, buildGraphqlContext } from '@hancr/observability';
 
 // Feature Modules
 import { AuthModule } from './auth/auth.module';
@@ -92,9 +92,7 @@ import { pubSubProvider } from './pubsub.provider';
       subscriptions: {
         'graphql-ws': true,
       },
-      context: (ctx: { req?: unknown; request?: unknown }) => ({
-        req: ctx.req ?? ctx.request,
-      }),
+      context: buildGraphqlContext,
     }),
 
     // =============================================

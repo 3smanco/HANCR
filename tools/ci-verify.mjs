@@ -28,6 +28,17 @@ const steps = [
       '--runInBand',
     ],
   ],
+  [
+    'Test driver location subscription guard',
+    'npx',
+    [
+      'jest',
+      'apps/driver-api/src/app/location/location.resolver.spec.ts',
+      '--config',
+      'apps/driver-api/jest.config.ts',
+      '--runInBand',
+    ],
+  ],
   ['Whitespace check', 'git', ['diff', '--check']],
   [
     'Generated GraphQL schema check',

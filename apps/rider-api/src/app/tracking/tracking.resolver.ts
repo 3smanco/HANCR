@@ -1,32 +1,37 @@
-import { Resolver, Subscription, Args, Int } from '@nestjs/graphql';
-import { Inject } from '@nestjs/common';
+import { ForbiddenException, Inject, UseGuards } from '@nestjs/common';
+import { Args, Int, Resolver, Subscription } from '@nestjs/graphql';
+import { InjectRepository } from '@nestjs/typeorm';
+import { OrderEntity, OrderStatus } from '@hancr/database';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
-import { DriverLocationType } from './dto/driver-location.type';
+import { Repository } from 'typeorm';
+import { JwtAuthGuard, CurrentUser } from '../auth/jwt-auth.guard';
+import { AuthUser } from '../auth/jwt.strategy';
 import { PUB_SUB } from '../pubsub.provider';
+import { DriverLocationType } from './dto/driver-location.type';
 
-/**
- * Channel name — يجب أن يطابق الـ driver-api/location.resolver
- * لكي يستقبل rider-api التحديثات من نفس Redis channel.
- */
 export const DRIVER_LOCATION_UPDATED = 'DRIVER_LOCATION_UPDATED';
 
+const TRACKABLE_ORDER_STATUSES = new Set<OrderStatus>([
+  OrderStatus.DriverAccepted,
+  OrderStatus.WaitingForPrePay,
+  OrderStatus.Arrived,
+  OrderStatus.Started,
+  OrderStatus.WaitingForPostPay,
+  OrderStatus.WaitingForReview,
+]);
+
 /**
- * TrackingResolver — Subscription لتتبع موقع السائق على خريطة الراكب.
+ * Live driver-location stream for the rider app.
  *
- * Flow:
- *  1. السائق يستدعي `updateLocation` في driver-api كل 4 ثوانٍ
- *  2. driver-api ينشر event على Redis channel `DRIVER_LOCATION_UPDATED`
- *  3. rider-api يستقبل الـ event ويبثّه للراكب المشترك عبر WebSocket
- *  4. الفلتر يضمن أن الراكب يستقبل تحديثات سائقه فقط (driverId match)
- *
- * NOTE: لا يوجد authentication على هذا الـ subscription — أي راكب يعرف
- * driverId يستطيع تتبعه. هذا مقبول لأنه يُفترض أنه سائقه في رحلة نشطة.
- * مستقبلاً يمكن إضافة guard يتحقق من ربط الراكب بالسائق في order نشط.
+ * Security: rider JWT auth and active order ownership are required before
+ * opening the stream.
  */
 @Resolver()
 export class TrackingResolver {
   constructor(
     @Inject(PUB_SUB) private readonly pubSub: RedisPubSub,
+    @InjectRepository(OrderEntity)
+    private readonly orderRepo: Repository<OrderEntity>,
   ) {}
 
   @Subscription(() => DriverLocationType, {
@@ -38,9 +43,28 @@ export class TrackingResolver {
       return payload.driverLocationUpdated.driverId === variables.driverId;
     },
   })
-  driverLocationUpdated(
-    @Args('driverId', { type: () => Int }) _driverId: number,
-  ): AsyncIterator<unknown> {
+  @UseGuards(JwtAuthGuard)
+  async driverLocationUpdated(
+    @CurrentUser() user: AuthUser,
+    @Args('driverId', { type: () => Int }) driverId: number,
+    @Args('orderId', { type: () => Int }) orderId: number,
+  ): Promise<AsyncIterator<unknown>> {
+    await this.assertCanTrackDriver(user.riderId, orderId, driverId);
     return this.pubSub.asyncIterator(DRIVER_LOCATION_UPDATED);
+  }
+
+  private async assertCanTrackDriver(
+    riderId: number,
+    orderId: number,
+    driverId: number,
+  ): Promise<void> {
+    const order = await this.orderRepo.findOne({
+      where: { id: orderId, riderId, driverId },
+      select: ['id', 'status'],
+    });
+
+    if (!order || !TRACKABLE_ORDER_STATUSES.has(order.status)) {
+      throw new ForbiddenException('Tracking is not allowed for this order');
+    }
   }
 }

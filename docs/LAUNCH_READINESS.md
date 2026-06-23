@@ -15,6 +15,8 @@ For the current production audit summary, see `docs/PRODUCTION_AUDIT.md`.
   set `Secure` automatically on HTTPS.
 - API Sentry captures unexpected errors and delegates HTTP response rendering
   back to Nest's base exception filter.
+- GraphQL subscriptions pass WebSocket auth payloads into JWT guards, and live
+  driver-location tracking is limited to the authenticated rider's active order.
 
 ## Green Checks
 

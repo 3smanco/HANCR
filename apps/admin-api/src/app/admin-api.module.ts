@@ -54,7 +54,7 @@ import { NotificationsModule } from '@hancr/notifications';
 import { ScheduleModule } from '@nestjs/schedule';
 
 // Observability
-import { ObservabilityModule } from '@hancr/observability';
+import { ObservabilityModule, buildGraphqlContext } from '@hancr/observability';
 
 @Module({
   imports: [
@@ -99,9 +99,7 @@ import { ObservabilityModule } from '@hancr/observability';
       subscriptions: {
         'graphql-ws': true,
       },
-      context: (ctx: { req?: unknown; request?: unknown }) => ({
-        req: ctx.req ?? ctx.request,
-      }),
+      context: buildGraphqlContext,
     }),
 
     // =============================================
