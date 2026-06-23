@@ -30,6 +30,9 @@
   - رفض غياب `ADMIN_DEFAULT_EMAIL`.
   - رفض البريد غير الصالح.
   - رفض كلمات المرور الضعيفة أو placeholder.
+- قفل الهويات التجريبية في الإنتاج:
+  - حتى لو ضُبط `ALLOW_TEST_PHONES=true` بالخطأ مع `NODE_ENV=production`،
+    تتجاهل rider-api وdriver-api أرقام وإيميلات OTP الثابتة.
 - تحسين جلسة لوحة الإدارة:
   - cookie options مركزية.
   - `SameSite=Strict`.

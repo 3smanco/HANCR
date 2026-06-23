@@ -100,12 +100,7 @@ export class AuthService {
     // الأرقام التجريبية (OTP ثابت 123456) — مُتحكَّم بها عبر ALLOW_TEST_PHONES.
     // تبقى مُفعَّلة أثناء التطوير/الاختبار (حتى يعمل Twilio الفعلي)؛
     // اضبط ALLOW_TEST_PHONES=false عند الإطلاق الحقيقي لإغلاق هذا الباب.
-    const allowTestPhones =
-      isDev ||
-      this.configService.get<string>(
-        'ALLOW_TEST_PHONES',
-        isDev ? 'true' : 'false',
-      ) === 'true';
+    const allowTestPhones = this.allowTestIdentities();
     const isTestPhone = allowTestPhones && AuthService.TEST_PHONES.has(phone);
 
     const code = isTestPhone
@@ -327,13 +322,11 @@ export class AuthService {
 
   /** هل نسمح بالهويات التجريبية (نفس علم الأرقام التجريبية) */
   private allowTestIdentities(): boolean {
-    const isDev = this.configService.get<string>('NODE_ENV') === 'development';
+    const nodeEnv = this.configService.get<string>('NODE_ENV');
+    if (nodeEnv === 'development') return true;
+    if (nodeEnv === 'production') return false;
     return (
-      isDev ||
-      this.configService.get<string>(
-        'ALLOW_TEST_PHONES',
-        isDev ? 'true' : 'false',
-      ) === 'true'
+      this.configService.get<string>('ALLOW_TEST_PHONES', 'false') === 'true'
     );
   }
 

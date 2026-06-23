@@ -11,6 +11,8 @@ For the current production audit summary, see `docs/PRODUCTION_AUDIT.md`.
   admin seeding.
 - `ADMIN_DEFAULT_PASSWORD` must be non-placeholder and at least 16 characters
   before first production admin seeding.
+- `ALLOW_TEST_PHONES` should be set to `false`; the APIs also ignore it when
+  `NODE_ENV=production`.
 - Admin panel session cookies are written through the shared Apollo helper and
   set `Secure` automatically on HTTPS.
 - API Sentry captures unexpected errors and delegates HTTP response rendering
