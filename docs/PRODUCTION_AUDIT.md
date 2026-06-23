@@ -35,7 +35,8 @@ Last reviewed: 2026-06-23
   the authenticated driver's own stream.
 - Auth, SMS, email, and Sentry failure contexts now mask phone numbers and email
   addresses in logs. Disabled SMS/email dev logs no longer print raw OTP message
-  bodies or OTP-bearing email subjects.
+  bodies or OTP-bearing email subjects, and auth debug logs no longer print OTP
+  codes.
 
 ## Runtime Health
 
@@ -95,6 +96,8 @@ reviewed:
   disables and Apollo Client deprecated query/lazy-query options.
 - Generated GraphQL schemas must stay clean.
 - Secret hygiene must pass.
+- Log redaction validation must pass and rejects raw phone/email/body/subject/OTP
+  interpolation in sensitive auth/SMS/email logging paths.
 - Flutter analyzers must pass for rider and driver apps.
 - Admin bootstrap credential validation is covered by an admin-api unit test.
 - Live tracking subscription authorization is covered by rider-api and
