@@ -17,3 +17,4 @@ export type {
   GraphqlContextSource,
   HancrGraphqlContext,
 } from './lib/graphql-context';
+export { maskEmail, maskPhoneNumber } from './lib/redaction';

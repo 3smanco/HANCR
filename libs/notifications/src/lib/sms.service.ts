@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { maskPhoneNumber } from '@hancr/observability';
 import { Twilio } from 'twilio';
 
 export interface SmsResult {
@@ -53,8 +54,12 @@ export class SmsService {
    * Returns `{ success: false }` and logs in dev-mode when Twilio is missing.
    */
   async send(to: string, body: string): Promise<SmsResult> {
+    const maskedTo = maskPhoneNumber(to);
+
     if (!this.enabled) {
-      this.logger.debug(`[dev-sms] → ${to}: ${body}`);
+      this.logger.debug(
+        `[dev-sms] would send ${body.length} chars to ${maskedTo}`,
+      );
       return { success: false, error: 'twilio_disabled' };
     }
 
@@ -64,11 +69,13 @@ export class SmsService {
         to,
         body,
       });
-      this.logger.log(`SMS sent → ${to} (SID: ${msg.sid})`);
+      this.logger.log(`SMS sent to ${maskedTo} (SID: ${msg.sid})`);
       return { success: true, sid: msg.sid };
     } catch (e) {
       const err = e as Error & { code?: string };
-      this.logger.warn(`SMS send failed → ${to}: ${err.code} ${err.message}`);
+      this.logger.warn(
+        `SMS send failed to ${maskedTo}: ${err.code} ${err.message}`,
+      );
       return { success: false, error: err.code || err.message };
     }
   }

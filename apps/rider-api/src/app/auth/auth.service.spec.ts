@@ -4,6 +4,8 @@ import { captureException } from '@hancr/observability';
 
 jest.mock('@hancr/observability', () => ({
   captureException: jest.fn(),
+  maskEmail: jest.fn((email: string) => email),
+  maskPhoneNumber: jest.fn(() => '+97***55'),
 }));
 
 describe('Rider AuthService OTP delivery', () => {
@@ -59,7 +61,7 @@ describe('Rider AuthService OTP delivery', () => {
     expect(redis.setex).toHaveBeenCalled();
     expect(sms.sendOtp).toHaveBeenCalledWith('+97455555555', expect.any(String), 'ar');
     expect(captureException).toHaveBeenCalledWith(expect.any(Error), {
-      phone: '+97455555555',
+      phone: '+97***55',
       gateway: 'twilio',
     });
   });

@@ -33,6 +33,9 @@ Last reviewed: 2026-06-23
   `orderId`, matching `driverId`, and a live trackable order status before the
   stream opens. The duplicate driver-api location subscription is restricted to
   the authenticated driver's own stream.
+- Auth, SMS, email, and Sentry failure contexts now mask phone numbers and email
+  addresses in logs. Disabled SMS/email dev logs no longer print raw OTP message
+  bodies or OTP-bearing email subjects.
 
 ## Runtime Health
 
@@ -98,9 +101,9 @@ reviewed:
   driver-api unit tests, and the driver subscription guard is part of
   `npm run ci:verify`.
 
-GitHub workflow files are still prepared locally under `.github/workflows`, but
-they are not tracked because pushing workflow files requires a GitHub token with
-the `workflow` scope.
+A clean GitHub workflow is prepared locally in commit `752ada4` as
+`.github/workflows/ci.yml`, but GitHub rejected both `git push` and the Contents
+API because the current integration does not have the `workflow` scope.
 
 ## Dependency Risk
 

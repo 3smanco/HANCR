@@ -13,7 +13,11 @@ import { OAuth2Client } from 'google-auth-library';
 import { createHash, randomUUID } from 'crypto';
 import { RiderEntity, RiderDeviceEntity } from '@hancr/database';
 import { SmsService, EmailService } from '@hancr/notifications';
-import { captureException } from '@hancr/observability';
+import {
+  captureException,
+  maskEmail,
+  maskPhoneNumber,
+} from '@hancr/observability';
 import {
   generateTotpSecret,
   buildOtpAuthUri,
@@ -79,6 +83,7 @@ export class AuthService {
 
   async sendOtp(input: SendOtpInput): Promise<SendOtpResponse> {
     const { phone } = input;
+    const maskedPhone = maskPhoneNumber(phone);
     const key = `hancr:otp:login:${phone}`;
     const isDev = this.configService.get<string>('NODE_ENV') === 'development';
 
@@ -119,9 +124,9 @@ export class AuthService {
     );
     // أمن: لا نُسجّل قيمة OTP أبداً. في dev فقط نُظهر الكود للتشخيص.
     if (isDev) {
-      this.logger.debug(`[dev] OTP for ${phone}: ${code}`);
+      this.logger.debug(`[dev] OTP for ${maskedPhone}: ${code}`);
     } else {
-      this.logger.log(`OTP issued for ${phone}`);
+      this.logger.log(`OTP issued for ${maskedPhone}`);
     }
 
     // إرسال SMS عبر Twilio لو مُكوَّن
@@ -137,10 +142,12 @@ export class AuthService {
     // مراقبة: فشل تسليم OTP في الإنتاج (Twilio مُفعَّل لكنه فشل) يُرسَل لـ Sentry —
     // كان يُبتلَع كـ success:true فلا يُنبّه أحداً (مثال: حساب Twilio تجريبي/خطأ 21608).
     if (!deliverable && this.smsService.enabled) {
-      this.logger.error(`OTP SMS delivery failed for ${phone}: ${sms.error}`);
+      this.logger.error(
+        `OTP SMS delivery failed for ${maskedPhone}: ${sms.error}`,
+      );
       captureException(
         new Error(`OTP SMS delivery failed: ${sms.error}`),
-        { phone, gateway: 'twilio' },
+        { phone: maskedPhone, gateway: 'twilio' },
       );
     }
 
@@ -246,7 +253,7 @@ export class AuthService {
       });
       rider = await this.riderRepo.save(rider);
       this.logger.log(
-        `New rider registered: ${phone} (ID: ${rider.id})` +
+        `New rider registered: ${maskPhoneNumber(phone)} (ID: ${rider.id})` +
           (referredBy ? ` referred by #${referredBy}` : ''),
       );
     } else {
@@ -333,6 +340,7 @@ export class AuthService {
   /** يُرسل رمز OTP إلى البريد (تخزين Redis مع TTL من اللوحة) */
   async sendEmailOtp(input: SendEmailOtpInput): Promise<SendOtpResponse> {
     const email = input.email.trim().toLowerCase();
+    const maskedEmail = maskEmail(email);
     const isDev = this.configService.get<string>('NODE_ENV') === 'development';
 
     // حدّ لكل بريد: 3/60ث (يمنع قصف البريد)
@@ -356,16 +364,18 @@ export class AuthService {
       otpTtl,
       JSON.stringify({ code, attempts: 0 }),
     );
-    if (isDev) this.logger.debug(`[dev] Email OTP for ${email}: ${code}`);
+    if (isDev) this.logger.debug(`[dev] Email OTP for ${maskedEmail}: ${code}`);
 
     const res = await this.emailService.sendOtp(email, code, 'ar');
     const expose = isDev || isTest;
     const deliverable = res.success || expose;
 
     if (!deliverable && this.emailService.enabled) {
-      this.logger.error(`Email OTP delivery failed for ${email}: ${res.error}`);
+      this.logger.error(
+        `Email OTP delivery failed for ${maskedEmail}: ${res.error}`,
+      );
       captureException(new Error(`Email OTP delivery failed: ${res.error}`), {
-        email,
+        email: maskedEmail,
         gateway: 'smtp',
       });
     }

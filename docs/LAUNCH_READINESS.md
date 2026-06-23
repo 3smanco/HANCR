@@ -17,6 +17,9 @@ For the current production audit summary, see `docs/PRODUCTION_AUDIT.md`.
   back to Nest's base exception filter.
 - GraphQL subscriptions pass WebSocket auth payloads into JWT guards, and live
   driver-location tracking is limited to the authenticated rider's active order.
+- Auth, SMS, and email logs mask phone numbers and email addresses before they
+  leave the service. Disabled SMS/email dev logs do not print raw OTP bodies or
+  OTP-bearing email subjects.
 
 ## Green Checks
 
@@ -71,8 +74,8 @@ These are not code failures, but they should be closed before broad public use:
 
 ## GitHub Actions Setup
 
-Workflow files are prepared locally under `.github/workflows`, but GitHub rejected
-both git push and connector writes with:
+A clean workflow file is prepared locally as `.github/workflows/ci.yml` in
+commit `752ada4`, but GitHub rejected both git push and connector writes with:
 
 ```text
 Resource not accessible by integration
