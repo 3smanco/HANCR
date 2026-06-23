@@ -5,6 +5,15 @@ after each deploy.
 
 For the current production audit summary, see `docs/PRODUCTION_AUDIT.md`.
 
+## Security Baseline
+
+- `ADMIN_DEFAULT_EMAIL` must be configured and valid before first production
+  admin seeding.
+- `ADMIN_DEFAULT_PASSWORD` must be non-placeholder and at least 16 characters
+  before first production admin seeding.
+- Admin panel session cookies are written through the shared Apollo helper and
+  set `Secure` automatically on HTTPS.
+
 ## Green Checks
 
 These checks are expected to pass before deploy:

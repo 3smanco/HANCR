@@ -17,6 +17,11 @@ Last reviewed: 2026-06-23
 - `npm run ci:verify` passes locally on the `main` worktree.
 - Admin panel `next lint --max-warnings=0`, `tsc --noEmit`, and `next build`
   pass without warnings.
+- Production admin bootstrap now rejects missing/invalid default email values
+  and weak or placeholder `ADMIN_DEFAULT_PASSWORD` values before creating the
+  first super admin.
+- Admin panel session cookies are centralized in `lib/apollo.ts` and use
+  `Secure` automatically when the panel is served over HTTPS.
 
 ## Runtime Health
 
@@ -74,6 +79,7 @@ reviewed:
 - Generated GraphQL schemas must stay clean.
 - Secret hygiene must pass.
 - Flutter analyzers must pass for rider and driver apps.
+- Admin bootstrap credential validation is covered by an admin-api unit test.
 
 GitHub workflow files are still prepared locally under `.github/workflows`, but
 they are not tracked because pushing workflow files requires a GitHub token with
