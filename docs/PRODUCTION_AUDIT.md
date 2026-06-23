@@ -10,6 +10,8 @@ Last reviewed: 2026-06-23
 - No `ecosystem.config.js.bak*`, `test.ts`, or other old backup files were
   found at the repository root or first two levels of `/opt/hancr`.
 - Generated GraphQL schemas are clean in Git.
+- Production GraphQL schema generation now runs in memory, so PM2 reloads do
+  not rewrite `apps/*/schema.gql` on the server.
 - `npm run secrets:check` passes on the server.
 - `npm run admin:i18n:check` passes with 214 literal admin-panel translation keys.
 - `npm run admin:quality:check` passes and rejects hidden hook disables or

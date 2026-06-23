@@ -56,7 +56,10 @@ import { pubSubProvider } from './pubsub.provider';
 
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'apps/driver-api/schema.gql'),
+      autoSchemaFile:
+        process.env['NODE_ENV'] === 'production'
+          ? true
+          : join(process.cwd(), 'apps/driver-api/schema.gql'),
       sortSchema: true,
       playground: process.env['NODE_ENV'] !== 'production',
       introspection: process.env['NODE_ENV'] !== 'production',
