@@ -22,6 +22,17 @@ class AppConfig {
   static bool get isStaging => env == 'staging';
   static bool get isDevelopment => env == 'development';
 
+  // Error monitoring. Leave empty in local builds; set via --dart-define in
+  // staging/production release builds.
+  static const String sentryDsn = String.fromEnvironment(
+    'SENTRY_DSN',
+    defaultValue: '',
+  );
+  static const String sentryRelease = String.fromEnvironment(
+    'SENTRY_RELEASE',
+    defaultValue: 'hancr-rider@1.0.0+1',
+  );
+
   // ── API Endpoints ─────────────────────────────────────────────────────────
   static const String _devHost = String.fromEnvironment(
     'API_HOST',

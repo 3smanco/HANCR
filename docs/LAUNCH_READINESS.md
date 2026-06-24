@@ -17,6 +17,8 @@ For the current production audit summary, see `docs/PRODUCTION_AUDIT.md`.
   set `Secure` automatically on HTTPS.
 - API Sentry captures unexpected errors and delegates HTTP response rendering
   back to Nest's base exception filter.
+- Rider and driver Flutter apps initialize Sentry when release builds provide
+  `--dart-define=SENTRY_DSN=...` and tag events with `ENV`/`SENTRY_RELEASE`.
 - GraphQL subscriptions pass WebSocket auth payloads into JWT guards, and live
   driver-location tracking is limited to the authenticated rider's active order.
 - Auth, SMS, and email logs mask phone numbers and email addresses before they
@@ -57,7 +59,7 @@ These require external credentials or GitHub permissions:
 | Monitoring | `SENTRY_DSN_RIDER_API` | No production error tracking for rider API | Create a Sentry project and add its DSN to `/opt/hancr/.env.prod` |
 | Monitoring | `SENTRY_DSN_DRIVER_API` | No production error tracking for driver API | Create a Sentry project and add its DSN to `/opt/hancr/.env.prod` |
 | Monitoring | `SENTRY_DSN_ADMIN_API` | No production error tracking for admin API | Create a Sentry project and add its DSN to `/opt/hancr/.env.prod` |
-| Monitoring | mobile Sentry SDKs | Flutter app crash reporting is still disabled in `pubspec.yaml` | Re-enable `sentry_flutter` after the Kotlin/build issue is resolved |
+| Monitoring | mobile `SENTRY_DSN` build defines | Flutter SDK wiring is present, but release builds need DSNs to send crash reports | Add rider/driver app DSNs to release secrets and pass `--dart-define=SENTRY_DSN=...` |
 | GitHub CI | workflow write permission | CI workflow files cannot be pushed by the current OAuth token | Re-authenticate GitHub with `workflow` scope or push `.github/workflows` manually |
 
 ## Production Warnings

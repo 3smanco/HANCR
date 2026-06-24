@@ -19,8 +19,8 @@ dependencies:
   flutter_bloc: ^8.1.6
   equatable: ^2.0.5
 
-  # Error Monitoring (Sentry) — معطَّلة مؤقتاً (مشكلة Kotlin compile)
-  # sentry_flutter: ^8.10.1
+  # Error Monitoring (Sentry)
+  sentry_flutter: ^9.22.0
 
   # Navigation
   go_router: ^14.6.1

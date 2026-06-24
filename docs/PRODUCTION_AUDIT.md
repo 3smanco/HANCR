@@ -40,6 +40,9 @@ Last reviewed: 2026-06-23
   addresses in logs. Disabled SMS/email dev logs no longer print raw OTP message
   bodies or OTP-bearing email subjects, and auth debug logs no longer print OTP
   codes.
+- Rider and driver Flutter apps now include `sentry_flutter` and initialize it
+  when release builds provide `--dart-define=SENTRY_DSN=...`, with environment
+  and release tags sourced from `AppConfig`.
 
 ## Runtime Health
 
@@ -139,8 +142,8 @@ Notable packages to review first:
   HTTPS domains, then confirm readiness removes the five URL/CORS failures.
 - Add the three API Sentry DSNs and confirm readiness has zero monitoring
   failures.
-- Re-enable mobile Sentry for rider and driver Flutter apps after resolving the
-  noted Kotlin/build issue in their `pubspec.yaml` comments.
+- Add rider and driver mobile Sentry DSNs to release secrets and verify crash
+  events from internal testing builds.
 - Decide and configure uploads, payments, payouts, email, translation, and FX.
 - Re-authenticate GitHub with workflow scope and push `.github/workflows`.
 - Review PM2 restart history; current services are online, but restart counters
