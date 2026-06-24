@@ -3,6 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import { execFileSync } from 'child_process';
+import net from 'node:net';
 import dotenv from 'dotenv';
 
 const args = new Set(process.argv.slice(2));
@@ -53,6 +54,20 @@ function hasConfiguredValue(key) {
 
 function configuredKeys(keys) {
   return keys.filter(hasConfiguredValue);
+}
+
+function normalizedHostname(hostname) {
+  return hostname.replace(/^\[(.*)\]$/, '$1').toLowerCase();
+}
+
+function isLocalHostname(hostname) {
+  return ['localhost', '127.0.0.1', '0.0.0.0', '::1'].includes(
+    normalizedHostname(hostname),
+  );
+}
+
+function isIpLiteral(hostname) {
+  return net.isIP(normalizedHostname(hostname)) !== 0;
 }
 
 function add(level, group, key, message) {
@@ -113,11 +128,13 @@ function requireHttpsUrl(group, key, message = 'must be a production https URL')
     return;
   }
 
-  if (
-    strict &&
-    ['localhost', '127.0.0.1', '0.0.0.0', '::1'].includes(parsed.hostname)
-  ) {
+  if (strict && isLocalHostname(parsed.hostname)) {
     add('fail', group, key, 'must not point to a local host in production');
+    return;
+  }
+
+  if (strict && isIpLiteral(parsed.hostname)) {
+    add('fail', group, key, 'must use a production domain, not an IP address');
     return;
   }
 
@@ -147,6 +164,16 @@ function requireHttpsOriginList(group, key) {
 
     if (strict && parsed.protocol !== 'https:') {
       add('fail', group, key, `origin must use https: ${origin}`);
+      return;
+    }
+
+    if (strict && isIpLiteral(parsed.hostname)) {
+      add(
+        'fail',
+        group,
+        key,
+        `origin must use a domain, not an IP address: ${origin}`,
+      );
       return;
     }
 
