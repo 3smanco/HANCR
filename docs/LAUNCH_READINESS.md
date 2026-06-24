@@ -39,6 +39,15 @@ npm run readiness:template
 npm run secrets:check
 ```
 
+The PM2 server deploy path is captured in:
+
+```bash
+./scripts/deploy-direct.sh
+```
+
+It refreshes stale PM2 definitions before `startOrReload`, which prevents old
+`ts-node` or `next start` process definitions from surviving a deploy.
+
 On the PM2 server:
 
 ```bash
@@ -109,3 +118,4 @@ API production bundles are also built by `npm run ci:verify`, and PM2 uses
 `dist/apps/*/main.js` instead of `ts-node` for the three API services. The
 admin panel uses Next standalone output under PM2, so the admin-panel production
 build must run before reload to copy `.next/static` into `.next/standalone`.
+The deploy script performs both builds and checks for stale PM2 script paths.

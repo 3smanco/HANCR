@@ -1,97 +1,107 @@
-#!/bin/bash
-# نشر مباشر بدون Docker — أسرع + أسهل debug
-set -e
-cd /opt/hancr
+#!/usr/bin/env bash
+# Direct PM2 deploy for the current production server.
+#
+# Defaults are intentionally conservative:
+# - pulls main with --ff-only
+# - installs dependencies
+# - builds compiled API bundles
+# - builds the admin-panel Next standalone output
+# - refreshes PM2 from the tracked ecosystem.config.js
+# - does not run migrations unless RUN_MIGRATIONS=1
+set -euo pipefail
 
-echo "═══════════════════════════════════════════════════"
-echo "  HANCR — Direct Deploy (Node + pm2)"
-echo "═══════════════════════════════════════════════════"
+APP_ROOT="${HANCR_ROOT:-/opt/hancr}"
+BRANCH="${HANCR_DEPLOY_BRANCH:-main}"
+INSTALL_DEPS="${INSTALL_DEPS:-1}"
+RUN_MIGRATIONS="${RUN_MIGRATIONS:-0}"
+SKIP_GIT_PULL="${SKIP_GIT_PULL:-0}"
 
-# ─── 1. تثبيت npm deps ───
-echo "[1/7] npm install (5-10 min)..."
-npm install --legacy-peer-deps --no-audit --no-fund 2>&1 | tail -5
+export HANCR_ROOT="$APP_ROOT"
 
-# ─── 2. تثبيت pm2 globally ───
-echo "[2/7] Installing pm2..."
-sudo npm install -g pm2 2>&1 | tail -2
+step() {
+  printf '\n==> %s\n' "$*"
+}
 
-# ─── 3. تشغيل migrations ───
-echo "[3/7] Loading .env.prod variables..."
-set -a
-source .env.prod
-set +a
+cd "$APP_ROOT"
 
-echo "[4/7] Running TypeORM migrations..."
-TS_NODE_PROJECT=tsconfig.base.json \
-  DATABASE_HOST=localhost DATABASE_PORT=5432 \
-  npx typeorm-ts-node-commonjs migration:run \
-  -d libs/database/src/lib/data-source.ts 2>&1 | tail -10
+step "Repository"
+if [[ "$SKIP_GIT_PULL" != "1" ]]; then
+  git pull --ff-only origin "$BRANCH"
+else
+  echo "Skipping git pull because SKIP_GIT_PULL=1"
+fi
+git status --short --branch
+git rev-parse --short HEAD
 
-# ─── 5. تطبيق seed users ───
-echo "[5/7] Seeding demo users..."
-DATABASE_URL="postgresql://$DATABASE_USER:$DATABASE_PASSWORD@localhost:5432/$DATABASE_NAME"
-docker exec -i hancr_postgres_prod psql -U $DATABASE_USER -d $DATABASE_NAME < scripts/seed-demo-users.sql 2>&1 | tail -10
+if [[ "$INSTALL_DEPS" != "0" ]]; then
+  step "Install dependencies"
+  npm install --legacy-peer-deps --no-audit --no-fund
+fi
 
-# ─── 6. تشغيل APIs بـ pm2 ───
-echo "[6/7] Starting APIs with pm2..."
-cat > /tmp/ecosystem.config.js <<'PMEOF'
-module.exports = {
-  apps: [
-    {
-      name: 'rider-api',
-      script: 'npx',
-      args: 'ts-node --project apps/rider-api/tsconfig.app.json -r tsconfig-paths/register apps/rider-api/src/main.ts',
-      env: {
-        NODE_ENV: 'production',
-        RIDER_API_PORT: '3000',
-        TS_NODE_PROJECT: 'tsconfig.base.json',
-      },
-      cwd: '/opt/hancr',
-      autorestart: true,
-      max_memory_restart: '500M',
-    },
-    {
-      name: 'driver-api',
-      script: 'npx',
-      args: 'ts-node --project apps/driver-api/tsconfig.app.json -r tsconfig-paths/register apps/driver-api/src/main.ts',
-      env: {
-        NODE_ENV: 'production',
-        DRIVER_API_PORT: '3001',
-        TS_NODE_PROJECT: 'tsconfig.base.json',
-      },
-      cwd: '/opt/hancr',
-      autorestart: true,
-      max_memory_restart: '500M',
-    },
-    {
-      name: 'admin-api',
-      script: 'npx',
-      args: 'ts-node --project apps/admin-api/tsconfig.app.json -r tsconfig-paths/register apps/admin-api/src/main.ts',
-      env: {
-        NODE_ENV: 'production',
-        ADMIN_API_PORT: '3002',
-        TS_NODE_PROJECT: 'tsconfig.base.json',
-      },
-      cwd: '/opt/hancr',
-      autorestart: true,
-      max_memory_restart: '500M',
-    },
-  ],
+if [[ "$RUN_MIGRATIONS" == "1" ]]; then
+  step "Run database migrations"
+  set -a
+  # shellcheck disable=SC1091
+  . ./.env.prod
+  set +a
+  DATABASE_HOST="${PM2_DATABASE_HOST:-127.0.0.1}" \
+    REDIS_HOST="${PM2_REDIS_HOST:-127.0.0.1}" \
+    TS_NODE_PROJECT=tsconfig.base.json \
+    npx typeorm-ts-node-commonjs migration:run \
+    -d libs/database/src/lib/data-source.ts
+else
+  step "Skip migrations"
+  echo "Set RUN_MIGRATIONS=1 to run TypeORM migrations during deploy."
+fi
+
+step "Build API bundles"
+npm run build:apis:prod
+
+step "Build admin panel standalone output"
+(cd apps/admin-panel && npm run build)
+
+step "Refresh stale PM2 definitions"
+node <<'NODE'
+const childProcess = require('child_process');
+const path = require('path');
+
+const root = process.env.HANCR_ROOT || '/opt/hancr';
+const expected = {
+  'rider-api': path.join(root, 'dist/apps/rider-api/main.js'),
+  'driver-api': path.join(root, 'dist/apps/driver-api/main.js'),
+  'admin-api': path.join(root, 'dist/apps/admin-api/main.js'),
+  'admin-panel': path.join(root, 'apps/admin-panel/.next/standalone/server.js'),
 };
-PMEOF
 
-# Load .env.prod into pm2 env
-pm2 delete all 2>/dev/null || true
-cd /opt/hancr && pm2 start /tmp/ecosystem.config.js --env production 2>&1 | tail -10
-pm2 save 2>&1 | tail -2
-pm2 startup systemd -u $USER --hp $HOME 2>&1 | grep "sudo" | head -1 | bash
+let processes = [];
+try {
+  processes = JSON.parse(childProcess.execSync('pm2 jlist', { encoding: 'utf8' }));
+} catch (error) {
+  console.log('PM2 process list is not available yet; continuing with startOrReload.');
+}
 
-echo "[7/7] ✓ APIs running"
-sleep 3
-pm2 status
-echo ""
-echo "═══════════════════════════════════════════════════"
-echo "  ✓ Deployment complete!"
-echo "  Logs: pm2 logs"
-echo "  Status: pm2 status"
-echo "═══════════════════════════════════════════════════"
+for (const proc of processes) {
+  const name = proc.name;
+  const expectedPath = expected[name];
+  if (!expectedPath) continue;
+
+  const actualPath = proc.pm2_env?.pm_exec_path;
+  if (actualPath && path.resolve(actualPath) !== path.resolve(expectedPath)) {
+    console.log(`Deleting stale PM2 app ${name}: ${actualPath} -> ${expectedPath}`);
+    childProcess.execFileSync('pm2', ['delete', name], { stdio: 'inherit' });
+  }
+}
+NODE
+
+step "Start or reload PM2 apps"
+pm2 startOrReload ecosystem.config.js --update-env
+pm2 save
+pm2 status --no-color
+
+step "Health checks"
+curl -fsS http://127.0.0.1:3000/health/ready >/dev/null
+curl -fsS http://127.0.0.1:3001/health/ready >/dev/null
+curl -fsS http://127.0.0.1:3002/health/ready >/dev/null
+curl -fsSI http://127.0.0.1:3003/login >/dev/null
+
+echo "Deploy complete."
