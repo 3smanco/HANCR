@@ -58,6 +58,9 @@ Last reviewed: 2026-06-25
 - API production builds now have explicit webpack configs, are included in
   `npm run ci:verify`, and PM2 runs the generated `dist/apps/*/main.js`
   bundles instead of `ts-node --transpile-only`.
+- `scripts/deploy-direct.sh` now reflects the current PM2 production path:
+  compiled API bundles, admin-panel standalone build, stale PM2 definition
+  cleanup, and local health checks.
 
 ## Runtime Health
 
