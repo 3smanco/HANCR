@@ -4,9 +4,9 @@ class GeoPoint {
   const GeoPoint({required this.lat, required this.lng});
 
   factory GeoPoint.fromJson(Map<String, dynamic> json) => GeoPoint(
-        lat: (json['lat'] as num).toDouble(),
-        lng: (json['lng'] as num).toDouble(),
-      );
+    lat: (json['lat'] as num).toDouble(),
+    lng: (json['lng'] as num).toDouble(),
+  );
 }
 
 /// عنصر في قائمة المشتريات (Grocery Run)
@@ -17,10 +17,10 @@ class ShoppingItem {
   const ShoppingItem({required this.name, required this.qty, this.note});
 
   factory ShoppingItem.fromJson(Map<String, dynamic> json) => ShoppingItem(
-        name: json['name'] as String? ?? '',
-        qty: json['qty'] as int? ?? 1,
-        note: json['note'] as String?,
-      );
+    name: json['name'] as String? ?? '',
+    qty: json['qty'] as int? ?? 1,
+    note: json['note'] as String?,
+  );
 }
 
 enum OrderStatus {
@@ -38,51 +38,78 @@ enum OrderStatus {
   unknown;
 
   static OrderStatus fromString(String s) {
-    switch (s.toLowerCase()) {
-      case 'requested':        return OrderStatus.requested;
-      case 'not_found':        return OrderStatus.notFound;
-      case 'found':            return OrderStatus.found;
-      case 'driver_accepted':  return OrderStatus.driverAccepted;
-      case 'arrived':          return OrderStatus.arrived;
-      case 'started':          return OrderStatus.started;
-      case 'waiting_for_post_pay': return OrderStatus.waitingForPostPay;
-      case 'waiting_for_review':   return OrderStatus.waitingForReview;
-      case 'finished':         return OrderStatus.finished;
-      case 'canceled_by_rider':  return OrderStatus.canceledByRider;
-      case 'canceled_by_driver': return OrderStatus.canceledByDriver;
-      default:                 return OrderStatus.unknown;
+    final normalized = s.replaceAll(RegExp(r'[^a-zA-Z]'), '').toLowerCase();
+    switch (normalized) {
+      case 'requested':
+        return OrderStatus.requested;
+      case 'notfound':
+        return OrderStatus.notFound;
+      case 'found':
+        return OrderStatus.found;
+      case 'driveraccepted':
+        return OrderStatus.driverAccepted;
+      case 'arrived':
+        return OrderStatus.arrived;
+      case 'started':
+        return OrderStatus.started;
+      case 'waitingforpostpay':
+        return OrderStatus.waitingForPostPay;
+      case 'waitingforreview':
+        return OrderStatus.waitingForReview;
+      case 'finished':
+        return OrderStatus.finished;
+      case 'ridercanceled':
+      case 'canceledbyrider':
+        return OrderStatus.canceledByRider;
+      case 'drivercanceled':
+      case 'canceledbydriver':
+        return OrderStatus.canceledByDriver;
+      default:
+        return OrderStatus.unknown;
     }
   }
 
   bool get isActive => [
-        OrderStatus.found,
-        OrderStatus.driverAccepted,
-        OrderStatus.arrived,
-        OrderStatus.started,
-        OrderStatus.waitingForPostPay,
-      ].contains(this);
+    OrderStatus.found,
+    OrderStatus.driverAccepted,
+    OrderStatus.arrived,
+    OrderStatus.started,
+    OrderStatus.waitingForPostPay,
+  ].contains(this);
 
   bool get isFinished => [
-        OrderStatus.finished,
-        OrderStatus.canceledByRider,
-        OrderStatus.canceledByDriver,
-        OrderStatus.waitingForReview,
-      ].contains(this);
+    OrderStatus.finished,
+    OrderStatus.canceledByRider,
+    OrderStatus.canceledByDriver,
+    OrderStatus.waitingForReview,
+  ].contains(this);
 
   String get label {
     switch (this) {
-      case OrderStatus.requested:       return 'Finding driver';
-      case OrderStatus.notFound:        return 'No drivers found';
-      case OrderStatus.found:           return 'Ride found';
-      case OrderStatus.driverAccepted:  return 'On the way';
-      case OrderStatus.arrived:         return 'Arrived at pickup';
-      case OrderStatus.started:         return 'In progress';
-      case OrderStatus.waitingForPostPay: return 'Awaiting payment';
-      case OrderStatus.waitingForReview:  return 'Rate your ride';
-      case OrderStatus.finished:        return 'Completed';
-      case OrderStatus.canceledByRider: return 'Canceled by rider';
-      case OrderStatus.canceledByDriver: return 'Canceled by driver';
-      case OrderStatus.unknown:         return 'Unknown';
+      case OrderStatus.requested:
+        return 'Finding driver';
+      case OrderStatus.notFound:
+        return 'No drivers found';
+      case OrderStatus.found:
+        return 'Ride found';
+      case OrderStatus.driverAccepted:
+        return 'On the way';
+      case OrderStatus.arrived:
+        return 'Arrived at pickup';
+      case OrderStatus.started:
+        return 'In progress';
+      case OrderStatus.waitingForPostPay:
+        return 'Awaiting payment';
+      case OrderStatus.waitingForReview:
+        return 'Rate your ride';
+      case OrderStatus.finished:
+        return 'Completed';
+      case OrderStatus.canceledByRider:
+        return 'Canceled by rider';
+      case OrderStatus.canceledByDriver:
+        return 'Canceled by driver';
+      case OrderStatus.unknown:
+        return 'Unknown';
     }
   }
 }
@@ -111,6 +138,7 @@ class DriverOrderModel {
   final String? receiverName;
   final String? receiverPhone;
   final bool isBidOrder;
+  final int? poolGroupId;
   final DateTime? etaPickup;
   final DateTime? startTimestamp;
   final DateTime? finishTimestamp;
@@ -151,6 +179,7 @@ class DriverOrderModel {
     this.receiverName,
     this.receiverPhone,
     required this.isBidOrder,
+    this.poolGroupId,
     this.etaPickup,
     this.startTimestamp,
     this.finishTimestamp,
@@ -196,6 +225,7 @@ class DriverOrderModel {
       receiverName: json['receiverName'] as String?,
       receiverPhone: json['receiverPhone'] as String?,
       isBidOrder: json['isBidOrder'] as bool? ?? false,
+      poolGroupId: json['poolGroupId'] as int?,
       etaPickup: json['etaPickup'] != null
           ? DateTime.parse(json['etaPickup'] as String)
           : null,
@@ -222,8 +252,7 @@ class DriverOrderModel {
     );
   }
 
-  String get originAddress =>
-      addresses.isNotEmpty ? addresses.first : 'Pickup';
+  String get originAddress => addresses.isNotEmpty ? addresses.first : 'Pickup';
   String get destinationAddress =>
       addresses.length > 1 ? addresses.last : 'Destination';
 
@@ -239,46 +268,48 @@ class DriverOrderModel {
   }
 
   DriverOrderModel copyWith({OrderStatus? status}) => DriverOrderModel(
-        id: id,
-        type: type,
-        status: status ?? this.status,
-        riderId: riderId,
-        riderName: riderName,
-        riderPhone: riderPhone,
-        riderRating: riderRating,
-        points: points,
-        addresses: addresses,
-        distanceBest: distanceBest,
-        durationBest: durationBest,
-        costBest: costBest,
-        costAfterCoupon: costAfterCoupon,
-        currency: currency,
-        paymentMode: paymentMode,
-        quietRide: quietRide,
-        requestedTemperature: requestedTemperature,
-        audioOff: audioOff,
-        numberMasked: numberMasked,
-        otpCode: otpCode,
-        receiverName: receiverName,
-        receiverPhone: receiverPhone,
-        isBidOrder: isBidOrder,
-        etaPickup: etaPickup,
-        startTimestamp: startTimestamp,
-        finishTimestamp: finishTimestamp,
-        createdOn: createdOn,
-        familyMode: familyMode,
-        preferFemaleDriver: preferFemaleDriver,
-        preferredDriverId: preferredDriverId,
-        entitlementId: entitlementId,
-        companyId: companyId,
-        bookedHours: bookedHours,
-        nightShift: nightShift,
-        shoppingList: shoppingList,
-        budget: budget,
-      );
+    id: id,
+    type: type,
+    status: status ?? this.status,
+    riderId: riderId,
+    riderName: riderName,
+    riderPhone: riderPhone,
+    riderRating: riderRating,
+    points: points,
+    addresses: addresses,
+    distanceBest: distanceBest,
+    durationBest: durationBest,
+    costBest: costBest,
+    costAfterCoupon: costAfterCoupon,
+    currency: currency,
+    paymentMode: paymentMode,
+    quietRide: quietRide,
+    requestedTemperature: requestedTemperature,
+    audioOff: audioOff,
+    numberMasked: numberMasked,
+    otpCode: otpCode,
+    receiverName: receiverName,
+    receiverPhone: receiverPhone,
+    isBidOrder: isBidOrder,
+    poolGroupId: poolGroupId,
+    etaPickup: etaPickup,
+    startTimestamp: startTimestamp,
+    finishTimestamp: finishTimestamp,
+    createdOn: createdOn,
+    familyMode: familyMode,
+    preferFemaleDriver: preferFemaleDriver,
+    preferredDriverId: preferredDriverId,
+    entitlementId: entitlementId,
+    companyId: companyId,
+    bookedHours: bookedHours,
+    nightShift: nightShift,
+    shoppingList: shoppingList,
+    budget: budget,
+  );
 
   /// نوع رئيسي للعرض في الشاشات
   bool get isGrocery => shoppingList != null && shoppingList!.isNotEmpty;
   bool get isHourly => bookedHours != null && bookedHours! > 0;
   bool get isPrepaid => entitlementId != null || companyId != null;
+  bool get isSharedPool => poolGroupId != null;
 }
