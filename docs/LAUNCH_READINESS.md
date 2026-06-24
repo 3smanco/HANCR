@@ -119,3 +119,6 @@ API production bundles are also built by `npm run ci:verify`, and PM2 uses
 admin panel uses Next standalone output under PM2, so the admin-panel production
 build must run before reload to copy `.next/static` into `.next/standalone`.
 The deploy script performs both builds and checks for stale PM2 script paths.
+Production GraphQL schema generation is in-memory; if `apps/*/schema.gql`
+changes, it should come from development or CI generation and be reviewed as an
+API contract change, not from PM2 reloads on the server.
