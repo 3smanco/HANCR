@@ -142,9 +142,19 @@ API because the current integration does not have the `workflow` scope.
 
 ## Dependency Risk
 
-Production dependency audit still needs a dedicated major-upgrade pass. A
-non-breaking cleanup pass removed unused `@nestjs/platform-express`, upgraded
-`nodemailer` to `^9.0.1`, and moved admin-panel to Next `^14.2.35`.
+Production dependency audit still needs a dedicated major-upgrade pass. Recheck
+the current state with:
+
+```bash
+npm run audit:prod:summary
+```
+
+A non-breaking cleanup pass removed unused `@nestjs/platform-express`, upgraded
+`nodemailer` to `^9.0.1`, and moved admin-panel to Next `^14.2.35`. A
+conservative `npm audit fix --omit=dev --package-lock-only` pass was tested
+afterward and not committed because it did not reduce the production audit risk
+set; it only churned lockfile metadata and surfaced additional dev/optional
+noise.
 
 - Root production audit: 31 vulnerabilities total
   - 1 critical
@@ -161,6 +171,8 @@ Notable packages to review first:
 - `fastify`
 - `@apollo/server` / `@nestjs/apollo`
 - `next`
+- `firebase-admin`
+- `@nestjs/config`
 
 ## Operational Follow-ups
 

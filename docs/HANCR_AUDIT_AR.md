@@ -101,6 +101,7 @@
   - root: 31 vulnerability منها 1 critical و8 high.
   - admin-panel: 2 vulnerabilities منها 1 high.
   هذه تحتاج ترقية منظمة لأنها تمس Fastify/Nest/Apollo/Next وقد تكون breaking.
+  يمكن إعادة إنتاج الملخص المختصر عبر `npm run audit:prod:summary`.
 - GitHub Actions جاهزة محليا في commit `752ada4`، لكن GitHub رفض `git push`
   وContents API لأن التكامل الحالي لا يملك صلاحية `workflow`.
 

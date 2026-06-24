@@ -37,6 +37,7 @@ npm run build:apis:prod
 (cd apps/admin-panel && npm run build)
 npm run readiness:template
 npm run secrets:check
+npm run audit:prod:summary
 ```
 
 The PM2 server deploy path is captured in:
