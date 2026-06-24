@@ -174,6 +174,10 @@ Notable packages to review first:
 - `firebase-admin`
 - `@nestjs/config`
 
+`npm run audit:prod:summary` also lists the current non-breaking candidates
+(`ajv`, `file-type`, `gaxios`, and related transitive packages) so they can be
+tested separately before the larger Nest/Fastify/Apollo/Next migration.
+
 ## Operational Follow-ups
 
 - Move public URLs and CORS origins from the raw HTTP server IP to production

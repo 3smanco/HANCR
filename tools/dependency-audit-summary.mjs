@@ -61,7 +61,9 @@ function summarize(target, audit) {
   const fixGroups = new Map();
   for (const item of vulnerabilities) {
     const kind = fixKind(item.fixAvailable);
-    fixGroups.set(kind, (fixGroups.get(kind) ?? 0) + 1);
+    const items = fixGroups.get(kind) ?? [];
+    items.push(item);
+    fixGroups.set(kind, items);
   }
 
   console.log(`\n${target.name}`);
@@ -79,8 +81,10 @@ function summarize(target, audit) {
   }
 
   console.log('Fix availability:');
-  for (const [kind, count] of [...fixGroups.entries()].sort()) {
-    console.log(`  ${count} x ${kind}`);
+  for (const [kind, items] of [...fixGroups.entries()].sort()) {
+    const names = [...new Set(items.map((item) => item.name))].sort();
+    console.log(`  ${items.length} x ${kind}`);
+    console.log(`    ${names.join(', ')}`);
   }
 }
 
