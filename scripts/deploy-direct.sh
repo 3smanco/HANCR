@@ -52,6 +52,7 @@ wait_for_url() {
 cd "$APP_ROOT"
 
 step "Repository"
+start_sha="$(git rev-parse HEAD)"
 if [[ "$SKIP_GIT_PULL" != "1" ]]; then
   git pull --ff-only origin "$BRANCH"
 else
@@ -59,6 +60,18 @@ else
 fi
 git status --short --branch
 git rev-parse --short HEAD
+current_sha="$(git rev-parse HEAD)"
+
+if [[ "$SKIP_GIT_PULL" != "1" && "${HANCR_DEPLOY_REEXECED:-0}" != "1" && "$start_sha" != "$current_sha" ]]; then
+  echo "Repository updated from ${start_sha:0:7} to ${current_sha:0:7}; re-executing updated deploy script."
+  export HANCR_DEPLOY_REEXECED=1
+  export HANCR_ROOT="$APP_ROOT"
+  export HANCR_DEPLOY_BRANCH="$BRANCH"
+  export INSTALL_DEPS
+  export RUN_MIGRATIONS
+  export SKIP_GIT_PULL
+  exec "$0"
+fi
 
 if [[ "$INSTALL_DEPS" != "0" ]]; then
   step "Install dependencies"
