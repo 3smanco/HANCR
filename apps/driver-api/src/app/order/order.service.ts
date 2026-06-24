@@ -370,8 +370,7 @@ export class OrderService {
     );
 
     // السائق يعود إلى Online
-    await this.driverRepo.update(driverId, { status: DriverStatus.Online });
-    await this.driverRedis.setStatus(driverId, 'Online');
+    await this.releaseDriverIfIdle(driverId);
 
     // ─── Auto-settle payment ───
     // - Wallet mode: debit rider's wallet + credit driver's earnings (minus commission)
@@ -451,8 +450,7 @@ export class OrderService {
       }),
     );
 
-    await this.driverRepo.update(driverId, { status: DriverStatus.Online });
-    await this.driverRedis.setStatus(driverId, 'Online');
+    await this.releaseDriverIfIdle(driverId);
 
     try {
       await this._settlePayment(order);
@@ -488,8 +486,7 @@ export class OrderService {
     }
 
     await this.orderRepo.update(orderId, { status: OrderStatus.DriverCanceled });
-    await this.driverRepo.update(driverId, { status: DriverStatus.Online });
-    await this.driverRedis.setStatus(driverId, 'Online');
+    await this.releaseDriverIfIdle(driverId);
 
     await this.activityRepo.save(
       this.activityRepo.create({
@@ -524,6 +521,24 @@ export class OrderService {
       if (order) return this.toType(order);
     }
     return null;
+  }
+
+  private async releaseDriverIfIdle(driverId: number): Promise<void> {
+    const busyStatuses = [
+      OrderStatus.DriverAccepted,
+      OrderStatus.Arrived,
+      OrderStatus.Started,
+    ];
+    const remaining = await this.orderRepo.count({
+      where: busyStatuses.map((status) => ({ driverId, status })),
+    });
+    if (remaining > 0) return;
+
+    await this.driverRepo.update(
+      { id: driverId, status: DriverStatus.Busy },
+      { status: DriverStatus.Online },
+    );
+    await this.driverRedis.setStatus(driverId, 'Online');
   }
 
   /**
