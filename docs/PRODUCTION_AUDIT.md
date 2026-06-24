@@ -147,6 +147,7 @@ the current state with:
 
 ```bash
 npm run audit:prod:summary
+npm run audit:prod:fix-dry-run
 ```
 
 A non-breaking cleanup pass removed unused `@nestjs/platform-express`, upgraded
@@ -154,7 +155,10 @@ A non-breaking cleanup pass removed unused `@nestjs/platform-express`, upgraded
 conservative `npm audit fix --omit=dev --package-lock-only` pass was tested
 afterward and not committed because it did not reduce the production audit risk
 set; it only churned lockfile metadata and surfaced additional dev/optional
-noise.
+noise. Boolean `fixAvailable: true` entries in npm audit are advisory metadata,
+not proof that npm can apply a safe non-breaking fix. Use
+`npm run audit:prod:fix-dry-run` to verify whether npm can actually make a
+package-lock-only change.
 
 - Root production audit: 31 vulnerabilities total
   - 1 critical
@@ -174,9 +178,10 @@ Notable packages to review first:
 - `firebase-admin`
 - `@nestjs/config`
 
-`npm run audit:prod:summary` also lists the current non-breaking candidates
-(`ajv`, `file-type`, `gaxios`, and related transitive packages) so they can be
-tested separately before the larger Nest/Fastify/Apollo/Next migration.
+`npm run audit:prod:summary` also lists advisory-only candidates (`ajv`,
+`file-type`, `gaxios`, and related transitive packages). Current dry-run
+evidence shows no safe `npm audit fix` lockfile change for them, so they should
+be handled through explicit migration testing rather than automatic fixes.
 
 ## Operational Follow-ups
 
