@@ -25,7 +25,11 @@ import {
   WalletTransactionType,
   WalletTransactionStatus,
 } from '@hancr/database';
-import { OrderRedisService, CronLockService } from '@hancr/redis';
+import {
+  OrderRedisService,
+  CronLockService,
+  DriverRedisService,
+} from '@hancr/redis';
 import { PushNotificationService } from '@hancr/notifications';
 import { WalletService } from '@hancr/wallet';
 import { SosService } from '@hancr/sos';
@@ -46,6 +50,12 @@ import { AppConfigReader } from '../app-config/app-config-reader.service';
 // GraphQL Subscription events
 export const ORDER_UPDATED = 'ORDER_UPDATED';
 export const NEW_ORDER_AVAILABLE = 'NEW_ORDER_AVAILABLE';
+export const DRIVER_ORDER_UPDATED = 'DRIVER_ORDER_UPDATED';
+
+/** نصف قطر الانحراف الأقصى لضمّ راكب Share لرحلة جارية (كم). */
+const SHARE_MAX_DETOUR_KM = 3;
+/** أقصى فرق اتجاه مسموح بين مساري الراكبين (درجات). */
+const SHARE_MAX_BEARING_DIFF = 60;
 
 const CURRENT_ACTIVE_ORDER_STATUSES: OrderStatus[] = [
   OrderStatus.Requested,
@@ -80,6 +90,7 @@ export class OrderService {
     private readonly driverRepo: Repository<DriverEntity>,
 
     private readonly orderRedis: OrderRedisService,
+    private readonly driverRedis: DriverRedisService,
     private readonly cronLock: CronLockService,
     private readonly matchingService: MatchingService,
     private readonly directionsService: DirectionsService,
@@ -437,6 +448,53 @@ export class OrderService {
         } as OrderEntity);
       }
 
+      // ============================================================
+      // Share Pooling — ضمّ الطلب لرحلة Share جارية متوافقة (إن وُجدت)
+      // ============================================================
+      if (service.nameEn === 'Share' && destPoint) {
+        const join = await this.tryJoinSharePool(
+          input.regionId,
+          originPoint,
+          destPoint,
+        );
+        if (join) {
+          const etaPickup = new Date(Date.now() + join.etaMinutes * 60 * 1000);
+          const joined = await this.joinSharePoolIfAvailable(
+            savedOrder.id,
+            join,
+            etaPickup,
+          );
+          if (joined) {
+            const pooledOrder = {
+              ...savedOrder,
+              status: OrderStatus.DriverAccepted,
+              driverId: join.driverId,
+              poolGroupId: join.poolGroupId,
+              etaPickup,
+            } as OrderEntity;
+            this.logger.log(
+              `Order #${savedOrder.id} pooled into group ${join.poolGroupId} ` +
+                `(driver ${join.driverId})`,
+            );
+            await this.pubSub.publish(ORDER_UPDATED, {
+              orderUpdated: this.toGqlType(pooledOrder),
+            });
+            await this.pubSub.publish(DRIVER_ORDER_UPDATED, {
+              driverOrderUpdated: this.toDriverOrderPayload(pooledOrder, rider),
+            });
+            return this.toGqlType(pooledOrder);
+          }
+          this.logger.warn(
+            `Share pool ${join.poolGroupId} filled before order #${savedOrder.id} could join`,
+          );
+        }
+        // لا رفيق متاح الآن — نفتح المجموعة لانضمام لاحق
+        await this.orderRepo.update(savedOrder.id, {
+          poolGroupId: savedOrder.id,
+        });
+        savedOrder.poolGroupId = savedOrder.id;
+      }
+
       // إضافة الطلب إلى Redis للمطابقة الفورية
       await this.orderRedis.addOrder({
         orderId: savedOrder.id,
@@ -529,6 +587,7 @@ export class OrderService {
             otpCode: savedOrder.otpCode,
             receiverName: savedOrder.receiverName,
             isBidOrder: savedOrder.isBidOrder,
+            poolGroupId: savedOrder.poolGroupId,
             etaPickup,
             createdOn: savedOrder.createdOn,
           },
@@ -660,6 +719,153 @@ export class OrderService {
       perMin: zone ? Number(zone.per_minute) : Number(service.perMinuteDrive),
       zoneMultiplier: zone ? Number(zone.multiplier) : 1,
     };
+  }
+
+  /**
+   * Share Pooling — يبحث عن رحلة Share جارية يمكن ضمّ الطلب الجديد لها.
+   * المعايير: نفس المنطقة · سائق معيَّن · المجموعة بها < راكبين ·
+   * موقع السائق ضمن SHARE_MAX_DETOUR_KM من الالتقاط الجديد ·
+   * اتجاه المسار الجديد متوافق مع وجهة السائق (≤ SHARE_MAX_BEARING_DIFF).
+   * يُعيد أقرب تطابق أو null.
+   */
+  private async tryJoinSharePool(
+    regionId: number,
+    pickup: { lat: number; lng: number },
+    dropoff: { lat: number; lng: number },
+  ): Promise<{
+    driverId: number;
+    poolGroupId: number;
+    etaMinutes: number;
+  } | null> {
+    const rows = await this.dataSource.query<
+      Array<{ poolGroupId: number; driverId: number; points: unknown }>
+    >(
+      `SELECT o.pool_group_id AS "poolGroupId", o.driver_id AS "driverId", o.points
+       FROM hancr_order o
+       JOIN hancr_service s ON s.id = o.service_id
+       WHERE s.name_en = 'Share'
+         AND o.region_id = $1
+         AND o.driver_id IS NOT NULL
+         AND o.pool_group_id IS NOT NULL
+         AND o.status IN ('DriverAccepted','Arrived','Started')
+         AND (SELECT COUNT(*) FROM hancr_order x
+              WHERE x.pool_group_id = o.pool_group_id
+                AND x.status IN ('DriverAccepted','Arrived','Started','WaitingForPostPay')) < 2`,
+      [regionId],
+    );
+    if (!rows || rows.length === 0) return null;
+
+    const newBearing = this.bearing(pickup, dropoff);
+    let best: { driverId: number; poolGroupId: number; distKm: number } | null =
+      null;
+
+    for (const r of rows) {
+      const loc = await this.driverRedis.getDriverLocation(r.driverId);
+      if (!loc) continue;
+      const distKm = this.haversineKm(loc, pickup);
+      if (distKm > SHARE_MAX_DETOUR_KM) continue;
+
+      const pts = this.parseGeoPoints(r.points);
+      const candDropoff = pts.length > 0 ? pts[pts.length - 1] : null;
+      if (candDropoff) {
+        const driverBearing = this.bearing(loc, candDropoff);
+        if (
+          this.bearingDiff(driverBearing, newBearing) > SHARE_MAX_BEARING_DIFF
+        ) {
+          continue;
+        }
+      }
+      if (!best || distKm < best.distKm) {
+        best = { driverId: r.driverId, poolGroupId: r.poolGroupId, distKm };
+      }
+    }
+    if (!best) return null;
+    return {
+      driverId: best.driverId,
+      poolGroupId: best.poolGroupId,
+      etaMinutes: Math.max(1, Math.ceil(best.distKm * 1.5)),
+    };
+  }
+
+  private async joinSharePoolIfAvailable(
+    orderId: number,
+    join: { driverId: number; poolGroupId: number },
+    etaPickup: Date,
+  ): Promise<boolean> {
+    return this.dataSource.transaction(async (manager) => {
+      await manager.query('SELECT pg_advisory_xact_lock($1)', [
+        join.poolGroupId,
+      ]);
+      const rows = await manager.query<Array<{ count: number | string }>>(
+        `SELECT COUNT(*)::int AS "count"
+         FROM hancr_order
+         WHERE pool_group_id = $1
+           AND status IN ('DriverAccepted','Arrived','Started','WaitingForPostPay')`,
+        [join.poolGroupId],
+      );
+      if (Number(rows[0]?.count ?? 0) >= 2) return false;
+
+      await manager.update(OrderEntity, orderId, {
+        status: OrderStatus.DriverAccepted,
+        driverId: join.driverId,
+        poolGroupId: join.poolGroupId,
+        etaPickup,
+      });
+      await manager.save(
+        manager.create(RequestActivityEntity, {
+          orderId,
+          type: RequestActivityType.DriverAccepted,
+        }),
+      );
+      return true;
+    });
+  }
+
+  private parseGeoPoints(value: unknown): Array<{ lat: number; lng: number }> {
+    try {
+      const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter(
+        (p): p is { lat: number; lng: number } =>
+          typeof p?.lat === 'number' && typeof p?.lng === 'number',
+      );
+    } catch {
+      return [];
+    }
+  }
+
+  private haversineKm(
+    a: { lat: number; lng: number },
+    b: { lat: number; lng: number },
+  ): number {
+    const R = 6371;
+    const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+    const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+    const la1 = (a.lat * Math.PI) / 180;
+    const la2 = (b.lat * Math.PI) / 180;
+    const h =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+
+  private bearing(
+    a: { lat: number; lng: number },
+    b: { lat: number; lng: number },
+  ): number {
+    const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+    const la1 = (a.lat * Math.PI) / 180;
+    const la2 = (b.lat * Math.PI) / 180;
+    const y = Math.sin(dLng) * Math.cos(la2);
+    const x =
+      Math.cos(la1) * Math.sin(la2) -
+      Math.sin(la1) * Math.cos(la2) * Math.cos(dLng);
+    return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+  }
+
+  private bearingDiff(a: number, b: number): number {
+    const d = Math.abs(a - b) % 360;
+    return d > 180 ? 360 - d : d;
   }
 
   async previewRoute(
@@ -1144,6 +1350,7 @@ export class OrderService {
       receiverName: order.receiverName,
       isBidOrder: order.isBidOrder,
       bidId: order.bidId,
+      poolGroupId: order.poolGroupId,
       riderId: order.riderId,
       driverId: order.driverId,
       driverName: driver
@@ -1164,6 +1371,55 @@ export class OrderService {
       expectedTimestamp: order.expectedTimestamp,
       createdOn: order.createdOn,
       updatedAt: order.updatedAt,
+      shoppingList: order.shoppingList,
+      budget: order.budget != null ? Number(order.budget) : undefined,
+    };
+  }
+
+  private toDriverOrderPayload(
+    order: OrderEntity,
+    rider?: RiderEntity,
+  ): Record<string, unknown> {
+    return {
+      id: order.id,
+      type: order.type,
+      status: order.status,
+      driverId: order.driverId,
+      riderId: order.riderId,
+      riderName: rider
+        ? `${rider.firstName ?? ''} ${rider.lastName ?? ''}`.trim()
+        : undefined,
+      riderPhone: order.numberMasked ? undefined : rider?.phoneNumber,
+      riderRating: rider ? Number(rider.rating) : 5,
+      points: order.points ?? [],
+      addresses: order.addresses,
+      distanceBest: order.distanceBest,
+      durationBest: order.durationBest,
+      costBest: Number(order.costBest),
+      costAfterCoupon: Number(order.costAfterCoupon),
+      currency: order.currency,
+      paymentMode: order.paymentMode ?? PaymentMode.Cash,
+      quietRide: order.quietRide,
+      requestedTemperature: order.requestedTemperature,
+      audioOff: order.audioOff,
+      numberMasked: order.numberMasked,
+      familyMode: order.familyMode,
+      preferFemaleDriver: order.preferFemaleDriver,
+      preferredDriverId: order.preferredDriverId,
+      entitlementId: order.entitlementId,
+      companyId: order.companyId,
+      bookedHours: order.bookedHours,
+      nightShift: order.nightShift,
+      otpCode:
+        order.type === OrderType.ParcelDelivery ? undefined : order.otpCode,
+      receiverName: order.receiverName,
+      receiverPhone: order.numberMasked ? undefined : order.receiverPhone,
+      isBidOrder: order.isBidOrder,
+      poolGroupId: order.poolGroupId,
+      etaPickup: order.etaPickup,
+      startTimestamp: order.startTimestamp,
+      finishTimestamp: order.finishTimestamp,
+      createdOn: order.createdOn,
       shoppingList: order.shoppingList,
       budget: order.budget != null ? Number(order.budget) : undefined,
     };
@@ -1270,6 +1526,7 @@ export class OrderService {
           otpCode: order.otpCode,
           receiverName: order.receiverName,
           isBidOrder: order.isBidOrder,
+          poolGroupId: order.poolGroupId,
           etaPickup,
           createdOn: order.createdOn,
         },

@@ -21,6 +21,15 @@ export class OrderResolver {
     return this.orderService.getActiveOrder(driver.driverId);
   }
 
+  /** كل الطلبات النشطة (أكثر من واحد عند الرحلة المشتركة Share) */
+  @Query(() => [DriverOrderType], { description: 'الطلبات النشطة (Share pool)' })
+  @UseGuards(JwtAuthGuard)
+  driverActiveOrders(
+    @CurrentDriver() driver: AuthDriver,
+  ): Promise<DriverOrderType[]> {
+    return this.orderService.getActiveOrders(driver.driverId);
+  }
+
   /** سجل رحلات السائق المكتملة (الأحدث أولاً) */
   @Query(() => [DriverOrderType], { description: 'سجل رحلات السائق المكتملة' })
   @UseGuards(JwtAuthGuard)

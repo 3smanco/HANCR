@@ -77,6 +77,9 @@ export class OrderType {
   @Field(() => Int, { nullable: true })
   bidId?: number;
 
+  @Field(() => Int, { nullable: true })
+  poolGroupId?: number;
+
   /** بيانات السائق (مختصرة) */
   @Field(() => Int, { nullable: true })
   driverId?: number;

@@ -60,6 +60,8 @@ export class DriverOrderType {
   /** Bid */
   @Field() isBidOrder!: boolean;
 
+  @Field(() => Int, { nullable: true }) poolGroupId?: number;
+
   @Field({ nullable: true }) etaPickup?: Date;
   @Field({ nullable: true }) startTimestamp?: Date;
   @Field({ nullable: true }) finishTimestamp?: Date;

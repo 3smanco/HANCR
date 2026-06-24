@@ -242,6 +242,14 @@ export class OrderEntity {
   @Column({ nullable: true, name: 'bid_id' })
   bidId?: number;
 
+  /**
+   * ===== الرحلات المشتركة (Share Pooling) =====
+   * معرّف مجموعة التشارك — كل الطلبات في نفس الرحلة المشتركة تحمل نفس القيمة
+   * (= id أول طلب في المجموعة). null = ليست رحلة مشاركة / لم تُجمَّع بعد.
+   */
+  @Column({ type: 'int', nullable: true, name: 'pool_group_id' })
+  poolGroupId?: number;
+
   /** ===== سائق بالساعة ===== */
 
   /** عدد الساعات المحجوزة (HourlyChauffeur) */
