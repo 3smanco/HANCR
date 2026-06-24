@@ -86,12 +86,12 @@ module.exports = {
     {
       name: 'admin-panel',
       cwd: `${root}/apps/admin-panel`,
-      script: '/usr/bin/bash',
-      args: ['-c', 'npx next start -p 3003'],
-      interpreter: 'none',
+      script: `${root}/apps/admin-panel/.next/standalone/server.js`,
       env: {
         ...loadedEnv,
         NODE_ENV: nodeEnv,
+        HOSTNAME: process.env.ADMIN_PANEL_HOSTNAME || '0.0.0.0',
+        PORT: process.env.ADMIN_PANEL_PORT || '3003',
         NEXT_PUBLIC_ADMIN_API_URL:
           process.env.NEXT_PUBLIC_ADMIN_API_URL ||
           'http://127.0.0.1:3002/graphql',

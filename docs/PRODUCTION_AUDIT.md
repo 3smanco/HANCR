@@ -27,6 +27,10 @@ Last reviewed: 2026-06-25
   raw IP literals, even when the scheme is HTTPS.
 - Admin panel `next lint --max-warnings=0`, `tsc --noEmit`, and `next build`
   pass without warnings.
+- Admin panel production serving now uses the Next standalone server under PM2.
+  The admin-panel postbuild step copies `.next/static` and `public` assets into
+  the standalone output, removing the unsupported `next start` warning for
+  `output: 'standalone'`.
 - Production admin bootstrap now rejects missing/invalid default email values
   and weak or placeholder `ADMIN_DEFAULT_PASSWORD` values before creating the
   first super admin.
@@ -165,7 +169,8 @@ Notable packages to review first:
   events from internal testing builds.
 - Decide and configure uploads, payments, payouts, email, translation, and FX.
 - Re-authenticate GitHub with workflow scope and push `.github/workflows`.
-- Review PM2 restart history; current services are online, but restart counters
-  are high and should be understood before public launch.
-- Keep `npm run build:apis:prod` in the deploy path before every PM2 reload so
-  compiled API artifacts match the checked-out commit.
+- Review PM2 restart history; the admin-panel standalone warning has been fixed,
+  but existing restart counters should still be tracked before public launch.
+- Keep `npm run build:apis:prod` and the admin-panel production build in the
+  deploy path before every PM2 reload so compiled artifacts match the
+  checked-out commit.

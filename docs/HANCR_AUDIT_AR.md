@@ -32,6 +32,9 @@
   - lint بدون warnings.
   - فحص مفاتيح الترجمة.
   - منع إخفاء مشاكل hooks أو استخدام خيارات Apollo القديمة.
+- تشغيل لوحة الإدارة في الإنتاج أصبح عبر Next standalone server داخل PM2، مع
+  نسخ `.next/static` و`public` بعد البناء، وهذا يزيل تحذير `next start` مع
+  `output: 'standalone'`.
 - تقوية إنشاء أول مشرف إنتاجي:
   - رفض غياب `ADMIN_DEFAULT_EMAIL`.
   - رفض البريد غير الصالح.
@@ -92,7 +95,8 @@
 
 - production للـ APIs يعمل عبر ملفات `dist/apps/*/main.js` بعد build إنتاجي،
   ولم يعد يعتمد على `ts-node --transpile-only` لتشغيل خدمات PM2.
-- عدادات إعادة تشغيل PM2 مرتفعة ويجب تحليل سببها قبل الإطلاق العام.
+- تم إصلاح سبب ظاهر في لوحة الإدارة وهو تشغيل `next start` مع standalone، لكن
+  عدادات إعادة تشغيل PM2 المرتفعة يجب الاستمرار في مراقبتها قبل الإطلاق العام.
 - `npm audit --omit=dev` يظهر:
   - root: 31 vulnerability منها 1 critical و8 high.
   - admin-panel: 2 vulnerabilities منها 1 high.
@@ -148,8 +152,9 @@
 ### المرحلة 3: تقوية النشر
 
 - بناء APIs كـ compiled JS.
-- تشغيل PM2 على ملفات build لا ts-node. تم تنفيذ هذا للـ APIs، ويبقى ضبط
-  pipeline النشر لفرض build قبل reload.
+- تشغيل PM2 على ملفات build لا ts-node. تم تنفيذ هذا للـ APIs، وتم ضبط لوحة
+  الإدارة على Next standalone server؛ ويبقى ضبط pipeline النشر لفرض build قبل
+  reload.
 - إضافة rollback واضح لكل نشر.
 - مراقبة logs/restarts بعد كل deploy.
 
