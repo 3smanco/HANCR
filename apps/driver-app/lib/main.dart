@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'app.dart';
+import 'core/config/app_config.dart';
 import 'core/i18n/app_localization.dart';
 import 'core/services/push_service.dart';
 import 'core/theme/theme_controller.dart';
@@ -40,28 +42,50 @@ Future<void> main() async {
     );
   };
 
-  runZonedGuarded<Future<void>>(() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: Color(0xFF0A0807),
-      ),
-    );
-    await LocaleController.instance.load();
+  if (AppConfig.sentryDsn.isEmpty) {
+    await _bootstrap();
+    return;
+  }
 
-    // N5 — تطبيق الثيم الحي المخزَّن محلياً قبل أول إطار، ثم جلب أحدثه من الخادم.
-    await ThemeController.instance.bootstrap();
+  await SentryFlutter.init((options) {
+    options.dsn = AppConfig.sentryDsn;
+    options.environment = AppConfig.env;
+    options.release = AppConfig.sentryRelease;
+    options.tracesSampleRate = AppConfig.isProduction ? 0.1 : 1.0;
+  }, appRunner: _bootstrap);
+}
 
-    try {
-      await PushService.instance.initialize();
-    } catch (e) {
-      debugPrint('[main] PushService init skipped: $e');
-    }
-    runApp(const HancrCaptainApp());
-  }, (error, stack) {
-    debugPrint('[main] Uncaught zone error: $error\n$stack');
-  });
+Future<void> _bootstrap() async {
+  runZonedGuarded<Future<void>>(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          systemNavigationBarColor: Color(0xFF0A0807),
+        ),
+      );
+      await LocaleController.instance.load();
+
+      // N5 — تطبيق الثيم الحي المخزَّن محلياً قبل أول إطار، ثم جلب أحدثه من الخادم.
+      await ThemeController.instance.bootstrap();
+
+      try {
+        await PushService.instance.initialize();
+      } catch (e) {
+        debugPrint('[main] PushService init skipped: $e');
+      }
+      runApp(const HancrCaptainApp());
+    },
+    (error, stack) {
+      debugPrint('[main] Uncaught zone error: $error\n$stack');
+      if (AppConfig.sentryDsn.isNotEmpty) {
+        unawaited(Sentry.captureException(error, stackTrace: stack));
+      }
+    },
+  );
 }

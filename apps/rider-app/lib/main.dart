@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'app.dart';
+import 'core/config/app_config.dart';
 import 'core/i18n/app_localization.dart';
 import 'core/services/push_service.dart';
 import 'core/theme/theme_controller.dart';
@@ -42,6 +44,23 @@ Future<void> main() async {
     );
   };
 
+  if (AppConfig.sentryDsn.isEmpty) {
+    await _bootstrap();
+    return;
+  }
+
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = AppConfig.sentryDsn;
+      options.environment = AppConfig.env;
+      options.release = AppConfig.sentryRelease;
+      options.tracesSampleRate = AppConfig.isProduction ? 0.1 : 1.0;
+    },
+    appRunner: _bootstrap,
+  );
+}
+
+Future<void> _bootstrap() async {
   // runZonedGuarded يلتقط الأخطاء غير المتزامنة بحيث لا يموت التطبيق بصمت.
   runZonedGuarded<Future<void>>(() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -76,5 +95,8 @@ Future<void> main() async {
     runApp(const HancrRiderApp());
   }, (error, stack) {
     debugPrint('[main] Uncaught zone error: $error\n$stack');
+    if (AppConfig.sentryDsn.isNotEmpty) {
+      unawaited(Sentry.captureException(error, stackTrace: stack));
+    }
   });
 }
