@@ -43,25 +43,17 @@ const commonApiEnv = {
   NODE_ENV: nodeEnv,
   DATABASE_HOST: process.env.PM2_DATABASE_HOST || 'localhost',
   REDIS_HOST: process.env.PM2_REDIS_HOST || 'localhost',
-  TS_NODE_PROJECT: `${root}/tsconfig.base.json`,
   SENTRY_RELEASE: process.env.SENTRY_RELEASE || gitSha(),
 };
 
-const tsNode = `${root}/node_modules/.bin/ts-node`;
-const tsNodeArgs = (entry) => [
-  '--transpile-only',
-  '-r',
-  'tsconfig-paths/register',
-  entry,
-];
+const apiScript = (appName) => `${root}/dist/apps/${appName}/main.js`;
 
 module.exports = {
   apps: [
     {
       name: 'rider-api',
       cwd: root,
-      script: tsNode,
-      args: tsNodeArgs('apps/rider-api/src/main.ts'),
+      script: apiScript('rider-api'),
       env: {
         ...commonApiEnv,
         RIDER_API_PORT: '3000',
@@ -72,8 +64,7 @@ module.exports = {
     {
       name: 'driver-api',
       cwd: root,
-      script: tsNode,
-      args: tsNodeArgs('apps/driver-api/src/main.ts'),
+      script: apiScript('driver-api'),
       env: {
         ...commonApiEnv,
         DRIVER_API_PORT: '3001',
@@ -84,8 +75,7 @@ module.exports = {
     {
       name: 'admin-api',
       cwd: root,
-      script: tsNode,
-      args: tsNodeArgs('apps/admin-api/src/main.ts'),
+      script: apiScript('admin-api'),
       env: {
         ...commonApiEnv,
         ADMIN_API_PORT: '3002',
