@@ -868,6 +868,24 @@ export class OrderService {
     return d > 180 ? 360 - d : d;
   }
 
+  private async releaseDriverIfIdle(driverId: number): Promise<void> {
+    const busyStatuses = [
+      OrderStatus.DriverAccepted,
+      OrderStatus.Arrived,
+      OrderStatus.Started,
+    ];
+    const remaining = await this.orderRepo.count({
+      where: busyStatuses.map((status) => ({ driverId, status })),
+    });
+    if (remaining > 0) return;
+
+    await this.driverRepo.update(
+      { id: driverId, status: DriverStatus.Busy },
+      { status: DriverStatus.Online },
+    );
+    await this.driverRedis.setStatus(driverId, 'Online');
+  }
+
   async previewRoute(
     riderId: number,
     origin: { lat: number; lng: number },
@@ -980,10 +998,7 @@ export class OrderService {
     // تحرير السائق المُسنَد (كان يبقى Busy للأبد بعد الإلغاء) — يعيده للتوفّر.
     // ملاحظة: حالة Redis الفورية يملكها driver-api ويعيد ضبطها عند استقبال ORDER_UPDATED.
     if (order.driverId) {
-      await this.driverRepo.update(
-        { id: order.driverId, status: DriverStatus.Busy },
-        { status: DriverStatus.Online },
-      );
+      await this.releaseDriverIfIdle(order.driverId);
     }
 
     // إزالة من Redis
