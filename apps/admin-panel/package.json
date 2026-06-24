@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev -p 4000",
     "build": "next build",
+    "postbuild": "node scripts/copy-standalone-assets.mjs",
     "start": "next start -p 4000",
     "lint": "next lint --max-warnings=0",
     "type-check": "tsc --noEmit"

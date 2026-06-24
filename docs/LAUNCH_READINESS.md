@@ -34,6 +34,7 @@ These checks are expected to pass before deploy:
 ```bash
 npm run ci:verify
 npm run build:apis:prod
+(cd apps/admin-panel && npm run build)
 npm run readiness:template
 npm run secrets:check
 ```
@@ -105,4 +106,6 @@ admin-panel i18n key validation, admin-panel quality guard, admin-panel linting 
 `--max-warnings=0`, Flutter dependency resolution, and `flutter analyze --no-pub`
 for both mobile apps.
 API production bundles are also built by `npm run ci:verify`, and PM2 uses
-`dist/apps/*/main.js` instead of `ts-node` for the three API services.
+`dist/apps/*/main.js` instead of `ts-node` for the three API services. The
+admin panel uses Next standalone output under PM2, so the admin-panel production
+build must run before reload to copy `.next/static` into `.next/standalone`.
