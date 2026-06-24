@@ -6,14 +6,16 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const includeFixDryRun =
+  process.argv.includes('--fix-dry-run') || process.argv.includes('--check-fix');
 
 const targets = [
   { name: 'root APIs/workspace', cwd: root },
   { name: 'admin panel', cwd: path.join(root, 'apps', 'admin-panel') },
 ];
 
-function runAudit(target) {
-  const result = spawnSync(npmCommand, ['audit', '--omit=dev', '--json'], {
+function runNpmJson(target, args, label) {
+  const result = spawnSync(npmCommand, args, {
     cwd: target.cwd,
     encoding: 'utf8',
     shell: process.platform === 'win32',
@@ -22,14 +24,26 @@ function runAudit(target) {
   const output = result.stdout?.trim();
   if (!output) {
     const detail = result.error?.message ?? result.stderr ?? `exit ${result.status}`;
-    throw new Error(`npm audit produced no JSON for ${target.name}: ${detail}`);
+    throw new Error(`${label} produced no JSON for ${target.name}: ${detail}`);
   }
 
   try {
     return JSON.parse(output);
   } catch (error) {
-    throw new Error(`Could not parse npm audit JSON for ${target.name}: ${error.message}`);
+    throw new Error(`Could not parse ${label} JSON for ${target.name}: ${error.message}`);
   }
+}
+
+function runAudit(target) {
+  return runNpmJson(target, ['audit', '--omit=dev', '--json'], 'npm audit');
+}
+
+function runFixDryRun(target) {
+  return runNpmJson(
+    target,
+    ['audit', 'fix', '--omit=dev', '--package-lock-only', '--dry-run', '--json'],
+    'npm audit fix dry-run',
+  );
 }
 
 function severityLabel(metadata = {}) {
@@ -44,7 +58,7 @@ function severityLabel(metadata = {}) {
 }
 
 function fixKind(fixAvailable) {
-  if (fixAvailable === true) return 'non-breaking available';
+  if (fixAvailable === true) return 'advisory fixAvailable=true';
   if (!fixAvailable) return 'no npm fix';
   if (fixAvailable.isSemVerMajor) {
     return `breaking: ${fixAvailable.name}@${fixAvailable.version}`;
@@ -52,7 +66,14 @@ function fixKind(fixAvailable) {
   return `non-breaking: ${fixAvailable.name}@${fixAvailable.version}`;
 }
 
-function summarize(target, audit) {
+function summarizeDryRun(fixDryRun) {
+  const changed = fixDryRun.changed ?? 0;
+  const added = fixDryRun.added ?? 0;
+  const removed = fixDryRun.removed ?? 0;
+  return `changed ${changed}, added ${added}, removed ${removed}`;
+}
+
+function summarize(target, audit, fixDryRun = null) {
   const vulnerabilities = Object.values(audit.vulnerabilities ?? {});
   const direct = vulnerabilities
     .filter((item) => item.isDirect)
@@ -86,11 +107,24 @@ function summarize(target, audit) {
     console.log(`  ${items.length} x ${kind}`);
     console.log(`    ${names.join(', ')}`);
   }
+
+  if (fixDryRun) {
+    console.log(`Safe fix dry-run: ${summarizeDryRun(fixDryRun)}`);
+    const advisoryOnlyCount = fixGroups.get('advisory fixAvailable=true')?.length ?? 0;
+    if (advisoryOnlyCount > 0 && (fixDryRun.changed ?? 0) === 0) {
+      console.log(
+        'Note: advisory fixAvailable=true entries did not resolve to a safe npm audit fix change.',
+      );
+    }
+  }
 }
 
 console.log('HANCR production dependency audit summary');
 console.log('Runs: npm audit --omit=dev --json');
+if (includeFixDryRun) {
+  console.log('Also runs: npm audit fix --omit=dev --package-lock-only --dry-run --json');
+}
 
 for (const target of targets) {
-  summarize(target, runAudit(target));
+  summarize(target, runAudit(target), includeFixDryRun ? runFixDryRun(target) : null);
 }

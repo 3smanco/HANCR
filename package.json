@@ -30,6 +30,7 @@
     "secrets:check": "node tools/secret-hygiene-check.mjs",
     "logs:redaction:check": "node tools/check-log-redaction.mjs",
     "audit:prod:summary": "node tools/dependency-audit-summary.mjs",
+    "audit:prod:fix-dry-run": "node tools/dependency-audit-summary.mjs --fix-dry-run",
     "admin:i18n:check": "node tools/check-admin-i18n.mjs",
     "admin:quality:check": "node tools/check-admin-panel-quality.mjs",
     "verify": "powershell -ExecutionPolicy Bypass -File scripts/verify.ps1"
