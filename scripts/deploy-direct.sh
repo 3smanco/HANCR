@@ -22,6 +22,33 @@ step() {
   printf '\n==> %s\n' "$*"
 }
 
+wait_for_url() {
+  local label="$1"
+  local url="$2"
+  local method="${3:-GET}"
+  local attempts="${4:-30}"
+  local delay_seconds="${5:-2}"
+
+  for ((attempt = 1; attempt <= attempts; attempt += 1)); do
+    if [[ "$method" == "HEAD" ]]; then
+      if curl -fsSI "$url" >/dev/null 2>&1; then
+        echo "$label is ready"
+        return 0
+      fi
+    elif curl -fsS "$url" >/dev/null 2>&1; then
+      echo "$label is ready"
+      return 0
+    fi
+
+    if [[ "$attempt" -lt "$attempts" ]]; then
+      sleep "$delay_seconds"
+    fi
+  done
+
+  echo "$label did not become ready: $url" >&2
+  return 1
+}
+
 cd "$APP_ROOT"
 
 step "Repository"
@@ -99,9 +126,9 @@ pm2 save
 pm2 status --no-color
 
 step "Health checks"
-curl -fsS http://127.0.0.1:3000/health/ready >/dev/null
-curl -fsS http://127.0.0.1:3001/health/ready >/dev/null
-curl -fsS http://127.0.0.1:3002/health/ready >/dev/null
-curl -fsSI http://127.0.0.1:3003/login >/dev/null
+wait_for_url "rider-api" http://127.0.0.1:3000/health/ready
+wait_for_url "driver-api" http://127.0.0.1:3001/health/ready
+wait_for_url "admin-api" http://127.0.0.1:3002/health/ready
+wait_for_url "admin-panel" http://127.0.0.1:3003/login HEAD
 
 echo "Deploy complete."
