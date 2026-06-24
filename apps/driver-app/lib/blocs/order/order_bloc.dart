@@ -31,13 +31,28 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     try {
       final client = await GraphQLClientManager.get();
       final result = await client.query(
-        QueryOptions(document: gql(driverActiveOrderQuery)),
+        QueryOptions(document: gql(driverActiveOrdersQuery)),
       );
       if (!result.hasException) {
+        final data = result.data?['driverActiveOrders'] as List<dynamic>?;
+        final orders = _sortActiveOrders(
+          (data ?? [])
+              .map((e) => DriverOrderModel.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        );
+        if (orders.isNotEmpty) {
+          emit(OrderActive(orders.first, orders: orders));
+          return;
+        }
+      } else {
+        final fallback = await client.query(
+          QueryOptions(document: gql(driverActiveOrderQuery)),
+        );
         final data =
-            result.data?['driverActiveOrder'] as Map<String, dynamic>?;
-        if (data != null) {
-          emit(OrderActive(DriverOrderModel.fromJson(data)));
+            fallback.data?['driverActiveOrder'] as Map<String, dynamic>?;
+        if (!fallback.hasException && data != null) {
+          final order = DriverOrderModel.fromJson(data);
+          emit(OrderActive(order, orders: [order]));
           return;
         }
       }
@@ -64,8 +79,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       _newOrderSub = newOrderStream.listen((result) {
         final data = result.data?['newOrderAvailable'];
         if (data != null) {
-          final order =
-              DriverOrderModel.fromJson(data as Map<String, dynamic>);
+          final order = DriverOrderModel.fromJson(data as Map<String, dynamic>);
           add(NewOrderReceived(order));
         }
       });
@@ -77,8 +91,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       _orderUpdateSub = updateStream.listen((result) {
         final data = result.data?['driverOrderUpdated'];
         if (data != null) {
-          final order =
-              DriverOrderModel.fromJson(data as Map<String, dynamic>);
+          final order = DriverOrderModel.fromJson(data as Map<String, dynamic>);
           add(OrderUpdatedFromSubscription(order));
         }
       });
@@ -98,9 +111,21 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   ) {
     final order = event.order;
     if (order.status.isFinished) {
-      emit(OrderCompleted(order));
+      final remaining = _withoutOrder(state, order.id);
+      if (remaining.isNotEmpty) {
+        emit(
+          OrderActive(
+            remaining.first,
+            orders: remaining,
+            completedOrder: order,
+          ),
+        );
+      } else {
+        emit(OrderCompleted(order));
+      }
     } else if (order.status.isActive) {
-      emit(OrderActive(order));
+      final orders = _mergeActiveOrder(state, order);
+      emit(OrderActive(orders.first, orders: orders));
     }
   }
 
@@ -108,6 +133,9 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     OrderAcceptRequested event,
     Emitter<OrderState> emit,
   ) async {
+    final previous = state is OrderActive
+        ? (state as OrderActive).activeOrders
+        : const <DriverOrderModel>[];
     emit(const OrderLoading());
     try {
       final client = await GraphQLClientManager.get();
@@ -118,16 +146,19 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         ),
       );
       if (result.hasException) {
-        emit(OrderError(
-          result.exception?.graphqlErrors.firstOrNull?.message ??
-              'Accept failed',
-        ));
+        emit(
+          OrderError(
+            result.exception?.graphqlErrors.firstOrNull?.message ??
+                'Accept failed',
+          ),
+        );
         return;
       }
-      final data =
-          result.data?['acceptOrder'] as Map<String, dynamic>?;
+      final data = result.data?['acceptOrder'] as Map<String, dynamic>?;
       if (data != null) {
-        emit(OrderActive(DriverOrderModel.fromJson(data)));
+        final order = DriverOrderModel.fromJson(data);
+        final orders = _mergeOrderInto(previous, order);
+        emit(OrderActive(orders.first, orders: orders));
       }
     } catch (e) {
       emit(OrderError(e.toString()));
@@ -141,46 +172,42 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   Future<void> _onArrived(
     OrderArrivedAtPickupRequested event,
     Emitter<OrderState> emit,
-  ) async =>
-      _mutateAndUpdate(
-        emit,
-        mutation: arrivedAtPickupMutation,
-        key: 'arrivedAtPickup',
-        orderId: event.orderId,
-      );
+  ) async => _mutateAndUpdate(
+    emit,
+    mutation: arrivedAtPickupMutation,
+    key: 'arrivedAtPickup',
+    orderId: event.orderId,
+  );
 
   Future<void> _onStart(
     OrderStartRideRequested event,
     Emitter<OrderState> emit,
-  ) async =>
-      _mutateAndUpdate(
-        emit,
-        mutation: startRideMutation,
-        key: 'startRide',
-        orderId: event.orderId,
-      );
+  ) async => _mutateAndUpdate(
+    emit,
+    mutation: startRideMutation,
+    key: 'startRide',
+    orderId: event.orderId,
+  );
 
   Future<void> _onFinish(
     OrderFinishRideRequested event,
     Emitter<OrderState> emit,
-  ) async =>
-      _mutateAndUpdate(
-        emit,
-        mutation: finishRideMutation,
-        key: 'finishRide',
-        orderId: event.orderId,
-      );
+  ) async => _mutateAndUpdate(
+    emit,
+    mutation: finishRideMutation,
+    key: 'finishRide',
+    orderId: event.orderId,
+  );
 
   Future<void> _onCancel(
     OrderCancelRequested event,
     Emitter<OrderState> emit,
-  ) async =>
-      _mutateAndUpdate(
-        emit,
-        mutation: driverCancelOrderMutation,
-        key: 'driverCancelOrder',
-        orderId: event.orderId,
-      );
+  ) async => _mutateAndUpdate(
+    emit,
+    mutation: driverCancelOrderMutation,
+    key: 'driverCancelOrder',
+    orderId: event.orderId,
+  );
 
   Future<void> _mutateAndUpdate(
     Emitter<OrderState> emit, {
@@ -201,9 +228,21 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       if (data == null) return;
       final order = DriverOrderModel.fromJson(data);
       if (order.status.isFinished) {
-        emit(OrderCompleted(order));
+        final remaining = _withoutOrder(state, order.id);
+        if (remaining.isNotEmpty) {
+          emit(
+            OrderActive(
+              remaining.first,
+              orders: remaining,
+              completedOrder: order,
+            ),
+          );
+        } else {
+          emit(OrderCompleted(order));
+        }
       } else {
-        emit(OrderActive(order));
+        final orders = _mergeActiveOrder(state, order);
+        emit(OrderActive(orders.first, orders: orders));
       }
     } catch (_) {}
   }
@@ -232,6 +271,49 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     } catch (e) {
       return e.toString();
     }
+  }
+
+  static List<DriverOrderModel> _sortActiveOrders(
+    List<DriverOrderModel> orders,
+  ) {
+    final sorted = [...orders];
+    sorted.sort((a, b) {
+      final pool = (a.poolGroupId ?? a.id).compareTo(b.poolGroupId ?? b.id);
+      if (pool != 0) return pool;
+      return a.createdOn.compareTo(b.createdOn);
+    });
+    return sorted;
+  }
+
+  static List<DriverOrderModel> _mergeOrderInto(
+    List<DriverOrderModel> current,
+    DriverOrderModel order,
+  ) {
+    final next = [...current];
+    final idx = next.indexWhere((o) => o.id == order.id);
+    if (idx >= 0) {
+      next[idx] = order;
+    } else {
+      next.add(order);
+    }
+    return _sortActiveOrders(next);
+  }
+
+  static List<DriverOrderModel> _mergeActiveOrder(
+    OrderState state,
+    DriverOrderModel order,
+  ) {
+    final current = state is OrderActive
+        ? state.activeOrders
+        : const <DriverOrderModel>[];
+    return _mergeOrderInto(current, order);
+  }
+
+  static List<DriverOrderModel> _withoutOrder(OrderState state, int orderId) {
+    if (state is! OrderActive) return const [];
+    return _sortActiveOrders(
+      state.activeOrders.where((o) => o.id != orderId).toList(),
+    );
   }
 
   @override

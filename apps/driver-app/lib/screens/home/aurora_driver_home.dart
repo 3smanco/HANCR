@@ -49,13 +49,20 @@ class _AuroraDriverHomeState extends State<AuroraDriverHome> {
     return BlocProvider<SosBloc>(
       create: (_) => SosBloc()..add(const SosLoadRequested()),
       child: BlocListener<OrderBloc, OrderState>(
-        listenWhen: (prev, curr) => curr is OrderCompleted,
+        listenWhen: (prev, curr) =>
+            curr is OrderCompleted ||
+            (curr is OrderActive && curr.completedOrder != null),
         listener: (ctx, state) {
-          if (state is OrderCompleted && state.order.riderId != 0) {
+          final completed = state is OrderCompleted
+              ? state.order
+              : state is OrderActive
+              ? state.completedOrder
+              : null;
+          if (completed != null && completed.riderId != 0) {
             RateRiderSheet.show(
               ctx,
-              orderId: state.order.id,
-              riderName: state.order.riderName ?? tr('rider'),
+              orderId: completed.id,
+              riderName: completed.riderName ?? tr('rider'),
             );
           }
         },
@@ -80,15 +87,26 @@ class _AuroraDriverHomeState extends State<AuroraDriverHome> {
         top: false,
         child: Padding(
           padding: const EdgeInsets.symmetric(
-              horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
+            horizontal: AuroraSpacing.md,
+            vertical: AuroraSpacing.sm,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _navItem(0, Icons.map_outlined, Icons.map, tr('nav_map')),
-              _navItem(1, Icons.attach_money_outlined,
-                  Icons.attach_money, tr('nav_earnings')),
+              _navItem(
+                1,
+                Icons.attach_money_outlined,
+                Icons.attach_money,
+                tr('nav_earnings'),
+              ),
               _navItem(2, Icons.star_outline, Icons.star, tr('nav_stars')),
-              _navItem(3, Icons.person_outline, Icons.person, tr('nav_account')),
+              _navItem(
+                3,
+                Icons.person_outline,
+                Icons.person,
+                tr('nav_account'),
+              ),
             ],
           ),
         ),
@@ -102,7 +120,9 @@ class _AuroraDriverHomeState extends State<AuroraDriverHome> {
       onTap: () => setState(() => _tab = idx),
       child: Container(
         padding: const EdgeInsets.symmetric(
-            horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
+          horizontal: AuroraSpacing.md,
+          vertical: AuroraSpacing.sm,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -116,7 +136,9 @@ class _AuroraDriverHomeState extends State<AuroraDriverHome> {
             Text(
               label,
               style: AuroraText.caption.copyWith(
-                color: selected ? AuroraColors.ember : AuroraColors.textSecondary,
+                color: selected
+                    ? AuroraColors.ember
+                    : AuroraColors.textSecondary,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
@@ -183,11 +205,14 @@ class _MapTab extends StatelessWidget {
             builder: (ctx, state) {
               if (state is OrderActive) return const SizedBox.shrink();
               return GestureDetector(
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => const DriverBidsScreen())),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const DriverBidsScreen()),
+                ),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: AuroraSpacing.md, vertical: 8),
+                    horizontal: AuroraSpacing.md,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: AuroraColors.ash,
                     borderRadius: BorderRadius.circular(AuroraRadius.pill),
@@ -197,14 +222,16 @@ class _MapTab extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.gavel,
-                          color: AuroraColors.ember, size: 16),
+                      Icon(Icons.gavel, color: AuroraColors.ember, size: 16),
                       const SizedBox(width: 6),
-                      Text(tr('bids'),
-                          style: TextStyle(
-                              color: AuroraColors.pearl,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13)),
+                      Text(
+                        tr('bids'),
+                        style: TextStyle(
+                          color: AuroraColors.pearl,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -234,7 +261,7 @@ class _MapTab extends StatelessWidget {
           child: BlocBuilder<OrderBloc, OrderState>(
             builder: (ctx, state) {
               if (state is OrderActive) {
-                return _ActiveRideCard(order: state.order);
+                return _ActiveRideDeck(orders: state.activeOrders);
               }
               return const SizedBox.shrink();
             },
@@ -256,8 +283,7 @@ class _DriverTopBar extends StatelessWidget {
       children: [
         // Avatar pill
         Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 6, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
           decoration: BoxDecoration(
             color: AuroraColors.ash.withValues(alpha: 0.95),
             borderRadius: BorderRadius.circular(AuroraRadius.pill),
@@ -280,8 +306,7 @@ class _DriverTopBar extends StatelessWidget {
                   gradient: AuroraColors.emberGradient,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.person,
-                    color: AuroraColors.pearl, size: 18),
+                child: Icon(Icons.person, color: AuroraColors.pearl, size: 18),
               ),
               const SizedBox(width: AuroraSpacing.sm),
               BlocBuilder<LocationBloc, LocationState>(
@@ -334,8 +359,9 @@ class _DriverTopBar extends StatelessWidget {
             final lng = state is LocationTracking ? state.lng : 0.0;
             return BlocBuilder<OrderBloc, OrderState>(
               builder: (ctx2, orderState) {
-                final orderId =
-                    orderState is OrderActive ? orderState.order.id : null;
+                final orderId = orderState is OrderActive
+                    ? orderState.order.id
+                    : null;
                 return AuroraDriverSosButton(
                   latitude: lat,
                   longitude: lng,
@@ -449,23 +475,29 @@ class _OnlineToggleState extends State<_OnlineToggle>
       if (online) {
         locBloc.add(const LocationStopTracking());
         await client.mutate(MutationOptions(document: gql(goOfflineMutation)));
-        messenger.showSnackBar(SnackBar(
-          content: Text(tr('youOffline'), style: AuroraText.bodyMedium),
-          backgroundColor: AuroraColors.smoke,
-        ));
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(tr('youOffline'), style: AuroraText.bodyMedium),
+            backgroundColor: AuroraColors.smoke,
+          ),
+        );
       } else {
         await client.mutate(MutationOptions(document: gql(goOnlineMutation)));
         locBloc.add(const LocationStartTracking());
-        messenger.showSnackBar(SnackBar(
-          content: Text(tr('youOnline'), style: AuroraText.bodyMedium),
-          backgroundColor: AuroraColors.success,
-        ));
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(tr('youOnline'), style: AuroraText.bodyMedium),
+            backgroundColor: AuroraColors.success,
+          ),
+        );
       }
     } catch (e) {
-      messenger.showSnackBar(SnackBar(
-        content: Text('خطأ: $e'),
-        backgroundColor: AuroraColors.danger,
-      ));
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('خطأ: $e'),
+          backgroundColor: AuroraColors.danger,
+        ),
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -473,9 +505,96 @@ class _OnlineToggleState extends State<_OnlineToggle>
 }
 
 /// Active ride card (في الـ map)
+class _ActiveRideDeck extends StatefulWidget {
+  final List<DriverOrderModel> orders;
+  const _ActiveRideDeck({required this.orders});
+
+  @override
+  State<_ActiveRideDeck> createState() => _ActiveRideDeckState();
+}
+
+class _ActiveRideDeckState extends State<_ActiveRideDeck> {
+  int _index = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final orders = widget.orders;
+    if (orders.isEmpty) return const SizedBox.shrink();
+    if (_index >= orders.length) _index = orders.length - 1;
+    if (orders.length == 1) {
+      return _ActiveRideCard(order: orders.first);
+    }
+
+    final selected = orders[_index];
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 42,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: AuroraSpacing.lg),
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (ctx, i) {
+              final order = orders[i];
+              final active = i == _index;
+              return GestureDetector(
+                onTap: () => setState(() => _index = i),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AuroraSpacing.md,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: active ? AuroraColors.ember : AuroraColors.coal,
+                    borderRadius: BorderRadius.circular(AuroraRadius.pill),
+                    border: Border.all(
+                      color: active ? AuroraColors.ember : AuroraColors.border,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.group,
+                        size: 16,
+                        color: active ? AuroraColors.pearl : AuroraColors.ember,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        order.riderName?.isNotEmpty == true
+                            ? order.riderName!
+                            : '#${order.id}',
+                        style: AuroraText.bodySmall.copyWith(
+                          color: AuroraColors.pearl,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            separatorBuilder: (context, index) =>
+                const SizedBox(width: AuroraSpacing.sm),
+            itemCount: orders.length,
+          ),
+        ),
+        const SizedBox(height: AuroraSpacing.sm),
+        _ActiveRideCard(
+          order: selected,
+          poolIndex: _index + 1,
+          poolCount: orders.length,
+        ),
+      ],
+    );
+  }
+}
+
 class _ActiveRideCard extends StatefulWidget {
   final DriverOrderModel order;
-  const _ActiveRideCard({required this.order});
+  final int? poolIndex;
+  final int? poolCount;
+  const _ActiveRideCard({required this.order, this.poolIndex, this.poolCount});
 
   @override
   State<_ActiveRideCard> createState() => _ActiveRideCardState();
@@ -485,9 +604,10 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
   bool _busy = false;
 
   DriverOrderModel get order => widget.order;
+  bool get _hasPoolSiblings =>
+      widget.poolCount != null && widget.poolCount! > 1;
   bool get _isDelivery =>
-      order.type == 'ParcelDelivery' ||
-      (order.receiverPhone ?? '').isNotEmpty;
+      order.type == 'ParcelDelivery' || (order.receiverPhone ?? '').isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -514,9 +634,10 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                    _isDelivery ? Icons.local_shipping : Icons.local_taxi,
-                    color: AuroraColors.ember,
-                    size: 22),
+                  _isDelivery ? Icons.local_shipping : Icons.local_taxi,
+                  color: AuroraColors.ember,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: AuroraSpacing.md),
               Expanded(
@@ -524,7 +645,11 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _isDelivery ? tr('parcelDelivery') : tr('activeRide'),
+                      _isDelivery
+                          ? tr('parcelDelivery')
+                          : _hasPoolSiblings
+                          ? '${tr('activeRide')} ${widget.poolIndex}/${widget.poolCount}'
+                          : tr('activeRide'),
                       style: AuroraText.titleSmall,
                     ),
                     Text(
@@ -538,8 +663,10 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.chat_bubble_outline,
-                    color: AuroraColors.ember),
+                icon: Icon(
+                  Icons.chat_bubble_outline,
+                  color: AuroraColors.ember,
+                ),
                 tooltip: tr('chatWithRider'),
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(
@@ -559,8 +686,11 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
             const SizedBox(height: AuroraSpacing.md),
             Row(
               children: [
-                const Icon(Icons.person_pin_circle,
-                    size: 18, color: AuroraColors.textSecondary),
+                const Icon(
+                  Icons.person_pin_circle,
+                  size: 18,
+                  color: AuroraColors.textSecondary,
+                ),
                 const SizedBox(width: AuroraSpacing.sm),
                 Expanded(
                   child: Text(
@@ -577,13 +707,14 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
           const SizedBox(height: AuroraSpacing.sm),
           Row(
             children: [
-              Icon(Icons.location_on,
-                  size: 18, color: AuroraColors.ember),
+              Icon(Icons.location_on, size: 18, color: AuroraColors.ember),
               const SizedBox(width: AuroraSpacing.sm),
               Expanded(
-                child: Text(order.destinationAddress,
-                    style: AuroraText.bodySmall,
-                    overflow: TextOverflow.ellipsis),
+                child: Text(
+                  order.destinationAddress,
+                  style: AuroraText.bodySmall,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
@@ -605,7 +736,9 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
                   icon: Icons.navigation,
                   label: tr('navigate'),
                   onTap: () {
-                    final p = order.points.isNotEmpty ? order.points.first : null;
+                    final p = order.points.isNotEmpty
+                        ? order.points.first
+                        : null;
                     if (p != null) openExternalNav(context, p.lat, p.lng);
                   },
                 ),
@@ -622,11 +755,13 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
             TextButton(
               onPressed: _busy
                   ? null
-                  : () => context
-                      .read<OrderBloc>()
-                      .add(OrderCancelRequested(order.id)),
-              child: Text(tr('cancelRide'),
-                  style: TextStyle(color: AuroraColors.danger)),
+                  : () => context.read<OrderBloc>().add(
+                      OrderCancelRequested(order.id),
+                    ),
+              child: Text(
+                tr('cancelRide'),
+                style: TextStyle(color: AuroraColors.danger),
+              ),
             ),
           ],
         ],
@@ -640,17 +775,16 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
         return AuroraButton.primary(
           label: tr('arrivedPickup'),
           icon: Icons.my_location,
-          onPressed: () => context
-              .read<OrderBloc>()
-              .add(OrderArrivedAtPickupRequested(order.id)),
+          onPressed: () => context.read<OrderBloc>().add(
+            OrderArrivedAtPickupRequested(order.id),
+          ),
         );
       case OrderStatus.arrived:
         return AuroraButton.primary(
           label: tr('startRide'),
           icon: Icons.play_arrow,
-          onPressed: () => context
-              .read<OrderBloc>()
-              .add(OrderStartRideRequested(order.id)),
+          onPressed: () =>
+              context.read<OrderBloc>().add(OrderStartRideRequested(order.id)),
         );
       case OrderStatus.started:
         return AuroraButton.primary(
@@ -660,10 +794,10 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
           onPressed: _busy
               ? null
               : (_isDelivery
-                  ? _openOtpDialog
-                  : () => context
-                      .read<OrderBloc>()
-                      .add(OrderFinishRideRequested(order.id))),
+                    ? _openOtpDialog
+                    : () => context.read<OrderBloc>().add(
+                        OrderFinishRideRequested(order.id),
+                      )),
         );
       default:
         return const SizedBox.shrink();
@@ -689,8 +823,10 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
           children: [
             Icon(icon, size: 16, color: AuroraColors.ember),
             const SizedBox(width: 6),
-            Text(label,
-                style: AuroraText.bodySmall.copyWith(color: AuroraColors.pearl)),
+            Text(
+              label,
+              style: AuroraText.bodySmall.copyWith(color: AuroraColors.pearl),
+            ),
           ],
         ),
       ),
@@ -703,22 +839,26 @@ class _ActiveRideCardState extends State<_ActiveRideCard> {
       context: context,
       builder: (dctx) => AlertDialog(
         backgroundColor: AuroraColors.coal,
-        title: Text(tr('confirmDelivery'),
-            style: AuroraText.titleSmall),
+        title: Text(tr('confirmDelivery'), style: AuroraText.titleSmall),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(tr('askReceiverCode'),
-                style: AuroraText.bodySmall
-                    .copyWith(color: AuroraColors.textSecondary)),
+            Text(
+              tr('askReceiverCode'),
+              style: AuroraText.bodySmall.copyWith(
+                color: AuroraColors.textSecondary,
+              ),
+            ),
             const SizedBox(height: AuroraSpacing.md),
             TextField(
               controller: ctrl,
               keyboardType: TextInputType.number,
               maxLength: 4,
               textAlign: TextAlign.center,
-              style: AuroraText.titleMedium
-                  .copyWith(color: AuroraColors.ember, letterSpacing: 8),
+              style: AuroraText.titleMedium.copyWith(
+                color: AuroraColors.ember,
+                letterSpacing: 8,
+              ),
               decoration: const InputDecoration(
                 counterText: '',
                 hintText: '••••',
@@ -769,8 +909,10 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(horizontal: AuroraSpacing.sm, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AuroraSpacing.sm,
+        vertical: 4,
+      ),
       decoration: BoxDecoration(
         color: AuroraColors.ember.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AuroraRadius.sm),

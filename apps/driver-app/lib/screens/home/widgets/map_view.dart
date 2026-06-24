@@ -31,26 +31,42 @@ class _MapViewState extends State<MapView> {
           final markers = <Marker>{};
 
           if (orderState is OrderActive) {
-            final order = orderState.order;
-            if (order.points.isNotEmpty) {
-              markers.add(Marker(
-                markerId: const MarkerId('pickup'),
-                position: LatLng(
-                    order.points.first.lat, order.points.first.lng),
-                icon: BitmapDescriptor.defaultMarkerWithHue(
-                    BitmapDescriptor.hueGreen),
-                infoWindow: const InfoWindow(title: 'Pickup'),
-              ));
-            }
-            if (order.points.length > 1) {
-              markers.add(Marker(
-                markerId: const MarkerId('destination'),
-                position:
-                    LatLng(order.points.last.lat, order.points.last.lng),
-                icon: BitmapDescriptor.defaultMarkerWithHue(
-                    BitmapDescriptor.hueOrange),
-                infoWindow: const InfoWindow(title: 'Destination'),
-              ));
+            for (final order in orderState.activeOrders) {
+              if (order.points.isEmpty) continue;
+              markers.add(
+                Marker(
+                  markerId: MarkerId('pickup-${order.id}'),
+                  position: LatLng(
+                    order.points.first.lat,
+                    order.points.first.lng,
+                  ),
+                  icon: BitmapDescriptor.defaultMarkerWithHue(
+                    BitmapDescriptor.hueGreen,
+                  ),
+                  infoWindow: InfoWindow(
+                    title: order.riderName ?? 'Pickup',
+                    snippet: 'Pickup',
+                  ),
+                ),
+              );
+              if (order.points.length > 1) {
+                markers.add(
+                  Marker(
+                    markerId: MarkerId('destination-${order.id}'),
+                    position: LatLng(
+                      order.points.last.lat,
+                      order.points.last.lng,
+                    ),
+                    icon: BitmapDescriptor.defaultMarkerWithHue(
+                      BitmapDescriptor.hueOrange,
+                    ),
+                    infoWindow: InfoWindow(
+                      title: order.riderName ?? 'Destination',
+                      snippet: 'Destination',
+                    ),
+                  ),
+                );
+              }
             }
           }
 

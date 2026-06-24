@@ -23,6 +23,7 @@ const String _orderFragment = r'''
     receiverName
     receiverPhone
     isBidOrder
+    poolGroupId
     etaPickup
     startTimestamp
     finishTimestamp
@@ -39,7 +40,8 @@ const String _orderFragment = r'''
   }
 ''';
 
-const String driverActiveOrderQuery = '''
+const String driverActiveOrderQuery =
+    '''
   $_orderFragment
   query DriverActiveOrder {
     driverActiveOrder {
@@ -48,7 +50,18 @@ const String driverActiveOrderQuery = '''
   }
 ''';
 
-const String completedOrdersQuery = '''
+const String driverActiveOrdersQuery =
+    '''
+  $_orderFragment
+  query DriverActiveOrders {
+    driverActiveOrders {
+      ...OrderFields
+    }
+  }
+''';
+
+const String completedOrdersQuery =
+    '''
   $_orderFragment
   query CompletedOrders(\$limit: Int, \$offset: Int) {
     completedOrders(limit: \$limit, offset: \$offset) {
@@ -63,7 +76,8 @@ const String rateRiderMutation = r'''
   }
 ''';
 
-const String acceptOrderMutation = '''
+const String acceptOrderMutation =
+    '''
   $_orderFragment
   mutation AcceptOrder(\$orderId: Int!) {
     acceptOrder(orderId: \$orderId) {
@@ -72,7 +86,8 @@ const String acceptOrderMutation = '''
   }
 ''';
 
-const String arrivedAtPickupMutation = '''
+const String arrivedAtPickupMutation =
+    '''
   $_orderFragment
   mutation ArrivedAtPickup(\$orderId: Int!) {
     arrivedAtPickup(orderId: \$orderId) {
@@ -81,7 +96,8 @@ const String arrivedAtPickupMutation = '''
   }
 ''';
 
-const String startRideMutation = '''
+const String startRideMutation =
+    '''
   $_orderFragment
   mutation StartRide(\$orderId: Int!) {
     startRide(orderId: \$orderId) {
@@ -90,7 +106,8 @@ const String startRideMutation = '''
   }
 ''';
 
-const String finishRideMutation = '''
+const String finishRideMutation =
+    '''
   $_orderFragment
   mutation FinishRide(\$orderId: Int!) {
     finishRide(orderId: \$orderId) {
@@ -99,7 +116,8 @@ const String finishRideMutation = '''
   }
 ''';
 
-const String driverCancelOrderMutation = '''
+const String driverCancelOrderMutation =
+    '''
   $_orderFragment
   mutation DriverCancelOrder(\$orderId: Int!) {
     driverCancelOrder(orderId: \$orderId) {
@@ -157,7 +175,8 @@ const String orderMessagesReadSubscription = r'''
   }
 ''';
 
-const String confirmDeliveryMutation = '''
+const String confirmDeliveryMutation =
+    '''
   $_orderFragment
   mutation ConfirmDelivery(\$orderId: Int!, \$otp: String!) {
     confirmDelivery(orderId: \$orderId, otp: \$otp) {
@@ -166,7 +185,8 @@ const String confirmDeliveryMutation = '''
   }
 ''';
 
-const String newOrderAvailableSubscription = '''
+const String newOrderAvailableSubscription =
+    '''
   $_orderFragment
   subscription NewOrderAvailable {
     newOrderAvailable {
@@ -175,7 +195,8 @@ const String newOrderAvailableSubscription = '''
   }
 ''';
 
-const String driverOrderUpdatedSubscription = '''
+const String driverOrderUpdatedSubscription =
+    '''
   $_orderFragment
   subscription DriverOrderUpdated {
     driverOrderUpdated {

@@ -28,9 +28,12 @@ class OrderIncoming extends OrderState {
 /// Driver accepted and is navigating to rider
 class OrderActive extends OrderState {
   final DriverOrderModel order;
-  const OrderActive(this.order);
+  final List<DriverOrderModel> orders;
+  final DriverOrderModel? completedOrder;
+  const OrderActive(this.order, {this.orders = const [], this.completedOrder});
+  List<DriverOrderModel> get activeOrders => orders.isEmpty ? [order] : orders;
   @override
-  List<Object?> get props => [order];
+  List<Object?> get props => [order, orders, completedOrder];
 }
 
 /// Ride is finished / canceled — show summary briefly
