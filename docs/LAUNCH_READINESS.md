@@ -24,6 +24,8 @@ For the current production audit summary, see `docs/PRODUCTION_AUDIT.md`.
 - Auth, SMS, and email logs mask phone numbers and email addresses before they
   leave the service. Disabled SMS/email dev logs do not print raw OTP bodies or
   OTP-bearing email subjects, and auth debug logs do not print OTP codes.
+- Strict readiness rejects raw IP literals in public URLs and CORS origins, even
+  when they use HTTPS. Production launch requires real DNS names.
 
 ## Green Checks
 
@@ -100,6 +102,7 @@ The workflow should run the same gates as `npm run ci:verify`.
 
 `npm run ci:verify` also runs the secret hygiene check, log redaction check,
 admin-panel i18n key validation, admin-panel quality guard, admin-panel linting with
-`--max-warnings=0`, and `flutter analyze --no-pub` for both mobile apps.
+`--max-warnings=0`, Flutter dependency resolution, and `flutter analyze --no-pub`
+for both mobile apps.
 API production bundles are also built by `npm run ci:verify`, and PM2 uses
 `dist/apps/*/main.js` instead of `ts-node` for the three API services.

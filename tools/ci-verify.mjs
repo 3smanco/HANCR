@@ -17,6 +17,8 @@ const steps = [
   ['Type-check admin-panel', 'npm', ['run', 'type-check'], 'apps/admin-panel'],
   ['Lint admin-panel', 'npm', ['run', 'lint'], 'apps/admin-panel'],
   ['Build admin-panel', 'npm', ['run', 'build'], 'apps/admin-panel'],
+  ['Get rider-app Flutter dependencies', 'flutter', ['pub', 'get'], 'apps/rider-app'],
+  ['Get driver-app Flutter dependencies', 'flutter', ['pub', 'get'], 'apps/driver-app'],
   ['Analyze rider-app', 'flutter', ['analyze', '--no-pub'], 'apps/rider-app'],
   ['Analyze driver-app', 'flutter', ['analyze', '--no-pub'], 'apps/driver-app'],
   ['Test rider-api', 'npx', ['nx', 'test', 'rider-api', '--skip-nx-cache', '--runInBand']],

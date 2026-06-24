@@ -1,6 +1,6 @@
 # HANCR Production Audit
 
-Last reviewed: 2026-06-23
+Last reviewed: 2026-06-25
 
 ## Verified Cleanups
 
@@ -17,6 +17,14 @@ Last reviewed: 2026-06-23
 - `npm run admin:quality:check` passes and rejects hidden hook disables or
   Apollo Client deprecated hook options.
 - `npm run ci:verify` passes locally on the `main` worktree.
+- `npm run ci:verify` now fetches Flutter dependencies for rider and driver
+  apps before running `flutter analyze --no-pub`, so the gate no longer
+  depends on a stale local `.dart_tool` state.
+- Driver order-service tests cover the share-pool busy-driver behavior: a
+  driver is not released to `Online` while another accepted/arrived/started
+  order remains active.
+- Strict production readiness now rejects public URL and CORS origins that use
+  raw IP literals, even when the scheme is HTTPS.
 - Admin panel `next lint --max-warnings=0`, `tsc --noEmit`, and `next build`
   pass without warnings.
 - Production admin bootstrap now rejects missing/invalid default email values
@@ -81,6 +89,10 @@ The 8 failures are production launch gaps:
 - `SENTRY_DSN_DRIVER_API`
 - `SENTRY_DSN_ADMIN_API`
 
+Raw server-IP origins are intentionally treated as launch blockers. The
+readiness check also rejects HTTPS IP literals; production should use real DNS
+names with TLS.
+
 API Sentry wiring is present in all three API entrypoints; these failures are
 missing production DSNs, not missing code initialization.
 
@@ -108,10 +120,14 @@ reviewed:
 - Log redaction validation must pass and rejects raw phone/email/body/subject/OTP
   interpolation in sensitive auth/SMS/email logging paths.
 - Flutter analyzers must pass for rider and driver apps.
+- Flutter dependency resolution for both mobile apps is part of `ci:verify`
+  before analysis.
 - Admin bootstrap credential validation is covered by an admin-api unit test.
 - Live tracking subscription authorization is covered by rider-api and
   driver-api unit tests, and the driver subscription guard is part of
   `npm run ci:verify`.
+- Share-pool driver release behavior is covered by driver-api order-service
+  tests.
 
 A clean GitHub workflow is prepared locally in commit `752ada4` as
 `.github/workflows/ci.yml`, but GitHub rejected both `git push` and the Contents

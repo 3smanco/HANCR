@@ -81,6 +81,7 @@ describe('OrderService', () => {
           useValue: {
             findOne: jest.fn(),
             update: jest.fn(),
+            count: jest.fn(),
           },
         },
         {
@@ -175,6 +176,7 @@ describe('OrderService', () => {
       if (w.id) return makeOrder({ id: w.id });
       return null;
     });
+    orderRepo.count.mockResolvedValue(0);
   });
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -472,10 +474,26 @@ describe('OrderService', () => {
         makeOrder({ status: OrderStatus.Started }),
       );
       await service.finishRide(7, 1);
-      expect(driverRepo.update).toHaveBeenCalledWith(7, {
-        status: DriverStatus.Online,
-      });
+      expect(driverRepo.update).toHaveBeenCalledWith(
+        { id: 7, status: DriverStatus.Busy },
+        { status: DriverStatus.Online },
+      );
       expect(driverRedis.setStatus).toHaveBeenCalledWith(7, 'Online');
+    });
+
+    it('لا يعيد السائق Online إذا بقي له طلب نشط آخر', async () => {
+      orderRepo.findOne.mockResolvedValue(
+        makeOrder({ status: OrderStatus.Started }),
+      );
+      orderRepo.count.mockResolvedValue(1);
+
+      await service.finishRide(7, 1);
+
+      expect(driverRepo.update).not.toHaveBeenCalledWith(
+        { id: 7, status: DriverStatus.Busy },
+        { status: DriverStatus.Online },
+      );
+      expect(driverRedis.setStatus).not.toHaveBeenCalledWith(7, 'Online');
     });
 
     it('يرفض لو الحالة ليست Started', async () => {
@@ -513,9 +531,10 @@ describe('OrderService', () => {
         1,
         expect.objectContaining({ status: OrderStatus.DriverCanceled }),
       );
-      expect(driverRepo.update).toHaveBeenCalledWith(7, {
-        status: DriverStatus.Online,
-      });
+      expect(driverRepo.update).toHaveBeenCalledWith(
+        { id: 7, status: DriverStatus.Busy },
+        { status: DriverStatus.Online },
+      );
     });
 
     it('يلغي order في حالة Arrived', async () => {
