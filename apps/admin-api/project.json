@@ -14,6 +14,7 @@
         "outputPath": "dist/apps/admin-api",
         "main": "apps/admin-api/src/main.ts",
         "tsConfig": "apps/admin-api/tsconfig.app.json",
+        "webpackConfig": "apps/admin-api/webpack.config.js",
         "assets": []
       },
       "configurations": {

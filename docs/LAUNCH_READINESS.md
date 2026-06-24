@@ -31,6 +31,7 @@ These checks are expected to pass before deploy:
 
 ```bash
 npm run ci:verify
+npm run build:apis:prod
 npm run readiness:template
 npm run secrets:check
 ```
@@ -100,3 +101,5 @@ The workflow should run the same gates as `npm run ci:verify`.
 `npm run ci:verify` also runs the secret hygiene check, log redaction check,
 admin-panel i18n key validation, admin-panel quality guard, admin-panel linting with
 `--max-warnings=0`, and `flutter analyze --no-pub` for both mobile apps.
+API production bundles are also built by `npm run ci:verify`, and PM2 uses
+`dist/apps/*/main.js` instead of `ts-node` for the three API services.

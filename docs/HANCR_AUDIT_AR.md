@@ -84,8 +84,8 @@
 
 ### مخاطر تقنية
 
-- production يعمل حاليا عبر `ts-node --transpile-only`، وهذا مناسب مؤقتا لكنه
-  ليس نموذج نشر صلب على المدى الطويل. الأفضل الانتقال إلى compiled artifacts.
+- production للـ APIs يعمل عبر ملفات `dist/apps/*/main.js` بعد build إنتاجي،
+  ولم يعد يعتمد على `ts-node --transpile-only` لتشغيل خدمات PM2.
 - عدادات إعادة تشغيل PM2 مرتفعة ويجب تحليل سببها قبل الإطلاق العام.
 - `npm audit --omit=dev` يظهر:
   - root: 31 vulnerability منها 1 critical و8 high.
@@ -106,7 +106,7 @@
 5. تفعيل SMTP أو مزود بريد transactional.
 6. تجهيز GCS buckets وservice account للوثائق والرفع.
 7. إعادة تفعيل GitHub workflows بعد تسجيل GitHub token بصلاحية `workflow`.
-8. نقل النشر من `ts-node` إلى build artifacts.
+8. إبقاء `npm run build:apis:prod` خطوة إلزامية قبل كل PM2 reload.
 9. عمل pass مستقل لترقية الاعتماديات ذات الثغرات.
 10. اختبار رحلة كاملة: تسجيل، طلب، قبول سائق، تتبع مباشر، دفع، إنهاء، مراجعة.
 
@@ -142,7 +142,8 @@
 ### المرحلة 3: تقوية النشر
 
 - بناء APIs كـ compiled JS.
-- تشغيل PM2 على ملفات build لا ts-node.
+- تشغيل PM2 على ملفات build لا ts-node. تم تنفيذ هذا للـ APIs، ويبقى ضبط
+  pipeline النشر لفرض build قبل reload.
 - إضافة rollback واضح لكل نشر.
 - مراقبة logs/restarts بعد كل deploy.
 

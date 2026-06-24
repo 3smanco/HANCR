@@ -18,6 +18,7 @@ closed before broad public traffic.
 For the current PM2-based server, use the tracked process file:
 
 ```bash
+npm run build:apis:prod
 pm2 startOrReload ecosystem.config.js --update-env
 pm2 save
 pm2 status

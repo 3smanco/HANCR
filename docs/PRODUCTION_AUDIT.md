@@ -43,6 +43,9 @@ Last reviewed: 2026-06-23
 - Rider and driver Flutter apps now include `sentry_flutter` and initialize it
   when release builds provide `--dart-define=SENTRY_DSN=...`, with environment
   and release tags sourced from `AppConfig`.
+- API production builds now have explicit webpack configs, are included in
+  `npm run ci:verify`, and PM2 runs the generated `dist/apps/*/main.js`
+  bundles instead of `ts-node --transpile-only`.
 
 ## Runtime Health
 
@@ -148,5 +151,5 @@ Notable packages to review first:
 - Re-authenticate GitHub with workflow scope and push `.github/workflows`.
 - Review PM2 restart history; current services are online, but restart counters
   are high and should be understood before public launch.
-- Move production runtime from `ts-node --transpile-only` to compiled build
-  artifacts in a later deployment hardening pass.
+- Keep `npm run build:apis:prod` in the deploy path before every PM2 reload so
+  compiled API artifacts match the checked-out commit.
