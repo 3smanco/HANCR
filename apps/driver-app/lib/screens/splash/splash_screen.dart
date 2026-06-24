@@ -20,6 +20,7 @@ class _SplashScreenState extends State<SplashScreen>
   late final AnimationController _ctrl;
   late final Animation<double> _fadeAnim;
   late final Animation<double> _scaleAnim;
+  bool _animationStarted = false;
 
   @override
   void initState() {
@@ -29,10 +30,28 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 900),
     );
     _fadeAnim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
-    _scaleAnim = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack),
-    );
-    _ctrl.forward();
+    _scaleAnim = Tween<double>(
+      begin: 0.85,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) || Motion.reduceMotion;
+    if (reduceMotion) {
+      _ctrl
+        ..stop()
+        ..value = 1;
+      _animationStarted = true;
+      return;
+    }
+    if (!_animationStarted) {
+      _ctrl.forward();
+      _animationStarted = true;
+    }
   }
 
   @override
@@ -43,6 +62,16 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) || Motion.reduceMotion;
+    Widget carArt = const CarArt(type: CarType.suv, size: Size(132, 60));
+    if (!reduceMotion) {
+      carArt = carArt
+          .animate()
+          .fadeIn(duration: Motion.slow, delay: Motion.base)
+          .slideX(begin: -0.5, end: 0, curve: Motion.decelerate);
+    }
+
     return BlocListener<AuthBloc, AuthState>(
       listener: (ctx, state) {
         if (state is AuthAuthenticated) {
@@ -99,10 +128,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ),
                     const SizedBox(height: 28),
-                    const CarArt(type: CarType.suv, size: Size(132, 60))
-                        .animate()
-                        .fadeIn(duration: Motion.slow, delay: Motion.base)
-                        .slideX(begin: -0.5, end: 0, curve: Motion.decelerate),
+                    carArt,
                     const SizedBox(height: 28),
                     const AuroraLoader(size: 30),
                   ],
