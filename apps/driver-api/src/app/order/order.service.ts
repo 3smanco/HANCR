@@ -526,6 +526,25 @@ export class OrderService {
     return null;
   }
 
+  /**
+   * كل الطلبات النشطة للسائق — يُعيد أكثر من طلب عند الرحلة المشتركة (Share pool).
+   * مُرتَّبة بالأقدم أولاً (الراكب الأساسي ثم المنضمّ).
+   */
+  async getActiveOrders(driverId: number): Promise<DriverOrderType[]> {
+    const activeStatuses = [
+      OrderStatus.DriverAccepted,
+      OrderStatus.Arrived,
+      OrderStatus.Started,
+      OrderStatus.WaitingForPostPay,
+    ];
+    const orders = await this.orderRepo.find({
+      where: activeStatuses.map((status) => ({ driverId, status })),
+      relations: ['rider'],
+      order: { createdOn: 'ASC' },
+    });
+    return orders.map((o) => this.toType(o));
+  }
+
   // ─────────────────────────────────────────────
   // completedOrders — سجل رحلات السائق المكتملة
   // ─────────────────────────────────────────────
@@ -813,6 +832,7 @@ export class OrderService {
       receiverName: order.receiverName,
       receiverPhone: order.numberMasked ? undefined : order.receiverPhone,
       isBidOrder: order.isBidOrder,
+      poolGroupId: order.poolGroupId,
       etaPickup: order.etaPickup,
       startTimestamp: order.startTimestamp,
       finishTimestamp: order.finishTimestamp,
