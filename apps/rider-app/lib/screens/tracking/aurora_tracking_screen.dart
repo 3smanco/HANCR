@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
@@ -204,12 +205,22 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
           ),
           BlocListener<OrderBloc, OrderState>(
             listenWhen: (p, c) {
+              if (c is OrderError) return true;
               final pD = p is OrderActive ? p.order.driverId : null;
               final cD = c is OrderActive ? c.order.driverId : null;
               return pD != cD;
             },
             listener: (ctx, state) {
-              if (state is OrderActive && state.order.driverId != null) {
+              if (state is OrderError) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: AuroraColors.danger,
+                  ),
+                );
+                ctx.read<TrackingBloc>().add(const TrackingStopped());
+                ctx.go('/home');
+              } else if (state is OrderActive && state.order.driverId != null) {
                 ctx.read<TrackingBloc>().add(
                       TrackingStarted(
                         orderId: state.order.id,
@@ -438,7 +449,14 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
   Widget _statusPill(OrderModel order) {
     String text;
     Color color;
-    if (order.status == OrderStatus.driverAccepted) {
+    if (order.status == OrderStatus.notFound) {
+      text = tr('noDriversTitle');
+      color = AuroraColors.danger;
+    } else if (order.status == OrderStatus.requested ||
+        order.status == OrderStatus.found) {
+      text = tr('searchingDriver');
+      color = AuroraColors.ember;
+    } else if (order.status == OrderStatus.driverAccepted) {
       text = tr('driverOnWay');
       color = AuroraColors.ember;
     } else if (order.status == OrderStatus.arrived) {
@@ -489,6 +507,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
 
   // ─────────────────────────────────────────────────────────────
   Widget _buildBottomCard(OrderModel order) {
+    final hasDriver = order.driverId != null;
     return Container(
       decoration: BoxDecoration(
         color: AuroraColors.obsidian,
@@ -514,8 +533,12 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
               ),
               const SizedBox(height: AuroraSpacing.lg),
 
-              // Driver info
-              _driverInfoRow(order),
+              if (order.status == OrderStatus.notFound)
+                _noDriverFoundCard()
+              else if (!hasDriver)
+                _searchingDriverCard(order)
+              else
+                _driverInfoRow(order),
 
               // كود التسليم للأمانات
               if ((order.otpCode ?? '').isNotEmpty &&
@@ -529,48 +552,134 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
               // ETA + fare
               _etaFareRow(order),
 
-              const SizedBox(height: AuroraSpacing.lg),
+              if (hasDriver) ...[
+                const SizedBox(height: AuroraSpacing.lg),
 
-              // Actions
-              Builder(builder: (rowCtx) {
-                return Row(
-                  children: [
-                    Expanded(
-                      child: _action(
-                        icon: Icons.phone,
-                        label: tr('call'),
-                        onTap: () => launchPhoneCall(rowCtx, order.driverPhone),
+                // Actions
+                Builder(builder: (rowCtx) {
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: _action(
+                          icon: Icons.phone,
+                          label: tr('call'),
+                          onTap: () =>
+                              launchPhoneCall(rowCtx, order.driverPhone),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: AuroraSpacing.sm),
-                    Expanded(
-                      child: _action(
-                        icon: Icons.chat_bubble_outline,
-                        label: tr('message'),
-                        onTap: () => Navigator.of(rowCtx).push(
-                          MaterialPageRoute(
-                            builder: (_) => AuroraChatScreen(
-                              orderId: order.id,
-                              driverName: order.driverName,
+                      const SizedBox(width: AuroraSpacing.sm),
+                      Expanded(
+                        child: _action(
+                          icon: Icons.chat_bubble_outline,
+                          label: tr('message'),
+                          onTap: () => Navigator.of(rowCtx).push(
+                            MaterialPageRoute(
+                              builder: (_) => AuroraChatScreen(
+                                orderId: order.id,
+                                driverName: order.driverName,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: AuroraSpacing.sm),
-                    Expanded(
-                      child: _action(
-                        icon: Icons.share_outlined,
-                        label: tr('share'),
-                        onTap: () => _shareTrip(order),
+                      const SizedBox(width: AuroraSpacing.sm),
+                      Expanded(
+                        child: _action(
+                          icon: Icons.share_outlined,
+                          label: tr('share'),
+                          onTap: () => _shareTrip(order),
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              }),
+                    ],
+                  );
+                }),
+              ],
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _searchingDriverCard(OrderModel order) {
+    return _statusCard(
+      icon: Icons.radar,
+      title: tr('searchingDriverTitle'),
+      body: tr('searchingDriverBody'),
+      accent: AuroraColors.ember,
+      trailing: SizedBox(
+        width: 22,
+        height: 22,
+        child: CircularProgressIndicator(
+          strokeWidth: 2.5,
+          valueColor: AlwaysStoppedAnimation<Color>(AuroraColors.ember),
+        ),
+      ),
+    );
+  }
+
+  Widget _noDriverFoundCard() {
+    return _statusCard(
+      icon: Icons.search_off_outlined,
+      title: tr('noDriversTitle'),
+      body: tr('noDriversBody'),
+      accent: AuroraColors.danger,
+      trailing: TextButton(
+        onPressed: () => context.go('/home'),
+        child: Text(
+          tr('backHome'),
+          style: AuroraText.bodySmall.copyWith(color: AuroraColors.ember),
+        ),
+      ),
+    );
+  }
+
+  Widget _statusCard({
+    required IconData icon,
+    required String title,
+    required String body,
+    required Color accent,
+    Widget? trailing,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AuroraSpacing.md),
+      decoration: BoxDecoration(
+        color: AuroraColors.ash,
+        borderRadius: BorderRadius.circular(AuroraRadius.lg),
+        border: Border.all(color: accent.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(AuroraRadius.md),
+            ),
+            child: Icon(icon, color: accent),
+          ),
+          const SizedBox(width: AuroraSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AuroraText.titleSmall),
+                const SizedBox(height: 4),
+                Text(
+                  body,
+                  style: AuroraText.bodySmall
+                      .copyWith(color: AuroraColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          if (trailing != null) ...[
+            const SizedBox(width: AuroraSpacing.sm),
+            trailing,
+          ],
+        ],
       ),
     );
   }

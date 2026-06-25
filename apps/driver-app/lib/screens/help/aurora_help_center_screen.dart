@@ -12,25 +12,30 @@ class AuroraHelpCenterScreen extends StatelessWidget {
   static const _appLink = 'https://hancr.com/downloads/hancr-driver.apk';
 
   List<(String, String)> _faq() => [
-        (tr('faqQ1'), tr('faqA1')),
-        (tr('faqQ2'), tr('faqA2')),
-        (tr('faqQ3'), tr('faqA3')),
-        (tr('faqQ4'), tr('faqA4')),
-      ];
+    (tr('faqQ1'), tr('faqA1')),
+    (tr('faqQ2'), tr('faqA2')),
+    (tr('faqQ3'), tr('faqA3')),
+    (tr('faqQ4'), tr('faqA4')),
+  ];
 
   void _invite(BuildContext context) {
     final msg = '${tr('inviteShareText')}\n$_appLink';
-    launchExternalUrl(context, 'https://wa.me/?text=${Uri.encodeComponent(msg)}');
+    launchExternalUrl(
+      context,
+      'https://wa.me/?text=${Uri.encodeComponent(msg)}',
+    );
   }
 
   Future<void> _copy(BuildContext context) async {
     await Clipboard.setData(const ClipboardData(text: _appLink));
     if (context.mounted) {
       Haptics.success();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(tr('linkCopied')),
-        backgroundColor: AuroraColors.smoke,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(tr('linkCopied')),
+          backgroundColor: AuroraColors.smoke,
+        ),
+      );
     }
   }
 
@@ -62,29 +67,40 @@ class AuroraHelpCenterScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.card_giftcard,
-                            color: Color(0xFFFFF5EE), size: 22),
+                        const Icon(
+                          Icons.card_giftcard,
+                          color: Color(0xFFFFF5EE),
+                          size: 22,
+                        ),
                         const SizedBox(width: AuroraSpacing.sm),
-                        Text(tr('inviteCaptains'),
-                            style: AuroraText.titleMedium
-                                .copyWith(color: AuroraColors.pearl)),
+                        Text(
+                          tr('inviteCaptains'),
+                          style: AuroraText.titleMedium.copyWith(
+                            color: AuroraColors.pearl,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: AuroraSpacing.sm),
-                    Text(tr('inviteDesc'),
-                        style: AuroraText.bodyMedium.copyWith(
-                            color: AuroraColors.pearl.withValues(alpha: 0.9),
-                            height: 1.5)),
+                    Text(
+                      tr('inviteDesc'),
+                      style: AuroraText.bodyMedium.copyWith(
+                        color: AuroraColors.pearl.withValues(alpha: 0.9),
+                        height: 1.5,
+                      ),
+                    ),
                     const SizedBox(height: AuroraSpacing.md),
                     Row(
                       children: [
                         Expanded(
-                          child: _whiteBtn(Icons.share, tr('shareApp'),
-                              () => _invite(context)),
+                          child: _whiteBtn(
+                            Icons.share,
+                            tr('shareApp'),
+                            () => _invite(context),
+                          ),
                         ),
                         const SizedBox(width: AuroraSpacing.sm),
-                        _whiteIconBtn(
-                            Icons.copy, () => _copy(context)),
+                        _whiteIconBtn(Icons.copy, () => _copy(context)),
                       ],
                     ),
                   ],
@@ -106,11 +122,17 @@ class AuroraHelpCenterScreen extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 child: Column(
                   children: [
-                    _contactRow(Icons.email_outlined, tr('contactEmail'),
-                        () => launchSupportEmail(context, subject: 'دعم السائق')),
+                    _contactRow(
+                      Icons.email_outlined,
+                      tr('contactEmail'),
+                      () => launchSupportEmail(context, subject: 'دعم السائق'),
+                    ),
                     const Divider(height: 1, color: AuroraColors.divider),
-                    _contactRow(Icons.chat, tr('contactWhatsapp'),
-                        () => _invite(context)),
+                    _contactRow(
+                      Icons.chat,
+                      tr('contactWhatsapp'),
+                      () => launchSupportWhatsApp(context, text: 'دعم السائق'),
+                    ),
                   ],
                 ),
               ),
@@ -136,9 +158,12 @@ class AuroraHelpCenterScreen extends StatelessWidget {
             children: [
               Icon(icon, color: AuroraColors.emberDeep, size: 18),
               const SizedBox(width: 6),
-              Text(label,
-                  style: AuroraText.buttonMedium
-                      .copyWith(color: AuroraColors.emberDeep)),
+              Text(
+                label,
+                style: AuroraText.buttonMedium.copyWith(
+                  color: AuroraColors.emberDeep,
+                ),
+              ),
             ],
           ),
         ),
@@ -181,8 +206,11 @@ class AuroraHelpCenterScreen extends StatelessWidget {
               ),
               const SizedBox(width: AuroraSpacing.md),
               Expanded(child: Text(label, style: AuroraText.bodyLarge)),
-              const Icon(Icons.chevron_left,
-                  color: AuroraColors.textSecondary, size: 20),
+              const Icon(
+                Icons.chevron_left,
+                color: AuroraColors.textSecondary,
+                size: 20,
+              ),
             ],
           ),
         ),
@@ -216,23 +244,34 @@ class _FaqItemState extends State<_FaqItem> {
         children: [
           ListTile(
             title: Text(widget.question, style: AuroraText.titleSmall),
-            trailing: Icon(_open ? Icons.expand_less : Icons.expand_more,
-                color: AuroraColors.ember),
+            trailing: Icon(
+              _open ? Icons.expand_less : Icons.expand_more,
+              color: AuroraColors.ember,
+            ),
             onTap: () => setState(() => _open = !_open),
           ),
           AnimatedCrossFade(
             duration: Motion.fast,
-            crossFadeState:
-                _open ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: _open
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             firstChild: const SizedBox(width: double.infinity),
             secondChild: Padding(
-              padding: const EdgeInsets.fromLTRB(AuroraSpacing.md, 0,
-                  AuroraSpacing.md, AuroraSpacing.md),
+              padding: const EdgeInsets.fromLTRB(
+                AuroraSpacing.md,
+                0,
+                AuroraSpacing.md,
+                AuroraSpacing.md,
+              ),
               child: Align(
                 alignment: AlignmentDirectional.centerStart,
-                child: Text(widget.answer,
-                    style: AuroraText.bodyMedium.copyWith(
-                        color: AuroraColors.textSecondary, height: 1.5)),
+                child: Text(
+                  widget.answer,
+                  style: AuroraText.bodyMedium.copyWith(
+                    color: AuroraColors.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
               ),
             ),
           ),

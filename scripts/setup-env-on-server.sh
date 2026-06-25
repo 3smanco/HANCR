@@ -45,13 +45,13 @@ ADMIN_DEFAULT_EMAIL=admin@hancr.com
 ADMIN_DEFAULT_PASSWORD=$ADMIN_PASS
 
 # URLs (مؤقتاً IP — سيُغيَّر بعد DNS)
-PUBLIC_BASE_URL=http://34.18.212.201
-PUBLIC_API_URL=http://34.18.212.201
-PUBLIC_ADMIN_URL=http://34.18.212.201/admin
-CORS_ORIGINS=http://34.18.212.201,https://hancr.com,https://www.hancr.com,https://admin.hancr.com
-ADMIN_CORS_ORIGINS=http://34.18.212.201,https://admin.hancr.com
-PAYMENT_WEBHOOK_URL=http://34.18.212.201/rider/wallet/webhook/{gateway}
-NEXT_PUBLIC_ADMIN_API_URL=http://34.18.212.201/admin/graphql
+PUBLIC_BASE_URL=https://api.hancr.com
+PUBLIC_API_URL=https://api.hancr.com
+PUBLIC_ADMIN_URL=https://admin.hancr.com
+CORS_ORIGINS=https://hancr.com,https://www.hancr.com,https://admin.hancr.com
+ADMIN_CORS_ORIGINS=https://hancr.com,https://www.hancr.com,https://admin.hancr.com
+PAYMENT_WEBHOOK_URL=https://api.hancr.com/rider/wallet/webhook/{gateway}
+NEXT_PUBLIC_ADMIN_API_URL=https://api.hancr.com/admin/graphql
 
 # Default region
 DEFAULT_LAT=24.7136

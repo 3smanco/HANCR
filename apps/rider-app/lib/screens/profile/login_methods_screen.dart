@@ -28,13 +28,6 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
     });
   }
 
-  void _toast(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: AuroraColors.smoke,
-    ));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,14 +108,6 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
                         ),
                       ],
                     ),
-                  ),
-                  // Apple / X — قريباً
-                  _tile(
-                    icon: Icons.apple,
-                    title: 'Apple',
-                    subtitle: tr('comingSoon'),
-                    trailing: null,
-                    onTap: () => _toast('Apple — ${tr('comingSoon')}'),
                   ),
                 ],
               );

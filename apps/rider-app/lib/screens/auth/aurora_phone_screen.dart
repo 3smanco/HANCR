@@ -420,15 +420,6 @@ class _AuroraPhoneScreenState extends State<AuroraPhoneScreen> {
               Icons.alternate_email,
               onTap: () => context.push('/auth/email'),
             ),
-            const SizedBox(width: AuroraSpacing.md),
-            // Apple — قريباً
-            _socialButton(
-              Icons.apple,
-              onTap: () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('Apple — ${tr('comingSoonSocial')}'),
-                backgroundColor: AuroraColors.smoke,
-              )),
-            ),
           ],
         ),
       ],

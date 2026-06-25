@@ -26,7 +26,11 @@ class _AuroraDriverDocumentsScreenState
   static const _types = <_DocTypeInfo>[
     _DocTypeInfo('national_id', 'doc_national_id', Icons.badge),
     _DocTypeInfo('license', 'doc_license', Icons.directions_car),
-    _DocTypeInfo('vehicle_registration', 'doc_vehicle_registration', Icons.assignment),
+    _DocTypeInfo(
+      'vehicle_registration',
+      'doc_vehicle_registration',
+      Icons.assignment,
+    ),
     _DocTypeInfo('insurance', 'doc_insurance', Icons.health_and_safety),
     _DocTypeInfo('criminal_record', 'doc_criminal_record', Icons.verified_user),
   ];
@@ -45,10 +49,12 @@ class _AuroraDriverDocumentsScreenState
     setState(() => _loading = true);
     try {
       final client = await GraphQLClientManager.get();
-      final res = await client.query(QueryOptions(
-        document: gql(myDocumentsQuery),
-        fetchPolicy: FetchPolicy.networkOnly,
-      ));
+      final res = await client.query(
+        QueryOptions(
+          document: gql(myDocumentsQuery),
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
       if (!mounted) return;
       setState(() {
         _docs = (res.data?['myDocuments'] as List<dynamic>? ?? [])
@@ -75,48 +81,46 @@ class _AuroraDriverDocumentsScreenState
       final contentType = _guessContentType(file.path);
 
       // 1) Ask the API for a presigned PUT URL.
-      final urlRes = await client.mutate(MutationOptions(
-        document: gql(generateUploadUrlMutation),
-        variables: {
-          'input': {
-            'type': info.type,
-            'contentType': contentType,
+      final urlRes = await client.mutate(
+        MutationOptions(
+          document: gql(generateUploadUrlMutation),
+          variables: {
+            'input': {'type': info.type, 'contentType': contentType},
           },
-        },
-      ));
+        ),
+      );
       if (urlRes.hasException) throw urlRes.exception!;
-      final urlData = urlRes.data?['generateDriverDocumentUploadUrl']
-          as Map<String, dynamic>?;
+      final urlData =
+          urlRes.data?['generateDriverDocumentUploadUrl']
+              as Map<String, dynamic>?;
       if (urlData == null) throw Exception('No upload URL returned');
       final uploadUrl = urlData['uploadUrl'] as String;
       final publicUrl = urlData['publicUrl'] as String;
 
-      // 2) PUT the bytes directly to the storage URL.
-      //    Skipped for the dev fallback (`/uploads/...`) because no real
-      //    storage backend is listening — we still persist the placeholder
-      //    publicUrl so the admin reviewer sees the record.
-      if (uploadUrl.startsWith('http')) {
-        final bytes = await File(file.path).readAsBytes();
-        final put = await http.put(
-          Uri.parse(uploadUrl),
-          headers: {'Content-Type': contentType},
-          body: bytes,
-        );
-        if (put.statusCode < 200 || put.statusCode >= 300) {
-          throw Exception('Upload failed (${put.statusCode})');
-        }
+      // 2) PUT the bytes directly to the signed storage URL.
+      final uploadUri = Uri.parse(uploadUrl);
+      if (!uploadUri.hasScheme) {
+        throw Exception('Invalid upload URL');
+      }
+      final bytes = await File(file.path).readAsBytes();
+      final put = await http.put(
+        uploadUri,
+        headers: {'Content-Type': contentType},
+        body: bytes,
+      );
+      if (put.statusCode < 200 || put.statusCode >= 300) {
+        throw Exception('Upload failed (${put.statusCode})');
       }
 
       // 3) Persist the canonical URL on the driver document record.
-      final res = await client.mutate(MutationOptions(
-        document: gql(uploadDocumentMutation),
-        variables: {
-          'input': {
-            'type': info.type,
-            'url': publicUrl,
+      final res = await client.mutate(
+        MutationOptions(
+          document: gql(uploadDocumentMutation),
+          variables: {
+            'input': {'type': info.type, 'url': publicUrl},
           },
-        },
-      ));
+        ),
+      );
       if (res.hasException) throw res.exception!;
 
       _toast(tr('doc_uploaded'));
@@ -136,8 +140,8 @@ class _AuroraDriverDocumentsScreenState
     return 'image/jpeg';
   }
 
-  void _toast(String s) => ScaffoldMessenger.of(context)
-      .showSnackBar(SnackBar(content: Text(s)));
+  void _toast(String s) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(s)));
 
   Map<String, dynamic>? _findDoc(String type) {
     for (final d in _docs) {
@@ -164,8 +168,9 @@ class _AuroraDriverDocumentsScreenState
                 children: [
                   Text(
                     tr('documentsHint'),
-                    style: AuroraText.bodySmall
-                        .copyWith(color: AuroraColors.textSecondary),
+                    style: AuroraText.bodySmall.copyWith(
+                      color: AuroraColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: AuroraSpacing.lg),
                   ..._types.map(_docCard),
@@ -219,8 +224,7 @@ class _AuroraDriverDocumentsScreenState
                 child: Text(tr(info.labelKey), style: AuroraText.titleSmall),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(AuroraRadius.sm),
@@ -230,9 +234,10 @@ class _AuroraDriverDocumentsScreenState
                   children: [
                     Icon(statusIcon, size: 12, color: statusColor),
                     const SizedBox(width: 4),
-                    Text(statusLabel,
-                        style: AuroraText.caption
-                            .copyWith(color: statusColor)),
+                    Text(
+                      statusLabel,
+                      style: AuroraText.caption.copyWith(color: statusColor),
+                    ),
                   ],
                 ),
               ),
@@ -246,9 +251,12 @@ class _AuroraDriverDocumentsScreenState
                 color: AuroraColors.dangerBg,
                 borderRadius: BorderRadius.circular(AuroraRadius.sm),
               ),
-              child: Text(rejectedReason,
-                  style: AuroraText.bodySmall
-                      .copyWith(color: AuroraColors.danger)),
+              child: Text(
+                rejectedReason,
+                style: AuroraText.bodySmall.copyWith(
+                  color: AuroraColors.danger,
+                ),
+              ),
             ),
           ],
           const SizedBox(height: AuroraSpacing.sm),
@@ -257,16 +265,17 @@ class _AuroraDriverDocumentsScreenState
             child: ElevatedButton.icon(
               onPressed: busy ? null : () => _uploadDoc(info),
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    doc == null ? AuroraColors.ember : AuroraColors.ash,
+                backgroundColor: doc == null
+                    ? AuroraColors.ember
+                    : AuroraColors.ash,
               ),
               icon: Icon(doc == null ? Icons.upload : Icons.refresh, size: 18),
               label: Text(
                 busy
                     ? tr('uploading')
                     : doc == null
-                        ? tr('uploadDocument')
-                        : tr('replaceDocument'),
+                    ? tr('uploadDocument')
+                    : tr('replaceDocument'),
               ),
             ),
           ),

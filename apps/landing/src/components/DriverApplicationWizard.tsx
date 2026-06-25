@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { gql, useMutation } from '@apollo/client';
+import { useState } from "react";
+import { gql, useMutation } from "@apollo/client";
 import {
   ArrowLeft,
   ArrowRight,
@@ -13,8 +13,8 @@ import {
   ShieldCheck,
   Upload,
   User,
-} from 'lucide-react';
-import { type Locale, translator } from '@/i18n/messages';
+} from "lucide-react";
+import { type Locale, translator } from "@/i18n/messages";
 
 // ── GraphQL ────────────────────────────────────────────────────────────────
 
@@ -40,11 +40,11 @@ const SUBMIT_APPLICATION = gql`
 // ── Types ──────────────────────────────────────────────────────────────────
 
 type DocType =
-  | 'national_id'
-  | 'license'
-  | 'vehicle_registration'
-  | 'insurance'
-  | 'profile_photo';
+  | "national_id"
+  | "license"
+  | "vehicle_registration"
+  | "insurance"
+  | "profile_photo";
 
 interface DocSlot {
   type: DocType;
@@ -57,43 +57,43 @@ interface DocSlot {
 
 const DOCS: DocSlot[] = [
   {
-    type: 'national_id',
-    labelAr: 'الهوية الوطنية',
-    labelEn: 'National ID',
-    hintAr: 'الوجه الذي يحمل الصورة',
-    hintEn: 'Photo side, both sides accepted',
+    type: "national_id",
+    labelAr: "الهوية الوطنية",
+    labelEn: "National ID",
+    hintAr: "الوجه الذي يحمل الصورة",
+    hintEn: "Photo side, both sides accepted",
     required: true,
   },
   {
-    type: 'license',
-    labelAr: 'رخصة القيادة',
-    labelEn: 'Driving License',
-    hintAr: 'رخصة سارية المفعول',
-    hintEn: 'Must be currently valid',
+    type: "license",
+    labelAr: "رخصة القيادة",
+    labelEn: "Driving License",
+    hintAr: "رخصة سارية المفعول",
+    hintEn: "Must be currently valid",
     required: true,
   },
   {
-    type: 'vehicle_registration',
-    labelAr: 'استمارة السيارة',
-    labelEn: 'Vehicle Registration',
-    hintAr: 'سارية المفعول',
-    hintEn: 'Currently valid',
+    type: "vehicle_registration",
+    labelAr: "استمارة السيارة",
+    labelEn: "Vehicle Registration",
+    hintAr: "سارية المفعول",
+    hintEn: "Currently valid",
     required: true,
   },
   {
-    type: 'insurance',
-    labelAr: 'تأمين السيارة',
-    labelEn: 'Vehicle Insurance',
-    hintAr: 'تأمين شامل سارٍ',
-    hintEn: 'Comprehensive cover, valid',
+    type: "insurance",
+    labelAr: "تأمين السيارة",
+    labelEn: "Vehicle Insurance",
+    hintAr: "تأمين شامل سارٍ",
+    hintEn: "Comprehensive cover, valid",
     required: true,
   },
   {
-    type: 'profile_photo',
-    labelAr: 'صورة شخصية',
-    labelEn: 'Profile Photo',
-    hintAr: 'صورة واضحة للوجه',
-    hintEn: 'A clear face photo',
+    type: "profile_photo",
+    labelAr: "صورة شخصية",
+    labelEn: "Profile Photo",
+    hintAr: "صورة واضحة للوجه",
+    hintEn: "A clear face photo",
     required: true,
   },
 ];
@@ -115,29 +115,31 @@ interface Vehicle {
   plateNumber: string;
 }
 
-type UploadedDocs = Partial<Record<DocType, { publicUrl: string; fileName: string }>>;
+type UploadedDocs = Partial<
+  Record<DocType, { publicUrl: string; fileName: string }>
+>;
 
 // ── Component ──────────────────────────────────────────────────────────────
 
 export function DriverApplicationWizard({ locale }: { locale: Locale }) {
   const tt = translator(locale);
-  const isAr = locale === 'ar';
+  const isAr = locale === "ar";
 
   const [step, setStep] = useState(0); // 0..3
   const [personal, setPersonal] = useState<Personal>({
-    fullName: '',
-    email: '',
-    phone: '',
-    city: '',
-    nationalIdNumber: '',
-    dateOfBirth: '',
+    fullName: "",
+    email: "",
+    phone: "",
+    city: "",
+    nationalIdNumber: "",
+    dateOfBirth: "",
   });
   const [vehicle, setVehicle] = useState<Vehicle>({
-    vehicleBrand: '',
-    vehicleModel: '',
-    vehicleYear: '',
-    vehicleColor: '',
-    plateNumber: '',
+    vehicleBrand: "",
+    vehicleModel: "",
+    vehicleYear: "",
+    vehicleColor: "",
+    plateNumber: "",
   });
   const [docs, setDocs] = useState<UploadedDocs>({});
   const [submitted, setSubmitted] = useState<{ id: number } | null>(null);
@@ -156,7 +158,7 @@ export function DriverApplicationWizard({ locale }: { locale: Locale }) {
   const personalValid =
     personal.fullName.trim().length >= 3 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(personal.email) &&
-    /^\+?[0-9]{8,20}$/.test(personal.phone.replace(/\s/g, '')) &&
+    /^\+?[0-9]{8,20}$/.test(personal.phone.replace(/\s/g, "")) &&
     personal.city.trim().length > 0;
 
   const vehicleValid =
@@ -187,11 +189,7 @@ export function DriverApplicationWizard({ locale }: { locale: Locale }) {
           />
         )}
         {step === 1 && (
-          <StepVehicle
-            locale={locale}
-            value={vehicle}
-            onChange={setVehicle}
-          />
+          <StepVehicle locale={locale} value={vehicle} onChange={setVehicle} />
         )}
         {step === 2 && (
           <StepDocuments
@@ -207,12 +205,17 @@ export function DriverApplicationWizard({ locale }: { locale: Locale }) {
           />
         )}
         {step === 3 && (
-          <StepReview locale={locale} personal={personal} vehicle={vehicle} docs={docs} />
+          <StepReview
+            locale={locale}
+            personal={personal}
+            vehicle={vehicle}
+            docs={docs}
+          />
         )}
       </div>
 
       {submitError ? (
-        <p className="text-danger text-sm mt-4">{tt('common.error')}</p>
+        <p className="text-danger text-sm mt-4">{tt("common.error")}</p>
       ) : null}
 
       {/* ── Navigation ── */}
@@ -223,8 +226,12 @@ export function DriverApplicationWizard({ locale }: { locale: Locale }) {
           disabled={step === 0 || submitting}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-stone hover:border-ember/50 hover:text-ember disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
-          {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-          {isAr ? 'السابق' : 'Back'}
+          {isAr ? (
+            <ArrowRight className="w-4 h-4" />
+          ) : (
+            <ArrowLeft className="w-4 h-4" />
+          )}
+          {isAr ? "السابق" : "Back"}
         </button>
 
         {step < 3 ? (
@@ -238,13 +245,19 @@ export function DriverApplicationWizard({ locale }: { locale: Locale }) {
             }
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-ember hover:bg-ember-deep text-pearl font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-ember"
           >
-            {isAr ? 'التالي' : 'Next'}
-            {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+            {isAr ? "التالي" : "Next"}
+            {isAr ? (
+              <ArrowLeft className="w-4 h-4" />
+            ) : (
+              <ArrowRight className="w-4 h-4" />
+            )}
           </button>
         ) : (
           <button
             type="button"
-            disabled={submitting || !personalValid || !vehicleValid || !docsValid}
+            disabled={
+              submitting || !personalValid || !vehicleValid || !docsValid
+            }
             onClick={() =>
               submit({
                 variables: {
@@ -252,9 +265,10 @@ export function DriverApplicationWizard({ locale }: { locale: Locale }) {
                     ...personal,
                     fullName: personal.fullName.trim(),
                     email: personal.email.trim(),
-                    phone: personal.phone.replace(/\s/g, ''),
+                    phone: personal.phone.replace(/\s/g, ""),
                     city: personal.city.trim() || undefined,
-                    nationalIdNumber: personal.nationalIdNumber.trim() || undefined,
+                    nationalIdNumber:
+                      personal.nationalIdNumber.trim() || undefined,
                     dateOfBirth: personal.dateOfBirth || undefined,
                     vehicleBrand: vehicle.vehicleBrand.trim(),
                     vehicleModel: vehicle.vehicleModel.trim(),
@@ -263,7 +277,8 @@ export function DriverApplicationWizard({ locale }: { locale: Locale }) {
                     plateNumber: vehicle.plateNumber.trim(),
                     docNationalIdUrl: docs.national_id?.publicUrl,
                     docLicenseUrl: docs.license?.publicUrl,
-                    docVehicleRegistrationUrl: docs.vehicle_registration?.publicUrl,
+                    docVehicleRegistrationUrl:
+                      docs.vehicle_registration?.publicUrl,
                     docInsuranceUrl: docs.insurance?.publicUrl,
                     docProfilePhotoUrl: docs.profile_photo?.publicUrl,
                   },
@@ -275,12 +290,12 @@ export function DriverApplicationWizard({ locale }: { locale: Locale }) {
             {submitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                {tt('common.loading')}
+                {tt("common.loading")}
               </>
             ) : (
               <>
                 <CheckCircle2 className="w-4 h-4" />
-                {isAr ? 'إرسال الطلب' : 'Submit application'}
+                {isAr ? "إرسال الطلب" : "Submit application"}
               </>
             )}
           </button>
@@ -294,8 +309,8 @@ export function DriverApplicationWizard({ locale }: { locale: Locale }) {
 
 function Stepper({ step, isAr }: { step: number; isAr: boolean }) {
   const labels = isAr
-    ? ['البيانات الشخصية', 'بيانات السيارة', 'الوثائق', 'المراجعة']
-    : ['Personal info', 'Vehicle info', 'Documents', 'Review'];
+    ? ["البيانات الشخصية", "بيانات السيارة", "الوثائق", "المراجعة"]
+    : ["Personal info", "Vehicle info", "Documents", "Review"];
   const icons = [User, Car, Upload, ShieldCheck];
   return (
     <ol className="flex items-start gap-2 sm:gap-3 overflow-x-auto">
@@ -309,17 +324,21 @@ function Stepper({ step, isAr }: { step: number; isAr: boolean }) {
               <div
                 className={`w-9 h-9 rounded-full grid place-items-center text-xs font-bold transition ${
                   done
-                    ? 'bg-success/20 text-success border border-success/40'
+                    ? "bg-success/20 text-success border border-success/40"
                     : active
-                      ? 'bg-ember text-pearl shadow-ember'
-                      : 'bg-ash border border-stone text-muted'
+                      ? "bg-ember text-pearl shadow-ember"
+                      : "bg-ash border border-stone text-muted"
                 }`}
               >
-                {done ? <CheckCircle2 className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+                {done ? (
+                  <CheckCircle2 className="w-4 h-4" />
+                ) : (
+                  <Icon className="w-4 h-4" />
+                )}
               </div>
               <span
                 className={`text-[10px] sm:text-xs mt-1.5 text-center max-w-[80px] leading-tight ${
-                  active ? 'text-pearl font-bold' : 'text-muted'
+                  active ? "text-pearl font-bold" : "text-muted"
                 }`}
               >
                 {label}
@@ -327,7 +346,7 @@ function Stepper({ step, isAr }: { step: number; isAr: boolean }) {
             </div>
             {idx < labels.length - 1 ? (
               <div
-                className={`flex-1 h-px mt-4 ${done ? 'bg-success/40' : 'bg-stone'}`}
+                className={`flex-1 h-px mt-4 ${done ? "bg-success/40" : "bg-stone"}`}
               />
             ) : null}
           </li>
@@ -349,34 +368,34 @@ function StepPersonal({
   onChange: (p: Personal) => void;
 }) {
   const tt = translator(locale);
-  const isAr = locale === 'ar';
+  const isAr = locale === "ar";
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-extrabold text-pearl">
-        {isAr ? 'من نتعامل معه؟' : 'Tell us about yourself'}
+        {isAr ? "من نتعامل معه؟" : "Tell us about yourself"}
       </h3>
       <p className="text-muted text-sm">
         {isAr
-          ? 'استخدم بياناتك كما تظهر في وثائقك الرسمية.'
-          : 'Use details exactly as they appear on your official documents.'}
+          ? "استخدم بياناتك كما تظهر في وثائقك الرسمية."
+          : "Use details exactly as they appear on your official documents."}
       </p>
 
       <div className="grid sm:grid-cols-2 gap-4 pt-2">
         <TextField
-          label={tt('common.name')}
+          label={tt("common.name")}
           value={value.fullName}
           onChange={(v) => onChange({ ...value, fullName: v })}
           required
         />
         <TextField
-          label={tt('common.email')}
+          label={tt("common.email")}
           type="email"
           value={value.email}
           onChange={(v) => onChange({ ...value, email: v })}
           required
         />
         <TextField
-          label={tt('common.phone')}
+          label={tt("common.phone")}
           type="tel"
           placeholder="+9665…"
           value={value.phone}
@@ -384,18 +403,18 @@ function StepPersonal({
           required
         />
         <TextField
-          label={tt('common.city')}
+          label={tt("common.city")}
           value={value.city}
           onChange={(v) => onChange({ ...value, city: v })}
           required
         />
         <TextField
-          label={isAr ? 'رقم الهوية الوطنية' : 'National ID number'}
+          label={isAr ? "رقم الهوية الوطنية" : "National ID number"}
           value={value.nationalIdNumber}
           onChange={(v) => onChange({ ...value, nationalIdNumber: v })}
         />
         <TextField
-          label={isAr ? 'تاريخ الميلاد' : 'Date of birth'}
+          label={isAr ? "تاريخ الميلاد" : "Date of birth"}
           type="date"
           value={value.dateOfBirth}
           onChange={(v) => onChange({ ...value, dateOfBirth: v })}
@@ -416,35 +435,35 @@ function StepVehicle({
   value: Vehicle;
   onChange: (v: Vehicle) => void;
 }) {
-  const isAr = locale === 'ar';
+  const isAr = locale === "ar";
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-extrabold text-pearl">
-        {isAr ? 'بيانات سيارتك' : 'Your vehicle'}
+        {isAr ? "بيانات سيارتك" : "Your vehicle"}
       </h3>
       <p className="text-muted text-sm">
         {isAr
-          ? 'موديل 2014 أو أحدث، استمارة سارية، وتأمين شامل.'
-          : 'Model 2014 or newer, valid registration, comprehensive insurance.'}
+          ? "موديل 2014 أو أحدث، استمارة سارية، وتأمين شامل."
+          : "Model 2014 or newer, valid registration, comprehensive insurance."}
       </p>
 
       <div className="grid sm:grid-cols-2 gap-4 pt-2">
         <TextField
-          label={isAr ? 'الماركة' : 'Brand'}
-          placeholder={isAr ? 'مثلاً Toyota' : 'e.g. Toyota'}
+          label={isAr ? "الماركة" : "Brand"}
+          placeholder={isAr ? "مثلاً Toyota" : "e.g. Toyota"}
           value={value.vehicleBrand}
           onChange={(v) => onChange({ ...value, vehicleBrand: v })}
           required
         />
         <TextField
-          label={isAr ? 'الموديل' : 'Model'}
-          placeholder={isAr ? 'مثلاً Camry' : 'e.g. Camry'}
+          label={isAr ? "الموديل" : "Model"}
+          placeholder={isAr ? "مثلاً Camry" : "e.g. Camry"}
           value={value.vehicleModel}
           onChange={(v) => onChange({ ...value, vehicleModel: v })}
           required
         />
         <TextField
-          label={isAr ? 'سنة الصنع' : 'Year'}
+          label={isAr ? "سنة الصنع" : "Year"}
           type="number"
           placeholder="2020"
           value={value.vehicleYear}
@@ -452,14 +471,14 @@ function StepVehicle({
           required
         />
         <TextField
-          label={isAr ? 'اللون' : 'Color'}
+          label={isAr ? "اللون" : "Color"}
           value={value.vehicleColor}
           onChange={(v) => onChange({ ...value, vehicleColor: v })}
         />
         <div className="sm:col-span-2">
           <TextField
-            label={isAr ? 'رقم اللوحة' : 'Plate number'}
-            placeholder={isAr ? 'مثلاً ABC 1234' : 'e.g. ABC 1234'}
+            label={isAr ? "رقم اللوحة" : "Plate number"}
+            placeholder={isAr ? "مثلاً ABC 1234" : "e.g. ABC 1234"}
             value={value.plateNumber}
             onChange={(v) => onChange({ ...value, plateNumber: v })}
             required
@@ -489,16 +508,16 @@ function StepDocuments({
     contentType: string;
   }) => Promise<{ uploadUrl: string; publicUrl: string; objectKey: string }>;
 }) {
-  const isAr = locale === 'ar';
+  const isAr = locale === "ar";
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-extrabold text-pearl">
-        {isAr ? 'الوثائق المطلوبة' : 'Required documents'}
+        {isAr ? "الوثائق المطلوبة" : "Required documents"}
       </h3>
       <p className="text-muted text-sm">
         {isAr
-          ? 'كل البيانات سرية. صور واضحة JPG/PNG/PDF — كل ملف حتى 10 ميغا.'
-          : 'All data is confidential. Clear JPG/PNG/PDF — up to 10 MB each.'}
+          ? "كل البيانات سرية. صور واضحة JPG/PNG/PDF — كل ملف حتى 10 ميغا."
+          : "All data is confidential. Clear JPG/PNG/PDF — up to 10 MB each."}
       </p>
 
       <div className="space-y-3 pt-2">
@@ -543,20 +562,18 @@ function DocUploadSlot({
     setBusy(true);
     try {
       const contentType =
-        file.type && file.type.match(/^(image\/(jpeg|jpg|png|webp)|application\/pdf)$/)
+        file.type &&
+        file.type.match(/^(image\/(jpeg|jpg|png|webp)|application\/pdf)$/)
           ? file.type
-          : 'image/jpeg';
+          : "image/jpeg";
       const sign = await generateUrl({ type: doc.type, contentType });
 
-      // Real PUT to GCS — skipped for the dev placeholder.
-      if (sign.uploadUrl.startsWith('http')) {
-        const put = await fetch(sign.uploadUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': contentType },
-          body: file,
-        });
-        if (!put.ok) throw new Error(`upload failed (${put.status})`);
-      }
+      const put = await fetch(sign.uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": contentType },
+        body: file,
+      });
+      if (!put.ok) throw new Error(`upload failed (${put.status})`);
 
       onUploaded({ publicUrl: sign.publicUrl, fileName: file.name });
     } catch (e) {
@@ -570,10 +587,10 @@ function DocUploadSlot({
     <div
       className={`relative rounded-xl border-2 p-4 transition ${
         uploaded
-          ? 'border-success/40 bg-success/5'
+          ? "border-success/40 bg-success/5"
           : busy
-            ? 'border-ember/40 bg-ember/5'
-            : 'border-stone/60 bg-obsidian/40 hover:border-ember/40'
+            ? "border-ember/40 bg-ember/5"
+            : "border-stone/60 bg-obsidian/40 hover:border-ember/40"
       }`}
     >
       <input
@@ -584,24 +601,27 @@ function DocUploadSlot({
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) handleFile(file);
-          e.target.value = '';
+          e.target.value = "";
         }}
       />
-      <label htmlFor={inputId} className="flex items-center gap-3 cursor-pointer">
+      <label
+        htmlFor={inputId}
+        className="flex items-center gap-3 cursor-pointer"
+      >
         <div
           className={`w-10 h-10 rounded-lg grid place-items-center shrink-0 ${
             uploaded
-              ? 'bg-success/15 text-success'
+              ? "bg-success/15 text-success"
               : busy
-                ? 'bg-ember/15 text-ember'
-                : 'bg-ash text-muted'
+                ? "bg-ember/15 text-ember"
+                : "bg-ash text-muted"
           }`}
         >
           {uploaded ? (
             <CheckCircle2 className="w-5 h-5" />
           ) : busy ? (
             <Loader2 className="w-5 h-5 animate-spin" />
-          ) : doc.type === 'profile_photo' ? (
+          ) : doc.type === "profile_photo" ? (
             <Camera className="w-5 h-5" />
           ) : (
             <Upload className="w-5 h-5" />
@@ -617,8 +637,8 @@ function DocUploadSlot({
               ? uploaded.fileName
               : busy
                 ? isAr
-                  ? 'جارٍ الرفع...'
-                  : 'Uploading...'
+                  ? "جارٍ الرفع..."
+                  : "Uploading..."
                 : isAr
                   ? doc.hintAr
                   : doc.hintEn}
@@ -629,12 +649,10 @@ function DocUploadSlot({
         </div>
         <div className="text-xs font-bold">
           {uploaded ? (
-            <span className="text-success">
-              {isAr ? 'تم' : 'Done'}
-            </span>
+            <span className="text-success">{isAr ? "تم" : "Done"}</span>
           ) : (
             <span className="text-muted">
-              {isAr ? 'اختر ملفاً' : 'Choose file'}
+              {isAr ? "اختر ملفاً" : "Choose file"}
             </span>
           )}
         </div>
@@ -656,37 +674,43 @@ function StepReview({
   vehicle: Vehicle;
   docs: UploadedDocs;
 }) {
-  const isAr = locale === 'ar';
+  const isAr = locale === "ar";
   return (
     <div className="space-y-5">
       <h3 className="text-xl font-extrabold text-pearl">
-        {isAr ? 'مراجعة الطلب' : 'Review your application'}
+        {isAr ? "مراجعة الطلب" : "Review your application"}
       </h3>
       <p className="text-muted text-sm">
         {isAr
-          ? 'تأكَّد من البيانات قبل الإرسال. ستصلك رسالة بنتيجة المراجعة خلال 48 ساعة.'
-          : 'Double-check everything below. We respond within 48 hours.'}
+          ? "تأكَّد من البيانات قبل الإرسال. ستصلك رسالة بنتيجة المراجعة خلال 48 ساعة."
+          : "Double-check everything below. We respond within 48 hours."}
       </p>
 
-      <Section title={isAr ? 'البيانات الشخصية' : 'Personal info'}>
-        <SummaryRow label={isAr ? 'الاسم' : 'Name'} value={personal.fullName} />
-        <SummaryRow label={isAr ? 'البريد' : 'Email'} value={personal.email} />
-        <SummaryRow label={isAr ? 'الجوال' : 'Phone'} value={personal.phone} />
-        <SummaryRow label={isAr ? 'المدينة' : 'City'} value={personal.city} />
+      <Section title={isAr ? "البيانات الشخصية" : "Personal info"}>
+        <SummaryRow label={isAr ? "الاسم" : "Name"} value={personal.fullName} />
+        <SummaryRow label={isAr ? "البريد" : "Email"} value={personal.email} />
+        <SummaryRow label={isAr ? "الجوال" : "Phone"} value={personal.phone} />
+        <SummaryRow label={isAr ? "المدينة" : "City"} value={personal.city} />
       </Section>
 
-      <Section title={isAr ? 'السيارة' : 'Vehicle'}>
+      <Section title={isAr ? "السيارة" : "Vehicle"}>
         <SummaryRow
-          label={isAr ? 'الماركة/الموديل' : 'Brand/Model'}
+          label={isAr ? "الماركة/الموديل" : "Brand/Model"}
           value={`${vehicle.vehicleBrand} ${vehicle.vehicleModel} (${vehicle.vehicleYear})`}
         />
         {vehicle.vehicleColor ? (
-          <SummaryRow label={isAr ? 'اللون' : 'Color'} value={vehicle.vehicleColor} />
+          <SummaryRow
+            label={isAr ? "اللون" : "Color"}
+            value={vehicle.vehicleColor}
+          />
         ) : null}
-        <SummaryRow label={isAr ? 'اللوحة' : 'Plate'} value={vehicle.plateNumber} />
+        <SummaryRow
+          label={isAr ? "اللوحة" : "Plate"}
+          value={vehicle.plateNumber}
+        />
       </Section>
 
-      <Section title={isAr ? 'الوثائق' : 'Documents'}>
+      <Section title={isAr ? "الوثائق" : "Documents"}>
         {DOCS.map((d) => (
           <SummaryRow
             key={d.type}
@@ -695,11 +719,11 @@ function StepReview({
               docs[d.type] ? (
                 <span className="inline-flex items-center gap-1 text-success font-semibold">
                   <CircleDot className="w-3 h-3" />
-                  {isAr ? 'مرفوع' : 'Uploaded'}
+                  {isAr ? "مرفوع" : "Uploaded"}
                 </span>
               ) : (
                 <span className="text-danger">
-                  {isAr ? 'مفقود' : 'Missing'}
+                  {isAr ? "مفقود" : "Missing"}
                 </span>
               )
             }
@@ -719,14 +743,14 @@ function Success({
   locale: Locale;
   applicationId: number;
 }) {
-  const isAr = locale === 'ar';
+  const isAr = locale === "ar";
   return (
     <div className="bg-ash/60 border border-success/40 rounded-2xl p-8 text-center shadow-card-xl">
       <div className="w-16 h-16 rounded-2xl bg-success/15 text-success mx-auto grid place-items-center mb-4">
         <CheckCircle2 className="w-10 h-10" />
       </div>
       <h2 className="text-2xl sm:text-3xl font-extrabold text-pearl mb-2">
-        {isAr ? 'استلمنا طلبك!' : 'Application received!'}
+        {isAr ? "استلمنا طلبك!" : "Application received!"}
       </h2>
       <p className="text-muted mb-6">
         {isAr
@@ -736,22 +760,22 @@ function Success({
       <div className="grid sm:grid-cols-2 gap-3 max-w-md mx-auto text-start text-sm">
         <div className="bg-obsidian/60 border border-stone/60 rounded-xl p-4">
           <div className="text-ember font-bold mb-1">
-            {isAr ? '1. مراجعة الوثائق' : '1. Document review'}
+            {isAr ? "1. مراجعة الوثائق" : "1. Document review"}
           </div>
           <div className="text-muted text-xs">
             {isAr
-              ? 'نتحقَّق من الصلاحية والوضوح.'
+              ? "نتحقَّق من الصلاحية والوضوح."
               : "We verify validity and clarity."}
           </div>
         </div>
         <div className="bg-obsidian/60 border border-stone/60 rounded-xl p-4">
           <div className="text-ember font-bold mb-1">
-            {isAr ? '2. تفعيل الحساب' : '2. Account activation'}
+            {isAr ? "2. تفعيل الحساب" : "2. Account activation"}
           </div>
           <div className="text-muted text-xs">
             {isAr
-              ? 'عند القبول نُرسل لك بيانات الدخول.'
-              : 'On approval we send your login details.'}
+              ? "عند القبول نُرسل لك بيانات الدخول."
+              : "On approval we send your login details."}
           </div>
         </div>
       </div>
@@ -763,7 +787,7 @@ function Success({
 
 function TextField({
   label,
-  type = 'text',
+  type = "text",
   value,
   onChange,
   required,
@@ -818,7 +842,7 @@ function SummaryRow({
   return (
     <div className="flex justify-between text-sm py-1 border-b border-stone/30 last:border-0">
       <span className="text-muted">{label}</span>
-      <span className="text-pearl font-semibold text-end">{value || '—'}</span>
+      <span className="text-pearl font-semibold text-end">{value || "—"}</span>
     </div>
   );
 }

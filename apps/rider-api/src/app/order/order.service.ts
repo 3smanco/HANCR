@@ -59,7 +59,6 @@ const SHARE_MAX_BEARING_DIFF = 60;
 
 const CURRENT_ACTIVE_ORDER_STATUSES: OrderStatus[] = [
   OrderStatus.Requested,
-  OrderStatus.NotFound,
   OrderStatus.Found,
   OrderStatus.DriverAccepted,
   OrderStatus.WaitingForPrePay,

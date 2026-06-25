@@ -1,10 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { randomBytes } from 'crypto';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { randomBytes } from "crypto";
+import { buildLocalUploadTarget } from "@hancr/uploads";
 import {
   ApplicationDocUploadUrlType,
   GenerateApplicationDocUploadUrlInput,
-} from './dto/driver-application.types';
+} from "./dto/driver-application.types";
 
 /**
  * M2 — Signed upload URLs for the public driver-application funnel.
@@ -28,22 +29,23 @@ export class ApplicationUploadUrlService {
   async generate(
     input: GenerateApplicationDocUploadUrlInput,
   ): Promise<ApplicationDocUploadUrlType> {
-    const bucket = this.cfg.get<string>('GCS_DRIVER_DOCS_BUCKET');
-    const saJson = this.cfg.get<string>('GCS_SERVICE_ACCOUNT_JSON');
+    const bucket = this.cfg.get<string>("GCS_DRIVER_DOCS_BUCKET");
+    const saJson = this.cfg.get<string>("GCS_SERVICE_ACCOUNT_JSON");
     const ext = extensionFor(input.contentType);
-    const objectKey = `applications/${Date.now()}-${randomBytes(8).toString('hex')}/${input.type}${ext}`;
+    const objectKey = `applications/${Date.now()}-${randomBytes(8).toString("hex")}/${input.type}${ext}`;
 
     if (bucket && saJson) {
       try {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { Storage } = require('@google-cloud/storage') as typeof import('@google-cloud/storage');
+        const { Storage } =
+          require("@google-cloud/storage") as typeof import("@google-cloud/storage");
         const credentials = JSON.parse(saJson) as Record<string, unknown>;
         const storage = new Storage({ credentials });
         const file = storage.bucket(bucket).file(objectKey);
         const expiresIn = 60 * 10;
         const [uploadUrl] = await file.getSignedUrl({
-          version: 'v4',
-          action: 'write',
+          version: "v4",
+          action: "write",
           expires: Date.now() + expiresIn * 1000,
           contentType: input.contentType,
         });
@@ -55,26 +57,28 @@ export class ApplicationUploadUrlService {
         };
       } catch (err) {
         this.logger.warn(
-          `GCS signed-URL generation failed (${(err as Error).message}); falling back to placeholder`,
+          `GCS signed-URL generation failed (${(err as Error).message}); falling back to local upload`,
         );
       }
     }
 
-    const base = this.cfg.get<string>('PUBLIC_UPLOADS_BASE') ?? '/uploads';
-    return {
-      uploadUrl: `${base}/${objectKey}`,
-      publicUrl: `${base}/${objectKey}`,
+    return buildLocalUploadTarget(this.cfg, {
       objectKey,
-      expiresIn: 600,
-    };
+      contentType: input.contentType,
+      apiMount: "admin",
+    });
   }
 }
 
 function extensionFor(contentType: string): string {
   switch (contentType) {
-    case 'image/png': return '.png';
-    case 'image/webp': return '.webp';
-    case 'application/pdf': return '.pdf';
-    default: return '.jpg';
+    case "image/png":
+      return ".png";
+    case "image/webp":
+      return ".webp";
+    case "application/pdf":
+      return ".pdf";
+    default:
+      return ".jpg";
   }
 }

@@ -37,7 +37,9 @@
       "@hancr/sos": ["libs/sos/src/index.ts"],
       "@hancr/sos/*": ["libs/sos/src/lib/*"],
       "@hancr/observability": ["libs/observability/src/index.ts"],
-      "@hancr/observability/*": ["libs/observability/src/lib/*"]
+      "@hancr/observability/*": ["libs/observability/src/lib/*"],
+      "@hancr/uploads": ["libs/uploads/src/index.ts"],
+      "@hancr/uploads/*": ["libs/uploads/src/lib/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]
