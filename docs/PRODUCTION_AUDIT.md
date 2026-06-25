@@ -142,46 +142,53 @@ API because the current integration does not have the `workflow` scope.
 
 ## Dependency Risk
 
-Production dependency audit still needs a dedicated major-upgrade pass. Recheck
-the current state with:
+Production dependency audit has completed the first major-upgrade pass for the
+API runtime. Recheck the current state with:
 
 ```bash
 npm run audit:prod:summary
 npm run audit:prod:fix-dry-run
 ```
 
-A non-breaking cleanup pass removed unused `@nestjs/platform-express`, upgraded
-`nodemailer` to `^9.0.1`, and moved admin-panel to Next `^14.2.35`. A
-conservative `npm audit fix --omit=dev --package-lock-only` pass was tested
-afterward and not committed because it did not reduce the production audit risk
-set; it only churned lockfile metadata and surfaced additional dev/optional
-noise. Boolean `fixAvailable: true` entries in npm audit are advisory metadata,
-not proof that npm can apply a safe non-breaking fix. Use
+- Root API dependencies were upgraded across Nest 11, Fastify 5, Apollo Server
+  5, GraphQL 16.11, `@fastify/static` 9.1, and compatible Nest integrations.
+- The old `nestjs-throttler-storage-redis` package was removed because it does
+  not support Nest 11 peers. A local Redis-backed `ThrottlerStorage`
+  implementation now keeps rate limits shared across PM2 processes.
+- GraphQL development landing pages now use Apollo Server 5's local landing
+  page plugin instead of enabling the deprecated GraphQL Playground behavior.
+- `ws` is pinned through npm `overrides` to 8.21.0 to clear the vulnerable
+  transitive version used by GraphQL subscriptions.
+
+Boolean `fixAvailable: true` entries in npm audit are advisory metadata, not
+proof that npm can apply a safe non-breaking fix. Use
 `npm run audit:prod:fix-dry-run` to verify whether npm can actually make a
 package-lock-only change.
 
-- Root production audit: 31 vulnerabilities total
-  - 1 critical
-  - 8 high
-  - 22 moderate
+- Root production audit: 9 vulnerabilities total
+  - 0 critical
+  - 0 high
+  - 9 moderate
 - Admin panel production audit: 2 vulnerabilities total
   - 1 high
   - 1 moderate
 
-Remaining fixes require breaking upgrades or a dedicated migration plan.
-Notable packages to review first:
+Remaining root API findings are Firebase/Admin SDK transitive advisories plus
+advisory-only `ajv` and `gaxios` entries. Current dry-run evidence shows no safe
+`npm audit fix` lockfile change for them.
 
-- `@fastify/middie` / `@nestjs/platform-fastify`
-- `fastify`
-- `@apollo/server` / `@nestjs/apollo`
-- `next`
-- `firebase-admin`
-- `@nestjs/config`
+Known dependency metadata note: `@nestjs/apollo@13.4.2` still depends on the
+deprecated `@apollo/server-plugin-landing-page-graphql-playground@4.0.1`, whose
+peer range only declares Apollo Server 4. Runtime config disables Playground and
+uses Apollo Server 5's local landing page plugin, but `npm ls` still reports
+that upstream peer mismatch until Nest Apollo removes the deprecated dependency
+in a stable release.
 
-`npm run audit:prod:summary` also lists advisory-only candidates (`ajv`,
-`file-type`, `gaxios`, and related transitive packages). Current dry-run
-evidence shows no safe `npm audit fix` lockfile change for them, so they should
-be handled through explicit migration testing rather than automatic fixes.
+The next dependency pass should focus on:
+
+- `firebase-admin` transitive advisories and available upstream guidance.
+- Admin-panel Next.js/PostCSS advisories, which currently require a larger Next
+  migration.
 
 ## Operational Follow-ups
 
