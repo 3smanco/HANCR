@@ -54,7 +54,11 @@ import { NotificationsModule } from '@hancr/notifications';
 import { ScheduleModule } from '@nestjs/schedule';
 
 // Observability
-import { ObservabilityModule, buildGraphqlContext } from '@hancr/observability';
+import {
+  ObservabilityModule,
+  buildApolloLandingPagePlugins,
+  buildGraphqlContext,
+} from '@hancr/observability';
 
 @Module({
   imports: [
@@ -97,8 +101,9 @@ import { ObservabilityModule, buildGraphqlContext } from '@hancr/observability';
           ? true
           : join(process.cwd(), 'apps/admin-api/schema.gql'),
       sortSchema: true,
-      playground: process.env['NODE_ENV'] !== 'production',
+      playground: false,
       introspection: process.env['NODE_ENV'] !== 'production',
+      plugins: buildApolloLandingPagePlugins(),
       subscriptions: {
         'graphql-ws': true,
       },

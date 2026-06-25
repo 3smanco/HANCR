@@ -15,7 +15,11 @@ import { HancrRedisModule } from '@hancr/redis';
 import { NotificationsModule } from '@hancr/notifications';
 import { WalletModule as HancrWalletModule } from '@hancr/wallet';
 import { SosModule as HancrSosModule } from '@hancr/sos';
-import { ObservabilityModule, buildGraphqlContext } from '@hancr/observability';
+import {
+  ObservabilityModule,
+  buildApolloLandingPagePlugins,
+  buildGraphqlContext,
+} from '@hancr/observability';
 
 // Feature Modules
 import { AuthModule } from './auth/auth.module';
@@ -61,8 +65,9 @@ import { pubSubProvider } from './pubsub.provider';
           ? true
           : join(process.cwd(), 'apps/driver-api/schema.gql'),
       sortSchema: true,
-      playground: process.env['NODE_ENV'] !== 'production',
+      playground: false,
       introspection: process.env['NODE_ENV'] !== 'production',
+      plugins: buildApolloLandingPagePlugins(),
       subscriptions: { 'graphql-ws': true },
       context: buildGraphqlContext,
     }),

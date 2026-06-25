@@ -3,12 +3,12 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TerminusModule } from '@nestjs/terminus';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import Redis from 'ioredis';
 import { HealthController } from './health.controller';
 import { SentryExceptionFilter } from './sentry-exception.filter';
 import { HANCR_THROTTLER_CONFIG } from './throttler.config';
 import { GqlThrottlerGuard } from './gql-throttler.guard';
+import { HancrRedisThrottlerStorage } from './redis-throttler-storage';
 
 /**
  * ObservabilityModule — Health + Sentry + Throttler (with GraphQL support).
@@ -25,7 +25,7 @@ import { GqlThrottlerGuard } from './gql-throttler.guard';
       inject: [ConfigService],
       useFactory: (cfg: ConfigService) => ({
         throttlers: HANCR_THROTTLER_CONFIG,
-        storage: new ThrottlerStorageRedisService(
+        storage: new HancrRedisThrottlerStorage(
           new Redis({
             host: cfg.get<string>('REDIS_HOST', 'localhost'),
             port: cfg.get<number>('REDIS_PORT', 6379),

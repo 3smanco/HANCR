@@ -13,6 +13,8 @@ export { HealthController } from './lib/health.controller';
 export { HANCR_THROTTLER_CONFIG } from './lib/throttler.config';
 export { GqlThrottlerGuard } from './lib/gql-throttler.guard';
 export { buildGraphqlContext } from './lib/graphql-context';
+export { buildApolloLandingPagePlugins } from './lib/apollo-landing-page';
+export { HancrRedisThrottlerStorage } from './lib/redis-throttler-storage';
 export type {
   GraphqlContextSource,
   HancrGraphqlContext,

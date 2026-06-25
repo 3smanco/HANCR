@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RiderEntity, RiderDeviceEntity } from '@hancr/database';
 import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
 import { JwtStrategy, requireSecret } from './jwt.strategy';
+
+type JwtExpiresIn = NonNullable<JwtModuleOptions['signOptions']>['expiresIn'];
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { JwtStrategy, requireSecret } from './jwt.strategy';
       useFactory: (cfg: ConfigService) => ({
         secret: requireSecret(cfg, 'JWT_SECRET'),
         signOptions: {
-          expiresIn: cfg.get<string>('JWT_EXPIRES_IN') ?? '7d',
+          expiresIn: cfg.get<JwtExpiresIn>('JWT_EXPIRES_IN') ?? '7d',
         },
       }),
     }),
