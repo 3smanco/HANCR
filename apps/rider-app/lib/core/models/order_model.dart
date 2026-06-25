@@ -65,6 +65,7 @@ enum OrderStatus {
   }
 
   bool get isActive => ![
+        OrderStatus.notFound,
         OrderStatus.finished,
         OrderStatus.riderCanceled,
         OrderStatus.driverCanceled,

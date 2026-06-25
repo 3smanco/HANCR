@@ -86,3 +86,31 @@ Future<void> _launch(BuildContext context, Uri uri) async {
     );
   }
 }
+
+/// يفتح رابطاً خارجياً في المتصفّح أو التطبيق المناسب.
+Future<void> launchExternalUrl(BuildContext context, String url) async {
+  final fixed = url.startsWith('http') ? url : 'https://$url';
+  await _launch(context, Uri.parse(fixed));
+}
+
+/// يفتح بريد الدعم لمراسلة فريق HANCR.
+Future<void> launchSupportEmail(BuildContext context, {String? subject}) async {
+  final uri = Uri(
+    scheme: 'mailto',
+    path: 'support@hancr.com',
+    query: subject != null ? 'subject=${Uri.encodeComponent(subject)}' : null,
+  );
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  } else if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('support@hancr.com')),
+    );
+  }
+}
+
+/// يفتح محادثة واتساب مع رقم الدعم إن توفر واتساب/متصفح خارجي.
+Future<void> launchSupportWhatsApp(BuildContext context, {String? text}) async {
+  final query = text == null ? '' : '?text=${Uri.encodeComponent(text)}';
+  await _launch(context, Uri.parse('https://wa.me/966500000000$query'));
+}

@@ -1,18 +1,19 @@
 // CRITICAL: initSentry يجب أن يُستدعى قبل أي import آخر
-import { initSentry } from '@hancr/observability';
-initSentry('rider-api');
+import { initSentry } from "@hancr/observability";
+initSentry("rider-api");
 
-import 'reflect-metadata';
-import { NestFactory } from '@nestjs/core';
+import "reflect-metadata";
+import { NestFactory } from "@nestjs/core";
 import {
   FastifyAdapter,
   NestFastifyApplication,
-} from '@nestjs/platform-fastify';
-import { ValidationPipe, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { RiderApiModule } from './app/rider-api.module';
+} from "@nestjs/platform-fastify";
+import { ValidationPipe, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { registerLocalUploads } from "@hancr/uploads";
+import { RiderApiModule } from "./app/rider-api.module";
 
-const logger = new Logger('RiderAPI');
+const logger = new Logger("RiderAPI");
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -45,7 +46,7 @@ async function bootstrap(): Promise<void> {
   // =============================================
   await app.register(
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('@fastify/helmet'),
+    require("@fastify/helmet"),
     {
       contentSecurityPolicy: false, // GraphQL playground يحتاج inline scripts
       crossOriginEmbedderPolicy: false,
@@ -56,34 +57,36 @@ async function bootstrap(): Promise<void> {
   // CORS — whitelist في الإنتاج
   // =============================================
   const config = app.get(ConfigService);
-  const env = config.get<string>('NODE_ENV') ?? 'development';
-  const corsOrigins = config.get<string>('CORS_ORIGINS') ?? '';
+  const env = config.get<string>("NODE_ENV") ?? "development";
+  const corsOrigins = config.get<string>("CORS_ORIGINS") ?? "";
   // أمن: في الإنتاج لا نعكس أي origin مع credentials. لو CORS_ORIGINS فارغ
   // نقع على نطاقات hancr الافتراضية (fail-closed) بدل origin:true.
   const allowedOrigins =
-    env === 'production'
-      ? (corsOrigins
-          ? corsOrigins.split(',').map((s) => s.trim())
-          : [
-              'https://hancr.com',
-              'https://www.hancr.com',
-              'https://admin.hancr.com',
-            ])
+    env === "production"
+      ? corsOrigins
+        ? corsOrigins.split(",").map((s) => s.trim())
+        : [
+            "https://hancr.com",
+            "https://www.hancr.com",
+            "https://admin.hancr.com",
+          ]
       : true;
 
   await app.register(
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('@fastify/cors'),
+    require("@fastify/cors"),
     {
       origin: allowedOrigins,
       credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     },
   );
 
-  const port = config.get<number>('RIDER_API_PORT') ?? 3000;
+  await registerLocalUploads(app, config);
 
-  await app.listen(port, '0.0.0.0');
+  const port = config.get<number>("RIDER_API_PORT") ?? 3000;
+
+  await app.listen(port, "0.0.0.0");
 
   logger.log(`========================================`);
   logger.log(` HANCR Rider API — ${env.toUpperCase()}`);

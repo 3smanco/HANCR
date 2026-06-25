@@ -15,6 +15,7 @@ import '../../core/graphql/gql/order_gql.dart';
 import '../../core/i18n/app_localization.dart';
 import '../../core/models/order_model.dart';
 import '../../core/services/storage_service.dart';
+import '../../core/utils/external_launch.dart';
 import '../../core/account_version.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../../core/motion/motion.dart';
@@ -213,17 +214,42 @@ class HelpCenterScreen extends StatelessWidget {
           const SizedBox(height: AuroraSpacing.lg),
           Text(tr('contactUs'), style: AuroraText.titleMedium),
           const SizedBox(height: AuroraSpacing.md),
-          _contactRow(context, Icons.email_outlined, 'support@hancr.com'),
+          _contactRow(
+            context,
+            Icons.email_outlined,
+            'support@hancr.com',
+            onTap: () => launchSupportEmail(context, subject: tr('support')),
+          ),
           const SizedBox(height: AuroraSpacing.sm),
-          _contactRow(context, Icons.phone_outlined, '+966 50 000 0000'),
+          _contactRow(
+            context,
+            Icons.phone_outlined,
+            '+966 50 000 0000',
+            onTap: () => launchPhoneCall(context, '+966500000000'),
+          ),
         ],
       ),
     );
   }
 
-  Widget _contactRow(BuildContext context, IconData icon, String value) {
+  Widget _contactRow(
+    BuildContext context,
+    IconData icon,
+    String value, {
+    VoidCallback? onTap,
+  }) {
     return GestureDetector(
-      onTap: () {
+      onTap: onTap ??
+          () {
+            Clipboard.setData(ClipboardData(text: value));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${tr('copied')}: $value'),
+                backgroundColor: AuroraColors.smoke,
+              ),
+            );
+          },
+      onLongPress: () {
         Clipboard.setData(ClipboardData(text: value));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

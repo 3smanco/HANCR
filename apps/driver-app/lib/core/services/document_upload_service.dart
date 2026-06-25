@@ -27,8 +27,9 @@ class DocumentUploadService {
       source: source,
       maxWidth: 2000,
       imageQuality: 85,
-      preferredCameraDevice:
-          frontCamera ? CameraDevice.front : CameraDevice.rear,
+      preferredCameraDevice: frontCamera
+          ? CameraDevice.front
+          : CameraDevice.rear,
     );
   }
 
@@ -41,39 +42,46 @@ class DocumentUploadService {
     final contentType = _guessContentType(file.path);
 
     // 1) رابط PUT موقّع.
-    final urlRes = await client.mutate(MutationOptions(
-      document: gql(generateUploadUrlMutation),
-      variables: {
-        'input': {'type': type, 'contentType': contentType},
-      },
-    ));
+    final urlRes = await client.mutate(
+      MutationOptions(
+        document: gql(generateUploadUrlMutation),
+        variables: {
+          'input': {'type': type, 'contentType': contentType},
+        },
+      ),
+    );
     if (urlRes.hasException) throw urlRes.exception!;
-    final urlData = urlRes.data?['generateDriverDocumentUploadUrl']
-        as Map<String, dynamic>?;
+    final urlData =
+        urlRes.data?['generateDriverDocumentUploadUrl']
+            as Map<String, dynamic>?;
     if (urlData == null) throw Exception('No upload URL returned');
     final uploadUrl = urlData['uploadUrl'] as String;
     final publicUrl = urlData['publicUrl'] as String;
 
-    // 2) رفع البايتات للتخزين (يُتخطّى احتياط dev غير http).
-    if (uploadUrl.startsWith('http')) {
-      final bytes = await File(file.path).readAsBytes();
-      final put = await http.put(
-        Uri.parse(uploadUrl),
-        headers: {'Content-Type': contentType},
-        body: bytes,
-      );
-      if (put.statusCode < 200 || put.statusCode >= 300) {
-        throw Exception('Upload failed (${put.statusCode})');
-      }
+    // 2) رفع البايتات للتخزين.
+    final uploadUri = Uri.parse(uploadUrl);
+    if (!uploadUri.hasScheme) {
+      throw Exception('Invalid upload URL');
+    }
+    final bytes = await File(file.path).readAsBytes();
+    final put = await http.put(
+      uploadUri,
+      headers: {'Content-Type': contentType},
+      body: bytes,
+    );
+    if (put.statusCode < 200 || put.statusCode >= 300) {
+      throw Exception('Upload failed (${put.statusCode})');
     }
 
     // 3) تسجيل الوثيقة (تعود حالتها pending للمراجعة).
-    final res = await client.mutate(MutationOptions(
-      document: gql(uploadDocumentMutation),
-      variables: {
-        'input': {'type': type, 'url': publicUrl},
-      },
-    ));
+    final res = await client.mutate(
+      MutationOptions(
+        document: gql(uploadDocumentMutation),
+        variables: {
+          'input': {'type': type, 'url': publicUrl},
+        },
+      ),
+    );
     if (res.hasException) throw res.exception!;
 
     return DocUploadResult(publicUrl: publicUrl);

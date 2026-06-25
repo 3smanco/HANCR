@@ -4073,6 +4073,76 @@ const Map<String, Map<String, String>> _t = {
     'fr': 'Retour à l\'accueil',
     'tr': 'Ana sayfaya dön'
   },
+  'searchingDriver': {
+    'ar': 'جاري البحث',
+    'en': 'Searching',
+    'ur': 'تلاش جاری ہے',
+    'hi': 'खोज जारी है',
+    'bn': 'খোঁজা হচ্ছে',
+    'fil': 'Naghahanap',
+    'fr': 'Recherche',
+    'tr': 'Aranıyor'
+  },
+  'searchingDriverTitle': {
+    'ar': 'نبحث عن أقرب سائق',
+    'en': 'Finding the nearest driver',
+    'ur': 'قریب ترین ڈرائیور تلاش کیا جا رہا ہے',
+    'hi': 'नज़दीकी ड्राइवर खोज रहे हैं',
+    'bn': 'নিকটতম ড্রাইভার খোঁজা হচ্ছে',
+    'fil': 'Hinahanap ang pinakamalapit na driver',
+    'fr': 'Recherche du chauffeur le plus proche',
+    'tr': 'En yakın sürücü aranıyor'
+  },
+  'searchingDriverBody': {
+    'ar': 'سنعرض بيانات السائق وأزرار التواصل فور قبول الطلب.',
+    'en':
+        'Driver details and contact actions will appear once the ride is accepted.',
+    'ur': 'درخواست قبول ہوتے ہی ڈرائیور کی تفصیل اور رابطہ ظاہر ہوگا۔',
+    'hi': 'राइड स्वीकार होते ही ड्राइवर विवरण और संपर्क दिखेंगे।',
+    'bn': 'রাইড গ্রহণ হলেই ড্রাইভারের তথ্য ও যোগাযোগ দেখা যাবে।',
+    'fil': 'Lalabas ang driver details at contact kapag natanggap ang biyahe.',
+    'fr':
+        'Les détails du chauffeur et les actions de contact apparaîtront après acceptation.',
+    'tr': 'Sürücü kabul edince bilgiler ve iletişim seçenekleri görünecek.'
+  },
+  'noDriversTitle': {
+    'ar': 'لا يوجد سائق متاح الآن',
+    'en': 'No driver available now',
+    'ur': 'فی الحال کوئی ڈرائیور دستیاب نہیں',
+    'hi': 'अभी कोई ड्राइवर उपलब्ध नहीं है',
+    'bn': 'এখন কোনো ড্রাইভার নেই',
+    'fil': 'Walang available na driver ngayon',
+    'fr': 'Aucun chauffeur disponible',
+    'tr': 'Şu anda sürücü yok'
+  },
+  'noDriversBody': {
+    'ar':
+        'لم نقفل حسابك بطلب معلّق. يمكنك تعديل الموقع أو المحاولة مرة أخرى مباشرة.',
+    'en':
+        'You are not stuck with a pending ride. Adjust the pickup point or try again.',
+    'ur':
+        'آپ کسی زیر التوا سواری میں پھنسے نہیں ہیں۔ مقام بدلیں یا دوبارہ کوشش کریں۔',
+    'hi':
+        'आप किसी लंबित राइड में अटके नहीं हैं। स्थान बदलें या फिर कोशिश करें।',
+    'bn': 'আপনি কোনো পেন্ডিং রাইডে আটকে নেই। পিকআপ বদলান বা আবার চেষ্টা করুন।',
+    'fil': 'Hindi ka stuck sa pending ride. Baguhin ang pickup o subukan ulit.',
+    'fr':
+        'Vous n’êtes pas bloqué sur une course en attente. Modifiez le point de départ ou réessayez.',
+    'tr':
+        'Bekleyen bir yolculukta takılı kalmadınız. Konumu değiştirin veya tekrar deneyin.'
+  },
+  'noDriversAvailableNow': {
+    'ar':
+        'لا يوجد سائقون متاحون الآن. يمكنك تعديل نقطة الالتقاط أو المحاولة مرة أخرى.',
+    'en': 'No drivers are available now. Adjust the pickup point or try again.',
+    'ur': 'فی الحال ڈرائیور دستیاب نہیں۔ مقام بدلیں یا دوبارہ کوشش کریں۔',
+    'hi': 'अभी ड्राइवर उपलब्ध नहीं हैं। पिकअप बदलें या फिर कोशिश करें।',
+    'bn': 'এখন ড্রাইভার পাওয়া যাচ্ছে না। পিকআপ বদলান বা আবার চেষ্টা করুন।',
+    'fil':
+        'Walang available na driver ngayon. Baguhin ang pickup o subukan ulit.',
+    'fr': 'Aucun chauffeur n’est disponible. Modifiez le départ ou réessayez.',
+    'tr': 'Şu anda sürücü yok. Alış noktasını değiştirin veya tekrar deneyin.'
+  },
 
   // ─── Rate ───
   'rateTitle': {

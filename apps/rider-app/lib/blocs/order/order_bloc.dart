@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/order_gql.dart';
+import '../../core/i18n/app_localization.dart';
 import '../../core/models/order_model.dart';
 import 'order_event.dart';
 import 'order_state.dart';
@@ -114,6 +115,10 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         emit(OrderScheduled(order));
         return;
       }
+      if (order.status == OrderStatus.notFound) {
+        emit(OrderError(tr('noDriversAvailableNow')));
+        return;
+      }
       emit(OrderActive(order));
       add(const OrderSubscriptionStart());
     } catch (e) {
@@ -176,6 +181,9 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     if (order.status.awaitingReview) {
       add(const OrderSubscriptionStop());
       emit(OrderAwaitingReview(order));
+    } else if (order.status == OrderStatus.notFound) {
+      add(const OrderSubscriptionStop());
+      emit(OrderError(tr('noDriversAvailableNow')));
     } else if (order.status.isFinished ||
         order.status == OrderStatus.riderCanceled ||
         order.status == OrderStatus.driverCanceled) {

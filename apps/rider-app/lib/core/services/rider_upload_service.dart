@@ -46,17 +46,19 @@ class RiderUploadService {
     final uploadUrl = urlData['uploadUrl'] as String;
     final publicUrl = urlData['publicUrl'] as String;
 
-    // 2) رفع البايتات للتخزين (يُتخطّى احتياط dev غير http).
-    if (uploadUrl.startsWith('http')) {
-      final bytes = await File(file.path).readAsBytes();
-      final put = await http.put(
-        Uri.parse(uploadUrl),
-        headers: {'Content-Type': contentType},
-        body: bytes,
-      );
-      if (put.statusCode < 200 || put.statusCode >= 300) {
-        throw Exception('Upload failed (${put.statusCode})');
-      }
+    // 2) رفع البايتات للتخزين.
+    final uploadUri = Uri.parse(uploadUrl);
+    if (!uploadUri.hasScheme) {
+      throw Exception('Invalid upload URL');
+    }
+    final bytes = await File(file.path).readAsBytes();
+    final put = await http.put(
+      uploadUri,
+      headers: {'Content-Type': contentType},
+      body: bytes,
+    );
+    if (put.statusCode < 200 || put.statusCode >= 300) {
+      throw Exception('Upload failed (${put.statusCode})');
     }
 
     return publicUrl;

@@ -9,18 +9,18 @@ import '../widgets/aurora/aurora.dart';
 Future<void> launchPhoneCall(BuildContext context, String? phone) async {
   final clean = (phone ?? '').replaceAll(' ', '');
   if (clean.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(tr('noPhoneAvailable'))),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(tr('noPhoneAvailable'))));
     return;
   }
   final uri = Uri(scheme: 'tel', path: clean);
   if (await canLaunchUrl(uri)) {
     await launchUrl(uri);
   } else if (context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(tr('cannotCall'))),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(tr('cannotCall'))));
   }
 }
 
@@ -35,36 +35,48 @@ Future<void> openExternalNav(
     context: context,
     backgroundColor: AuroraColors.coal,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(AuroraRadius.xl)),
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(AuroraRadius.xl),
+      ),
     ),
     builder: (ctx) => SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: AuroraSpacing.md),
-          Text(tr('navigateWith'),
-              style: AuroraText.titleSmall.copyWith(color: AuroraColors.pearl)),
+          Text(
+            tr('navigateWith'),
+            style: AuroraText.titleSmall.copyWith(color: AuroraColors.pearl),
+          ),
           const SizedBox(height: AuroraSpacing.sm),
           ListTile(
             leading: Icon(Icons.map, color: AuroraColors.ember),
-            title: Text(tr('googleMaps'),
-                style: AuroraText.bodyMedium
-                    .copyWith(color: AuroraColors.pearl)),
+            title: Text(
+              tr('googleMaps'),
+              style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
+            ),
             onTap: () {
               Navigator.pop(ctx);
-              _launch(context, Uri.parse(
-                  'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving'));
+              _launch(
+                context,
+                Uri.parse(
+                  'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving',
+                ),
+              );
             },
           ),
           ListTile(
             leading: const Icon(Icons.navigation, color: AuroraColors.info),
-            title: Text(tr('waze'),
-                style: AuroraText.bodyMedium
-                    .copyWith(color: AuroraColors.pearl)),
+            title: Text(
+              tr('waze'),
+              style: AuroraText.bodyMedium.copyWith(color: AuroraColors.pearl),
+            ),
             onTap: () {
               Navigator.pop(ctx);
-              _launch(context,
-                  Uri.parse('https://waze.com/ul?ll=$lat,$lng&navigate=yes'));
+              _launch(
+                context,
+                Uri.parse('https://waze.com/ul?ll=$lat,$lng&navigate=yes'),
+              );
             },
           ),
           const SizedBox(height: AuroraSpacing.md),
@@ -78,9 +90,9 @@ Future<void> _launch(BuildContext context, Uri uri) async {
   if (await canLaunchUrl(uri)) {
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   } else if (context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(tr('cannotOpenMaps'))),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(tr('cannotOpenMaps'))));
   }
 }
 
@@ -100,8 +112,14 @@ Future<void> launchSupportEmail(BuildContext context, {String? subject}) async {
   if (await canLaunchUrl(uri)) {
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   } else if (context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('support@hancr.com')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('support@hancr.com')));
   }
+}
+
+/// يفتح محادثة واتساب مع دعم HANCR.
+Future<void> launchSupportWhatsApp(BuildContext context, {String? text}) async {
+  final query = text == null ? '' : '?text=${Uri.encodeComponent(text)}';
+  await _launch(context, Uri.parse('https://wa.me/966500000000$query'));
 }

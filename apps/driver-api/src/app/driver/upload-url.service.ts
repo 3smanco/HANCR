@@ -1,10 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { randomBytes } from 'crypto';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { randomBytes } from "crypto";
+import { buildLocalUploadTarget } from "@hancr/uploads";
 import {
   DocumentUploadUrlType,
   GenerateUploadUrlInput,
-} from './dto/upload-url.type';
+} from "./dto/upload-url.type";
 
 /**
  * K4 — Driver document upload URL generator.
@@ -34,24 +35,25 @@ export class UploadUrlService {
     driverId: number,
     input: GenerateUploadUrlInput,
   ): Promise<DocumentUploadUrlType> {
-    const bucket = this.cfg.get<string>('GCS_DRIVER_DOCS_BUCKET');
-    const saJson = this.cfg.get<string>('GCS_SERVICE_ACCOUNT_JSON');
+    const bucket = this.cfg.get<string>("GCS_DRIVER_DOCS_BUCKET");
+    const saJson = this.cfg.get<string>("GCS_SERVICE_ACCOUNT_JSON");
     const ext = extensionFor(input.contentType);
-    const objectKey = `driver-${driverId}/${input.type}/${Date.now()}-${randomBytes(6).toString('hex')}${ext}`;
+    const objectKey = `driver-${driverId}/${input.type}/${Date.now()}-${randomBytes(6).toString("hex")}${ext}`;
 
     if (bucket && saJson) {
       // Production: real GCS v4 signed URL.
       // Lazy-require so projects without the dependency installed still build.
       try {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { Storage } = require('@google-cloud/storage') as typeof import('@google-cloud/storage');
+        const { Storage } =
+          require("@google-cloud/storage") as typeof import("@google-cloud/storage");
         const credentials = JSON.parse(saJson) as Record<string, unknown>;
         const storage = new Storage({ credentials });
         const file = storage.bucket(bucket).file(objectKey);
         const expiresIn = 60 * 10; // 10 minutes
         const [uploadUrl] = await file.getSignedUrl({
-          version: 'v4',
-          action: 'write',
+          version: "v4",
+          action: "write",
           expires: Date.now() + expiresIn * 1000,
           contentType: input.contentType,
         });
@@ -63,34 +65,31 @@ export class UploadUrlService {
         };
       } catch (err) {
         this.logger.warn(
-          `GCS signed-URL generation failed (${(err as Error).message}); falling back to placeholder URL`,
+          `GCS signed-URL generation failed (${(err as Error).message}); falling back to local upload`,
         );
       }
     }
 
-    // Development / unconfigured fallback.
     this.logger.debug(
-      `Returning placeholder upload URL for driver #${driverId} type=${input.type}`,
+      `Returning local upload URL for driver #${driverId} type=${input.type}`,
     );
-    const base = this.cfg.get<string>('PUBLIC_UPLOADS_BASE') ?? '/uploads';
-    return {
-      uploadUrl: `${base}/${objectKey}`,
-      publicUrl: `${base}/${objectKey}`,
+    return buildLocalUploadTarget(this.cfg, {
       objectKey,
-      expiresIn: 600,
-    };
+      contentType: input.contentType,
+      apiMount: "driver",
+    });
   }
 }
 
 function extensionFor(contentType: string): string {
   switch (contentType) {
-    case 'image/png':
-      return '.png';
-    case 'image/webp':
-      return '.webp';
-    case 'application/pdf':
-      return '.pdf';
+    case "image/png":
+      return ".png";
+    case "image/webp":
+      return ".webp";
+    case "application/pdf":
+      return ".pdf";
     default:
-      return '.jpg';
+      return ".jpg";
   }
 }
