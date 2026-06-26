@@ -476,7 +476,9 @@ class _HelpTopicScreen extends StatelessWidget {
           AuroraButton.primary(
             label: tr('contactUs'),
             icon: Icons.support_agent,
-            onPressed: () => Navigator.of(context).maybePop(),
+            // كان يُغلق الصفحة فقط (يبدو كزر ميت يُخرج المستخدم) — الآن يفتح
+            // بريد الدعم فعلياً بنفس نمط مركز المساعدة.
+            onPressed: () => launchSupportEmail(context, subject: title),
           ),
         ],
       ),

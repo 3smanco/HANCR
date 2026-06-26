@@ -324,7 +324,8 @@ export class AuthService {
   private allowTestIdentities(): boolean {
     const nodeEnv = this.configService.get<string>('NODE_ENV');
     if (nodeEnv === 'development') return true;
-    if (nodeEnv === 'production') return false;
+    // يحترم ALLOW_TEST_PHONES حتى في الإنتاج (للاختبار قبل ترقية Twilio).
+    // أمن: عطّل ALLOW_TEST_PHONES عند الإطلاق الحقيقي لإغلاق أرقام التجربة الستة.
     return (
       this.configService.get<string>('ALLOW_TEST_PHONES', 'false') === 'true'
     );

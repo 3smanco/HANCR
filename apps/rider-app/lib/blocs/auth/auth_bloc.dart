@@ -4,6 +4,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import '../../core/config/app_config.dart';
 import '../../core/graphql/graphql_client.dart';
 import '../../core/graphql/gql/auth_gql.dart';
+import '../../core/graphql/gql/rider_gql.dart';
 import '../../core/services/storage_service.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
@@ -51,11 +52,49 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
     final hasToken = await StorageService.hasToken();
-    if (hasToken) {
+    if (!hasToken) {
+      emit(const AuthUnauthenticated());
+      return;
+    }
+    // تحقّق من **صلاحية** التوكن فعلياً (لا مجرد وجوده) عبر استعلام me خفيف.
+    // يمنع حبس المستخدم في حالة «داخل لكن مرفوض» عند انتهاء الصلاحية/الحظر.
+    try {
+      final client = await GraphQLClientManager.get();
+      final result = await client.query(QueryOptions(
+        document: gql(meQuery),
+        fetchPolicy: FetchPolicy.networkOnly,
+      ));
+      if (result.hasException) {
+        final isAuthErr = result.exception?.graphqlErrors.any((e) {
+              final m = e.message.toLowerCase();
+              return m.contains('unauthorized') || m.contains('unauthenticated');
+            }) ??
+            false;
+        if (isAuthErr) {
+          await StorageService.clearAll();
+          await GraphQLClientManager.reset();
+          emit(const AuthUnauthenticated());
+          return;
+        }
+        // خطأ شبكة فقط (لا خطأ مصادقة) → أبقِ الجلسة (وضع أوفلاين متفائل).
+        final riderId = await StorageService.getRiderId();
+        emit(AuthAuthenticated(riderId: riderId ?? 0, isNewUser: false));
+        return;
+      }
+      final me = result.data?['me'] as Map<String, dynamic>?;
+      if (me == null || me['banned'] == true || me['active'] == false) {
+        await StorageService.clearAll();
+        await GraphQLClientManager.reset();
+        emit(const AuthUnauthenticated());
+        return;
+      }
+      final riderId =
+          me['id'] as int? ?? (await StorageService.getRiderId()) ?? 0;
+      emit(AuthAuthenticated(riderId: riderId, isNewUser: false));
+    } catch (_) {
+      // خطأ غير متوقّع → لا تُسجّل الخروج؛ أبقِ الجلسة كما كانت.
       final riderId = await StorageService.getRiderId();
       emit(AuthAuthenticated(riderId: riderId ?? 0, isNewUser: false));
-    } else {
-      emit(const AuthUnauthenticated());
     }
   }
 
