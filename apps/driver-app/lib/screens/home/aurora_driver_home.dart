@@ -14,6 +14,8 @@ import '../../blocs/order/order_event.dart';
 import '../../blocs/order/order_state.dart';
 import '../../core/models/order_model.dart';
 import 'rate_rider_sheet.dart';
+import 'widgets/incoming_order_sheet.dart';
+import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/sos/sos_bloc.dart';
 import '../../blocs/sos/sos_event.dart';
 import '../../core/graphql/graphql_client.dart';
@@ -36,6 +38,33 @@ class AuroraDriverHome extends StatefulWidget {
 
 class _AuroraDriverHomeState extends State<AuroraDriverHome> {
   int _tab = 0;
+  bool _incomingShown = false;
+
+  /// يعرض لوحة الطلب الوارد عند بثّ [OrderIncoming] من الـ OrderBloc.
+  /// كان هذا الربط مفقوداً: الاشتراك كان يستلم الطلب لكن لا شيء يعرضه —
+  /// السائق يرى إشعار FCM فقط دون ظهور الطلب داخل التطبيق.
+  Future<void> _presentIncoming(BuildContext ctx, DriverOrderModel order) async {
+    if (_incomingShown) return;
+    _incomingShown = true;
+    // نمرّر الـ Blocs صراحةً للـ modal (route جديد) لضمان توفّرها داخل اللوحة.
+    final orderBloc = ctx.read<OrderBloc>();
+    final authBloc = ctx.read<AuthBloc>();
+    await showModalBottomSheet<void>(
+      context: ctx,
+      isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: Colors.transparent,
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: orderBloc),
+          BlocProvider.value(value: authBloc),
+        ],
+        child: IncomingOrderSheet(order: order),
+      ),
+    );
+    _incomingShown = false;
+  }
 
   late final _tabs = const [
     _MapTab(),
@@ -48,24 +77,36 @@ class _AuroraDriverHomeState extends State<AuroraDriverHome> {
   Widget build(BuildContext context) {
     return BlocProvider<SosBloc>(
       create: (_) => SosBloc()..add(const SosLoadRequested()),
-      child: BlocListener<OrderBloc, OrderState>(
-        listenWhen: (prev, curr) =>
-            curr is OrderCompleted ||
-            (curr is OrderActive && curr.completedOrder != null),
-        listener: (ctx, state) {
-          final completed = state is OrderCompleted
-              ? state.order
-              : state is OrderActive
-              ? state.completedOrder
-              : null;
-          if (completed != null && completed.riderId != 0) {
-            RateRiderSheet.show(
-              ctx,
-              orderId: completed.id,
-              riderName: completed.riderName ?? tr('rider'),
-            );
-          }
-        },
+      child: MultiBlocListener(
+        listeners: [
+          // طلب وارد جديد → عرض لوحة القبول/الرفض
+          BlocListener<OrderBloc, OrderState>(
+            listenWhen: (prev, curr) => curr is OrderIncoming,
+            listener: (ctx, state) {
+              if (state is OrderIncoming) _presentIncoming(ctx, state.order);
+            },
+          ),
+          // اكتمال رحلة → فتح تقييم الراكب
+          BlocListener<OrderBloc, OrderState>(
+            listenWhen: (prev, curr) =>
+                curr is OrderCompleted ||
+                (curr is OrderActive && curr.completedOrder != null),
+            listener: (ctx, state) {
+              final completed = state is OrderCompleted
+                  ? state.order
+                  : state is OrderActive
+                  ? state.completedOrder
+                  : null;
+              if (completed != null && completed.riderId != 0) {
+                RateRiderSheet.show(
+                  ctx,
+                  orderId: completed.id,
+                  riderName: completed.riderName ?? tr('rider'),
+                );
+              }
+            },
+          ),
+        ],
         child: Scaffold(
           backgroundColor: AuroraColors.obsidian,
           extendBody: true,

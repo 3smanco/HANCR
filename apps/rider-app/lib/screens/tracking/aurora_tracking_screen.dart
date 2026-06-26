@@ -363,9 +363,10 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
         _mapCtrl = c;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _fitBounds();
-          if (order.points.length > 1) {
+          // المسار الفعلي (يتبع الشوارع) إن توفّر، وإلا نقاط البداية/النهاية.
+          if (order.routeLine.length > 1) {
             _revealRoute(
-                order.points.map((p) => LatLng(p.lat, p.lng)).toList());
+                order.routeLine.map((p) => LatLng(p.lat, p.lng)).toList());
           }
         });
       },
@@ -374,7 +375,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
         zoom: 14,
       ),
       markers: markers,
-      polylines: order.points.length > 1
+      polylines: order.routeLine.length > 1
           ? {
               Polyline(
                 polylineId: const PolylineId('route'),
@@ -382,7 +383,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
                 width: 5,
                 patterns: const [],
                 points: _routeReveal ??
-                    order.points.map((p) => LatLng(p.lat, p.lng)).toList(),
+                    order.routeLine.map((p) => LatLng(p.lat, p.lng)).toList(),
               ),
             }
           : <Polyline>{},
