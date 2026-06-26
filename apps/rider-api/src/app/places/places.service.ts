@@ -3,12 +3,16 @@ import { ConfigService } from '@nestjs/config';
 import { PlacePredictionType, PlaceLocationType } from './place.type';
 
 /**
- * PlacesService — بحث الأماكن عبر **Places API (New)** (المفتاح يبقى في الخادم).
- * searchText يُعيد الاسم + العنوان + الإحداثيات في نداء واحد، فنحسب المسافة
- * من موقع المستخدم ونرتّب النتائج (تظهر الفروع الأقرب أولاً).
+ * PlacesService — بحث الأماكن عبر **Places API (legacy)** (المفتاح يبقى في الخادم).
  *
- * تشغيلي: يلزم تفعيل "Places API (New)" على المشروع + السماح بها في قيود مفتاح
- * GOOGLE_MAPS_API_KEY. وإلا تعود النتائج فارغة (PERMISSION_DENIED).
+ * نستخدم Autocomplete (يُعيد placeId + الوصف) ثم Place Details عند الاختيار
+ * لجلب الإحداثيات. السبب: "Places API (New)" كانت معطَّلة على المشروع
+ * (SERVICE_DISABLED / PERMISSION_DENIED) بينما الـ legacy مفعَّلة وتعمل —
+ * فكان البحث يعود فارغاً دائماً. العميل (rider-app) يدعم أصلاً غياب الإحداثيات
+ * في التوقّعات ويجلبها عبر placeDetails عند اختيار النتيجة.
+ *
+ * تشغيلي: يلزم تفعيل "Places API" (legacy) على المفتاح. للترقية مستقبلاً إلى
+ * Places API (New) فعِّلها من Google Cloud Console ثم بدِّل الـ endpoints.
  */
 @Injectable()
 export class PlacesService {
@@ -19,7 +23,7 @@ export class PlacesService {
     this.apiKey = this.config.get<string>('GOOGLE_MAPS_API_KEY');
   }
 
-  /** بحث نصّي عن مكان مع انحياز للموقع + حساب المسافة + ترتيب بالأقرب. */
+  /** بحث (Autocomplete) عن مكان مع انحياز للموقع. الإحداثيات تُجلب عند الاختيار. */
   async search(
     input: string,
     lat?: number,
@@ -28,122 +32,95 @@ export class PlacesService {
     const q = input.trim();
     if (!this.apiKey || q.length < 2) return [];
     try {
-      const body: Record<string, unknown> = {
-        textQuery: q,
-        languageCode: 'ar',
-        maxResultCount: 8,
-      };
+      const params = new URLSearchParams({
+        input: q,
+        language: 'ar',
+        key: this.apiKey,
+      });
+      // انحياز للموقع الحالي لإظهار النتائج الأقرب أولاً.
       if (lat != null && lng != null) {
-        body.locationBias = {
-          circle: {
-            center: { latitude: lat, longitude: lng },
-            radius: 50000.0,
-          },
-        };
+        params.set('location', `${lat},${lng}`);
+        params.set('radius', '50000');
       }
       const res = await fetch(
-        'https://places.googleapis.com/v1/places:searchText',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Goog-Api-Key': this.apiKey,
-            'X-Goog-FieldMask':
-              'places.id,places.displayName,places.formattedAddress,places.location',
-          },
-          body: JSON.stringify(body),
-          signal: AbortSignal.timeout(5000),
-        },
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?${params.toString()}`,
+        { signal: AbortSignal.timeout(5000) },
       );
       const data = (await res.json()) as {
-        error?: { message?: string };
-        places?: Array<{
-          id: string;
-          displayName?: { text?: string };
-          formattedAddress?: string;
-          location?: { latitude?: number; longitude?: number };
+        status: string;
+        error_message?: string;
+        predictions?: Array<{
+          place_id: string;
+          description?: string;
+          structured_formatting?: {
+            main_text?: string;
+            secondary_text?: string;
+          };
         }>;
       };
-      if (data.error) {
-        this.logger.warn(`Places(New) searchText error: ${data.error.message}`);
+      // ZERO_RESULTS حالة طبيعية (لا نتائج) — لا تُسجَّل كخطأ.
+      if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+        this.logger.warn(
+          `Places autocomplete status=${data.status}` +
+            (data.error_message ? ` — ${data.error_message}` : ''),
+        );
         return [];
       }
-      const out = (data.places ?? []).map((p) => {
-        const plat = p.location?.latitude;
-        const plng = p.location?.longitude;
-        return {
-          placeId: p.id,
-          title: p.displayName?.text ?? p.formattedAddress ?? '',
-          subtitle: p.formattedAddress,
-          lat: plat,
-          lng: plng,
-          distanceMeters:
-            lat != null && lng != null && plat != null && plng != null
-              ? this.haversine(lat, lng, plat, plng)
-              : undefined,
-        } as PlacePredictionType;
-      });
-      // ترتيب بالأقرب عند توفّر موقع المستخدم
-      if (lat != null && lng != null) {
-        out.sort(
-          (a, b) =>
-            (a.distanceMeters ?? Infinity) - (b.distanceMeters ?? Infinity),
-        );
-      }
-      return out;
+      return (data.predictions ?? []).slice(0, 8).map(
+        (p) =>
+          ({
+            placeId: p.place_id,
+            title: p.structured_formatting?.main_text ?? p.description ?? '',
+            subtitle: p.structured_formatting?.secondary_text,
+            // الإحداثيات تُجلب عند الاختيار عبر details() — Autocomplete لا يعيدها.
+            lat: undefined,
+            lng: undefined,
+            distanceMeters: undefined,
+          }) as PlacePredictionType,
+      );
     } catch (e) {
-      this.logger.warn(`Places(New) searchText failed: ${(e as Error).message}`);
+      this.logger.warn(`Places autocomplete failed: ${(e as Error).message}`);
       return [];
     }
   }
 
-  /** احتياطي: إحداثيات مكان من placeId عبر Place Details (New). */
+  /** إحداثيات مكان من placeId عبر Place Details (legacy). */
   async details(placeId: string): Promise<PlaceLocationType | null> {
     if (!this.apiKey || !placeId) return null;
     try {
+      const params = new URLSearchParams({
+        place_id: placeId,
+        fields: 'geometry,formatted_address',
+        language: 'ar',
+        key: this.apiKey,
+      });
       const res = await fetch(
-        `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?languageCode=ar`,
-        {
-          headers: {
-            'X-Goog-Api-Key': this.apiKey,
-            'X-Goog-FieldMask': 'location,formattedAddress',
-          },
-          signal: AbortSignal.timeout(5000),
-        },
+        `https://maps.googleapis.com/maps/api/place/details/json?${params.toString()}`,
+        { signal: AbortSignal.timeout(5000) },
       );
       const data = (await res.json()) as {
-        error?: { message?: string };
-        location?: { latitude?: number; longitude?: number };
-        formattedAddress?: string;
+        status: string;
+        error_message?: string;
+        result?: {
+          geometry?: { location?: { lat?: number; lng?: number } };
+          formatted_address?: string;
+        };
       };
-      const lat = data.location?.latitude;
-      const lng = data.location?.longitude;
-      if (data.error || lat == null || lng == null) {
-        if (data.error) this.logger.warn(`Place details(New): ${data.error.message}`);
+      const lat = data.result?.geometry?.location?.lat;
+      const lng = data.result?.geometry?.location?.lng;
+      if (data.status !== 'OK' || lat == null || lng == null) {
+        if (data.status !== 'OK') {
+          this.logger.warn(
+            `Place details status=${data.status}` +
+              (data.error_message ? ` — ${data.error_message}` : ''),
+          );
+        }
         return null;
       }
-      return { lat, lng, address: data.formattedAddress };
+      return { lat, lng, address: data.result?.formatted_address };
     } catch (e) {
-      this.logger.warn(`Place details(New) failed: ${(e as Error).message}`);
+      this.logger.warn(`Place details failed: ${(e as Error).message}`);
       return null;
     }
-  }
-
-  /** مسافة هافرسين بالأمتار. */
-  private haversine(
-    lat1: number,
-    lng1: number,
-    lat2: number,
-    lng2: number,
-  ): number {
-    const R = 6371000;
-    const p1 = (lat1 * Math.PI) / 180;
-    const p2 = (lat2 * Math.PI) / 180;
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLng = ((lng2 - lng1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(p1) * Math.cos(p2) * Math.sin(dLng / 2) ** 2;
-    return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
   }
 }

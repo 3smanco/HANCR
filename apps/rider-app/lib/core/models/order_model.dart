@@ -130,7 +130,13 @@ class OrderModel extends Equatable {
   final int distanceBest;
   final int durationBest;
   final List<GeoPoint> points;
+
+  /// مسار الطريق الفعلي (يتبع الشوارع) — قد يكون فارغاً لطلبات قديمة.
+  final List<GeoPoint> directions;
   final List<String> addresses;
+
+  /// الخط المرسوم على الخريطة: المسار الفعلي إن توفّر، وإلا نقاط البداية/النهاية.
+  List<GeoPoint> get routeLine => directions.length > 1 ? directions : points;
   final DateTime? etaPickup;
   final DateTime? startTimestamp;
   final DateTime? finishTimestamp;
@@ -171,6 +177,7 @@ class OrderModel extends Equatable {
     required this.distanceBest,
     required this.durationBest,
     required this.points,
+    this.directions = const [],
     required this.addresses,
     this.etaPickup,
     this.startTimestamp,
@@ -213,6 +220,10 @@ class OrderModel extends Equatable {
                 ?.map((p) => GeoPoint.fromJson(p as Map<String, dynamic>))
                 .toList() ??
             [],
+        directions: (json['directions'] as List<dynamic>?)
+                ?.map((p) => GeoPoint.fromJson(p as Map<String, dynamic>))
+                .toList() ??
+            const [],
         addresses: (json['addresses'] as List<dynamic>?)?.cast<String>() ?? [],
         etaPickup: json['etaPickup'] != null
             ? DateTime.tryParse(json['etaPickup'] as String)

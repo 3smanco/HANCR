@@ -44,6 +44,10 @@ export class OrderType {
   @Field(() => [GeoPointType], { nullable: true })
   points?: GeoPointType[];
 
+  /** مسار الطريق الفعلي (يتبع الشوارع) لرسمه على خريطة التتبّع. */
+  @Field(() => [GeoPointType], { nullable: true })
+  directions?: GeoPointType[];
+
   @Field(() => [String])
   addresses!: string[];
 

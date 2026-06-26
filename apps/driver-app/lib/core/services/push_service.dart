@@ -5,7 +5,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:go_router/go_router.dart';
 import '../graphql/graphql_client.dart';
+import '../router/app_router.dart';
 
 /// PushService — إدارة Firebase Cloud Messaging للـ rider-app
 ///
@@ -68,6 +70,9 @@ class PushService {
       );
       await _localNotifications.initialize(
         const InitializationSettings(android: androidInit, iOS: iosInit),
+        // نقر الإشعار المعروض أثناء فتح التطبيق (foreground) → فتح شاشة الطلبات.
+        onDidReceiveNotificationResponse: (resp) =>
+            _handleTapPayload(resp.payload),
       );
 
       // Android notification channel (required for Android 8+)
@@ -87,6 +92,11 @@ class PushService {
       // ─── Listeners ───
       FirebaseMessaging.onMessage.listen(_onForegroundMessage);
       FirebaseMessaging.instance.onTokenRefresh.listen(_onTokenRefresh);
+      // نقر الإشعار والتطبيق في الخلفية (لكن حيّ) → فتح شاشة الطلبات.
+      FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenedApp);
+      // التطبيق كان مغلقاً تماماً وفُتح عبر نقر الإشعار.
+      final initial = await FirebaseMessaging.instance.getInitialMessage();
+      if (initial != null) _onMessageOpenedApp(initial);
 
       _initialized = true;
     } catch (e) {
@@ -189,8 +199,36 @@ class PushService {
           ),
           iOS: const DarwinNotificationDetails(),
         ),
-        payload: message.data.toString(),
+        // نمرّر نوع الإشعار فقط — يكفي للتوجيه عند النقر.
+        payload: message.data['type'] as String?,
       );
     }
+  }
+
+  /// نقر إشعار والتطبيق في الخلفية/مغلق (RemoteMessage).
+  void _onMessageOpenedApp(RemoteMessage message) {
+    _handleTapPayload(message.data['type'] as String?);
+  }
+
+  /// توجيه موحّد عند نقر أي إشعار: طلب جديد → شاشة الطلبات (Map).
+  /// لوحة الطلب الوارد تظهر تلقائياً عبر اشتراك `newOrderAvailable` ما دام
+  /// الطلب حيّاً (لم تنتهِ مهلته). أنواع أخرى تُترك للسلوك الافتراضي.
+  void _handleTapPayload(String? type) {
+    if (type == 'new_order_for_driver') {
+      _navigateHome();
+    }
+  }
+
+  /// ينتقل لشاشة الرئيسية عبر الـ root navigator، مع إعادة محاولة قصيرة
+  /// إن لم يكن السياق جاهزاً بعد (حالة الفتح من إشعار والتطبيق مغلق).
+  void _navigateHome([int attempt = 0]) {
+    final ctx = rootNavigatorKey.currentContext;
+    if (ctx != null) {
+      ctx.go('/home');
+      return;
+    }
+    if (attempt >= 6) return; // ~3 ثوانٍ كحدّ أقصى
+    Future.delayed(const Duration(milliseconds: 500),
+        () => _navigateHome(attempt + 1));
   }
 }

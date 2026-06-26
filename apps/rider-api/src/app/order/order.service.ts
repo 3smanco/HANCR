@@ -313,6 +313,11 @@ export class OrderService {
         status: OrderStatus.Requested,
         points: input.points.map((p) => ({ lat: p.lat, lng: p.lng })),
         addresses: input.addresses,
+        // مسار الطريق الفعلي (مفكوك من polyline اتجاهات Google) — تستخدمه
+        // شاشة تتبّع الراكب لرسم خط يتبع الشوارع بدل خط مستقيم بين النقطتين.
+        directions: route.polyline
+          ? this.decodePolyline(route.polyline)
+          : undefined,
         distanceBest: distanceMeters,
         durationBest: durationSeconds,
         costBest,
@@ -831,6 +836,38 @@ export class OrderService {
     } catch {
       return [];
     }
+  }
+
+  /**
+   * يفكّ ترميز Google encoded polyline إلى قائمة نقاط ({lat,lng}).
+   * يُخزَّن الناتج في `order.directions` ليرسم العميل المسار على الطرق.
+   */
+  private decodePolyline(encoded: string): Array<{ lat: number; lng: number }> {
+    const points: Array<{ lat: number; lng: number }> = [];
+    let index = 0;
+    let lat = 0;
+    let lng = 0;
+    while (index < encoded.length) {
+      let b: number;
+      let shift = 0;
+      let result = 0;
+      do {
+        b = encoded.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      lat += (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      lng += (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
+      points.push({ lat: lat / 1e5, lng: lng / 1e5 });
+    }
+    return points;
   }
 
   private haversineKm(

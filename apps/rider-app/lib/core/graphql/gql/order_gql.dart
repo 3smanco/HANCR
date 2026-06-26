@@ -11,6 +11,7 @@ const String createOrderMutation = r'''
       durationBest
       etaPickup
       points { lat lng }
+      directions { lat lng }
       addresses
       quietRide
       audioOff
@@ -120,6 +121,7 @@ const String activeOrderQuery = r'''
       plateNumber
       driverAvatarUrl
       points { lat lng }
+      directions { lat lng }
       addresses
       quietRide
       audioOff
