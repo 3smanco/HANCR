@@ -95,18 +95,6 @@ export function buildGraphqlContext(
     headers['authorization'] = authorization;
   }
 
-  // سجل تأكيد مؤقّت (CTXDBG) — يُزال بعد تأكيد عمل الدخول.
-  try {
-    // eslint-disable-next-line no-console
-    console.error(
-      '[CTXDBG] srcKeys=', Object.keys(s),
-      'headerKeys=', Object.keys(headers).slice(0, 20),
-      'authPresent=', !!authorization,
-    );
-  } catch {
-    /* noop */
-  }
-
   req.headers = headers;
   return { req };
 }
