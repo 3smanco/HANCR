@@ -8,13 +8,14 @@ git pull origin main 2>&1 | tail -2
 
 cd /opt/hancr/apps/landing
 
-echo "[2/4] ensure NEXT_PUBLIC_GOOGLE_CLIENT_ID in .env.production..."
-if ! grep -q "NEXT_PUBLIC_GOOGLE_CLIENT_ID" .env.production 2>/dev/null; then
-  echo "NEXT_PUBLIC_GOOGLE_CLIENT_ID=390136620892-bkt9ive9las4eqqft40dorpnva676l4l.apps.googleusercontent.com" >> .env.production
-  echo "  added"
-else
-  echo "  already present"
-fi
+echo "[2/4] write .env.production (مشروع Google Cloud الجديد hancr-500516)..."
+# .env.production مُتجاهَل في git، لذا يُكتب هنا بشكل قاطع (يضمن المفاتيح الجديدة عند كل نشر).
+cat > .env.production <<'ENVEOF'
+NEXT_PUBLIC_GOOGLE_MAPS_KEY=AIzaSyAQ00g8v0BEo4m7V2R8RmoVwJiq-1I5RrQ
+NEXT_PUBLIC_RIDER_API_URL=https://api.hancr.com/rider/graphql
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=997014889761-64eq7g8i3fnidrdcnhnkpds47ru8r3ap.apps.googleusercontent.com
+ENVEOF
+echo "  written"
 
 echo "[3/4] next build (static export → out/)..."
 npx next build 2>&1 | tail -8

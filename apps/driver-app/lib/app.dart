@@ -13,6 +13,7 @@ import 'blocs/location/location_bloc.dart';
 import 'blocs/order/order_bloc.dart';
 import 'blocs/order/order_event.dart';
 import 'blocs/order/order_state.dart';
+import 'core/graphql/graphql_client.dart';
 import 'core/router/app_router.dart';
 import 'core/services/push_service.dart';
 import 'core/theme/aurora_theme.dart';
@@ -48,6 +49,13 @@ class _HancrCaptainAppState extends State<HancrCaptainApp> {
     _orderBloc = OrderBloc();
     _driverBloc = DriverBloc();
     _locationBloc = LocationBloc();
+    // عند رصد خطأ مصادقة (Unauthorized/401) من أي طلب GraphQL، سجّل الخروج
+    // تلقائياً ليعيد الراوتر التوجيه للدخول بدل حبس السائق في حالة مرفوضة.
+    GraphQLClientManager.onUnauthorized = () {
+      if (_authBloc.state is AuthAuthenticated) {
+        _authBloc.add(const AuthLogoutRequested());
+      }
+    };
     _router = _buildRouter();
   }
 

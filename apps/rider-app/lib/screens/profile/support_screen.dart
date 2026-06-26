@@ -107,7 +107,25 @@ class _SupportScreenState extends State<SupportScreen> {
           child: _loading
               ? const Center(child: AuroraLoader(size: 36))
               : _error != null
-                  ? Center(child: Text(_error!, style: AuroraText.bodyMedium))
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(_error!,
+                              style: AuroraText.bodyMedium,
+                              textAlign: TextAlign.center),
+                          const SizedBox(height: AuroraSpacing.md),
+                          TextButton.icon(
+                            onPressed: _load,
+                            icon: Icon(Icons.refresh,
+                                color: AuroraColors.ember, size: 18),
+                            label: Text(tr('retry'),
+                                style: AuroraText.buttonMedium
+                                    .copyWith(color: AuroraColors.ember)),
+                          ),
+                        ],
+                      ),
+                    )
                   : _complaints.isEmpty
                       ? Center(
                           child: Text(tr('noComplaints'),
