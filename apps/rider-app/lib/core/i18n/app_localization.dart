@@ -2344,6 +2344,11 @@ const Map<String, Map<String, String>> _t = {
   },
   'confirmCancel': {'ar': 'تأكيد الإلغاء', 'en': 'Confirm cancellation'},
   'keepRide': {'ar': 'متابعة الرحلة', 'en': 'Keep my ride'},
+  // ─── HANCR Shield + الأمزجة (Phase F) ───
+  'rideInsured': {'ar': 'رحلتك مؤمّنة', 'en': 'Ride insured'},
+  'moodQuiet': {'ar': 'هدوء', 'en': 'Quiet'},
+  'moodNoAudio': {'ar': 'بدون موسيقى', 'en': 'No music'},
+  'moodMasked': {'ar': 'رقم مخفي', 'en': 'Masked number'},
   'economySection': {
     'ar': 'اقتصادي',
     'en': 'Economy',

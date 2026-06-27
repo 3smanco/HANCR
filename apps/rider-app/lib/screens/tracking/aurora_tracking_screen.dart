@@ -578,6 +578,8 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
               ],
 
               if (hasDriver) ...[
+                const SizedBox(height: AuroraSpacing.md),
+                _moodsShieldRow(order),
                 const SizedBox(height: AuroraSpacing.lg),
 
                 // Actions
@@ -896,6 +898,51 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
           ),
         ),
       ],
+    );
+  }
+
+  /// شريط HANCR Shield + استرجاع الأمزجة المختارة (Phase F).
+  Widget _moodsShieldRow(OrderModel order) {
+    final chips = <Widget>[
+      _miniChip(Icons.verified_user_rounded, tr('rideInsured'),
+          AuroraColors.success),
+      if (order.quietRide)
+        _miniChip(Icons.volume_off_rounded, tr('moodQuiet'), AuroraColors.ember),
+      if (order.audioOff)
+        _miniChip(
+            Icons.music_off_rounded, tr('moodNoAudio'), AuroraColors.ember),
+      if (order.numberMasked)
+        _miniChip(
+            Icons.phone_locked_rounded, tr('moodMasked'), AuroraColors.ember),
+    ];
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: Wrap(
+        spacing: AuroraSpacing.sm,
+        runSpacing: AuroraSpacing.sm,
+        children: chips,
+      ),
+    );
+  }
+
+  Widget _miniChip(IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AuroraRadius.pill),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 5),
+          Text(label,
+              style: AuroraText.caption
+                  .copyWith(color: color, fontWeight: FontWeight.w700)),
+        ],
+      ),
     );
   }
 
