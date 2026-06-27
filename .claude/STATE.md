@@ -4,6 +4,15 @@
 > ابدأ أي محادثة جديدة بقراءته (وحده يكفي للسياق) بدل تحميل المهارة الضخمة أو قراءة عشرات الملفات.
 > آخر تحديث: 2026-06-27
 
+## 💳 إدارة مفاتيح بوابات الدفع من اللوحة + تفعيل Stripe (2026-06-27) — منشور حيّاً ✅
+PR [#190](https://github.com/3smanco/HANCR/pull/190) مدموج (`main`) ومنشور (backend+admin-panel، بلا migration، بلا APK — لا تغيير Flutter).
+- **`libs/wallet/gateways/gateway-credentials.service.ts` (جديد):** يقرأ مفاتيح البوابات من `gateway_config` (jsonb في hancr_app_config، يُدار من اللوحة) أولاً ثم `.env` fallback، مُخزَّن 60s + OnModuleInit (لتحقّق الـwebhook المتزامن). البوابات الثلاث (Stripe/HyperPay/Moyasar) تقرأ عبره؛ `PaymentGatewayService.isStub()` ديناميكي (`creds.hasAny()`). `_createStubCheckout` بادئات per-gateway (`hpay_`/`moy_`/`pi_`). spec **14/14**.
+- **صفحة اللوحة `settings/gateways`:** أُضيفت حقول مفاتيح سرّية (password) لكل بوابة — stripe(secretKey,webhookSecret) · hyperpay(accessToken,entityId,baseUrl,webhookSecret) · moyasar(apiKey,webhookSecret) — تُحفظ في `gatewayConfig` عبر `updateAppConfig` وتُستخدم خلال دقيقة دون لمس البيئة. **أسماء الحقول تطابق `GatewayCredentials.get(gateway, field, envKey)` تماماً.**
+- **تفعيل Stripe:** افتح `admin.hancr.com → الإعدادات → بوابات الدفع`، فعّل Stripe، أدخِل Secret Key + Webhook Secret، احفظ. (البوابة الافتراضية للرحلات `TRIP_PAYMENT_GATEWAY=Stripe`.)
+- **نقاط الركوب (pickupZones):** النظام حيّ/منشور (query + Snap-to). **الإدراج يحتاج إحداثيات حقيقية يقدّمها المالك** (الوكيل مُنع أمنياً من اختلاق إحداثيات وكتابتها في إعداد الإنتاج). الصيغة: `pricingRulesConfig.pickupZones = [{lat,lng,label,regionId?}]`. (لا يوجد محرّر UI مخصّص بعد — يمكن إضافته كـ follow-up.)
+- التحقق: tsc rider+driver+admin-api=0 · admin-panel next build=نجح · health كلها ready.
+
+
 ## 🚖 رحلة العميل الشاملة — خطة + Phase B1 + B2 ✅ (2026-06-27)
 **الخطة الكاملة:** `~/.claude/plans/1-typed-pillow.md` — دورة حياة الراكب من الطلب لما بعد التقييم (full‑stack، هوية Aurora، كل المراحل). المهام في TaskList (Phase A→F).
 - **التشخيص (مؤكَّد من الكود):** التنقّل مدفوع بالحالة عبر `redirect` في `app.dart` (`OrderActive→/tracking`…). `pickup_confirmation_screen.dart` كانت مبنية لكن **غير مدمجة** (مسار `/preview/pickup` فقط، ثيم HancrColors قديم)، و`_requestRide()` كان يتخطّاها للطلب مباشرة. حالة `arrived` مجرّد سطر نص — لا عدّاد انتظار.
@@ -29,6 +38,8 @@
   - **D3:** `milesEarned` مُثرى في getActiveOrder → يظهر في شاشة التقييم + زر «احجز نفس الرحلة».
   - **C4 Stripe كامل:** البوابة قابلة للضبط (`TRIP_PAYMENT_GATEWAY` افتراضي Stripe) + `tripCheckoutUrl(orderId)` (من metadata المعاملة المعلّقة) + زر «ادفع بالبطاقة» يفتح checkout خارجياً. **يكفي إضافة مفاتيح Stripe في البيئة.**
   - **pickupZones registry (SDUI):** `pricingRulesConfig.pickupZones` (jsonb، بلا migration) + `pickupZones(lat,lng,regionId)` + الشاشة تجلب وتلتصق. *(إضافة محرّر مخصّص في اللوحة = تحسين لاحق صغير.)*
+  - **🚀 نُشر حيّاً (الدفعة الرابعة، 2026-06-27):** PR [#189](https://github.com/3smanco/HANCR/pull/189) → `main` (`cb12988`). السيرفر: `deploy-direct.sh` (بلا migrations جديدة) → rider+driver-api مُعاد بناؤهما، health كلها ready. APK الراكب أُعيد بناؤه ونُشر `hancr.com/downloads/hancr-rider.apk` (HTTP 200، 50,978,215 بايت، `.bak-20260627d`). **رحلة العميل كاملة (A→F + كل البنود العميقة) حيّة الآن.**
+  - **⚙️ لتفعيل الدفع بالبطاقة:** أضف مفاتيح Stripe في بيئة السيرفر (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`) + اختياري `TRIP_PAYMENT_GATEWAY=Stripe` (هو الافتراضي). لإضافة نقاط ركوب معتمدة: أدرِجها في `pricingRulesConfig.pickupZones` (`[{regionId,lat,lng,label}]`).
 
 ## 🚀 نشر إصلاحات المشاكل الثلاث — مكتمل وحيّ ومُتحقَّق (2026-06-26)
 **PR [#185](https://github.com/3smanco/HANCR/pull/185) مدموج في `main`.** النشر تمّ كاملاً:
