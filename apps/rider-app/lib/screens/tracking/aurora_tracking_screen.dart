@@ -559,6 +559,13 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
               else
                 _driverInfoRow(order),
 
+              // مرحلة الدفع (pre/post-pay) — توضيح أن الدفع قيد المعالجة.
+              if (order.status == OrderStatus.waitingForPrePay ||
+                  order.status == OrderStatus.waitingForPostPay) ...[
+                const SizedBox(height: AuroraSpacing.md),
+                _paymentProcessingCard(order),
+              ],
+
               // كود التسليم للأمانات
               if ((order.otpCode ?? '').isNotEmpty &&
                   (order.receiverPhone ?? '').isNotEmpty) ...[
@@ -898,6 +905,42 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
           ),
         ),
       ],
+    );
+  }
+
+  /// بطاقة مرحلة الدفع (pre/post-pay) — تعرض الإجمالي وأن المعالجة جارية.
+  Widget _paymentProcessingCard(OrderModel order) {
+    final fmt = NumberFormat('#,##0.00', 'ar');
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AuroraSpacing.md),
+      decoration: BoxDecoration(
+        color: AuroraColors.infoBg,
+        borderRadius: BorderRadius.circular(AuroraRadius.lg),
+        border: Border.all(color: AuroraColors.info.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              valueColor: AlwaysStoppedAnimation<Color>(AuroraColors.info),
+            ),
+          ),
+          const SizedBox(width: AuroraSpacing.md),
+          Expanded(
+            child: Text(tr('processingPayment'),
+                style: AuroraText.bodyMedium
+                    .copyWith(color: AuroraColors.textPrimary)),
+          ),
+          Text(
+            '${fmt.format(order.costAfterCoupon)} ${order.currency}',
+            style: AuroraText.titleSmall.copyWith(color: AuroraColors.info),
+          ),
+        ],
+      ),
     );
   }
 

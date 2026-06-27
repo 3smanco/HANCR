@@ -2359,6 +2359,7 @@ const Map<String, Map<String, String>> _t = {
   'rateNegDirty': {'ar': 'السيارة غير نظيفة', 'en': 'Car not clean'},
   'rateNegRude': {'ar': 'سلوك غير لائق', 'en': 'Rude behavior'},
   'rateNegRoute': {'ar': 'مسار خاطئ', 'en': 'Wrong route'},
+  'processingPayment': {'ar': 'جارٍ معالجة الدفع…', 'en': 'Processing payment…'},
   'economySection': {
     'ar': 'اقتصادي',
     'en': 'Economy',
