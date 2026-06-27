@@ -10,6 +10,7 @@ import {
   WebhookVerificationError,
   extractRawBody,
 } from './gateway.interface';
+import { GatewayCredentials } from './gateway-credentials.service';
 
 /**
  * MoyasarGateway — البوابة السعودية الرئيسية.
@@ -33,9 +34,13 @@ export class MoyasarGateway implements IPaymentGateway {
   private readonly logger = new Logger(MoyasarGateway.name);
   private readonly baseUrl = 'https://api.moyasar.com';
 
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly creds: GatewayCredentials,
+  ) {}
 
   async createCheckout(input: CreateCheckoutInput): Promise<CheckoutResult> {
+    await this.creds.ensureLoaded();
     const apiKey = this._requireEnv('MOYASAR_API_KEY');
 
     // Moyasar يحتاج amount بالـ halalas (لا decimals)
@@ -140,8 +145,15 @@ export class MoyasarGateway implements IPaymentGateway {
     };
   }
 
+  private static readonly FIELDS: Record<string, string> = {
+    MOYASAR_API_KEY: 'apiKey',
+    MOYASAR_WEBHOOK_SECRET: 'webhookSecret',
+  };
+
+  /** يقرأ المفتاح من gateway_config (لوحة التحكم) ثم البيئة. */
   private _requireEnv(key: string): string {
-    const value = this.config.get<string>(key);
+    const field = MoyasarGateway.FIELDS[key] ?? key;
+    const value = this.creds.get('moyasar', field, key);
     if (!value || value.startsWith('YOUR_') || value.startsWith('your_')) {
       throw new Error(`${key} is not configured`);
     }

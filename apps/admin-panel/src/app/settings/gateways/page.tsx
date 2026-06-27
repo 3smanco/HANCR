@@ -18,10 +18,30 @@ type GatewayCfg = {
   enabled: boolean;
   regions: string[];
   displayName?: string;
+  [k: string]: unknown; // مفاتيح الاعتماد (secretKey, apiKey, …)
 };
 type GatewayState = Record<GatewayCode, GatewayCfg>;
 
 const ALL_REGIONS = ['SA', 'AE', 'QA', 'KW', 'BH', 'OM'] as const;
+
+// حقول مفاتيح كل بوابة — تُحفظ في gatewayConfig ويقرأها الباكند (GatewayCredentials).
+const CRED_FIELDS: Record<GatewayCode, Array<{ key: string; label: string }>> = {
+  hyperpay: [
+    { key: 'accessToken', label: 'Access Token' },
+    { key: 'entityId', label: 'Entity ID' },
+    { key: 'baseUrl', label: 'Base URL (اختياري)' },
+    { key: 'webhookSecret', label: 'Webhook Secret' },
+  ],
+  moyasar: [
+    { key: 'apiKey', label: 'API Key (sk_…)' },
+    { key: 'webhookSecret', label: 'Webhook Secret' },
+  ],
+  stripe: [
+    { key: 'secretKey', label: 'Secret Key (sk_…)' },
+    { key: 'webhookSecret', label: 'Webhook Secret (whsec_…)' },
+  ],
+  applepay: [],
+};
 
 const GATEWAYS: Array<{
   id: GatewayCode;
@@ -83,6 +103,7 @@ export default function GatewaysSettingsPage() {
       const r = remote[code];
       if (r && typeof r === 'object') {
         merged[code] = {
+          ...(r as GatewayCfg), // يحمل مفاتيح الاعتماد المحفوظة
           enabled: Boolean(r.enabled),
           regions: Array.isArray(r.regions) ? r.regions : DEFAULTS[code].regions,
           displayName: typeof r.displayName === 'string' ? r.displayName : undefined,
@@ -103,6 +124,9 @@ export default function GatewaysSettingsPage() {
         : [...cur, region];
       return { ...s, [code]: { ...s[code], regions: next } };
     });
+  };
+  const setCred = (code: GatewayCode, key: string, value: string) => {
+    setState((s) => ({ ...s, [code]: { ...s[code], [key]: value } }));
   };
 
   return (
@@ -163,28 +187,52 @@ export default function GatewaysSettingsPage() {
                     </div>
 
                     {cfg.enabled ? (
-                      <div>
-                        <div className="text-xs font-bold text-gray-500 mb-2">
-                          الدول المدعومة:
+                      <div className="space-y-3">
+                        <div>
+                          <div className="text-xs font-bold text-gray-500 mb-2">
+                            الدول المدعومة:
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {ALL_REGIONS.map((r) => {
+                              const on = cfg.regions.includes(r);
+                              return (
+                                <button
+                                  key={r}
+                                  onClick={() => toggleRegion(g.id, r)}
+                                  className={`px-2.5 py-1 rounded-full text-xs font-bold border transition ${
+                                    on
+                                      ? 'bg-hancr-violet text-white border-hancr-violet'
+                                      : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                                  }`}
+                                >
+                                  {r}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {ALL_REGIONS.map((r) => {
-                            const on = cfg.regions.includes(r);
-                            return (
-                              <button
-                                key={r}
-                                onClick={() => toggleRegion(g.id, r)}
-                                className={`px-2.5 py-1 rounded-full text-xs font-bold border transition ${
-                                  on
-                                    ? 'bg-hancr-violet text-white border-hancr-violet'
-                                    : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
-                                }`}
-                              >
-                                {r}
-                              </button>
-                            );
-                          })}
-                        </div>
+                        {CRED_FIELDS[g.id].length > 0 ? (
+                          <div>
+                            <div className="text-xs font-bold text-gray-500 mb-2">
+                              مفاتيح البوابة (سرّية — تُحفظ مشفّرة في الإعداد):
+                            </div>
+                            <div className="grid sm:grid-cols-2 gap-2">
+                              {CRED_FIELDS[g.id].map((f) => (
+                                <input
+                                  key={f.key}
+                                  type="password"
+                                  autoComplete="new-password"
+                                  placeholder={f.label}
+                                  value={(cfg[f.key] as string) ?? ''}
+                                  onChange={(e) =>
+                                    setCred(g.id, f.key, e.target.value)
+                                  }
+                                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono focus:border-hancr-violet outline-none"
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
                     ) : null}
                   </div>
@@ -202,8 +250,10 @@ export default function GatewaysSettingsPage() {
                 {saving ? 'جارٍ الحفظ…' : 'حفظ الكل'}
               </button>
               <p className="text-xs text-gray-400 mt-3">
-                ⚠️ مفاتيح API السرية لا تُحفظ هنا — فقط حالة التفعيل والنطاق
-                الجغرافي. المفاتيح في <code>.env.prod</code> على السيرفر.
+                ✅ المفاتيح تُحفظ هنا وتُستخدم فوراً (خلال دقيقة) دون تعديل البيئة.
+                الحقول الفارغة تسقط تلقائياً على متغيّرات <code>.env</code> إن
+                وُجدت. للدفع بالبطاقة افتراضياً: فعّل <b>Stripe</b> وأدخِل
+                Secret Key + Webhook Secret.
               </p>
             </div>
           </div>

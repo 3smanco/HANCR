@@ -1,6 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { PaymentGatewayService } from './payment-gateway.service';
+import { GatewayCredentials } from './gateways/gateway-credentials.service';
+import { HyperPayGateway } from './gateways/hyperpay.gateway';
+import { MoyasarGateway } from './gateways/moyasar.gateway';
+import { StripeGateway } from './gateways/stripe.gateway';
 import { PaymentGateway } from '@hancr/database';
 
 describe('PaymentGatewayService', () => {
@@ -10,9 +14,21 @@ describe('PaymentGatewayService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PaymentGatewayService,
+        HyperPayGateway,
+        MoyasarGateway,
+        StripeGateway,
         {
           provide: ConfigService,
           useValue: { get: jest.fn(() => undefined) },
+        },
+        {
+          // بلا مفاتيح → stub mode (يطابق توقّعات الاختبار).
+          provide: GatewayCredentials,
+          useValue: {
+            ensureLoaded: jest.fn(async () => undefined),
+            hasAny: jest.fn(() => false),
+            get: jest.fn(() => undefined),
+          },
         },
       ],
     }).compile();

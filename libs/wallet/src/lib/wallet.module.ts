@@ -5,9 +5,11 @@ import {
   WalletTransactionEntity,
   RiderEntity,
   DriverEntity,
+  AppConfigEntity,
 } from '@hancr/database';
 import { WalletService } from './wallet.service';
 import { PaymentGatewayService } from './payment-gateway.service';
+import { GatewayCredentials } from './gateways/gateway-credentials.service';
 import { HyperPayGateway } from './gateways/hyperpay.gateway';
 import { MoyasarGateway } from './gateways/moyasar.gateway';
 import { StripeGateway } from './gateways/stripe.gateway';
@@ -28,11 +30,13 @@ import { StripeGateway } from './gateways/stripe.gateway';
       WalletTransactionEntity,
       RiderEntity,
       DriverEntity,
+      AppConfigEntity,
     ]),
   ],
   providers: [
     WalletService,
     PaymentGatewayService,
+    GatewayCredentials,
     HyperPayGateway,
     MoyasarGateway,
     StripeGateway,
