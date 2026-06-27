@@ -23,6 +23,7 @@ import '../../core/widgets/aurora/aurora.dart';
 import '../../core/widgets/car_art.dart';
 import '../../core/motion/motion.dart';
 import 'aurora_bid_waiting_screen.dart';
+import 'aurora_pickup_adjust_screen.dart';
 import 'reserve_modal.dart';
 
 /// AuroraBookingScreen — قلب تجربة الراكب: تحديد الوجهة + اختيار الخدمة + الطلب.
@@ -640,7 +641,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     );
   }
 
-  void _requestRide() {
+  Future<void> _requestRide() async {
     final service = _selectedService;
     if (service == null) return;
     if (_bidMode && !_isDelivery && !_isHourly) {
@@ -661,10 +662,32 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
         return;
       }
     }
-    context.read<OrderBloc>().add(OrderCreateRequested(
-          origin: _origin,
-          destination: _destination,
+
+    // ── خطوة ضبط الالتقاط الدقيق (إجبارية قبل المطابقة) ──
+    // نلتقط الـ Navigator والـ Bloc قبل الـ await لتفادي استخدام context عبر async.
+    final orderBloc = context.read<OrderBloc>();
+    final navigator = Navigator.of(context);
+    final fare = _estimatedFare;
+    final adjusted = await navigator.push<PickupAdjustResult>(
+      MaterialPageRoute(
+        builder: (_) => AuroraPickupAdjustScreen(
+          initialOrigin: _origin,
           originAddress: _originLabel,
+          estimatedFare: fare > 0 ? fare.toDouble() : null,
+          currency: _routeCurrency,
+        ),
+      ),
+    );
+    if (adjusted == null || !mounted) return; // الراكب تراجع
+    final origin = adjusted.point;
+    final originLabel = adjusted.address.trim().isNotEmpty
+        ? adjusted.address.trim()
+        : _originLabel;
+
+    orderBloc.add(OrderCreateRequested(
+          origin: origin,
+          destination: _destination,
+          originAddress: originLabel,
           destinationAddress: _destinationLabel,
           service: service,
           regionId: _regionId,

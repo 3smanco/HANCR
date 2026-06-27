@@ -52,6 +52,9 @@ export const ORDER_UPDATED = 'ORDER_UPDATED';
 export const NEW_ORDER_AVAILABLE = 'NEW_ORDER_AVAILABLE';
 export const DRIVER_ORDER_UPDATED = 'DRIVER_ORDER_UPDATED';
 
+/** المهلة المجانية للانتظار قبل بدء الرسوم (ثانية). admin-tunable لاحقاً. */
+export const FREE_WAIT_SECONDS = 120;
+
 /** نصف قطر الانحراف الأقصى لضمّ راكب Share لرحلة جارية (كم). */
 const SHARE_MAX_DETOUR_KM = 3;
 /** أقصى فرق اتجاه مسموح بين مساري الراكبين (درجات). */
@@ -1417,6 +1420,9 @@ export class OrderService {
       serviceId: order.serviceId,
       regionId: order.regionId,
       etaPickup: order.etaPickup,
+      arrivedAt: order.arrivedAt,
+      waitCost: Number(order.waitCost ?? 0),
+      freeWaitSeconds: FREE_WAIT_SECONDS,
       startTimestamp: order.startTimestamp,
       finishTimestamp: order.finishTimestamp,
       expectedTimestamp: order.expectedTimestamp,

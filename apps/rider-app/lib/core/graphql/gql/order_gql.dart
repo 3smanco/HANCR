@@ -109,6 +109,9 @@ const String activeOrderQuery = r'''
       distanceBest
       durationBest
       etaPickup
+      arrivedAt
+      waitCost
+      freeWaitSeconds
       startTimestamp
       finishTimestamp
       driverId
@@ -205,6 +208,9 @@ const String orderUpdatedSubscription = r'''
       distanceBest
       durationBest
       etaPickup
+      arrivedAt
+      waitCost
+      freeWaitSeconds
       startTimestamp
       finishTimestamp
       driverId
