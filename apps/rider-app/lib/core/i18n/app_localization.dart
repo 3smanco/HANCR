@@ -2349,6 +2349,16 @@ const Map<String, Map<String, String>> _t = {
   'moodQuiet': {'ar': 'هدوء', 'en': 'Quiet'},
   'moodNoAudio': {'ar': 'بدون موسيقى', 'en': 'No music'},
   'moodMasked': {'ar': 'رقم مخفي', 'en': 'Masked number'},
+  // ─── الإيصال + التقييم السلبي (Phase D) ───
+  'fareBreakdown': {'ar': 'تفاصيل الأجرة', 'en': 'Fare breakdown'},
+  'baseFare': {'ar': 'أجرة الرحلة', 'en': 'Trip fare'},
+  'total': {'ar': 'الإجمالي', 'en': 'Total'},
+  'whatWrong': {'ar': 'ما الذي لم يكن جيداً؟', 'en': 'What went wrong?'},
+  'rateNegLate': {'ar': 'انتظار طويل', 'en': 'Long wait'},
+  'rateNegReckless': {'ar': 'قيادة متهورة', 'en': 'Reckless driving'},
+  'rateNegDirty': {'ar': 'السيارة غير نظيفة', 'en': 'Car not clean'},
+  'rateNegRude': {'ar': 'سلوك غير لائق', 'en': 'Rude behavior'},
+  'rateNegRoute': {'ar': 'مسار خاطئ', 'en': 'Wrong route'},
   'economySection': {
     'ar': 'اقتصادي',
     'en': 'Economy',
