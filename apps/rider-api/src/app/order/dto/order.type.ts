@@ -145,6 +145,14 @@ export class OrderType {
   @Field(() => Int)
   freeWaitSeconds!: number;
 
+  /** سعر دقيقة الانتظار (للعدّاد الحيّ في شاشة الوصول). */
+  @Field(() => Float)
+  perMinuteWait!: number;
+
+  /** أميال الولاء المتوقَّعة/المكتسبة من هذه الرحلة. */
+  @Field(() => Int, { nullable: true })
+  milesEarned?: number;
+
   @Field({ nullable: true })
   startTimestamp?: Date;
 

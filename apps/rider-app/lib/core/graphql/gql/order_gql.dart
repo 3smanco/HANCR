@@ -113,6 +113,8 @@ const String activeOrderQuery = r'''
       arrivedAt
       waitCost
       freeWaitSeconds
+      perMinuteWait
+      milesEarned
       startTimestamp
       finishTimestamp
       driverId

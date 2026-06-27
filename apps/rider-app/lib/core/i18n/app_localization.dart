@@ -2360,6 +2360,9 @@ const Map<String, Map<String, String>> _t = {
   'rateNegRude': {'ar': 'سلوك غير لائق', 'en': 'Rude behavior'},
   'rateNegRoute': {'ar': 'مسار خاطئ', 'en': 'Wrong route'},
   'processingPayment': {'ar': 'جارٍ معالجة الدفع…', 'en': 'Processing payment…'},
+  // ─── أميال الولاء + إعادة الحجز (D3) ───
+  'milesEarnedShort': {'ar': 'ميل', 'en': 'mi'},
+  'rebookRoute': {'ar': 'احجز نفس الرحلة', 'en': 'Rebook this trip'},
   'economySection': {
     'ar': 'اقتصادي',
     'en': 'Economy',
