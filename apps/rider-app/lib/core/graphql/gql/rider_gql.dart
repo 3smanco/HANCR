@@ -121,6 +121,13 @@ const String reverseGeocodeQuery = r'''
   }
 ''';
 
+// ─── نقاط الركوب المعتمدة القريبة (Snap-to في ضبط الالتقاط) ───
+const String pickupZonesQuery = r'''
+  query PickupZones($lat: Float!, $lng: Float!, $regionId: Int) {
+    pickupZones(lat: $lat, lng: $lng, regionId: $regionId) { lat lng label }
+  }
+''';
+
 // ─── Saved places (favorites) ───
 const String savedPlacesQuery = r'''
   query SavedPlaces {

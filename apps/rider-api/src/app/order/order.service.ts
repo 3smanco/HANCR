@@ -1306,6 +1306,16 @@ export class OrderService {
     return gql;
   }
 
+  /** نقاط الركوب المعتمدة القريبة (للانجذاب المغناطيسي في ضبط الالتقاط). */
+  async getPickupZones(
+    lat: number,
+    lng: number,
+    regionId?: number,
+  ): Promise<{ lat: number; lng: number; label?: string }[]> {
+    const zones = await this.appConfig.getNearbyPickupZones(lat, lng, regionId);
+    return zones.map((z) => ({ lat: z.lat, lng: z.lng, label: z.label }));
+  }
+
   /**
    * رابط دفع الرحلة بالبطاقة (Stripe/بوابة) — لإكمال دفع طلب WaitingForPostPay.
    * يُعيد redirectUrl للـ checkout المعلّق الذي أنشأه السائق عند إنهاء الرحلة.

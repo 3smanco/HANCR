@@ -33,11 +33,21 @@ export interface SurgeRule {
   multiplier: number;
 }
 
+/** نقطة ركوب معتمدة (Designated Pickup Zone) — تُدار من لوحة التحكم (SDUI). */
+export interface PickupZone {
+  regionId?: number; // omit = كل المناطق
+  lat: number;
+  lng: number;
+  label?: string;
+}
+
 export interface PricingRulesConfig {
   cancellationFee: number;
   cancellationGraceSeconds: number;
   cancellableStatuses: string[];
   surge: SurgeRule[];
+  /** نقاط الركوب المعتمدة للانجذاب المغناطيسي في شاشة ضبط الالتقاط. */
+  pickupZones?: PickupZone[];
 }
 
 export interface LoyaltyConfig {
@@ -139,6 +149,36 @@ export class AppConfigReader {
   async getLoyalty(): Promise<LoyaltyConfig> {
     const row = await this.load();
     return { ...DEFAULT_LOYALTY, ...(row?.loyaltyConfig ?? {}) };
+  }
+
+  /**
+   * نقاط الركوب المعتمدة القريبة من نقطة (للانجذاب المغناطيسي في ضبط الالتقاط).
+   * تُقرأ من pricingRulesConfig.pickupZones (SDUI) وتُفلتَر بالمنطقة + نصف القطر.
+   */
+  async getNearbyPickupZones(
+    lat: number,
+    lng: number,
+    regionId?: number,
+    radiusMeters = 800,
+  ): Promise<PickupZone[]> {
+    const { pickupZones } = await this.getPricingRules();
+    if (!Array.isArray(pickupZones) || pickupZones.length === 0) return [];
+    const distM = (aLat: number, aLng: number, bLat: number, bLng: number) => {
+      const r = 6371000;
+      const dLat = ((bLat - aLat) * Math.PI) / 180;
+      const dLng = ((bLng - aLng) * Math.PI) / 180;
+      const la1 = (aLat * Math.PI) / 180;
+      const la2 = (bLat * Math.PI) / 180;
+      const h =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
+      return 2 * r * Math.asin(Math.min(1, Math.sqrt(h)));
+    };
+    return pickupZones.filter(
+      (z) =>
+        (z.regionId == null || z.regionId === regionId) &&
+        distM(lat, lng, z.lat, z.lng) <= radiusMeters,
+    );
   }
 
   /**

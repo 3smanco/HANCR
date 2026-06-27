@@ -187,3 +187,16 @@ export class ShoppingListItemType {
   @Field({ nullable: true })
   note?: string;
 }
+
+/** نقطة ركوب معتمدة (Designated Pickup Zone) للانجذاب في ضبط الالتقاط. */
+@ObjectType()
+export class PickupZoneType {
+  @Field(() => Float)
+  lat!: number;
+
+  @Field(() => Float)
+  lng!: number;
+
+  @Field({ nullable: true })
+  label?: string;
+}

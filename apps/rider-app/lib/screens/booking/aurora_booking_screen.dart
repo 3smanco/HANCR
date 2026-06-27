@@ -675,6 +675,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
           originAddress: _originLabel,
           estimatedFare: fare > 0 ? fare.toDouble() : null,
           currency: _routeCurrency,
+          regionId: _regionId,
         ),
       ),
     );

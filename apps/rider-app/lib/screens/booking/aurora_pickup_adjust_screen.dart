@@ -34,6 +34,7 @@ class AuroraPickupAdjustScreen extends StatefulWidget {
     this.estimatedFare,
     this.currency = 'ر.س',
     this.pickupZones = const [],
+    this.regionId,
     super.key,
   });
 
@@ -45,8 +46,11 @@ class AuroraPickupAdjustScreen extends StatefulWidget {
   final double? estimatedFare;
   final String currency;
 
-  /// مناطق الركوب المعتمدة (Designated Pickup Zones) للانجذاب المغناطيسي.
+  /// مناطق الركوب المعتمدة الأولية (تُجلب حيّاً أيضاً من الخادم).
   final List<GeoPoint> pickupZones;
+
+  /// المنطقة الجغرافية — لجلب نقاط الركوب المعتمدة الخاصة بها.
+  final int? regionId;
 
   @override
   State<AuroraPickupAdjustScreen> createState() =>
@@ -64,6 +68,7 @@ class _AuroraPickupAdjustScreenState extends State<AuroraPickupAdjustScreen>
   String? _streetName; // اسم الشارع الحيّ من reverseGeocode
   bool _resolving = false;
   Timer? _debounce;
+  List<GeoPoint> _zones = const [];
 
   /// عتبة الانجذاب لمنطقة ركوب معتمدة (بالأمتار).
   static const double _snapRadiusMeters = 55;
@@ -72,6 +77,8 @@ class _AuroraPickupAdjustScreenState extends State<AuroraPickupAdjustScreen>
   void initState() {
     super.initState();
     _center = LatLng(widget.initialOrigin.lat, widget.initialOrigin.lng);
+    _zones = widget.pickupZones;
+    _fetchZones();
     _streetName = widget.originAddress.isEmpty ? null : widget.originAddress;
     _pulseCtrl = AnimationController(
       vsync: this,
@@ -113,6 +120,29 @@ class _AuroraPickupAdjustScreenState extends State<AuroraPickupAdjustScreen>
     }
   }
 
+  /// يجلب نقاط الركوب المعتمدة القريبة من الخادم (SDUI، تُدار من اللوحة).
+  Future<void> _fetchZones() async {
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(pickupZonesQuery),
+        variables: {
+          'lat': widget.initialOrigin.lat,
+          'lng': widget.initialOrigin.lng,
+          if (widget.regionId != null) 'regionId': widget.regionId,
+        },
+        fetchPolicy: FetchPolicy.noCache,
+      ));
+      final list = (res.data?['pickupZones'] as List<dynamic>?) ?? const [];
+      final zones = list
+          .map((e) => GeoPoint.fromJson(e as Map<String, dynamic>))
+          .toList();
+      if (mounted && zones.isNotEmpty) setState(() => _zones = zones);
+    } catch (_) {
+      /* لا مناطق معتمدة — تجاهل بصمت */
+    }
+  }
+
   // ── Snap-to nearest pickup zone ─────────────────────────────────────────
   /// مسافة هافرسين التقريبية بالأمتار.
   double _distanceMeters(LatLng a, LatLng b) {
@@ -128,10 +158,10 @@ class _AuroraPickupAdjustScreenState extends State<AuroraPickupAdjustScreen>
 
   /// يبحث عن أقرب منطقة معتمدة ضمن العتبة ويلتصق بها مغناطيسياً.
   Future<void> _trySnap(LatLng at) async {
-    if (widget.pickupZones.isEmpty) return;
+    if (_zones.isEmpty) return;
     GeoPoint? nearest;
     double best = double.infinity;
-    for (final z in widget.pickupZones) {
+    for (final z in _zones) {
       final d = _distanceMeters(at, LatLng(z.lat, z.lng));
       if (d < best) {
         best = d;
@@ -205,10 +235,10 @@ class _AuroraPickupAdjustScreenState extends State<AuroraPickupAdjustScreen>
 
   Widget _buildMap() {
     final zones = <Circle>{
-      for (var i = 0; i < widget.pickupZones.length; i++)
+      for (var i = 0; i < _zones.length; i++)
         Circle(
           circleId: CircleId('zone_$i'),
-          center: LatLng(widget.pickupZones[i].lat, widget.pickupZones[i].lng),
+          center: LatLng(_zones[i].lat, _zones[i].lng),
           radius: 12,
           fillColor: AuroraColors.success.withValues(alpha: 0.35),
           strokeColor: AuroraColors.success,

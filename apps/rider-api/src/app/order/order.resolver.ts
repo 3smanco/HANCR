@@ -10,7 +10,7 @@ import {
 import { UseGuards, Inject } from '@nestjs/common';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { OrderService, ORDER_UPDATED } from './order.service';
-import { OrderType } from './dto/order.type';
+import { OrderType, PickupZoneType } from './dto/order.type';
 import { CreateOrderInput } from './dto/create-order.input';
 import { RateDriverInput } from './dto/rate-driver.input';
 import { RoutePreviewInput, RoutePreviewType } from './dto/route-preview.type';
@@ -42,6 +42,19 @@ export class OrderResolver {
   ): Promise<NearbyDriverPin[]> {
     const pins = await this.matchingService.nearbyDriverPins(lat, lng);
     return pins.map((p) => ({ lat: p.lat, lng: p.lng, heading: p.heading }));
+  }
+
+  /**
+   * نقاط الركوب المعتمدة القريبة (للانجذاب المغناطيسي في شاشة ضبط الالتقاط).
+   */
+  @Query(() => [PickupZoneType], { description: 'نقاط ركوب معتمدة قريبة' })
+  @UseGuards(JwtAuthGuard)
+  pickupZones(
+    @Args('lat', { type: () => Float }) lat: number,
+    @Args('lng', { type: () => Float }) lng: number,
+    @Args('regionId', { type: () => Int, nullable: true }) regionId?: number,
+  ): Promise<PickupZoneType[]> {
+    return this.orderService.getPickupZones(lat, lng, regionId);
   }
 
   /**
