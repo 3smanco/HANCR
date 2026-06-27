@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemSound, SystemSoundType;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -19,6 +20,8 @@ import '../../core/widgets/aurora/aurora.dart';
 import '../../core/utils/external_launch.dart';
 import '../sos/aurora_sos_button.dart';
 import '../chat/aurora_chat_screen.dart';
+import 'widgets/aurora_arrived_panel.dart';
+import 'widgets/aurora_radar_beacon.dart';
 
 /// AuroraTrackingScreen — تتبُّع الرحلة بنمط Aurora.
 ///
@@ -230,6 +233,18 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
               } else {
                 ctx.read<TrackingBloc>().add(const TrackingStopped());
               }
+            },
+          ),
+          // تنبيه قسري عند وصول السائق: اهتزاز قوي + نغمة (B2).
+          BlocListener<OrderBloc, OrderState>(
+            listenWhen: (p, c) {
+              final pS = p is OrderActive ? p.order.status : null;
+              final cS = c is OrderActive ? c.order.status : null;
+              return cS == OrderStatus.arrived && pS != OrderStatus.arrived;
+            },
+            listener: (_, __) {
+              Haptics.heavy();
+              SystemSound.play(SystemSoundType.alert);
             },
           ),
           // انسياب علامة السيارة عند كل تحديث موقع
@@ -538,6 +553,8 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
                 _noDriverFoundCard()
               else if (!hasDriver)
                 _searchingDriverCard(order)
+              else if (order.status == OrderStatus.arrived)
+                AuroraArrivedPanel(order: order)
               else
                 _driverInfoRow(order),
 
@@ -552,6 +569,12 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
 
               // ETA + fare
               _etaFareRow(order),
+
+              // رسوم الانتظار (إن تراكمت) — تربط حساب B2 بواجهة الراكب.
+              if (order.waitCost > 0) ...[
+                const SizedBox(height: AuroraSpacing.sm),
+                _waitCostChip(order),
+              ],
 
               if (hasDriver) ...[
                 const SizedBox(height: AuroraSpacing.lg),
@@ -603,18 +626,28 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
   }
 
   Widget _searchingDriverCard(OrderModel order) {
-    return _statusCard(
-      icon: Icons.radar,
-      title: tr('searchingDriverTitle'),
-      body: tr('searchingDriverBody'),
-      accent: AuroraColors.ember,
-      trailing: SizedBox(
-        width: 22,
-        height: 22,
-        child: CircularProgressIndicator(
-          strokeWidth: 2.5,
-          valueColor: AlwaysStoppedAnimation<Color>(AuroraColors.ember),
-        ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+          horizontal: AuroraSpacing.lg, vertical: AuroraSpacing.lg),
+      decoration: BoxDecoration(
+        color: AuroraColors.ash,
+        borderRadius: BorderRadius.circular(AuroraRadius.lg),
+        border: Border.all(color: AuroraColors.ember.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          const AuroraRadarBeacon(size: 78),
+          const SizedBox(height: AuroraSpacing.md),
+          Text(tr('searchingDriverTitle'), style: AuroraText.titleSmall),
+          const SizedBox(height: 4),
+          Text(
+            tr('notifyingNearbyDrivers'),
+            textAlign: TextAlign.center,
+            style: AuroraText.bodySmall
+                .copyWith(color: AuroraColors.textSecondary),
+          ),
+        ],
       ),
     );
   }
@@ -862,6 +895,35 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _waitCostChip(OrderModel order) {
+    final fmt = NumberFormat('#,##0.00', 'ar');
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+          horizontal: AuroraSpacing.md, vertical: AuroraSpacing.sm),
+      decoration: BoxDecoration(
+        color: AuroraColors.warningBg,
+        borderRadius: BorderRadius.circular(AuroraRadius.md),
+        border: Border.all(color: AuroraColors.warning.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.timer_outlined, size: 18, color: AuroraColors.warning),
+          const SizedBox(width: AuroraSpacing.sm),
+          Expanded(
+            child: Text(tr('waitTimeFee'),
+                style: AuroraText.bodySmall
+                    .copyWith(color: AuroraColors.textPrimary)),
+          ),
+          Text(
+            '${fmt.format(order.waitCost)} ${order.currency}',
+            style: AuroraText.titleSmall.copyWith(color: AuroraColors.warning),
+          ),
+        ],
+      ),
     );
   }
 

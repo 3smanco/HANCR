@@ -125,6 +125,18 @@ export class OrderType {
   @Field({ nullable: true })
   etaPickup?: Date;
 
+  /** لحظة وصول السائق — مرجع عدّاد الانتظار (B2). */
+  @Field({ nullable: true })
+  arrivedAt?: Date;
+
+  /** تكلفة الانتظار المتراكمة حتى الآن. */
+  @Field(() => Float)
+  waitCost!: number;
+
+  /** مدّة الانتظار المجانية بالثواني قبل بدء الرسوم. */
+  @Field(() => Int)
+  freeWaitSeconds!: number;
+
   @Field({ nullable: true })
   startTimestamp?: Date;
 

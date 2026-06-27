@@ -252,6 +252,14 @@ class _HancrRiderAppState extends State<HancrRiderApp> {
             _orderBloc.add(const OrderActiveCheckRequested());
             // Register FCM token with backend (fire-and-forget)
             PushService.instance.registerWithBackend();
+            // وصول إشعار متعلّق بالطلب → أعد جلب الطلب النشط فوراً ليتحدّث
+            // التتبّع (وصل السائق/بدأت/اكتملت) دون انتظار. الراكب يستقبل
+            // تحوّلات السائق عبر FCM لا عبر اشتراك ORDER_UPDATED.
+            PushService.instance.onOrderEvent = (_) {
+              if (_authBloc.state is AuthAuthenticated) {
+                _orderBloc.add(const OrderActiveCheckRequested());
+              }
+            };
           }
         },
         child: ValueListenableBuilder<Locale>(

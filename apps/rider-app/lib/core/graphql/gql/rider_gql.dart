@@ -114,6 +114,13 @@ const String placeDetailsQuery = r'''
   }
 ''';
 
+// ─── Reverse geocode (اسم الشارع من إحداثيات — لشاشة ضبط الالتقاط) ───
+const String reverseGeocodeQuery = r'''
+  query ReverseGeocode($lat: Float!, $lng: Float!) {
+    reverseGeocode(lat: $lat, lng: $lng) { lat lng address }
+  }
+''';
+
 // ─── Saved places (favorites) ───
 const String savedPlacesQuery = r'''
   query SavedPlaces {

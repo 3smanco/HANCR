@@ -30,4 +30,17 @@ export class PlacesResolver {
   ): Promise<PlaceLocationType | null> {
     return this.places.details(placeId);
   }
+
+  /** اسم الشارع/العنوان المختصر من إحداثيات (لشاشة ضبط الالتقاط). */
+  @Query(() => PlaceLocationType, {
+    nullable: true,
+    description: 'عنوان مختصر من إحداثيات (reverse geocode)',
+  })
+  @UseGuards(JwtAuthGuard)
+  reverseGeocode(
+    @Args('lat', { type: () => Float }) lat: number,
+    @Args('lng', { type: () => Float }) lng: number,
+  ): Promise<PlaceLocationType | null> {
+    return this.places.reverseGeocode(lat, lng);
+  }
 }

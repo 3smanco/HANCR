@@ -41,6 +41,10 @@ export class OrderEntity {
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.Requested })
   status!: OrderStatus;
 
+  /** وقت وصول السائق لنقطة الالتقاط — مرجع عدّاد الانتظار (B2) */
+  @Column({ nullable: true, name: 'arrived_at' })
+  arrivedAt?: Date;
+
   /** وقت بدء الرحلة */
   @Column({ nullable: true, name: 'start_timestamp' })
   startTimestamp?: Date;

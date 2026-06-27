@@ -138,6 +138,16 @@ class OrderModel extends Equatable {
   /// الخط المرسوم على الخريطة: المسار الفعلي إن توفّر، وإلا نقاط البداية/النهاية.
   List<GeoPoint> get routeLine => directions.length > 1 ? directions : points;
   final DateTime? etaPickup;
+
+  /// لحظة وصول السائق لنقطة الالتقاط — مرجع عدّاد الانتظار (B2).
+  final DateTime? arrivedAt;
+
+  /// تكلفة الانتظار المتراكمة (من الخادم).
+  final double waitCost;
+
+  /// مدّة الانتظار المجانية بالثواني قبل بدء الرسوم.
+  final int freeWaitSeconds;
+
   final DateTime? startTimestamp;
   final DateTime? finishTimestamp;
   final DateTime? expectedTimestamp; // موعد الرحلة المجدولة (Reserve)
@@ -180,6 +190,9 @@ class OrderModel extends Equatable {
     this.directions = const [],
     required this.addresses,
     this.etaPickup,
+    this.arrivedAt,
+    this.waitCost = 0,
+    this.freeWaitSeconds = 120,
     this.startTimestamp,
     this.finishTimestamp,
     this.expectedTimestamp,
@@ -228,6 +241,11 @@ class OrderModel extends Equatable {
         etaPickup: json['etaPickup'] != null
             ? DateTime.tryParse(json['etaPickup'] as String)
             : null,
+        arrivedAt: json['arrivedAt'] != null
+            ? DateTime.tryParse(json['arrivedAt'] as String)
+            : null,
+        waitCost: (json['waitCost'] as num?)?.toDouble() ?? 0,
+        freeWaitSeconds: json['freeWaitSeconds'] as int? ?? 120,
         startTimestamp: json['startTimestamp'] != null
             ? DateTime.tryParse(json['startTimestamp'] as String)
             : null,

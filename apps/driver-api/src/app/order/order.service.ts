@@ -40,6 +40,9 @@ import { DriverOrderType } from './dto/driver-order.type';
 export const NEW_ORDER_AVAILABLE = 'NEW_ORDER_AVAILABLE';
 export const DRIVER_ORDER_UPDATED = 'DRIVER_ORDER_UPDATED';
 
+/** المهلة المجانية للانتظار قبل بدء الرسوم (ثانية) — مطابقة لـ rider-api FREE_WAIT_SECONDS. */
+const FREE_WAIT_SECONDS = 120;
+
 @Injectable()
 export class OrderService {
   private readonly logger = new Logger(OrderService.name);
@@ -212,7 +215,11 @@ export class OrderService {
       throw new BadRequestException(`Expected DriverAccepted status`);
     }
 
-    await this.orderRepo.update(orderId, { status: OrderStatus.Arrived });
+    // arrivedAt = مرجع عدّاد الانتظار (المهلة المجانية ثم المدفوعة).
+    await this.orderRepo.update(orderId, {
+      status: OrderStatus.Arrived,
+      arrivedAt: new Date(),
+    });
 
     await this.activityRepo.save(
       this.activityRepo.create({
@@ -356,11 +363,29 @@ export class OrderService {
       ? new Date(Date.now() + 10 * 60 * 1000)
       : undefined;
 
+    // ─── رسوم الانتظار (وقت السائق عند نقطة الالتقاط بعد المهلة المجانية) ───
+    const waitCharge = await this._computeWaitCharge(order);
+
     await this.orderRepo.update(orderId, {
       status: nextStatus,
       finishTimestamp: new Date(),
+      ...(waitCharge.cost > 0 && {
+        waitMinutes: waitCharge.minutes,
+        waitCost: waitCharge.cost,
+        costBest: Number(order.costBest) + waitCharge.cost,
+        costAfterCoupon: Number(order.costAfterCoupon) + waitCharge.cost,
+      }),
       ...(otpCode && { otpCode, otpExpiresAt, otpAttempts: 0 }),
     });
+
+    // عكس الرسوم في الكائن المحلي ليستخدمها _settlePayment في الإجمالي.
+    // (العمولة providerShare تبقى على الأجرة الأساسية — رسوم الانتظار كاملة للسائق.)
+    if (waitCharge.cost > 0) {
+      order.waitMinutes = waitCharge.minutes;
+      order.waitCost = waitCharge.cost;
+      order.costBest = Number(order.costBest) + waitCharge.cost;
+      order.costAfterCoupon = Number(order.costAfterCoupon) + waitCharge.cost;
+    }
 
     await this.activityRepo.save(
       this.activityRepo.create({
@@ -398,6 +423,32 @@ export class OrderService {
 
     this.logger.log(`Ride finished for order #${orderId}, status: ${nextStatus}`);
     return updated;
+  }
+
+  /**
+   * رسوم الانتظار = (المدّة بين وصول السائق arrivedAt وبدء الرحلة startTimestamp
+   * − المهلة المجانية FREE_WAIT_SECONDS) مقرّبة لأعلى دقيقة × perMinuteWait للخدمة.
+   * تُعيد صفراً إن لم يتجاوز الانتظار المهلة المجانية أو غابت الطوابع الزمنية.
+   */
+  private async _computeWaitCharge(
+    order: OrderEntity,
+  ): Promise<{ minutes: number; cost: number }> {
+    if (!order.arrivedAt || !order.startTimestamp) {
+      return { minutes: 0, cost: 0 };
+    }
+    const waitedSec =
+      (order.startTimestamp.getTime() - order.arrivedAt.getTime()) / 1000;
+    const chargeableSec = waitedSec - FREE_WAIT_SECONDS;
+    if (chargeableSec <= 0) return { minutes: 0, cost: 0 };
+    const minutes = Math.ceil(chargeableSec / 60);
+    const row = await this.orderRepo.findOne({
+      where: { id: order.id },
+      relations: ['service'],
+    });
+    const perMinuteWait = Number(row?.service?.perMinuteWait ?? 0);
+    if (perMinuteWait <= 0) return { minutes: 0, cost: 0 };
+    const cost = Math.round(minutes * perMinuteWait * 100) / 100;
+    return { minutes, cost };
   }
 
   // =============================================

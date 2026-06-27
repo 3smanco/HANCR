@@ -2297,6 +2297,33 @@ const Map<String, Map<String, String>> _t = {
     'fr': 'Plus d\'options',
     'tr': 'Daha fazla seçenek'
   },
+  // ─── ضبط الالتقاط الدقيق (Precise Pickup Adjustment) ───
+  'pickupAdjustTitle': {'ar': 'نقطة الالتقاء', 'en': 'Pickup point'},
+  'pickupAdjustHint': {
+    'ar': 'حرّك الخريطة لضبط نقطة الالتقاط',
+    'en': 'Move map to adjust pickup'
+  },
+  'confirmPickup': {'ar': 'تأكيد الالتقاط', 'en': 'Confirm pickup'},
+  'estimatedFareLabel': {'ar': 'السعر التقديري', 'en': 'Estimated fare'},
+  'pickupZoneNearby': {
+    'ar': 'نقطة ركوب معتمدة قريبة',
+    'en': 'Approved pickup zone nearby'
+  },
+  'locatingPickup': {'ar': 'جارٍ تحديد الموقع…', 'en': 'Locating…'},
+  // ─── وصول السائق + عدّاد الانتظار (Driver Arrived Countdown) ───
+  'driverArrivedBig': {'ar': 'وصل سائقك', 'en': 'Your driver has arrived'},
+  'meetOutside': {'ar': 'قابِل سائقك بالخارج', 'en': 'Meet your driver outside'},
+  'freeWaitTime': {'ar': 'وقت الانتظار المجاني', 'en': 'Free wait time'},
+  'paidWaitStarted': {
+    'ar': 'بدأ احتساب وقت الانتظار',
+    'en': 'Paid wait time applies'
+  },
+  'plateLabel': {'ar': 'رقم اللوحة', 'en': 'Plate'},
+  'notifyingNearbyDrivers': {
+    'ar': 'نُبلغ السائقين القريبين منك…',
+    'en': 'Notifying drivers near you…'
+  },
+  'waitTimeFee': {'ar': 'رسوم وقت الانتظار', 'en': 'Wait time fee'},
   'economySection': {
     'ar': 'اقتصادي',
     'en': 'Economy',

@@ -38,6 +38,12 @@ class PushService {
 
   bool _initialized = false;
 
+  /// يُستدعى عند وصول إشعار (foreground أو فتح التطبيق من إشعار خلفي).
+  /// يربطه `app.dart` بإعادة جلب الطلب النشط (`OrderActiveCheckRequested`)
+  /// لتحديث دورة الحياة فوراً — لأن الراكب يستقبل تحوّلات السائق
+  /// (assigned/arrived/started/completed) عبر FCM لا عبر الاشتراك المباشر.
+  void Function(RemoteMessage message)? onOrderEvent;
+
   // GraphQL: register the token in rider-api
   static const _updateTokenMutation = r'''
     mutation UpdateFcmToken($token: String!) {
@@ -85,7 +91,15 @@ class PushService {
 
       // ─── Listeners ───
       FirebaseMessaging.onMessage.listen(_onForegroundMessage);
+      FirebaseMessaging.onMessageOpenedApp.listen(_onOpenedApp);
       FirebaseMessaging.instance.onTokenRefresh.listen(_onTokenRefresh);
+
+      // فتح التطبيق من إشعار وهو مغلق تماماً → حدّث الطلب فور الإقلاع.
+      final initialMessage =
+          await FirebaseMessaging.instance.getInitialMessage();
+      if (initialMessage != null) {
+        _onOpenedApp(initialMessage);
+      }
 
       _initialized = true;
     } catch (e) {
@@ -193,5 +207,14 @@ class PushService {
         payload: message.data.toString(),
       );
     }
+
+    // حدّث دورة حياة الطلب فور وصول الإشعار (وصل السائق/بدأت الرحلة/اكتملت…).
+    onOrderEvent?.call(message);
+  }
+
+  /// فتح التطبيق بالضغط على إشعار (كان بالخلفية أو مغلقاً).
+  Future<void> _onOpenedApp(RemoteMessage message) async {
+    debugPrint('[Push] Opened from notification: ${message.data}');
+    onOrderEvent?.call(message);
   }
 }

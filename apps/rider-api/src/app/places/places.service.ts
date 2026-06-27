@@ -123,4 +123,70 @@ export class PlacesService {
       return null;
     }
   }
+
+  /**
+   * Reverse geocoding — اسم الشارع/العنوان المختصر من إحداثيات.
+   *
+   * يُستخدم في شاشة «ضبط الالتقاط الدقيق»: عند توقّف الراكب عن تحريك الخريطة
+   * نعرض اسم الشارع الحالي تحت الدبوس. نُفضّل مكوّن `route` (اسم الشارع) ثم
+   * `neighborhood`/`sublocality`، وإلا نسقط على `formatted_address` المختصر.
+   * يعتمد على Geocoding API (legacy) المُفعَّل على المفتاح.
+   */
+  async reverseGeocode(
+    lat: number,
+    lng: number,
+  ): Promise<PlaceLocationType | null> {
+    if (!this.apiKey) return null;
+    try {
+      const params = new URLSearchParams({
+        latlng: `${lat},${lng}`,
+        language: 'ar',
+        key: this.apiKey,
+      });
+      const res = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?${params.toString()}`,
+        { signal: AbortSignal.timeout(5000) },
+      );
+      const data = (await res.json()) as {
+        status: string;
+        error_message?: string;
+        results?: Array<{
+          formatted_address?: string;
+          address_components?: Array<{
+            long_name?: string;
+            types?: string[];
+          }>;
+        }>;
+      };
+      if (data.status !== 'OK' || !data.results?.length) {
+        if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+          this.logger.warn(
+            `Reverse geocode status=${data.status}` +
+              (data.error_message ? ` — ${data.error_message}` : ''),
+          );
+        }
+        return null;
+      }
+      // نبحث عن أدقّ تسمية مكانية عبر كل النتائج: شارع ثم حي.
+      const pick = (type: string): string | undefined => {
+        for (const r of data.results ?? []) {
+          const comp = r.address_components?.find((c) =>
+            c.types?.includes(type),
+          );
+          if (comp?.long_name) return comp.long_name;
+        }
+        return undefined;
+      };
+      const street =
+        pick('route') ??
+        pick('neighborhood') ??
+        pick('sublocality') ??
+        // أوّل عنوان مختصر (نأخذ أول جزأين قبل الفاصلة).
+        data.results[0].formatted_address?.split(',').slice(0, 2).join('،');
+      return { lat, lng, address: street };
+    } catch (e) {
+      this.logger.warn(`Reverse geocode failed: ${(e as Error).message}`);
+      return null;
+    }
+  }
 }
