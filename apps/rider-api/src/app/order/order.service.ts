@@ -55,6 +55,9 @@ export const DRIVER_ORDER_UPDATED = 'DRIVER_ORDER_UPDATED';
 /** المهلة المجانية للانتظار قبل بدء الرسوم (ثانية). admin-tunable لاحقاً. */
 export const FREE_WAIT_SECONDS = 120;
 
+/** رسم الإلغاء الافتراضي بعد إسناد السائق (إن لم تُحدِّده لوحة التحكم). */
+export const DEFAULT_CANCELLATION_FEE = 5;
+
 /** نصف قطر الانحراف الأقصى لضمّ راكب Share لرحلة جارية (كم). */
 const SHARE_MAX_DETOUR_KM = 3;
 /** أقصى فرق اتجاه مسموح بين مساري الراكبين (درجات). */
@@ -1005,7 +1008,11 @@ export class OrderService {
   // =============================================
   // cancelOrder — إلغاء الطلب من قِبَل الراكب
   // =============================================
-  async cancelOrder(riderId: number, orderId: number): Promise<OrderGqlType> {
+  async cancelOrder(
+    riderId: number,
+    orderId: number,
+    reason?: string,
+  ): Promise<OrderGqlType> {
     const order = await this.findOrderForRider(riderId, orderId);
 
     // N1 — الحالات القابلة للإلغاء من لوحة التحكم (pricingRulesConfig)
@@ -1024,8 +1031,24 @@ export class OrderService {
       );
     }
 
+    // رسم الإلغاء: مجاني قبل إسناد السائق؛ بعده يُطبَّق رسم (من اللوحة أو الافتراضي).
+    // ملاحظة: يُسجَّل ويُعرض للراكب الآن؛ الخصم الفعلي من المحفظة follow-up مقصود.
+    const driverAssigned =
+      order.status === OrderStatus.DriverAccepted ||
+      order.status === OrderStatus.Arrived;
+    const ruleFee = Number(
+      (rules as { cancellationFee?: number }).cancellationFee,
+    );
+    const cancellationFee = driverAssigned
+      ? Number.isFinite(ruleFee)
+        ? ruleFee
+        : DEFAULT_CANCELLATION_FEE
+      : 0;
+
     await this.orderRepo.update(orderId, {
       status: OrderStatus.RiderCanceled,
+      cancellationFee,
+      ...(reason ? { cancelReason: reason.slice(0, 120) } : {}),
     });
 
     // حدّ الإنفاق العائلي: إعادة المبلغ المحجوز عند الإلغاء (refund للحجز)
@@ -1051,12 +1074,21 @@ export class OrderService {
       }),
     );
 
-    const updated = { ...order, status: OrderStatus.RiderCanceled };
+    const updated = {
+      ...order,
+      status: OrderStatus.RiderCanceled,
+      cancellationFee,
+      cancelReason: reason ? reason.slice(0, 120) : order.cancelReason,
+    };
     await this.pubSub.publish(ORDER_UPDATED, {
       orderUpdated: this.toGqlType(updated as OrderEntity),
     });
 
-    this.logger.log(`Order #${orderId} cancelled by rider #${riderId}`);
+    this.logger.log(
+      `Order #${orderId} cancelled by rider #${riderId}` +
+        (cancellationFee > 0 ? ` (fee: ${cancellationFee})` : '') +
+        (reason ? ` — reason: ${reason}` : ''),
+    );
 
     return this.toGqlType(updated as OrderEntity);
   }
@@ -1423,6 +1455,8 @@ export class OrderService {
       arrivedAt: order.arrivedAt,
       waitCost: Number(order.waitCost ?? 0),
       freeWaitSeconds: FREE_WAIT_SECONDS,
+      cancellationFee: Number(order.cancellationFee ?? 0),
+      cancelReason: order.cancelReason,
       startTimestamp: order.startTimestamp,
       finishTimestamp: order.finishTimestamp,
       expectedTimestamp: order.expectedTimestamp,

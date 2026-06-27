@@ -137,7 +137,10 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       await client.mutate(
         MutationOptions(
           document: gql(cancelOrderMutation),
-          variables: {'orderId': event.orderId},
+          variables: {
+            'orderId': event.orderId,
+            if (event.reason != null) 'reason': event.reason,
+          },
         ),
       );
       emit(const OrderIdle());

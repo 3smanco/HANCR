@@ -78,10 +78,11 @@ const String orderMessagesReadSubscription = r'''
 ''';
 
 const String cancelOrderMutation = r'''
-  mutation CancelOrder($orderId: Int!) {
-    cancelOrder(orderId: $orderId) {
+  mutation CancelOrder($orderId: Int!, $reason: String) {
+    cancelOrder(orderId: $orderId, reason: $reason) {
       id
       status
+      cancellationFee
     }
   }
 ''';

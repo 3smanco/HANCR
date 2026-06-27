@@ -148,6 +148,12 @@ class OrderModel extends Equatable {
   /// مدّة الانتظار المجانية بالثواني قبل بدء الرسوم.
   final int freeWaitSeconds;
 
+  /// رسم الإلغاء (0 = مجاني).
+  final double cancellationFee;
+
+  /// سبب الإلغاء (إن أُلغي).
+  final String? cancelReason;
+
   final DateTime? startTimestamp;
   final DateTime? finishTimestamp;
   final DateTime? expectedTimestamp; // موعد الرحلة المجدولة (Reserve)
@@ -193,6 +199,8 @@ class OrderModel extends Equatable {
     this.arrivedAt,
     this.waitCost = 0,
     this.freeWaitSeconds = 120,
+    this.cancellationFee = 0,
+    this.cancelReason,
     this.startTimestamp,
     this.finishTimestamp,
     this.expectedTimestamp,
@@ -246,6 +254,8 @@ class OrderModel extends Equatable {
             : null,
         waitCost: (json['waitCost'] as num?)?.toDouble() ?? 0,
         freeWaitSeconds: json['freeWaitSeconds'] as int? ?? 120,
+        cancellationFee: (json['cancellationFee'] as num?)?.toDouble() ?? 0,
+        cancelReason: json['cancelReason'] as String?,
         startTimestamp: json['startTimestamp'] != null
             ? DateTime.tryParse(json['startTimestamp'] as String)
             : null,

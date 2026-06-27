@@ -2324,6 +2324,26 @@ const Map<String, Map<String, String>> _t = {
     'en': 'Notifying drivers near you…'
   },
   'waitTimeFee': {'ar': 'رسوم وقت الانتظار', 'en': 'Wait time fee'},
+  // ─── سبب الإلغاء (Cancellation reasons) ───
+  'cancelReasonTitle': {'ar': 'سبب الإلغاء', 'en': 'Reason for cancelling'},
+  'cancelReasonWaited': {'ar': 'الانتظار طال', 'en': 'Waiting too long'},
+  'cancelReasonChangedMind': {'ar': 'غيّرت رأيي', 'en': 'Changed my mind'},
+  'cancelReasonDriverAsked': {
+    'ar': 'السائق طلب الإلغاء',
+    'en': 'Driver asked to cancel'
+  },
+  'cancelReasonWrongPickup': {
+    'ar': 'خطأ في موقع الالتقاط',
+    'en': 'Wrong pickup location'
+  },
+  'cancelReasonFoundOther': {'ar': 'وجدت وسيلة أخرى', 'en': 'Found another ride'},
+  'cancelReasonOther': {'ar': 'سبب آخر', 'en': 'Other'},
+  'cancelFeeWarning': {
+    'ar': 'قد يُطبَّق رسم إلغاء لأن السائق في الطريق إليك',
+    'en': 'A cancellation fee may apply because your driver is on the way'
+  },
+  'confirmCancel': {'ar': 'تأكيد الإلغاء', 'en': 'Confirm cancellation'},
+  'keepRide': {'ar': 'متابعة الرحلة', 'en': 'Keep my ride'},
   'economySection': {
     'ar': 'اقتصادي',
     'en': 'Economy',

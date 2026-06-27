@@ -133,6 +133,14 @@ export class OrderType {
   @Field(() => Float)
   waitCost!: number;
 
+  /** رسم الإلغاء (0 = مجاني). */
+  @Field(() => Float)
+  cancellationFee!: number;
+
+  /** سبب الإلغاء (إن أُلغي). */
+  @Field({ nullable: true })
+  cancelReason?: string;
+
   /** مدّة الانتظار المجانية بالثواني قبل بدء الرسوم. */
   @Field(() => Int)
   freeWaitSeconds!: number;
