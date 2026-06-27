@@ -41,6 +41,15 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
         tr('rateOnRoute'),
       ];
 
+  /// أسباب التقييم المنخفض (rating ≤ 3) — لالتقاط الملاحظات السلبية.
+  List<String> get _negativeTagOptions => [
+        tr('rateNegLate'),
+        tr('rateNegReckless'),
+        tr('rateNegDirty'),
+        tr('rateNegRude'),
+        tr('rateNegRoute'),
+      ];
+
   static const _tips = [0.0, 2.0, 5.0, 10.0];
 
   @override
@@ -115,6 +124,12 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                         // ─── Trip summary card ───
                         _tripSummaryCard(order),
 
+                        // ─── Itemized fare breakdown ───
+                        if (order.costAfterCoupon > 0) ...[
+                          const SizedBox(height: AuroraSpacing.md),
+                          _fareBreakdown(order),
+                        ],
+
                         const SizedBox(height: AuroraSpacing.lg),
 
                         // ─── Driver card ───
@@ -143,7 +158,7 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
 
                         const SizedBox(height: AuroraSpacing.xl),
 
-                        // ─── Tags (إيجابيات) ───
+                        // ─── Tags: إيجابيات (≥4) أو أسباب سلبية (≤3) ───
                         if (_rating >= 4) ...[
                           Text(
                             tr('whatLiked'),
@@ -154,6 +169,18 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                             spacing: AuroraSpacing.sm,
                             runSpacing: AuroraSpacing.sm,
                             children: _tagOptions.map(_tagChip).toList(),
+                          ),
+                          const SizedBox(height: AuroraSpacing.xl),
+                        ] else ...[
+                          Text(
+                            tr('whatWrong'),
+                            style: AuroraText.titleSmall,
+                          ),
+                          const SizedBox(height: AuroraSpacing.md),
+                          Wrap(
+                            spacing: AuroraSpacing.sm,
+                            runSpacing: AuroraSpacing.sm,
+                            children: _negativeTagOptions.map(_tagChip).toList(),
                           ),
                           const SizedBox(height: AuroraSpacing.xl),
                         ],
@@ -279,6 +306,52 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
     );
   }
 
+  /// تفصيل الأجرة: أجرة الرحلة + وقت الانتظار (إن وُجد) → الإجمالي.
+  Widget _fareBreakdown(OrderModel order) {
+    final fmt = NumberFormat('#,##0.00', 'ar');
+    final total = order.costAfterCoupon;
+    final wait = order.waitCost;
+    final base = (total - wait) < 0 ? 0.0 : (total - wait);
+
+    Widget line(String label, double value, {bool strong = false}) {
+      final style = (strong ? AuroraText.titleSmall : AuroraText.bodyMedium)
+          .copyWith(
+        color: strong ? AuroraColors.pearl : AuroraColors.textPrimary,
+        fontWeight: strong ? FontWeight.w800 : FontWeight.w600,
+      );
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 3),
+        child: Row(
+          children: [
+            Expanded(child: Text(label, style: style)),
+            Text('${fmt.format(value)} ${order.currency}', style: style),
+          ],
+        ),
+      );
+    }
+
+    return AuroraCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.receipt_long_rounded,
+                  size: 18, color: AuroraColors.ember),
+              const SizedBox(width: AuroraSpacing.sm),
+              Text(tr('fareBreakdown'), style: AuroraText.titleSmall),
+            ],
+          ),
+          const SizedBox(height: AuroraSpacing.sm),
+          line(tr('baseFare'), base.toDouble()),
+          if (wait > 0) line(tr('waitTimeFee'), wait),
+          Divider(color: AuroraColors.divider, height: AuroraSpacing.lg),
+          line(tr('total'), total, strong: true),
+        ],
+      ),
+    );
+  }
+
   Widget _statPill({required IconData icon, required String label}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -352,7 +425,11 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
         final idx = i + 1;
         final filled = idx <= _rating;
         return GestureDetector(
-          onTap: () => setState(() => _rating = idx),
+          // تغيير التقييم يمسح الوسوم (إيجابية/سلبية حسب السياق).
+          onTap: () => setState(() {
+            _rating = idx;
+            _tags.clear();
+          }),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             margin: const EdgeInsets.symmetric(horizontal: 6),
