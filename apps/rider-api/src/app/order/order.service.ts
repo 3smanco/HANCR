@@ -1306,6 +1306,22 @@ export class OrderService {
     return gql;
   }
 
+  /**
+   * رابط دفع الرحلة بالبطاقة (Stripe/بوابة) — لإكمال دفع طلب WaitingForPostPay.
+   * يُعيد redirectUrl للـ checkout المعلّق الذي أنشأه السائق عند إنهاء الرحلة.
+   */
+  async getTripCheckoutUrl(
+    riderId: number,
+    orderId: number,
+  ): Promise<string | null> {
+    const checkout = await this.walletService.findPendingTripCheckout(
+      WalletOwnerType.Rider,
+      riderId,
+      orderId,
+    );
+    return checkout?.redirectUrl ?? null;
+  }
+
   // =============================================
   // getOrderHistory — سجل الرحلات
   // =============================================

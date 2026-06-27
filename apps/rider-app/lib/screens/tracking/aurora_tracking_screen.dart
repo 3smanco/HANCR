@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show SystemSound, SystemSoundType;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/motion/motion.dart';
@@ -16,6 +17,8 @@ import '../../blocs/sos/sos_state.dart';
 import '../../blocs/tracking/tracking_bloc.dart';
 import '../../core/models/order_model.dart';
 import '../../core/i18n/app_localization.dart';
+import '../../core/graphql/graphql_client.dart';
+import '../../core/graphql/gql/order_gql.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../../core/utils/external_launch.dart';
 import '../sos/aurora_sos_button.dart';
@@ -908,7 +911,7 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
     );
   }
 
-  /// بطاقة مرحلة الدفع (pre/post-pay) — تعرض الإجمالي وأن المعالجة جارية.
+  /// بطاقة مرحلة الدفع (pre/post-pay) — الإجمالي + زر الدفع بالبطاقة (Stripe).
   Widget _paymentProcessingCard(OrderModel order) {
     final fmt = NumberFormat('#,##0.00', 'ar');
     return Container(
@@ -919,29 +922,63 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
         borderRadius: BorderRadius.circular(AuroraRadius.lg),
         border: Border.all(color: AuroraColors.info.withValues(alpha: 0.4)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              valueColor: AlwaysStoppedAnimation<Color>(AuroraColors.info),
-            ),
+          Row(
+            children: [
+              SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(AuroraColors.info),
+                ),
+              ),
+              const SizedBox(width: AuroraSpacing.md),
+              Expanded(
+                child: Text(tr('processingPayment'),
+                    style: AuroraText.bodyMedium
+                        .copyWith(color: AuroraColors.textPrimary)),
+              ),
+              Text(
+                '${fmt.format(order.costAfterCoupon)} ${order.currency}',
+                style: AuroraText.titleSmall.copyWith(color: AuroraColors.info),
+              ),
+            ],
           ),
-          const SizedBox(width: AuroraSpacing.md),
-          Expanded(
-            child: Text(tr('processingPayment'),
-                style: AuroraText.bodyMedium
-                    .copyWith(color: AuroraColors.textPrimary)),
-          ),
-          Text(
-            '${fmt.format(order.costAfterCoupon)} ${order.currency}',
-            style: AuroraText.titleSmall.copyWith(color: AuroraColors.info),
+          const SizedBox(height: AuroraSpacing.md),
+          AuroraButton.primary(
+            label: tr('payByCard'),
+            icon: Icons.credit_card_rounded,
+            onPressed: () => _payTripByCard(order),
           ),
         ],
       ),
     );
+  }
+
+  /// يجلب رابط دفع البطاقة (Stripe) للطلب ويفتحه خارجياً لإكمال الدفع.
+  Future<void> _payTripByCard(OrderModel order) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final client = await GraphQLClientManager.get();
+      final res = await client.query(QueryOptions(
+        document: gql(tripCheckoutUrlQuery),
+        variables: {'orderId': order.id},
+        fetchPolicy: FetchPolicy.noCache,
+      ));
+      final url = res.data?['tripCheckoutUrl'] as String?;
+      if (!mounted) return;
+      if (url != null && url.isNotEmpty) {
+        await launchExternalUrl(context, url);
+      } else {
+        messenger
+            .showSnackBar(SnackBar(content: Text(tr('noCardPaymentNeeded'))));
+      }
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(tr('paymentLinkFailed'))));
+    }
   }
 
   /// شريط HANCR Shield + استرجاع الأمزجة المختارة (Phase F).

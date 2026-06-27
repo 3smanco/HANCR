@@ -430,6 +430,17 @@ export class OrderService {
    * − المهلة المجانية FREE_WAIT_SECONDS) مقرّبة لأعلى دقيقة × perMinuteWait للخدمة.
    * تُعيد صفراً إن لم يتجاوز الانتظار المهلة المجانية أو غابت الطوابع الزمنية.
    */
+  /** بوابة دفع الرحلات بالبطاقة (من البيئة TRIP_PAYMENT_GATEWAY، افتراضي Stripe). */
+  private _tripGateway(): PaymentGateway {
+    const raw = (
+      this.config.get<string>('TRIP_PAYMENT_GATEWAY') ?? 'Stripe'
+    ).trim();
+    const match = Object.values(PaymentGateway).find(
+      (g) => g.toLowerCase() === raw.toLowerCase(),
+    );
+    return (match as PaymentGateway) ?? PaymentGateway.Stripe;
+  }
+
   private async _computeWaitCharge(
     order: OrderEntity,
   ): Promise<{ minutes: number; cost: number }> {
@@ -770,10 +781,9 @@ export class OrderService {
       mode === PaymentMode.SavedPaymentMethod;
 
     if (isGatewayMode) {
-      // Default to HyperPay for SA — the AppConfig.gatewayConfig picker can
-      // later route per region/method, but the choice doesn't change the
-      // ledger flow (everything funnels through the same webhook).
-      const gateway = PaymentGateway.HyperPay;
+      // البوابة من البيئة (TRIP_PAYMENT_GATEWAY) — افتراضي Stripe. كل البوابات
+      // تمرّ بنفس الـ webhook فلا يتغيّر تدفّق الـ ledger.
+      const gateway = this._tripGateway();
       const pending = await this.walletService.debit({
         ownerType: WalletOwnerType.Rider,
         ownerId: order.riderId,

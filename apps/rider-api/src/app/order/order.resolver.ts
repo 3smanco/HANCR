@@ -141,6 +141,21 @@ export class OrderResolver {
   }
 
   /**
+   * رابط دفع الرحلة بالبطاقة (Stripe) لإكمال طلب WaitingForPostPay.
+   */
+  @Query(() => String, {
+    nullable: true,
+    description: 'رابط checkout لدفع الرحلة بالبطاقة',
+  })
+  @UseGuards(JwtAuthGuard)
+  tripCheckoutUrl(
+    @CurrentUser() user: AuthUser,
+    @Args('orderId', { type: () => Int }) orderId: number,
+  ): Promise<string | null> {
+    return this.orderService.getTripCheckoutUrl(user.riderId, orderId);
+  }
+
+  /**
    * سجل الرحلات السابقة
    */
   @Query(() => [OrderType], { description: 'سجل الرحلات' })

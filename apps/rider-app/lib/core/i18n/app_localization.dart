@@ -2363,6 +2363,16 @@ const Map<String, Map<String, String>> _t = {
   // ─── أميال الولاء + إعادة الحجز (D3) ───
   'milesEarnedShort': {'ar': 'ميل', 'en': 'mi'},
   'rebookRoute': {'ar': 'احجز نفس الرحلة', 'en': 'Rebook this trip'},
+  // ─── الدفع بالبطاقة (C4 Stripe) ───
+  'payByCard': {'ar': 'ادفع بالبطاقة', 'en': 'Pay by card'},
+  'noCardPaymentNeeded': {
+    'ar': 'لا حاجة لدفع إضافي',
+    'en': 'No card payment needed'
+  },
+  'paymentLinkFailed': {
+    'ar': 'تعذّر جلب رابط الدفع، حاول مجدداً',
+    'en': 'Could not get payment link, try again'
+  },
   'economySection': {
     'ar': 'اقتصادي',
     'en': 'Economy',

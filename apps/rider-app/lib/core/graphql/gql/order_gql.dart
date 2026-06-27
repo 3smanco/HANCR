@@ -171,6 +171,13 @@ const String orderHistoryQuery = r'''
   }
 ''';
 
+// رابط دفع الرحلة بالبطاقة (Stripe) لإكمال طلب WaitingForPostPay.
+const String tripCheckoutUrlQuery = r'''
+  query TripCheckoutUrl($orderId: Int!) {
+    tripCheckoutUrl(orderId: $orderId)
+  }
+''';
+
 const String nearbyDriversQuery = r'''
   query NearbyDrivers($lat: Float!, $lng: Float!) {
     nearbyDrivers(lat: $lat, lng: $lng) { lat lng heading }
