@@ -52,6 +52,14 @@ class _AuroraArrivedPanelState extends State<AuroraArrivedPanel> {
 
   bool get _isPaid => _elapsedSeconds >= _freeWait;
 
+  /// الرسم المتراكم للانتظار المدفوع (تقديري حيّ — مصدر الحقيقة الخادم).
+  double get _accruedCost {
+    if (!_isPaid || widget.order.perMinuteWait <= 0) return 0;
+    final paidSec = _elapsedSeconds - _freeWait;
+    final mins = (paidSec / 60).ceil();
+    return mins * widget.order.perMinuteWait;
+  }
+
   /// النص الزمني: ضمن المهلة = العدّ التنازلي للمجاني؛ بعدها = العدّ التصاعدي للمدفوع.
   String get _clock {
     final secs = _isPaid ? (_elapsedSeconds - _freeWait) : (_freeWait - _elapsedSeconds);
@@ -132,12 +140,23 @@ class _AuroraArrivedPanelState extends State<AuroraArrivedPanel> {
               color: color, size: 22),
           const SizedBox(width: AuroraSpacing.md),
           Expanded(
-            child: Text(
-              label,
-              style: AuroraText.bodyMedium.copyWith(
-                color: color,
-                fontWeight: FontWeight.w700,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: AuroraText.bodyMedium.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (paid && _accruedCost > 0)
+                  Text(
+                    '+${_accruedCost.toStringAsFixed(2)} ${widget.order.currency}',
+                    style: AuroraText.caption.copyWith(color: color),
+                  ),
+              ],
             ),
           ),
           Text(

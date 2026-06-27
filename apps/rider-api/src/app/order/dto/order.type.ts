@@ -145,6 +145,14 @@ export class OrderType {
   @Field(() => Int)
   freeWaitSeconds!: number;
 
+  /** سعر دقيقة الانتظار (للعدّاد الحيّ في شاشة الوصول). */
+  @Field(() => Float)
+  perMinuteWait!: number;
+
+  /** أميال الولاء المتوقَّعة/المكتسبة من هذه الرحلة. */
+  @Field(() => Int, { nullable: true })
+  milesEarned?: number;
+
   @Field({ nullable: true })
   startTimestamp?: Date;
 
@@ -178,4 +186,17 @@ export class ShoppingListItemType {
 
   @Field({ nullable: true })
   note?: string;
+}
+
+/** نقطة ركوب معتمدة (Designated Pickup Zone) للانجذاب في ضبط الالتقاط. */
+@ObjectType()
+export class PickupZoneType {
+  @Field(() => Float)
+  lat!: number;
+
+  @Field(() => Float)
+  lng!: number;
+
+  @Field({ nullable: true })
+  label?: string;
 }

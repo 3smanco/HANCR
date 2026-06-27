@@ -1032,14 +1032,21 @@ export class OrderService {
     }
 
     // رسم الإلغاء: مجاني قبل إسناد السائق؛ بعده يُطبَّق رسم (من اللوحة أو الافتراضي).
-    // ملاحظة: يُسجَّل ويُعرض للراكب الآن؛ الخصم الفعلي من المحفظة follow-up مقصود.
+    // Platinum (hasFreeCancellation) معفيّ تماماً.
     const driverAssigned =
       order.status === OrderStatus.DriverAccepted ||
       order.status === OrderStatus.Arrived;
     const ruleFee = Number(
       (rules as { cancellationFee?: number }).cancellationFee,
     );
-    const cancellationFee = driverAssigned
+    let freeCancellation = false;
+    try {
+      const loyalty = await this.loyaltyService.getOrCreate(riderId);
+      freeCancellation = loyalty.hasFreeCancellation;
+    } catch {
+      /* تعذّر جلب الولاء — نتابع بلا إعفاء */
+    }
+    const cancellationFee = driverAssigned && !freeCancellation
       ? Number.isFinite(ruleFee)
         ? ruleFee
         : DEFAULT_CANCELLATION_FEE
@@ -1050,6 +1057,29 @@ export class OrderService {
       cancellationFee,
       ...(reason ? { cancelReason: reason.slice(0, 120) } : {}),
     });
+
+    // خصم رسم الإلغاء فعلياً من محفظة الراكب (graceful — يبقى مسجَّلاً لو فشل).
+    if (cancellationFee > 0) {
+      try {
+        const { currency } = await this.walletService.getBalance(
+          WalletOwnerType.Rider,
+          riderId,
+        );
+        await this.walletService.debit({
+          ownerType: WalletOwnerType.Rider,
+          ownerId: riderId,
+          type: WalletTransactionType.CancellationFee,
+          amount: cancellationFee,
+          currency,
+          orderId,
+          description: `رسوم إلغاء — طلب #${orderId}`,
+        });
+      } catch (e) {
+        this.logger.warn(
+          `Cancellation fee debit failed for order #${orderId}: ${(e as Error).message}`,
+        );
+      }
+    }
 
     // حدّ الإنفاق العائلي: إعادة المبلغ المحجوز عند الإلغاء (refund للحجز)
     const reserved = Number(order.costAfterCoupon ?? 0);
@@ -1258,11 +1288,48 @@ export class OrderService {
     const order = await this.orderRepo.findOne({
       where: { riderId, status: In(CURRENT_ACTIVE_ORDER_STATUSES) },
       order: { createdOn: 'DESC' },
-      relations: ['driver'],
+      relations: ['driver', 'service'],
     });
-    if (order) return this.toGqlType(order);
+    if (!order) return null;
 
-    return null;
+    const gql = this.toGqlType(order);
+    // إثراء: سعر دقيقة الانتظار (للعدّاد الحيّ) + أميال الولاء المتوقَّعة من الرحلة.
+    gql.perMinuteWait = Number(order.service?.perMinuteWait ?? 0);
+    try {
+      const loyaltyCfg = await this.appConfig.getLoyalty();
+      gql.milesEarned = Math.floor(
+        Number(order.costAfterCoupon) * (loyaltyCfg.milesPerCurrency ?? 1),
+      );
+    } catch {
+      gql.milesEarned = Math.floor(Number(order.costAfterCoupon));
+    }
+    return gql;
+  }
+
+  /** نقاط الركوب المعتمدة القريبة (للانجذاب المغناطيسي في ضبط الالتقاط). */
+  async getPickupZones(
+    lat: number,
+    lng: number,
+    regionId?: number,
+  ): Promise<{ lat: number; lng: number; label?: string }[]> {
+    const zones = await this.appConfig.getNearbyPickupZones(lat, lng, regionId);
+    return zones.map((z) => ({ lat: z.lat, lng: z.lng, label: z.label }));
+  }
+
+  /**
+   * رابط دفع الرحلة بالبطاقة (Stripe/بوابة) — لإكمال دفع طلب WaitingForPostPay.
+   * يُعيد redirectUrl للـ checkout المعلّق الذي أنشأه السائق عند إنهاء الرحلة.
+   */
+  async getTripCheckoutUrl(
+    riderId: number,
+    orderId: number,
+  ): Promise<string | null> {
+    const checkout = await this.walletService.findPendingTripCheckout(
+      WalletOwnerType.Rider,
+      riderId,
+      orderId,
+    );
+    return checkout?.redirectUrl ?? null;
   }
 
   // =============================================
@@ -1455,6 +1522,7 @@ export class OrderService {
       arrivedAt: order.arrivedAt,
       waitCost: Number(order.waitCost ?? 0),
       freeWaitSeconds: FREE_WAIT_SECONDS,
+      perMinuteWait: Number(order.service?.perMinuteWait ?? 0),
       cancellationFee: Number(order.cancellationFee ?? 0),
       cancelReason: order.cancelReason,
       startTimestamp: order.startTimestamp,

@@ -22,7 +22,13 @@
   - شاشة التقييم: تفصيل أجرة (أجرة الرحلة + وقت الانتظار → الإجمالي) + وسوم سلبية عند rating ≤ 3 + مسح الوسوم عند تغيير التقييم.
   - بطاقة «جارٍ معالجة الدفع» في التتبع عند waitingForPrePay/PostPay.
   - **OTP handover (F) موجود أصلاً** (`_deliveryCodeCard` للأمانات)، شاشة المزايدة موجودة. ⇒ **معظم F منجَز**.
-- **⏭️ المتبقّي الحقيقي (يحتاج قراراً/باكند أعمق، ليس UI سريعاً):** C4 الكامل (تدفّق checkout البوابة + webview) · D3 ما بعد التقييم (أميال الولاء المكتسبة لكل رحلة + إعادة حجز — يحتاج backend miles-per-trip) · الخصم الفعلي لرسم الإلغاء من المحفظة · pickupZones registry · perMinuteWait للعرض الحيّ. **بقية رحلة العميل (A→F) منجَزة بمستوى عالٍ.**
+  - **🚀 نُشر (2026-06-27، الدفعة الثالثة):** PR [#188](https://github.com/3smanco/HANCR/pull/188) → `main` (`8bcbcb8`). **frontend فقط فلا redeploy باكند** — APK الراكب أُعيد بناؤه (D+C4-lite) ونُشر `hancr.com/downloads/hancr-rider.apk` (HTTP 200، 50,978,091 بايت، `.bak-20260627c`). **A→F كلها حيّة الآن.**
+- **✅ كل البنود «العميقة» المتبقّية أُنجزت (2026-06-27، فرع `feat/rider-journey-c-to-f` commits 7006f78→1f68378، مُتحقَّق tsc rider+driver=0، analyze=No issues، بلا migrations جديدة):**
+  - **perMinuteWait حيّ:** `getActiveOrder` مُثرى (service relation) → عدّاد الوصول يعرض الرسم المتراكم حيّاً.
+  - **خصم رسم الإلغاء فعلياً:** `cancelOrder` يخصم من المحفظة (graceful؛ Platinum معفيّ).
+  - **D3:** `milesEarned` مُثرى في getActiveOrder → يظهر في شاشة التقييم + زر «احجز نفس الرحلة».
+  - **C4 Stripe كامل:** البوابة قابلة للضبط (`TRIP_PAYMENT_GATEWAY` افتراضي Stripe) + `tripCheckoutUrl(orderId)` (من metadata المعاملة المعلّقة) + زر «ادفع بالبطاقة» يفتح checkout خارجياً. **يكفي إضافة مفاتيح Stripe في البيئة.**
+  - **pickupZones registry (SDUI):** `pricingRulesConfig.pickupZones` (jsonb، بلا migration) + `pickupZones(lat,lng,regionId)` + الشاشة تجلب وتلتصق. *(إضافة محرّر مخصّص في اللوحة = تحسين لاحق صغير.)*
 
 ## 🚀 نشر إصلاحات المشاكل الثلاث — مكتمل وحيّ ومُتحقَّق (2026-06-26)
 **PR [#185](https://github.com/3smanco/HANCR/pull/185) مدموج في `main`.** النشر تمّ كاملاً:

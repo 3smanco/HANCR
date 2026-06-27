@@ -113,6 +113,8 @@ const String activeOrderQuery = r'''
       arrivedAt
       waitCost
       freeWaitSeconds
+      perMinuteWait
+      milesEarned
       startTimestamp
       finishTimestamp
       driverId
@@ -166,6 +168,13 @@ const String orderHistoryQuery = r'''
       createdOn
       finishTimestamp
     }
+  }
+''';
+
+// رابط دفع الرحلة بالبطاقة (Stripe) لإكمال طلب WaitingForPostPay.
+const String tripCheckoutUrlQuery = r'''
+  query TripCheckoutUrl($orderId: Int!) {
+    tripCheckoutUrl(orderId: $orderId)
   }
 ''';
 

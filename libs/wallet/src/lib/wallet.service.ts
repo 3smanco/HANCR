@@ -147,6 +147,38 @@ export class WalletService {
   }
 
   /**
+   * يجلب رابط checkout المعلّق لدفع رحلة بالبطاقة (لإكمال الدفع من تطبيق الراكب).
+   * يُعيد آخر معاملة TripPayment معلّقة للطلب مع redirectUrl المخزَّن في metadata.
+   */
+  async findPendingTripCheckout(
+    ownerType: WalletOwnerType,
+    ownerId: number,
+    orderId: number,
+  ): Promise<{
+    transactionId: number;
+    redirectUrl?: string;
+    gatewayRef?: string;
+  } | null> {
+    const tx = await this.txRepo.findOne({
+      where: {
+        ownerType,
+        ownerId,
+        orderId,
+        type: WalletTransactionType.TripPayment,
+        status: WalletTransactionStatus.Pending,
+      },
+      order: { id: 'DESC' },
+    });
+    if (!tx) return null;
+    const md = (tx.metadata ?? {}) as { redirectUrl?: string };
+    return {
+      transactionId: tx.id,
+      redirectUrl: md.redirectUrl,
+      gatewayRef: tx.gatewayRef,
+    };
+  }
+
+  /**
    * تحديث حالة معاملة Pending (يُستخدم بواسطة webhook handlers)
    */
   async updateTransactionStatus(

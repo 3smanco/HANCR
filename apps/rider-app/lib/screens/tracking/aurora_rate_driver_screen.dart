@@ -224,6 +224,15 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                           onPressed: () => _submit(context, order),
                         ),
 
+                        const SizedBox(height: AuroraSpacing.md),
+
+                        // ─── إعادة حجز نفس الرحلة (D3) ───
+                        AuroraButton.secondary(
+                          label: tr('rebookRoute'),
+                          icon: Icons.replay_rounded,
+                          onPressed: () => _rebook(context, order),
+                        ),
+
                         const SizedBox(height: AuroraSpacing.huge),
                       ],
                     ),
@@ -299,6 +308,13 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
                 icon: Icons.schedule,
                 label: order.durationLabel,
               ),
+              if (order.milesEarned > 0) ...[
+                const SizedBox(width: AuroraSpacing.sm),
+                _statPill(
+                  icon: Icons.workspace_premium_rounded,
+                  label: '+${order.milesEarned} ${tr('milesEarnedShort')}',
+                ),
+              ],
             ],
           ),
         ],
@@ -556,6 +572,22 @@ class _AuroraRateDriverScreenState extends State<AuroraRateDriverScreen> {
     final textPart = _commentCtrl.text.trim();
     final combined = [tagPart, textPart].where((s) => s.isNotEmpty).join('. ');
     return combined.isEmpty ? null : combined;
+  }
+
+  /// إعادة حجز نفس الرحلة: ينتقل للحجز بنفس الوجهة ثم يُرسل التقييم الحالي.
+  void _rebook(BuildContext context, OrderModel order) {
+    final dest = order.points.isNotEmpty ? order.points.last : null;
+    final bloc = context.read<OrderBloc>();
+    context.go('/book', extra: {
+      'destination': dest,
+      'label': order.destinationAddress,
+    });
+    bloc.add(OrderRateDriverRequested(
+      orderId: order.id,
+      rating: _rating.toDouble(),
+      comment: _buildComment(),
+      tip: _tip > 0 ? _tip : null,
+    ));
   }
 
   void _skip(BuildContext context, OrderModel order) {
