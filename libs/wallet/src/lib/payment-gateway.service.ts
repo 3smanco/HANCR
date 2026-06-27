@@ -4,6 +4,7 @@ import { PaymentGateway } from '@hancr/database';
 import { HyperPayGateway } from './gateways/hyperpay.gateway';
 import { MoyasarGateway } from './gateways/moyasar.gateway';
 import { StripeGateway } from './gateways/stripe.gateway';
+import { GatewayCredentials } from './gateways/gateway-credentials.service';
 import {
   CreateCheckoutInput,
   CheckoutResult,
@@ -30,10 +31,10 @@ export {
 export class PaymentGatewayService {
   private readonly logger = new Logger(PaymentGatewayService.name);
   private readonly gateways: Map<PaymentGateway, IPaymentGateway>;
-  private readonly stubMode: boolean;
 
   constructor(
     private readonly config: ConfigService,
+    private readonly creds: GatewayCredentials,
     private readonly hyperPay: HyperPayGateway,
     private readonly moyasar: MoyasarGateway,
     private readonly stripe: StripeGateway,
@@ -45,21 +46,11 @@ export class PaymentGatewayService {
       [PaymentGateway.ApplePay, stripe], // عبر Stripe Payment Intent
       [PaymentGateway.GooglePay, stripe], // عبر Stripe Payment Intent
     ]);
+  }
 
-    const hasHyperPay = !!this.config.get<string>('HYPERPAY_ACCESS_TOKEN');
-    const hasMoyasar = !!this.config.get<string>('MOYASAR_API_KEY');
-    const hasStripe = !!this.config.get<string>('STRIPE_SECRET_KEY');
-    this.stubMode = !hasHyperPay && !hasMoyasar && !hasStripe;
-
-    if (this.stubMode) {
-      this.logger.warn(
-        '⚠ Payment gateways in STUB MODE — لا توجد credentials. لـ production أضِف keys في .env',
-      );
-    } else {
-      this.logger.log(
-        `Payment gateways: HyperPay=${hasHyperPay}, Moyasar=${hasMoyasar}, Stripe=${hasStripe}`,
-      );
-    }
+  /** Stub mode عند غياب أي مفاتيح (DB أو env). يُحدَّث ديناميكياً من اللوحة. */
+  private isStub(): boolean {
+    return !this.creds.hasAny();
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -70,13 +61,14 @@ export class PaymentGatewayService {
     gateway: PaymentGateway,
     input: CreateCheckoutInput,
   ): Promise<CheckoutResult> {
-    if (this.stubMode) {
-      return this._createStubCheckout(gateway, input);
-    }
-
     const impl = this.gateways.get(gateway);
     if (!impl) {
       throw new Error(`Unsupported gateway: ${gateway}`);
+    }
+
+    await this.creds.ensureLoaded();
+    if (this.isStub()) {
+      return this._createStubCheckout(gateway, input);
     }
 
     try {
@@ -115,7 +107,7 @@ export class PaymentGatewayService {
     headers: Record<string, string>,
     body: unknown,
   ): WebhookEvent {
-    if (this.stubMode) {
+    if (this.isStub()) {
       this.logger.warn(
         `[stub] Webhook NOT verified for ${gateway}. لا تستخدم في الإنتاج!`,
       );
@@ -137,18 +129,25 @@ export class PaymentGatewayService {
     gateway: PaymentGateway,
     _input: CreateCheckoutInput,
   ): CheckoutResult {
-    const ref = `stub_${Math.random().toString(36).slice(2, 10)}`;
+    const suffix = Math.random().toString(36).slice(2, 10);
     if (
       gateway === PaymentGateway.Stripe ||
       gateway === PaymentGateway.ApplePay ||
       gateway === PaymentGateway.GooglePay
     ) {
       return {
-        gatewayRef: `pi_${ref}`,
-        clientSecret: `pi_${ref}_secret_stub`,
+        gatewayRef: `pi_stub_${suffix}`,
+        clientSecret: `pi_stub_${suffix}_secret`,
         gateway,
       };
     }
+    const prefix =
+      gateway === PaymentGateway.HyperPay
+        ? 'hpay'
+        : gateway === PaymentGateway.Moyasar
+        ? 'moy'
+        : 'stub';
+    const ref = `${prefix}_${suffix}`;
     return {
       gatewayRef: ref,
       redirectUrl: `https://stub.hancr.local/pay?ref=${ref}`,

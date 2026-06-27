@@ -10,6 +10,7 @@ import {
   WebhookVerificationError,
   extractRawBody,
 } from './gateway.interface';
+import { GatewayCredentials } from './gateway-credentials.service';
 
 /**
  * HyperPayGateway — البوابة الرئيسية في الخليج.
@@ -33,17 +34,22 @@ export class HyperPayGateway implements IPaymentGateway {
   readonly name = PaymentGateway.HyperPay;
   private readonly logger = new Logger(HyperPayGateway.name);
 
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly creds: GatewayCredentials,
+  ) {}
 
   // ─────────────────────────────────────────────────────────────────────────
   // Create checkout
   // ─────────────────────────────────────────────────────────────────────────
 
   async createCheckout(input: CreateCheckoutInput): Promise<CheckoutResult> {
+    await this.creds.ensureLoaded();
     const accessToken = this._requireEnv('HYPERPAY_ACCESS_TOKEN');
     const entityId = this._requireEnv('HYPERPAY_ENTITY_ID');
     const baseUrl =
-      this.config.get<string>('HYPERPAY_BASE_URL') ?? 'https://eu-test.oppwa.com';
+      this.creds.get('hyperpay', 'baseUrl', 'HYPERPAY_BASE_URL') ??
+      'https://eu-test.oppwa.com';
 
     const params = new URLSearchParams({
       entityId,
@@ -162,10 +168,18 @@ export class HyperPayGateway implements IPaymentGateway {
   // Helpers
   // ─────────────────────────────────────────────────────────────────────────
 
+  private static readonly FIELDS: Record<string, string> = {
+    HYPERPAY_ACCESS_TOKEN: 'accessToken',
+    HYPERPAY_ENTITY_ID: 'entityId',
+    HYPERPAY_WEBHOOK_SECRET: 'webhookSecret',
+  };
+
+  /** يقرأ المفتاح من gateway_config (لوحة التحكم) ثم البيئة. */
   private _requireEnv(key: string): string {
-    const value = this.config.get<string>(key);
+    const field = HyperPayGateway.FIELDS[key] ?? key;
+    const value = this.creds.get('hyperpay', field, key);
     if (!value || value.startsWith('YOUR_') || value.startsWith('your_')) {
-      throw new Error(`${key} is not configured — set it in .env`);
+      throw new Error(`${key} is not configured`);
     }
     return value;
   }
