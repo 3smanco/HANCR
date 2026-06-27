@@ -264,6 +264,14 @@ export class OrderEntity {
   @Column({ type: 'smallint', nullable: true, name: 'rider_rating' })
   riderRating?: number;
 
+  /** سبب الإلغاء (يختاره الراكب) — للتحليلات وتحسين الخدمة. */
+  @Column({ type: 'varchar', length: 120, nullable: true, name: 'cancel_reason' })
+  cancelReason?: string;
+
+  /** رسم الإلغاء المحتسَب (0 = إلغاء مجاني قبل إسناد السائق). */
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, name: 'cancellation_fee' })
+  cancellationFee!: number;
+
   /** ===== طرق الدفع ===== */
 
   @Column({ type: 'enum', enum: PaymentMode, nullable: true, name: 'payment_mode' })

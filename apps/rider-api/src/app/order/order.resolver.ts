@@ -101,8 +101,9 @@ export class OrderResolver {
   cancelOrder(
     @CurrentUser() user: AuthUser,
     @Args('orderId', { type: () => Int }) orderId: number,
+    @Args('reason', { nullable: true }) reason?: string,
   ): Promise<OrderType> {
-    return this.orderService.cancelOrder(user.riderId, orderId);
+    return this.orderService.cancelOrder(user.riderId, orderId, reason);
   }
 
   /**

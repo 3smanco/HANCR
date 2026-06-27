@@ -71,9 +71,10 @@ class OrderCreateRequested extends OrderEvent {
 
 class OrderCancelRequested extends OrderEvent {
   final int orderId;
-  const OrderCancelRequested(this.orderId);
+  final String? reason;
+  const OrderCancelRequested(this.orderId, {this.reason});
   @override
-  List<Object?> get props => [orderId];
+  List<Object?> get props => [orderId, reason];
 }
 
 class OrderRateDriverRequested extends OrderEvent {
