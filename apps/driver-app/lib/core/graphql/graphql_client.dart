@@ -76,6 +76,9 @@ class GraphQLClientManager {
 
     final wsLink = WebSocketLink(
       AppConfig.wsUrl,
+      // السيرفر يدعم بروتوكول graphql-transport-ws (الحديث) حصراً؛ الافتراضي في
+      // graphql_flutter قديم ⇒ عدم تطابق يقتل كل الاشتراكات بصمت. نطابقه صراحةً.
+      subProtocol: GraphQLProtocol.graphqlTransportWs,
       config: SocketClientConfig(
         autoReconnect: true,
         inactivityTimeout: const Duration(seconds: 30),

@@ -84,6 +84,10 @@ class GraphQLClientManager {
 
     final wsLink = WebSocketLink(
       AppConfig.wsUrl,
+      // السيرفر (NestJS) يُفعّل `graphql-ws` library ⇒ بروتوكول graphql-transport-ws
+      // (الحديث) حصراً. الافتراضي في graphql_flutter هو graphql-ws (القديم) ⇒ عدم
+      // تطابق يجعل كل الاشتراكات تفشل بصمت. نطابق البروتوكول صراحةً.
+      subProtocol: GraphQLProtocol.graphqlTransportWs,
       config: SocketClientConfig(
         autoReconnect: true,
         initialPayload: token.isNotEmpty
