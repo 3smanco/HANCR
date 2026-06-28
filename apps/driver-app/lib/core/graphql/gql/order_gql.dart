@@ -60,6 +60,18 @@ const String driverActiveOrdersQuery =
   }
 ''';
 
+// الطلبات الواردة المتاحة الآن — تُسحب عند نقر إشعار FCM أو الإقلاع البارد
+// (الاشتراك الحيّ يفوته الحدث إن كان التطبيق مغلقاً وقت الإرسال).
+const String availableOrdersQuery =
+    '''
+  $_orderFragment
+  query AvailableOrders {
+    availableOrders {
+      ...OrderFields
+    }
+  }
+''';
+
 const String completedOrdersQuery =
     '''
   $_orderFragment

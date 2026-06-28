@@ -2,7 +2,24 @@
 
 > هذا الملف هو **المصدر الحي لحالة المشروع**. يُحدَّث بعد كل خطوة عمل.
 > ابدأ أي محادثة جديدة بقراءته (وحده يكفي للسياق) بدل تحميل المهارة الضخمة أو قراءة عشرات الملفات.
-> آخر تحديث: 2026-06-27
+> آخر تحديث: 2026-06-28
+
+## 🎨 صقل بصري لرحلة الراكب: مسار احترافي + اسم الشارع (2026-06-28) — مُتحقَّق، غير منشور
+**سياق:** المالك اشتكى من ٣ أمور (سيارات قريبة لا تظهر · مسار خط مستقيم · البحث يحدّد مكاناً خاطئاً) ويهمّه الشكل كثيراً. **تشخيص حاسم:** الثلاثة **مُصلَحة في الكود الحالي بالفعل** (سيارات حية `_loadNearbyDrivers`/10ث · `routePreview` يفكّ polyline · بحث Autocomplete+PlaceDetails منشور حيّاً). فحص حيّ للمفتاح `…I5RrQ`: **Directions/Geocoding/Places كلها تعمل** ⇒ ليست فوترة. ⇒ الأرجح أن المالك على **APK قديم**. القرار: تطوير بصري + بناء APK جديد (يحلّ الحالتين).
+- **التحسينات (مُتحقَّقة `flutter analyze` = No issues، شاشتان):**
+  - **مسار احترافي متعدّد الطبقات** في `aurora_booking_screen` + `aurora_tracking_screen`: طبقة casing داكنة شفافة (عرض 11) + خط ember رئيسي (عرض 6) بـ `Cap.roundCap`+`JointType.round`+`geodesic` (بدل خط مسطّح عرض 5).
+  - **علامتا بداية/نهاية** للمسار في شاشة الحجز (`circlePng`: أخضر success للانطلاق، ember للوجهة) عبر `_routeMarkers` مدموجة في `markers` الخريطة.
+  - **اسم الشارع تحت الدبوس** بدل الإحداثيات الخام: `_reverseGeocodeDestination` (debounce 400ms عبر `reverseGeocodeQuery`) في `onCameraIdle` لخطوة اختيار الوجهة ⇒ يقلّل التباس «حُدِّد مكان آخر».
+- **✅ APK الراكب بُني** (arm64، production، 50,978,215 بايت، 2026-06-28) → `deliverables/hancr-rider-20260628.apk` (package `com.zancr.hancr_rider`). **⏭️ التالي:** نشره على `hancr.com/downloads/hancr-rider.apk` (بانتظار تأكيد المالك). الأعطال الثلاثة + الصقل تصل دفعةً واحدة. **المالك: ألغِ تثبيت القديم قبل الجديد.**
+
+## 🔴→✅ إصلاح جذري: «الطلب لا يظهر للسائق عند نقر الإشعار» (2026-06-28) — مُتحقَّق، غير منشور
+**بلاغ المالك:** «أستطيع الطلب، لكن في تطبيق السائق يصل الإشعار فقط؛ عند الضغط عليه لا يظهر شيء.»
+- **السبب الجذري (مؤكَّد من الكود):** `OrderIncoming` (الذي يُظهر `IncomingOrderSheet`) كان يُطلَق **حصراً** عبر اشتراك `newOrderAvailable`. حين يكون تطبيق السائق مغلقاً/في الخلفية وقت الإرسال، الاشتراك **غير متصل**، والاشتراكات لا تُعيد بثّ الأحداث الفائتة ⇒ نقر إشعار FCM كان يستدعي `_navigateHome()` فقط معتمداً على اشتراكٍ فات الحدث ⇒ شاشة بلا طلب. (مطابق لنمط النظام A المرجعي: **FCM + Pull** لا FCM + اشتراك وحده — انظر `deliverables/REFERENCE-working-order-lifecycle.md`.)
+- **الإصلاح (8 تعديلات / 6 ملفات):**
+  - **Backend driver-api:** `OrderRedisService.getNearbyOrderIds(lat,lng,radius)` (georadius على `RequestGeo` + استبعاد المنتهية) · `OrderService.getAvailableOrders(driverId)` (موقع السائق من Redis → طلبات `Found` قريبة → `toType`) · استعلام `availableOrders` في الـ resolver (JwtAuthGuard).
+  - **App driver-app:** `availableOrdersQuery` (نفس `OrderFields`) · حدث `OrderIncomingCheckRequested` + معالج `_onCheckIncoming` (يستعلم networkOnly ويبثّ `OrderIncoming` إن كان `OrderIdle`) · `PushService.onOrderEvent` callback يُستدعى في `_handleTapPayload('new_order_for_driver')` · `app.dart` يربطه + يبثّ الحدث عند الإقلاع البارد. (التوجيه لـ`/home` + عرض اللوحة يعملان أصلاً عبر redirect الراوتر.)
+- **التحقق:** driver-api `tsc --noEmit` = **0** · driver-app `flutter analyze` (5 ملفات) = **No issues found**.
+- **⏭️ التالي:** نشر backend (driver-api) + إعادة بناء APK السائق ونشره. **لا migration.** (اختياري لاحقاً: فلترة بخدمات السائق في `getAvailableOrders`، ومحرّر pickupZones في اللوحة.)
 
 ## 💳 إدارة مفاتيح بوابات الدفع من اللوحة + تفعيل Stripe (2026-06-27) — منشور حيّاً ✅
 PR [#190](https://github.com/3smanco/HANCR/pull/190) مدموج (`main`) ومنشور (backend+admin-panel، بلا migration، بلا APK — لا تغيير Flutter).
