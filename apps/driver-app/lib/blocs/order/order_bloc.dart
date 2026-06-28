@@ -14,6 +14,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   OrderBloc() : super(const OrderIdle()) {
     on<OrderCheckActiveRequested>(_onCheckActive);
     on<OrderSubscriptionStartRequested>(_onSubStart);
+    on<OrderIncomingCheckRequested>(_onCheckIncoming);
     on<NewOrderReceived>(_onNewOrder);
     on<OrderUpdatedFromSubscription>(_onOrderUpdate);
     on<OrderAcceptRequested>(_onAccept);
@@ -103,6 +104,30 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     if (state is OrderIdle) {
       emit(OrderIncoming(event.order));
     }
+  }
+
+  /// "سحب" الطلب الوارد عند نقر إشعار FCM / الإقلاع البارد.
+  /// الاشتراك الحيّ يفوته الحدث إن كان التطبيق مغلقاً وقت الإرسال، فنستعلم
+  /// عن الطلبات المتاحة صراحةً ونعرض أقربها كطلب وارد (إن لم يكن السائق في رحلة).
+  Future<void> _onCheckIncoming(
+    OrderIncomingCheckRequested event,
+    Emitter<OrderState> emit,
+  ) async {
+    if (state is! OrderIdle) return; // لا نقاطع رحلة جارية
+    try {
+      final client = await GraphQLClientManager.get();
+      final result = await client.query(
+        QueryOptions(
+          document: gql(availableOrdersQuery),
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
+      if (result.hasException) return;
+      final data = result.data?['availableOrders'] as List<dynamic>?;
+      if (data == null || data.isEmpty) return;
+      final order = DriverOrderModel.fromJson(data.first as Map<String, dynamic>);
+      if (state is OrderIdle) emit(OrderIncoming(order));
+    } catch (_) {}
   }
 
   void _onOrderUpdate(

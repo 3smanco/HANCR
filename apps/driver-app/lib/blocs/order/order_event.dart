@@ -15,6 +15,12 @@ class OrderSubscriptionStartRequested extends OrderEvent {
   const OrderSubscriptionStartRequested();
 }
 
+/// "سحب" الطلب الوارد المتاح صراحةً — يُطلَق عند نقر إشعار FCM أو الإقلاع
+/// البارد، حيث يكون اشتراك `newOrderAvailable` قد فات الحدث.
+class OrderIncomingCheckRequested extends OrderEvent {
+  const OrderIncomingCheckRequested();
+}
+
 class NewOrderReceived extends OrderEvent {
   final DriverOrderModel order;
   const NewOrderReceived(this.order);

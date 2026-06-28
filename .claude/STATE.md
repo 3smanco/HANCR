@@ -2,7 +2,33 @@
 
 > هذا الملف هو **المصدر الحي لحالة المشروع**. يُحدَّث بعد كل خطوة عمل.
 > ابدأ أي محادثة جديدة بقراءته (وحده يكفي للسياق) بدل تحميل المهارة الضخمة أو قراءة عشرات الملفات.
-> آخر تحديث: 2026-06-27
+> آخر تحديث: 2026-06-28
+
+## 🎨 صقل بصري لرحلة الراكب: مسار احترافي + اسم الشارع (2026-06-28) — مُتحقَّق، غير منشور
+**سياق:** المالك اشتكى من ٣ أمور (سيارات قريبة لا تظهر · مسار خط مستقيم · البحث يحدّد مكاناً خاطئاً) ويهمّه الشكل كثيراً. **تشخيص حاسم:** الثلاثة **مُصلَحة في الكود الحالي بالفعل** (سيارات حية `_loadNearbyDrivers`/10ث · `routePreview` يفكّ polyline · بحث Autocomplete+PlaceDetails منشور حيّاً). فحص حيّ للمفتاح `…I5RrQ`: **Directions/Geocoding/Places كلها تعمل** ⇒ ليست فوترة. ⇒ الأرجح أن المالك على **APK قديم**. القرار: تطوير بصري + بناء APK جديد (يحلّ الحالتين).
+- **التحسينات (مُتحقَّقة `flutter analyze` = No issues، شاشتان):**
+  - **مسار احترافي متعدّد الطبقات** في `aurora_booking_screen` + `aurora_tracking_screen`: طبقة casing داكنة شفافة (عرض 11) + خط ember رئيسي (عرض 6) بـ `Cap.roundCap`+`JointType.round`+`geodesic` (بدل خط مسطّح عرض 5).
+  - **علامتا بداية/نهاية** للمسار في شاشة الحجز (`circlePng`: أخضر success للانطلاق، ember للوجهة) عبر `_routeMarkers` مدموجة في `markers` الخريطة.
+  - **اسم الشارع تحت الدبوس** بدل الإحداثيات الخام: `_reverseGeocodeDestination` (debounce 400ms عبر `reverseGeocodeQuery`) في `onCameraIdle` لخطوة اختيار الوجهة ⇒ يقلّل التباس «حُدِّد مكان آخر».
+- **✅ APK الراكب بُني** (arm64، production، 50,978,215 بايت، 2026-06-28) → `deliverables/hancr-rider-20260628.apk` (package `com.zancr.hancr_rider`). **⏭️ التالي:** نشره على `hancr.com/downloads/hancr-rider.apk` (بانتظار تأكيد المالك). الأعطال الثلاثة + الصقل تصل دفعةً واحدة. **المالك: ألغِ تثبيت القديم قبل الجديد.**
+
+## 🔴→✅ إصلاح جذري: «الطلب لا يظهر للسائق عند نقر الإشعار» (2026-06-28) — مُتحقَّق، غير منشور
+**بلاغ المالك:** «أستطيع الطلب، لكن في تطبيق السائق يصل الإشعار فقط؛ عند الضغط عليه لا يظهر شيء.»
+- **السبب الجذري (مؤكَّد من الكود):** `OrderIncoming` (الذي يُظهر `IncomingOrderSheet`) كان يُطلَق **حصراً** عبر اشتراك `newOrderAvailable`. حين يكون تطبيق السائق مغلقاً/في الخلفية وقت الإرسال، الاشتراك **غير متصل**، والاشتراكات لا تُعيد بثّ الأحداث الفائتة ⇒ نقر إشعار FCM كان يستدعي `_navigateHome()` فقط معتمداً على اشتراكٍ فات الحدث ⇒ شاشة بلا طلب. (مطابق لنمط النظام A المرجعي: **FCM + Pull** لا FCM + اشتراك وحده — انظر `deliverables/REFERENCE-working-order-lifecycle.md`.)
+- **الإصلاح (8 تعديلات / 6 ملفات):**
+  - **Backend driver-api:** `OrderRedisService.getNearbyOrderIds(lat,lng,radius)` (georadius على `RequestGeo` + استبعاد المنتهية) · `OrderService.getAvailableOrders(driverId)` (موقع السائق من Redis → طلبات `Found` قريبة → `toType`) · استعلام `availableOrders` في الـ resolver (JwtAuthGuard).
+  - **App driver-app:** `availableOrdersQuery` (نفس `OrderFields`) · حدث `OrderIncomingCheckRequested` + معالج `_onCheckIncoming` (يستعلم networkOnly ويبثّ `OrderIncoming` إن كان `OrderIdle`) · `PushService.onOrderEvent` callback يُستدعى في `_handleTapPayload('new_order_for_driver')` · `app.dart` يربطه + يبثّ الحدث عند الإقلاع البارد. (التوجيه لـ`/home` + عرض اللوحة يعملان أصلاً عبر redirect الراوتر.)
+- **التحقق:** driver-api `tsc --noEmit` = **0** · driver-app `flutter analyze` (5 ملفات) = **No issues found**.
+- **⏭️ التالي:** نشر backend (driver-api) + إعادة بناء APK السائق ونشره. **لا migration.** (اختياري لاحقاً: فلترة بخدمات السائق في `getAvailableOrders`، ومحرّر pickupZones في اللوحة.)
+
+## 💳 إدارة مفاتيح بوابات الدفع من اللوحة + تفعيل Stripe (2026-06-27) — منشور حيّاً ✅
+PR [#190](https://github.com/3smanco/HANCR/pull/190) مدموج (`main`) ومنشور (backend+admin-panel، بلا migration، بلا APK — لا تغيير Flutter).
+- **`libs/wallet/gateways/gateway-credentials.service.ts` (جديد):** يقرأ مفاتيح البوابات من `gateway_config` (jsonb في hancr_app_config، يُدار من اللوحة) أولاً ثم `.env` fallback، مُخزَّن 60s + OnModuleInit (لتحقّق الـwebhook المتزامن). البوابات الثلاث (Stripe/HyperPay/Moyasar) تقرأ عبره؛ `PaymentGatewayService.isStub()` ديناميكي (`creds.hasAny()`). `_createStubCheckout` بادئات per-gateway (`hpay_`/`moy_`/`pi_`). spec **14/14**.
+- **صفحة اللوحة `settings/gateways`:** أُضيفت حقول مفاتيح سرّية (password) لكل بوابة — stripe(secretKey,webhookSecret) · hyperpay(accessToken,entityId,baseUrl,webhookSecret) · moyasar(apiKey,webhookSecret) — تُحفظ في `gatewayConfig` عبر `updateAppConfig` وتُستخدم خلال دقيقة دون لمس البيئة. **أسماء الحقول تطابق `GatewayCredentials.get(gateway, field, envKey)` تماماً.**
+- **تفعيل Stripe:** افتح `admin.hancr.com → الإعدادات → بوابات الدفع`، فعّل Stripe، أدخِل Secret Key + Webhook Secret، احفظ. (البوابة الافتراضية للرحلات `TRIP_PAYMENT_GATEWAY=Stripe`.)
+- **نقاط الركوب (pickupZones):** النظام حيّ/منشور (query + Snap-to). **الإدراج يحتاج إحداثيات حقيقية يقدّمها المالك** (الوكيل مُنع أمنياً من اختلاق إحداثيات وكتابتها في إعداد الإنتاج). الصيغة: `pricingRulesConfig.pickupZones = [{lat,lng,label,regionId?}]`. (لا يوجد محرّر UI مخصّص بعد — يمكن إضافته كـ follow-up.)
+- التحقق: tsc rider+driver+admin-api=0 · admin-panel next build=نجح · health كلها ready.
+
 
 ## 🚖 رحلة العميل الشاملة — خطة + Phase B1 + B2 ✅ (2026-06-27)
 **الخطة الكاملة:** `~/.claude/plans/1-typed-pillow.md` — دورة حياة الراكب من الطلب لما بعد التقييم (full‑stack، هوية Aurora، كل المراحل). المهام في TaskList (Phase A→F).
@@ -29,6 +55,8 @@
   - **D3:** `milesEarned` مُثرى في getActiveOrder → يظهر في شاشة التقييم + زر «احجز نفس الرحلة».
   - **C4 Stripe كامل:** البوابة قابلة للضبط (`TRIP_PAYMENT_GATEWAY` افتراضي Stripe) + `tripCheckoutUrl(orderId)` (من metadata المعاملة المعلّقة) + زر «ادفع بالبطاقة» يفتح checkout خارجياً. **يكفي إضافة مفاتيح Stripe في البيئة.**
   - **pickupZones registry (SDUI):** `pricingRulesConfig.pickupZones` (jsonb، بلا migration) + `pickupZones(lat,lng,regionId)` + الشاشة تجلب وتلتصق. *(إضافة محرّر مخصّص في اللوحة = تحسين لاحق صغير.)*
+  - **🚀 نُشر حيّاً (الدفعة الرابعة، 2026-06-27):** PR [#189](https://github.com/3smanco/HANCR/pull/189) → `main` (`cb12988`). السيرفر: `deploy-direct.sh` (بلا migrations جديدة) → rider+driver-api مُعاد بناؤهما، health كلها ready. APK الراكب أُعيد بناؤه ونُشر `hancr.com/downloads/hancr-rider.apk` (HTTP 200، 50,978,215 بايت، `.bak-20260627d`). **رحلة العميل كاملة (A→F + كل البنود العميقة) حيّة الآن.**
+  - **⚙️ لتفعيل الدفع بالبطاقة:** أضف مفاتيح Stripe في بيئة السيرفر (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`) + اختياري `TRIP_PAYMENT_GATEWAY=Stripe` (هو الافتراضي). لإضافة نقاط ركوب معتمدة: أدرِجها في `pricingRulesConfig.pickupZones` (`[{regionId,lat,lng,label}]`).
 
 ## 🚀 نشر إصلاحات المشاكل الثلاث — مكتمل وحيّ ومُتحقَّق (2026-06-26)
 **PR [#185](https://github.com/3smanco/HANCR/pull/185) مدموج في `main`.** النشر تمّ كاملاً:

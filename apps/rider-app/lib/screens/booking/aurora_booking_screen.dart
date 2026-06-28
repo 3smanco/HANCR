@@ -87,6 +87,12 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   String _routeCurrency = 'ر.س';
   bool _loadingRoute = false;
   final Set<Polyline> _polylines = {};
+  // علامتا بداية/نهاية المسار + ذاكرة أيقوناتهما (مظهر premium للطريق)
+  final Set<Marker> _routeMarkers = {};
+  BitmapDescriptor? _originIcon;
+  BitmapDescriptor? _destIcon;
+  // تأجيل عكس الإحداثيات لاسم الشارع تحت الدبوس
+  Timer? _revGeoDebounce;
 
   // التفضيلات
   bool _quietRide = false;
@@ -154,6 +160,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     _loadMyCompany();
     _loadQuickPicks();
     _startDriverFeed();
+    _buildEndpointIcons();
   }
 
   /// سيارات الجوار الحيّة — تحميل أولي + تحديث دوري كل 10 ثوانٍ.
@@ -162,6 +169,22 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     _driversTimer?.cancel();
     _driversTimer = Timer.periodic(
         const Duration(seconds: 10), (_) => _loadNearbyDrivers());
+  }
+
+  /// يبني علامتي بداية/نهاية المسار (نقطتان دائريتان: أخضر للانطلاق، ember
+  /// للوجهة) — تُحسّن وضوح المسار بصرياً كما في الأنظمة المرجعية.
+  Future<void> _buildEndpointIcons() async {
+    try {
+      final origin = await circlePng(AuroraColors.success, 30);
+      final dest = await circlePng(AuroraColors.ember, 30);
+      if (!mounted) return;
+      setState(() {
+        _originIcon = BitmapDescriptor.bytes(origin);
+        _destIcon = BitmapDescriptor.bytes(dest);
+      });
+    } catch (_) {
+      // أيقونات تحسينية — تُتجاهل عند الفشل (يبقى الخط بلا نقاط طرفية)
+    }
   }
 
   Future<void> _loadNearbyDrivers() async {
@@ -585,17 +608,84 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
     }
   }
 
+  /// عند توقّف تحريك الخريطة على خطوة اختيار الوجهة: نعرض اسم الشارع/العنوان
+  /// الحقيقي تحت الدبوس (عبر reverseGeocode) بدل الإحداثيات الخام — أوضح
+  /// للمستخدم ويقلّل التباس «حُدِّد مكان آخر».
+  void _reverseGeocodeDestination() {
+    _revGeoDebounce?.cancel();
+    _revGeoDebounce = Timer(const Duration(milliseconds: 400), () async {
+      final dest = _destination;
+      try {
+        final client = await GraphQLClientManager.get();
+        final res = await client.query(QueryOptions(
+          document: gql(reverseGeocodeQuery),
+          fetchPolicy: FetchPolicy.networkOnly,
+          variables: {'lat': dest.lat, 'lng': dest.lng},
+        ));
+        final d = res.data?['reverseGeocode'] as Map<String, dynamic>?;
+        if (!mounted) return;
+        final addr = (d?['address'] as String?)?.trim();
+        if (addr != null && addr.isNotEmpty) {
+          setState(() => _destinationLabel = addr);
+        }
+      } catch (_) {
+        // يبقى الـ label السابق عند الفشل
+      }
+    });
+  }
+
   void _drawPolyline(String? encoded) {
     _polylines.clear();
+    _routeMarkers.clear();
     if (encoded == null || encoded.isEmpty) return;
     final pts = _decodePolyline(encoded);
     if (pts.isEmpty) return;
+
+    // طبقة سفلية (casing) داكنة شفافة تمنح المسار عمقاً وحدوداً واضحة على
+    // الخريطة الداكنة — ثم الخط الرئيسي ember فوقها بأطراف ووصلات مستديرة.
+    _polylines.add(Polyline(
+      polylineId: const PolylineId('route_casing'),
+      color: AuroraColors.obsidian.withValues(alpha: 0.6),
+      width: 11,
+      points: pts,
+      geodesic: true,
+      startCap: Cap.roundCap,
+      endCap: Cap.roundCap,
+      jointType: JointType.round,
+      zIndex: 0,
+    ));
     _polylines.add(Polyline(
       polylineId: const PolylineId('route'),
       color: AuroraColors.ember,
-      width: 5,
+      width: 6,
       points: pts,
+      geodesic: true,
+      startCap: Cap.roundCap,
+      endCap: Cap.roundCap,
+      jointType: JointType.round,
+      zIndex: 1,
     ));
+
+    // علامتا البداية (أخضر) والنهاية (ember) — أطراف واضحة للمسار.
+    if (_originIcon != null) {
+      _routeMarkers.add(Marker(
+        markerId: const MarkerId('route_origin'),
+        position: pts.first,
+        icon: _originIcon!,
+        anchor: const Offset(0.5, 0.5),
+        zIndexInt: 2,
+      ));
+    }
+    if (_destIcon != null) {
+      _routeMarkers.add(Marker(
+        markerId: const MarkerId('route_dest'),
+        position: pts.last,
+        icon: _destIcon!,
+        anchor: const Offset(0.5, 0.5),
+        zIndexInt: 2,
+      ));
+    }
+
     // ضبط الكاميرا لتشمل المسار
     final bounds = _boundsOf(pts);
     _mapCtrl?.animateCamera(CameraUpdate.newLatLngBounds(bounds, 80));
@@ -866,6 +956,7 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
   void dispose() {
     _searchDebounce?.cancel();
     _driversTimer?.cancel();
+    _revGeoDebounce?.cancel();
     _searchCtrl.dispose();
     _mapCtrl?.dispose();
     super.dispose();
@@ -915,15 +1006,14 @@ class _AuroraBookingScreenState extends State<AuroraBookingScreen> {
                   zoomControlsEnabled: false,
                   compassEnabled: false,
                   polylines: _polylines,
-                  markers: _driverMarkers,
+                  markers: {..._driverMarkers, ..._routeMarkers},
                   onCameraMove: (pos) {
                     _destination = GeoPoint(
                         lat: pos.target.latitude, lng: pos.target.longitude);
                   },
                   onCameraIdle: () {
                     if (_step == _BookingStep.pickDestination) {
-                      setState(() => _destinationLabel =
-                          'الوجهة: ${_destination.lat.toStringAsFixed(4)}, ${_destination.lng.toStringAsFixed(4)}');
+                      _reverseGeocodeDestination();
                     }
                   },
                 ),

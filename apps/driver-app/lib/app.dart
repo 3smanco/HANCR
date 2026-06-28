@@ -178,6 +178,11 @@ class _HancrCaptainAppState extends State<HancrCaptainApp> {
             _driverBloc.add(const DriverLoadRequested());
             _orderBloc.add(const OrderCheckActiveRequested());
             _orderBloc.add(const OrderSubscriptionStartRequested());
+            // إقلاع بارد: اسحب أي طلب وارد متاح فات الاشتراكَ الحيّ.
+            _orderBloc.add(const OrderIncomingCheckRequested());
+            // نقر إشعار طلب جديد → اسحب الطلب الوارد (الاشتراك قد يكون فاته).
+            PushService.instance.onOrderEvent =
+                () => _orderBloc.add(const OrderIncomingCheckRequested());
             // Register FCM token with driver-api (fire-and-forget)
             PushService.instance.registerWithBackend();
           }

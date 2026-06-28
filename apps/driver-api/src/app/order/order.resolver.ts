@@ -30,6 +30,17 @@ export class OrderResolver {
     return this.orderService.getActiveOrders(driver.driverId);
   }
 
+  /** الطلبات الواردة المتاحة الآن — تُسحب عند نقر إشعار FCM أو الإقلاع البارد */
+  @Query(() => [DriverOrderType], {
+    description: 'الطلبات الواردة المتاحة الآن (FCM + Pull)',
+  })
+  @UseGuards(JwtAuthGuard)
+  availableOrders(
+    @CurrentDriver() driver: AuthDriver,
+  ): Promise<DriverOrderType[]> {
+    return this.orderService.getAvailableOrders(driver.driverId);
+  }
+
   /** سجل رحلات السائق المكتملة (الأحدث أولاً) */
   @Query(() => [DriverOrderType], { description: 'سجل رحلات السائق المكتملة' })
   @UseGuards(JwtAuthGuard)

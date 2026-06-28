@@ -124,4 +124,43 @@ export class OrderRedisService {
     );
     return active.map((id) => parseInt(id));
   }
+
+  /**
+   * جلب معرّفات الطلبات المعلّقة القريبة من نقطة (موقع السائق) ضمن نصف قطر.
+   * يُستخدَم عند "سحب" الطلب الوارد بعد نقر إشعار FCM أو الإقلاع البارد —
+   * حيث يكون الاشتراك الحيّ قد فات الحدث (التطبيق كان مغلقاً وقت الإرسال).
+   * يستبعد الطلبات المنتهية صلاحيتها (RequestTime <= now).
+   */
+  async getNearbyOrderIds(
+    lat: number,
+    lng: number,
+    radiusMeters: number,
+    limit = 20,
+  ): Promise<number[]> {
+    const results = await this.redis.georadius(
+      RedisKeys.RequestGeo,
+      lng,
+      lat,
+      radiusMeters,
+      'm',
+      'ASC',
+      'COUNT',
+      limit,
+    );
+    if (!results || results.length === 0) return [];
+
+    const ids = (results as string[]).map((id) => parseInt(id));
+
+    // استبعاد المنتهية صلاحيتها — فقط الطلبات التي وقت انتهائها في المستقبل
+    const now = Date.now();
+    const live: number[] = [];
+    for (const id of ids) {
+      const score = await this.redis.zscore(
+        RedisKeys.RequestTime,
+        String(id),
+      );
+      if (score != null && parseInt(score) > now) live.push(id);
+    }
+    return live;
+  }
 }

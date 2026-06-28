@@ -395,16 +395,36 @@ class _AuroraTrackingScreenState extends State<AuroraTrackingScreen>
       ),
       markers: markers,
       polylines: order.routeLine.length > 1
-          ? {
-              Polyline(
-                polylineId: const PolylineId('route'),
-                color: AuroraColors.ember,
-                width: 5,
-                patterns: const [],
-                points: _routeReveal ??
-                    order.routeLine.map((p) => LatLng(p.lat, p.lng)).toList(),
-              ),
-            }
+          ? () {
+              final pts = _routeReveal ??
+                  order.routeLine.map((p) => LatLng(p.lat, p.lng)).toList();
+              // طبقة casing داكنة شفافة + الخط الرئيسي ember بأطراف مستديرة
+              // (مظهر احترافي متّسق مع شاشة الحجز).
+              return {
+                Polyline(
+                  polylineId: const PolylineId('route_casing'),
+                  color: AuroraColors.obsidian.withValues(alpha: 0.6),
+                  width: 11,
+                  geodesic: true,
+                  startCap: Cap.roundCap,
+                  endCap: Cap.roundCap,
+                  jointType: JointType.round,
+                  zIndex: 0,
+                  points: pts,
+                ),
+                Polyline(
+                  polylineId: const PolylineId('route'),
+                  color: AuroraColors.ember,
+                  width: 6,
+                  geodesic: true,
+                  startCap: Cap.roundCap,
+                  endCap: Cap.roundCap,
+                  jointType: JointType.round,
+                  zIndex: 1,
+                  points: pts,
+                ),
+              };
+            }()
           : <Polyline>{},
       myLocationButtonEnabled: false,
       zoomControlsEnabled: false,

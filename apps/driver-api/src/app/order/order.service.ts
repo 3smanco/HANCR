@@ -623,6 +623,43 @@ export class OrderService {
   }
 
   // ─────────────────────────────────────────────
+  // getAvailableOrders — الطلبات الواردة المتاحة الآن (FCM + Pull)
+  // ─────────────────────────────────────────────
+  /**
+   * الطلبات المعلّقة (status=Found) القريبة من السائق والمتاحة للقبول الآن.
+   *
+   * لماذا نحتاجها؟ الطلب الجديد يُبثّ عبر اشتراك `newOrderAvailable`، لكن إن
+   * كان تطبيق السائق مغلقاً/في الخلفية وقت الإرسال فإن الاشتراك لم يكن متصلاً
+   * والاشتراكات لا تُعيد بثّ الأحداث الفائتة ⇒ السائق يصله إشعار FCM فقط،
+   * وعند فتحه لا يجد شيئاً. هذه الدالة تتيح للتطبيق "سحب" الطلب صراحةً عند
+   * نقر الإشعار أو الإقلاع البارد (نمط FCM + Pull المعتمد عالمياً).
+   */
+  async getAvailableOrders(driverId: number): Promise<DriverOrderType[]> {
+    const driver = await this.driverRepo.findOne({ where: { id: driverId } });
+    if (!driver || !driver.active || driver.banned) return [];
+
+    // موقع السائق من Redis — بدونه لا مطابقة (غير متصل أو بلا GPS)
+    const loc = await this.driverRedis.getDriverLocation(driverId);
+    if (!loc) return [];
+
+    // نطاق واسع (10 كم) كي لا نُفوّت طلباً نُبّه به السائق أصلاً
+    const nearbyIds = await this.orderRedis.getNearbyOrderIds(
+      loc.lat,
+      loc.lng,
+      10000,
+    );
+    if (nearbyIds.length === 0) return [];
+
+    // فقط الطلبات التي ما زالت قابلة للإسناد (Found)
+    const orders = await this.orderRepo.find({
+      where: nearbyIds.map((id) => ({ id, status: OrderStatus.Found })),
+      relations: ['rider'],
+      order: { createdOn: 'ASC' },
+    });
+    return orders.map((o) => this.toType(o));
+  }
+
+  // ─────────────────────────────────────────────
   // completedOrders — سجل رحلات السائق المكتملة
   // ─────────────────────────────────────────────
   async getCompletedOrders(

@@ -40,6 +40,11 @@ class PushService {
 
   bool _initialized = false;
 
+  /// يُستدعى عند نقر إشعار طلب جديد — يربطه `app.dart` بسحب الطلب الوارد
+  /// عبر `OrderBloc.add(OrderIncomingCheckRequested())`. لازم لأن الاشتراك
+  /// الحيّ يفوت الحدث إن كان التطبيق مغلقاً وقت الإرسال.
+  void Function()? onOrderEvent;
+
   // GraphQL: register the token in driver-api
   static const _updateTokenMutation = r'''
     mutation UpdateDriverFcmToken($token: String!) {
@@ -210,12 +215,14 @@ class PushService {
     _handleTapPayload(message.data['type'] as String?);
   }
 
-  /// توجيه موحّد عند نقر أي إشعار: طلب جديد → شاشة الطلبات (Map).
-  /// لوحة الطلب الوارد تظهر تلقائياً عبر اشتراك `newOrderAvailable` ما دام
-  /// الطلب حيّاً (لم تنتهِ مهلته). أنواع أخرى تُترك للسلوك الافتراضي.
+  /// توجيه موحّد عند نقر أي إشعار: طلب جديد → شاشة الطلبات (Map) + "سحب"
+  /// الطلب الوارد صراحةً. لا نعتمد على اشتراك `newOrderAvailable` وحده لأن
+  /// التطبيق إن كان مغلقاً/في الخلفية وقت الإرسال فالاشتراك لم يكن متصلاً
+  /// والأحداث الفائتة لا تُعاد ⇒ كان السائق يصله إشعار بلا أي طلب يظهر.
   void _handleTapPayload(String? type) {
     if (type == 'new_order_for_driver') {
       _navigateHome();
+      onOrderEvent?.call();
     }
   }
 
