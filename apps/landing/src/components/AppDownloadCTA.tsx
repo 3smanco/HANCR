@@ -20,6 +20,7 @@ export function AppDownloadCTA({ locale, variant = 'both' }: Props) {
     title: string;
     subtitle: string;
     accent: 'ember' | 'stone';
+    size: string;
   }> = [];
 
   if (variant === 'rider' || variant === 'both') {
@@ -28,6 +29,7 @@ export function AppDownloadCTA({ locale, variant = 'both' }: Props) {
       title: tt('cta.downloadRider'),
       subtitle: isAr ? 'احجز رحلتك خلال ثوانٍ' : 'Book a ride in seconds',
       accent: 'ember',
+      size: '48.6 MB',
     });
   }
   if (variant === 'driver' || variant === 'both') {
@@ -36,6 +38,7 @@ export function AppDownloadCTA({ locale, variant = 'both' }: Props) {
       title: tt('cta.downloadDriver'),
       subtitle: isAr ? 'قُد واربح بمرونة' : 'Drive and earn on your terms',
       accent: 'stone',
+      size: '46.2 MB',
     });
   }
 
@@ -88,7 +91,7 @@ export function AppDownloadCTA({ locale, variant = 'both' }: Props) {
                     c.accent === 'ember' ? 'text-pearl/70' : 'text-muted'
                   }`}
                 >
-                  APK · 88 MB
+                  APK · {c.size}
                 </div>
               </div>
             </a>

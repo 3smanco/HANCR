@@ -60,10 +60,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // يمنع حبس المستخدم في حالة «داخل لكن مرفوض» عند انتهاء الصلاحية/الحظر.
     try {
       final client = await GraphQLClientManager.get();
+      // مهلة صارمة: لو تعلّق الطلب الشبكي (شبكة بطيئة/مُعلَّقة) لا نترك المستخدم
+      // عالقاً على شاشة البداية للأبد — TimeoutException يُلتقط أدناه فتُبقى
+      // الجلسة (وضع أوفلاين متفائل) ويكمل الإقلاع.
       final result = await client.query(QueryOptions(
         document: gql(meQuery),
         fetchPolicy: FetchPolicy.networkOnly,
-      ));
+      )).timeout(const Duration(seconds: 8));
       if (result.hasException) {
         final isAuthErr = result.exception?.graphqlErrors.any((e) {
               final m = e.message.toLowerCase();
