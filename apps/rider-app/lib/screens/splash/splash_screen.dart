@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
+import '../../core/services/storage_service.dart';
 import '../../core/widgets/aurora/aurora.dart';
 import '../../core/widgets/car_art.dart';
 import '../../core/motion/motion.dart';
@@ -21,6 +23,11 @@ class _SplashScreenState extends State<SplashScreen>
   late final Animation<double> _fadeAnim;
   late final Animation<double> _scaleAnim;
 
+  // شبكة أمان نهائية: لو لم يصل AuthBloc لحالة نهائية خلال 12ث (لأي سبب)،
+  // ننتقل يدوياً حسب وجود التوكن — كي لا يعلّق التطبيق على شاشة البداية أبداً.
+  Timer? _fallbackTimer;
+  bool _navigated = false;
+
   @override
   void initState() {
     super.initState();
@@ -33,10 +40,28 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack),
     );
     _ctrl.forward();
+
+    _fallbackTimer = Timer(const Duration(seconds: 12), _fallbackNavigate);
+  }
+
+  Future<void> _fallbackNavigate() async {
+    if (_navigated || !mounted) return;
+    final hasToken = await StorageService.hasToken();
+    if (_navigated || !mounted) return;
+    _navigated = true;
+    context.go(hasToken ? '/home' : '/auth/phone');
+  }
+
+  void _go(String route) {
+    if (_navigated || !mounted) return;
+    _navigated = true;
+    _fallbackTimer?.cancel();
+    context.go(route);
   }
 
   @override
   void dispose() {
+    _fallbackTimer?.cancel();
     _ctrl.dispose();
     super.dispose();
   }
@@ -46,9 +71,9 @@ class _SplashScreenState extends State<SplashScreen>
     return BlocListener<AuthBloc, AuthState>(
       listener: (ctx, state) {
         if (state is AuthAuthenticated) {
-          ctx.go('/home');
+          _go('/home');
         } else if (state is AuthUnauthenticated || state is AuthError) {
-          ctx.go('/auth/phone');
+          _go('/auth/phone');
         }
       },
       child: Scaffold(
