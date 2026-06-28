@@ -101,6 +101,12 @@ class OrderUpdatedFromSubscription extends OrderEvent {
   List<Object?> get props => [order];
 }
 
+/// استطلاع دوري للطلب النشط (شبكة أمان مستقلة عن WebSocket) — يحدّث الحالة
+/// حتى لو فشلت الاشتراكات على شبكة الجوال.
+class OrderActivePollRequested extends OrderEvent {
+  const OrderActivePollRequested();
+}
+
 class OrderSubscriptionStart extends OrderEvent {
   const OrderSubscriptionStart();
 }

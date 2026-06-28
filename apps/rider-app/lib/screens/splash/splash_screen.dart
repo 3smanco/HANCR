@@ -136,6 +136,15 @@ class _SplashScreenState extends State<SplashScreen>
                         .slideX(begin: -0.5, end: 0, curve: Motion.decelerate),
                     const SizedBox(height: 28),
                     const AuroraLoader(size: 30),
+                    const SizedBox(height: 16),
+                    // ختم النسخة — لتأكيد أن الجهاز يشغّل أحدث بناء.
+                    Text(
+                      'build 2026-06-28-e',
+                      style: AuroraText.bodySmall.copyWith(
+                        color: AuroraColors.textHint,
+                        fontSize: 11,
+                      ),
+                    ),
                   ],
                 ),
               ),
