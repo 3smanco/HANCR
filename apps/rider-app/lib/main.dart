@@ -85,9 +85,12 @@ Future<void> _bootstrap() async {
     // ثم جلب أحدث ثيم من الخادم في الخلفية.
     await ThemeController.instance.bootstrap();
 
-    // تهيئة الإشعارات — لا تُعطّل الإقلاع لو فشلت (محاطة بـ try داخلياً أيضاً)
+    // تهيئة الإشعارات — لا تُعطّل الإقلاع لو فشلت أو تعلّقت (مهلة صارمة +
+    // try؛ Firebase قد يتعلّق على بعض الأجهزة فلا يجب أن يحجب أول إطار).
     try {
-      await PushService.instance.initialize();
+      await PushService.instance
+          .initialize()
+          .timeout(const Duration(seconds: 8));
     } catch (e) {
       debugPrint('[main] PushService init skipped: $e');
     }
