@@ -10,9 +10,12 @@ import 'order_state.dart';
 
 class OrderBloc extends Bloc<OrderEvent, OrderState> {
   StreamSubscription<QueryResult<Object?>>? _sub;
+  // شبكة أمان: استطلاع دوري للطلب النشط مستقل عن WebSocket.
+  Timer? _poll;
 
   OrderBloc() : super(const OrderInitial()) {
     on<OrderActiveCheckRequested>(_onActiveCheck);
+    on<OrderActivePollRequested>(_onActivePoll);
     on<OrderCreateRequested>(_onCreate);
     on<OrderCancelRequested>(_onCancel);
     on<OrderRateDriverRequested>(_onRate);
@@ -20,6 +23,60 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     on<OrderSubscriptionStart>(_onSubStart);
     on<OrderSubscriptionStop>(_onSubStop);
     on<OrderHistoryRequested>(_onHistory);
+  }
+
+  /// يبدأ الاستطلاع الدوري (كل 5ث) للطلب النشط — يحدّث الشاشة حيّاً حتى لو
+  /// فشلت اشتراكات WebSocket. يُلغى تلقائياً عند انتهاء الرحلة.
+  void _startPoll() {
+    _poll?.cancel();
+    _poll = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) => add(const OrderActivePollRequested()),
+    );
+  }
+
+  void _stopPoll() {
+    _poll?.cancel();
+    _poll = null;
+  }
+
+  /// استطلاع صامت (بلا OrderLoading) — يطبّق نفس منطق تحديث الاشتراك.
+  Future<void> _onActivePoll(
+    OrderActivePollRequested event,
+    Emitter<OrderState> emit,
+  ) async {
+    // لا نستطلع إلا أثناء رحلة نشطة
+    if (state is! OrderActive) {
+      _stopPoll();
+      return;
+    }
+    try {
+      final client = await GraphQLClientManager.get();
+      final result = await client.query(
+        QueryOptions(
+          document: gql(activeOrderQuery),
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
+      final data = result.data?['activeOrder'] as Map<String, dynamic>?;
+      if (data == null) {
+        _stopPoll();
+        emit(const OrderIdle());
+        return;
+      }
+      final order = OrderModel.fromJson(data);
+      if (order.status.awaitingReview) {
+        _stopPoll();
+        emit(OrderAwaitingReview(order));
+      } else if (order.status.isActive) {
+        emit(OrderActive(order)); // تحديث الحالة (وصل/بدأ/دفع) حيّاً
+      } else {
+        _stopPoll();
+        emit(const OrderIdle());
+      }
+    } catch (_) {
+      // تجاهل — المحاولة القادمة بعد 5ث
+    }
   }
 
   // ── Active Order Check ────────────────────────────────────────────────────
@@ -43,6 +100,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         } else if (order.status.isActive) {
           emit(OrderActive(order));
           add(const OrderSubscriptionStart());
+          _startPoll();
         } else {
           emit(const OrderIdle());
         }
@@ -121,6 +179,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       }
       emit(OrderActive(order));
       add(const OrderSubscriptionStart());
+      _startPoll();
     } catch (e) {
       emit(OrderError(e.toString()));
     }
@@ -133,6 +192,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   ) async {
     try {
       add(const OrderSubscriptionStop());
+      _stopPoll();
       final client = await GraphQLClientManager.get();
       await client.mutate(
         MutationOptions(
@@ -183,17 +243,21 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     final order = event.order;
     if (order.status.awaitingReview) {
       add(const OrderSubscriptionStop());
+      _stopPoll();
       emit(OrderAwaitingReview(order));
     } else if (order.status == OrderStatus.notFound) {
       add(const OrderSubscriptionStop());
+      _stopPoll();
       emit(OrderError(tr('noDriversAvailableNow')));
     } else if (order.status.isFinished ||
         order.status == OrderStatus.riderCanceled ||
         order.status == OrderStatus.driverCanceled) {
       add(const OrderSubscriptionStop());
+      _stopPoll();
       emit(const OrderIdle());
     } else {
       emit(OrderActive(order));
+      _startPoll(); // ضمان استمرار الاستطلاع كشبكة أمان
     }
   }
 
@@ -256,6 +320,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
 
   @override
   Future<void> close() async {
+    _poll?.cancel();
     await _sub?.cancel();
     return super.close();
   }

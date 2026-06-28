@@ -10,6 +10,9 @@ import 'order_state.dart';
 class OrderBloc extends Bloc<OrderEvent, OrderState> {
   StreamSubscription<QueryResult<Object?>>? _newOrderSub;
   StreamSubscription<QueryResult<Object?>>? _orderUpdateSub;
+  // شبكة أمان: استطلاع دوري للطلبات الواردة مستقل عن WebSocket — يُظهر الطلب
+  // الجديد خلال ثوانٍ حتى لو فشلت الاشتراكات (الـ handler يتجاهل إن لم يكن idle).
+  Timer? _incomingPoll;
 
   OrderBloc() : super(const OrderIdle()) {
     on<OrderCheckActiveRequested>(_onCheckActive);
@@ -97,6 +100,13 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         }
       });
     } catch (_) {}
+
+    // شبكة أمان: استطلاع دوري كل 7ث للطلبات الواردة (مستقل عن WS).
+    _incomingPoll?.cancel();
+    _incomingPoll = Timer.periodic(
+      const Duration(seconds: 7),
+      (_) => add(const OrderIncomingCheckRequested()),
+    );
   }
 
   void _onNewOrder(NewOrderReceived event, Emitter<OrderState> emit) {
@@ -343,6 +353,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
 
   @override
   Future<void> close() async {
+    _incomingPoll?.cancel();
     await _newOrderSub?.cancel();
     await _orderUpdateSub?.cancel();
     return super.close();
